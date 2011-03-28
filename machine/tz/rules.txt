@@ -145,6 +145,7 @@ jackpot is collected from moves each time it is collected:
 Door Panel : Greed
 ==================
 Hit the standup targets during the mode for 5M each.
+Hitting the clock target awards 500K and moves the targets around
 
 Door Panel : 10 Million
 =======================
@@ -257,6 +258,10 @@ this option on if the autofire opto has failed.  Disabled by default.
 If the Gumball is lit, the machine won't try to grab the ball on the
 right magnet for the camera shot.  Disabled by default.
 
+- Advanced bonus info
+Shows advanced information such as highest 1-ball score, points this ball etc.
+Enabled by default.
+
 Combos and Lucky bounces
 ========================
 
@@ -265,8 +270,9 @@ There are 3 x 2 way combos:
 - Left loop -> Hitchhiker
 - Right loop -> Piano
 
-And a 3 way combo:
+And 2 x 3 way combos:
 - Leftramp -> Rightramp -> Piano
+- Leftramp -> Unlit lock -> Camera
 
 You get awarded a Lucky Bounce if the game thinks that skill wasn't involved
 :-p

@@ -96,15 +96,19 @@ static U8 find_player_ranked (U8 ranking)
 /* Speed up the bonus if both flipper buttons are pressed */
 static void bonus_button_monitor (void)
 {
-	buttons_held = FALSE;
+	buttons_held = TRUE;
 	while (in_bonus)
 	{
 		if ((switch_poll_logical (SW_LEFT_BUTTON) 
 			&& switch_poll_logical (SW_RIGHT_BUTTON)) 
-			&& buttons_held == FALSE)
+			&& buttons_held == TRUE)
 		{	
-			buttons_held = TRUE;
-			sound_send (SND_FIST_BOOM1);
+			buttons_held = FALSE;
+		//	sound_send (SND_FIST_BOOM1);
+		}
+		else
+		{
+			
 		}
 		task_sleep (TIME_100MS);
 	}
@@ -613,7 +617,7 @@ void bonus_deff (void)
 	}
 	
 	if (backdoor_award_collected == TRUE
-		&& door_panels_started
+		&& door_panels_started >= 10
 		&& loops
 		&& jets_bonus_level
 		&& left_ramps
@@ -721,7 +725,7 @@ void bonus_deff (void)
 	score_zero (temp_score);
 
 	/* Don't show if on first ball, you can just look at the scoreboard */
-	if (ball_up != 1)
+	if (ball_up != 1 && feature_config.advanced_bonus_info == YES)
 	{	
 		task_kill_gid (GID_BONUS_TALKING);
 		
@@ -778,7 +782,7 @@ void bonus_deff (void)
 	}
 		
 	/* If it's the last player of a multi player game ... */
-	if (num_players > 1 && player_up == num_players && ball_up != 1 && extra_balls == 0)
+	if (num_players > 1 && player_up == num_players && ball_up != 1 && extra_balls == 0 && feature_config.advanced_bonus_info == YES)
 	{
 	 	/* show highest 1 ball score so far*/
 		dmd_alloc_low_clean ();
@@ -836,7 +840,9 @@ void bonus_deff (void)
 		}
 	}
 
-	if (check_if_last_ball_of_multiplayer_game ())
+	if (check_if_last_ball_of_multiplayer_game ()
+		&& feature_config.advanced_bonus_info == YES)
+
 	{
 		task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
 		sound_send (SND_PLAYER_PIANO_UNUSED);
@@ -846,8 +852,8 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
 		sound_send (SND_GREED_MODE_BOOM);
 		sprintf_score (temp_score);
-		font_render_string_center (&font_fixed10, 64, 13, sprintf_buffer);
-		font_render_string_center (&font_mono5, 64, 23, "CONGRATULATIONS");
+		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_mono5, 64, 29, "CONGRATULATIONS");
 		
 		dmd_show_low ();
 		task_sleep_sec (6);
@@ -867,6 +873,13 @@ void bonus_deff (void)
 	task_kill_gid (GID_BONUS_BUTTON_MONITOR);
 	task_kill_gid (GID_BONUS_TALKING);
 	deff_exit ();
+}
+
+CALLSET_ENTRY (bonus, serve_ball)
+{
+	if (check_if_last_ball_of_multiplayer_game ()
+		&& feature_config.advanced_bonus_info == YES)
+		deff_start_sync (DEFF_SCORE_TO_BEAT);
 }
 
 void score_to_beat_deff (void)

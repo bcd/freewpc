@@ -22,12 +22,11 @@
 
 #include <freewpc.h>
 
-/* Uses the code from mpf.c to monitor the flipper buttons */
-extern U8 mpf_buttons_pressed;
-
+extern U8 masher_buttons_pressed;
 /* used to randomise the position of the doink text */
 U8 tnf_x;
 U8 tnf_y;
+U8 tnf_timer;
 
 /* Total amount scored from doink mode */
 __local__ score_t tnf_score;
@@ -35,18 +34,30 @@ __local__ score_t tnf_score;
 void tnf_deff (void)
 {
 	music_disable ();
-	U8 timer = 40; /* 4 seconds */
+	tnf_timer = 60;
 	tnf_x = 0;
 	tnf_y = 0;
-	while (--timer != 0)
+	sound_send (SND_PIANO_ENTRY_TUNE);
+	while (tnf_timer > 1)
 	{
-		dmd_alloc_low_clean ();
-		if (timer % 2 != 0)
-			font_render_string_center (&font_mono5, 64, 4, "HIT FLIPPER BUTTONS");
-		psprintf ("%d DOINK", "%d DOINKS", mpf_buttons_pressed);
-		font_render_string_center (&font_term6, 64 + tnf_x, 16 + tnf_y, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_100MS);
+		U16 fno;
+		dmd_alloc_pair_clean ();
+		for (fno = IMG_PINWHEEL_END; fno >= IMG_PINWHEEL_START; fno -= 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			if (tnf_timer % 2 != 0)
+				font_render_string_center (&font_mono5, 64, 4, "HIT FLIPPER BUTTONS");
+			psprintf ("%d DOINK", "%d DOINKS", masher_buttons_pressed);
+			font_render_string_center (&font_term6, 64 + tnf_x, 16 + tnf_y, sprintf_buffer);
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_16MS);
+			bounded_decrement (tnf_timer, 0);
+		}
 	}
 	deff_exit ();
 }
@@ -79,22 +90,30 @@ void tnf_exit_deff (void)
 	deff_exit ();
 }
 
-CALLSET_ENTRY (tnf, tnf_button_pushed)
+CALLSET_ENTRY (tnf, sw_left_button, sw_right_button)
 {
-	bounded_increment (mpf_buttons_pressed, 255);
-	if (mpf_buttons_pressed < 80)
-		sound_send (SND_BUYIN_CANCELLED);
-	else
-		sound_send (SND_CLOCK_CHAOS_END_BOOM);
-	score_add (tnf_score, score_table[SC_250K]);
-	tnf_x = random_scaled(10);
-	tnf_y = random_scaled(8);
+	if (deff_get_active () == DEFF_TNF)
+	{
+		bounded_increment (masher_buttons_pressed, 255);
+		if (masher_buttons_pressed < 80)
+			sound_send (SND_BUYIN_CANCELLED);
+		else
+			sound_send (SND_CLOCK_CHAOS_END_BOOM);
+		score_add (tnf_score, score_table[SC_250K]);
+		tnf_x = random_scaled(10);
+		tnf_y = random_scaled(8);
+	}
+}
+
+CALLSET_ENTRY (tnf, init)
+{
+	tnf_timer = 0;
 }
 
 CALLSET_ENTRY (tnf, tnf_start)
 {
 	flipper_disable ();
-	mpf_buttons_pressed = 1;
+	masher_buttons_pressed = 1;
 	score_zero (tnf_score);
 	leff_start (LEFF_BONUS);
 	deff_start_sync (DEFF_TNF);

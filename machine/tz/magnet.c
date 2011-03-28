@@ -29,7 +29,7 @@
 #define DEFAULT_MAG_HOLD_TIME (200 / MAG_DRIVE_RTT_FREQ)
 
 #define DEFAULT_MAG_DROP_TIME ( 336 / MAG_DRIVE_RTT_FREQ)
-#define DEFAULT_MAG_DROP_TIME_LEFT ( 380 / MAG_DRIVE_RTT_FREQ)
+#define DEFAULT_MAG_DROP_TIME_LEFT ( 360 / MAG_DRIVE_RTT_FREQ)
 #define DEFAULT_MAG_DROP_TIME_RIGHT ( 328 / MAG_DRIVE_RTT_FREQ)
 #define DEFAULT_MAG_THROW_TIME (20 / MAG_DRIVE_RTT_FREQ)
 
@@ -44,6 +44,9 @@ __fastram__ enum magnet_state {
 __fastram__ U8 left_magnet_timer, lower_right_magnet_timer;
 __fastram__ U8 left_magnet_hold_timer, lower_right_magnet_hold_timer;
 __fastram__ bool left_magnet_enabled_to_throw, lower_right_magnet_enabled_to_throw;
+/* 'Fudge' number to try and learn timings of the magnet throw */
+__fastram__ U8 left_magnet_swag, lower_right_magnet_swag;
+__fastram__ U8 left_magnet_throw_successes, lower_right_magnet_throw_successes;
 
 /** The magnet switch handler is a frequently called function
  * that polls the magnet switches to see if a ball is on
@@ -117,10 +120,12 @@ static inline void magnet_rtt_duty_handler (
 					switch (sol_magnet)
 					{
 						case SOL_RIGHT_MAGNET:
-							*hold_timer = DEFAULT_MAG_DROP_TIME_RIGHT;
+							*hold_timer = DEFAULT_MAG_DROP_TIME_RIGHT \
+								+ (128 - lower_right_magnet_swag);
 							break;
 						case SOL_LEFT_MAGNET:
-							*hold_timer = DEFAULT_MAG_DROP_TIME_LEFT;
+							*hold_timer = DEFAULT_MAG_DROP_TIME_LEFT \
+								+ (128 - left_magnet_swag);
 							break;
 					}
 					/* switch to THROW_DROP */
@@ -215,9 +220,32 @@ static inline void enable_magnet_throw (U8 magnet)
 	}
 }
 
+/* Task to keep the balls held */
+
+void magnet_reset_hold_timer (void)
+{
+	//enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+	set_mag_hold_time (MAG_LEFT, DEFAULT_MAG_HOLD_TIME);	
+	set_mag_hold_time (MAG_RIGHT, DEFAULT_MAG_HOLD_TIME);	
+}
+
+void magnet_hold_balls_task (void)
+{
+	U8 i;
+	/* Limit to 60 seconds */
+	for (i = 0; i < 60; i++)
+	{
+		magnet_reset_hold_timer ();
+		task_sleep_sec (1);
+	}
+	magnet_reset ();
+	task_exit ();
+}
 
 void magnet_enable_catch (U8 magnet)
 {
+	if (timer_find_gid (GID_LEFT_TO_RIGHT_THROW) && magnet == MAG_LEFT)
+		return;
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
 	set_mag_hold_time (magnet, DEFAULT_MAG_HOLD_TIME);	
 	magstates[magnet] = MAG_ENABLED;
@@ -225,6 +253,8 @@ void magnet_enable_catch (U8 magnet)
 
 void magnet_enable_catch_and_hold (U8 magnet, U8 secs)
 {
+	if (timer_find_gid (GID_LEFT_TO_RIGHT_THROW) && magnet == MAG_LEFT)
+		return;
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
 	
 	/* Limit to 4 secs as we run at 16ms ticks in a U8 timer */
@@ -236,9 +266,11 @@ void magnet_enable_catch_and_hold (U8 magnet, U8 secs)
 
 void magnet_enable_catch_and_throw (U8 magnet)
 {
+	if (timer_find_gid (GID_LEFT_TO_RIGHT_THROW) && magnet == MAG_LEFT)
+		return;
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
-	/* Hold the ball for 1 sec@100% before we throw to stabilise it*/
-	set_mag_hold_time (magnet, (32  / MAG_DRIVE_RTT_FREQ));
+	/* Hold the ball for 2 sec@100% before we throw to stabilise it*/
+	set_mag_hold_time (magnet, (64  / MAG_DRIVE_RTT_FREQ));
 	enable_magnet_throw (magnet);
 	magstates[magnet] = MAG_ENABLED;
 }
@@ -270,8 +302,41 @@ CALLSET_ENTRY (magnet, single_ball_play)
 	magnet_reset ();
 }
 
+/* Called by maghelper.c and loop.c to help tune the magnet throw */
+CALLSET_ENTRY (magnet, magnet_throw_left_success)
+{
+	/* Leave drop timer alone */
+	task_kill_gid (GID_LEFT_TO_RIGHT_THROW);
+	bounded_increment (left_magnet_throw_successes, 255);
+}
+
+/* Ball was grabbed by the magnet, lengthen time */
+CALLSET_ENTRY (magnet, magnet_throw_left_grab_failure)
+{
+	task_kill_gid (GID_LEFT_TO_RIGHT_THROW);
+	bounded_increment (left_magnet_swag, 255);
+}
+
+/* Ball never reached the magnet again */
+CALLSET_ENTRY (magnet, magnet_throw_left_failure)
+{
+	/* Shorten drop timer */
+	bounded_decrement (left_magnet_swag, 0);
+}
+
+/* Ball went up and then went down */
+CALLSET_ENTRY (magnet, magnet_throw_left_same_side)
+{
+	task_kill_gid (GID_LEFT_TO_RIGHT_THROW);
+	/* Increase drop timer */
+	bounded_increment (left_magnet_swag, 255);
+}
+
 CALLSET_ENTRY (magnet, init)
 {
 	magnet_reset ();
+	left_magnet_swag = 128; // Start in the middle
+	lower_right_magnet_swag = 128; // Start in the middle
+	left_magnet_throw_successes = 0;
+	lower_right_magnet_throw_successes = 0;
 }
-

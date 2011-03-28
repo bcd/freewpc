@@ -79,7 +79,7 @@ void spiralaward_collected_deff (void)
 {	
 	dmd_alloc_pair_clean ();
 	U16 fno;
-	for (fno = IMG_LOOP_END; fno <= IMG_LOOP_START; fno -= 2)
+	for (fno = IMG_LOOP_END; fno >= IMG_LOOP_START; fno -= 2)
 	{
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
@@ -89,7 +89,7 @@ void spiralaward_collected_deff (void)
 		frame_draw (fno);
 		dmd_overlay_outline ();
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 	}
 	dmd_alloc_pair_clean ();
 	write_spiralaward_text ();

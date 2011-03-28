@@ -71,6 +71,7 @@ void rocket_deff (void)
 
 static void rocket_kick_sound (void)
 {
+	event_can_follow (rocket, flipper, TIME_100MS);
 	sound_send (SND_ROCKET_KICK_DONE);
 	flasher_pulse (FLASH_UR_FLIPPER);
 	task_exit ();
@@ -84,6 +85,17 @@ CALLSET_ENTRY (rocket, dev_rocket_enter)
 		}
 }
 
+/* Give the player 1M if he hits the right flipper on
+ * the rocket launch */
+CALLSET_ENTRY (rocket, sw_right_button)
+{
+	if (event_did_follow (rocket, flipper))
+	{
+		sound_send (SND_CUCKOO);
+		score (SC_1M);
+	}
+}
+
 CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 {
 	if (in_live_game)
@@ -91,12 +103,6 @@ CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 		/* Small sleep to make sure skill code gets a chance to
 		 * execute */
 		task_sleep (TIME_33MS);
-		/* Wait until the skill shot has finished */
-		while (timer_find_gid (GID_AWARD_SKILL_SHOT))
-		{
-			task_sleep (TIME_500MS);
-		}
-
 		if (!multi_ball_play ())
 			leff_start (LEFF_ROCKET);
 		sound_send (SND_ROCKET_KICK_REVVING);

@@ -148,7 +148,8 @@ void clock_millions_mode_deff (void)
 			font_render_string_center (&font_var5, 64, 5, "CLOCK MILLIONS");
 			sprintf_current_score ();
 			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-			font_render_string_center (&font_var5, 64, 27, "SHOOT CLOCK");
+			psprintf ("SHOOT CLOCK 1 MORE TIME", "SHOOT CLOCK %d MORE TIMES", 6 - clock_mode_hits);
+			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 			sprintf ("%d", clock_millions_mode_timer);
 			font_render_string (&font_var5, 2, 2, sprintf_buffer);
 			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);

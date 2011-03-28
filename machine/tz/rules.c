@@ -320,12 +320,12 @@ void rules_deff (void)
 	task_create_gid1 (GID_RULES_LEFF, rules_doinks_leff);
 	rules_sleep_sec (9);
 
-	rule_msg ("DOINK MODE", "WHILST THE BALL IS BEING HELD", "HIT THE FLIPPER BUTTONS", "TO SCORE POINTS");
+	rule_msg ("DOINK MODE", "HIT THE FLIPPER BUTTONS", "WHILST THE BALL IS BEING HELD", "TO SCORE POINTS");
 	rules_sleep_sec (9);
 	rule_complete ();
 
 	rule_begin ();
-	rule_msg ("", "AND HAVE SOME FUN", "WHILST YOUR ARE AT IT", "");
+	rule_msg ("THANKS", "WE HOPE YOU", "ENJOY PLAYING","WWW.ODDCHANGE.COM/FREEWPC");
 	rules_sleep_sec (4);
 	rule_complete ();
 	

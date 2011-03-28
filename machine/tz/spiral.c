@@ -62,6 +62,8 @@ void spiral_loop_deff (void)
 			font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 			sprintf_score (spiral_mode_total);	
 			font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
+			sprintf ("MODE TOTAL");
+			font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 			dmd_text_outline ();
 			
 			dmd_alloc_pair ();

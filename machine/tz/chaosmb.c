@@ -207,6 +207,7 @@ static void chaosmb_score_jackpot (void)
 	chaosmb_check_jackpot_lamps ();
 	deff_start (DEFF_JACKPOT);
 	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
+	leff_start (LEFF_FLASH_GI2);
 	deff_start (DEFF_CHAOS_JACKPOT);
 }
 
@@ -316,12 +317,18 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 	if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 	{
 		leff_start (LEFF_CLOCK_TARGET);
-		if (chaosmb_hits_to_relight == 0)
+		if (chaosmb_hits_to_relight == 0 && !timer_find_gid (GID_STOP_IT_DEBOUNCE))
+		{
 			sound_send (SND_STOP_IT);
+			timer_restart_free (GID_STOP_IT_DEBOUNCE, TIME_5S);
+		}
 		else
 		{
 			sound_send (SND_CLOCK_BELL);
-			score (SC_250K);
+			if (!timer_find_gid (GID_STOP_IT_DEBOUNCE))
+				score (SC_250K);
+			else
+				score (SC_100K);
 		}
 		bounded_decrement (chaosmb_hits_to_relight, 0);
 	}

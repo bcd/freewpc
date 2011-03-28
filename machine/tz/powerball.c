@@ -96,17 +96,21 @@ void pb_detect_deff (void)
 	for (i = 0;i < 5;i++)
 	{
 		dmd_alloc_pair_clean ();
+		bool on = TRUE;
 		for (fno = IMG_POWERBALL_START; fno <= IMG_POWERBALL_END; fno += 2)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			if (fno % 2 != 0)
+			if (on)
 			{
-				font_render_string_center (&font_var5, 64, 26, "POWERBALL");
+				//font_render_string_center (&font_var5, 64, 26, "POWERBALL");
+				font_render_string_center (&font_var5, 64, 16, "POWERBALL");
+				on = FALSE;
 			}
 			else
 			{
-				font_render_string_center (&font_fixed6, 64, 26, "POWERBALL");
+				font_render_string_center (&font_fixed6, 64, 16, "POWERBALL");
+				on = TRUE;
 			}
 			dmd_text_outline ();
 			dmd_alloc_pair ();
@@ -297,6 +301,7 @@ only called at certain points when we want to announce this.
 The powerball may have been detected sometime earlier. */
 void pb_announce (void)
 {
+	task_kill_gid (GID_GUMBALL_MUSIC_BUG);
 	if (pb_announce_needed)
 	{
 #ifdef PB_DEBUG
@@ -403,10 +408,22 @@ void pb_container_exit (U8 location)
 CALLSET_ENTRY (pb_detect, left_ball_grabbed, right_ball_grabbed)
 {
 	if (single_ball_play ())
-	{	
+	{
+		task_kill_gid (GID_POWERBALL_MAG_DETECT);
 		pb_clear_location (PB_IN_PLAY);
 		pb_clear_location (PB_MAYBE_IN_PLAY);
 	}
+}
+
+/* Starts when a ball is detected on the magnet but is then killed by
+ * a successful grab */
+void powerball_magnet_detect_task (void)
+{
+	/* Wait a little while for the ball to be grabbed */
+	task_sleep (TIME_500MS);
+	pb_set_location (PB_IN_PLAY, 0);
+	pb_announce ();
+	task_exit ();
 }
 
 CALLSET_ENTRY (pb_detect, music_refresh)
@@ -437,6 +454,11 @@ CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 CALLSET_ENTRY (pb_detect, powerball_in_gumball)
 {
 	pb_detect_event (GUMBALL_PB_DETECTED);
+}
+
+CALLSET_ENTRY (pb_detect, check_magnet_grab)
+{
+	task_recreate_gid (GID_POWERBALL_MAG_DETECT, powerball_magnet_detect_task);
 }
 
 CALLSET_ENTRY (pb_detect, dev_slot_enter)

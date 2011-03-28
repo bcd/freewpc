@@ -20,7 +20,6 @@
 
 #include <freewpc.h>
 
-extern struct timed_mode_ops hitch_mode;
 
 void cow_deff (void)
 {
@@ -131,31 +130,6 @@ void two_way_combo_deff (void)
 	flash_and_exit_deff (15, TIME_66MS);
 }
 
-void shoot_again_deff (void)
-{	
-	sound_send (SND_EXTRA_BALL_BALLOON);
-	dmd_alloc_pair ();
-	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 10, "SHOOT AGAIN");
-	sprintf ("PLAYER %d", player_up);
-	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
-	dmd_show_low ();
-	dmd_copy_low_to_high ();
-	dmd_invert_page (dmd_low_buffer);
-	deff_swap_low_high (30, TIME_100MS);
-	deff_exit ();
-}
-
-void shoot_camera_deff (void)
-{
-	sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
-	if (timed_mode_running_p (&hitch_mode))
-		sprintf ("SHOOT HITCH");
-	else
-		sprintf ("SHOOT CAMERA");
-	flash_and_exit_deff (15, TIME_66MS);
-}
-
 void shoot_jackpot_deff (void)
 {
 	if (!global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
@@ -259,23 +233,26 @@ void jackpot_deff (void)
 	/* Loop the start of the animation 3 times */
 	for (i = 3; i > 0; --i)
 	{
-		for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 9; fno += 1)
+		for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 9; fno += 2)
 		{
 			//dmd_alloc_low_high ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
 			dmd_show2 ();
-			task_sleep (i);
+			if (i == 3)
+				task_sleep (TIME_100MS);
+			else
+				task_sleep (TIME_66MS);
 		}
 	}
 	/* Show once fully */
-	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 2; fno += 1)
+	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 2; fno += 2)
 	{
 			//dmd_alloc_low_high ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
 			dmd_show2 ();
-			task_sleep (TIME_16MS);
+			task_sleep (TIME_66MS);
 	}
 	/* Flash Jackpot */
 	dmd_alloc_pair ();
@@ -341,7 +318,6 @@ void tv_static_deff (void)
 	deff_exit ();
 }
 
-
 void text_color_flash_deff (void)
 {
 	U8 count = 8;
@@ -371,7 +347,6 @@ void text_color_flash_deff (void)
 	deff_exit ();	
 }
 
-
 void spell_test_deff (void)
 {
 	U8 count = 4;
@@ -387,7 +362,6 @@ void spell_test_deff (void)
 	task_sleep_sec (3);
 	deff_exit ();	
 }
-
 
 void two_color_flash_deff (void)
 {
@@ -407,7 +381,6 @@ void two_color_flash_deff (void)
 	}
 	deff_exit ();
 }
-
 
 void bg_flash_deff (void)
 {
@@ -465,7 +438,7 @@ void ball_explode_deff (void)
 	dmd_show2 ();
 	if (powerball_death == FALSE)	
 		sound_send (SND_EXPLOSION_3);
-	for (fno = IMG_BALLEXPLODE_START + 1; fno <= IMG_BALLEXPLODE_END; fno += 2)
+	for (fno = IMG_BALLEXPLODE_START; fno <= IMG_BALLEXPLODE_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
@@ -534,5 +507,3 @@ void explosion_deff (void)
 	task_sleep (TIME_700MS);
 	deff_exit ();
 }
-
-

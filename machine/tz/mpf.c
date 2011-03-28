@@ -27,7 +27,8 @@ __local__ U8 mpf_enable_count;
 U8 mpf_ball_count;
 U8 mpf_timer;
 U8 mpf_award;
-U8 mpf_buttons_pressed;
+/* How many times the player has hit the flipper buttons */
+U8 masher_buttons_pressed;
 U8 __local__ mpf_level;
 bool mpf_active;
 
@@ -286,7 +287,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	on when a ball is already in play. */
 	if (event_did_follow (right_ramp, mpf_enter))
 	{
-		mpf_buttons_pressed = 0;
+		masher_buttons_pressed = 0;
 		mpf_active = TRUE;
 		unlit_shot_count = 0;
 		mpf_award = 10;
@@ -411,7 +412,7 @@ void mpf_lamp_task (void)
 
 static void check_button_masher (void)
 {
-	if (mpf_buttons_pressed > 20)
+	if (masher_buttons_pressed > 20)
 	{
 		mpf_active = FALSE;
 		deff_start (DEFF_BUTTON_MASHER);
@@ -425,20 +426,15 @@ static void mpf_button_masher_handler (void)
 	{
 		if (task_find_gid (GID_MPF_BUTTON_MASHER))
 		{
-			bounded_increment (mpf_buttons_pressed, 254);
+			bounded_increment (masher_buttons_pressed, 254);
 			check_button_masher ();
 		}
 		else 
 		{
-			mpf_buttons_pressed = 0;
+			masher_buttons_pressed = 0;
 			timer_start_free (GID_MPF_BUTTON_MASHER, TIME_3S);
 		}
 
-	}
-	/* Hook for TNF mode */
-	else if (deff_get_active () == DEFF_TNF)
-	{
-		callset_invoke (tnf_button_pushed);
 	}
 }
 

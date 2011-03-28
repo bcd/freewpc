@@ -110,6 +110,23 @@ static void map_and_clean (void)
 
 CALLSET_ENTRY (tz_amode, amode_page)
 {
+	U16 fno;
+	for (fno = IMG_BTTZMELT_START; fno <= IMG_BTTZMELT_MIDDLE; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
+	task_sleep_sec (2);
+	for (fno = IMG_BTTZMELT_MIDDLE; fno <= IMG_BTTZMELT_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
+
 	map_and_clean ();
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
 	dmd_text_blur ();
@@ -117,18 +134,18 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	show_text_on_stars ();
 	
 	map_and_clean ();
-	font_render_string_center (&font_fixed10, 64, 7, "SOFTWARE BY");
-	font_render_string_center (&font_steel, 64, 20, "BCD");
+	font_render_string_center (&font_times10, 64, 7, "SOFTWARE BY");
+	font_render_string_center (&font_times10, 64, 21, "BCD");
 	show_text_on_stars ();
 	
 	map_and_clean ();
-	font_render_string_center (&font_fixed6, 64, 7, "AND");
+	font_render_string_center (&font_steel, 64, 7, "AND");
 	font_render_string_center (&font_steel, 64, 20, "SONNY JIM");
 	show_text_on_stars ();
 	
 	map_and_clean ();
-	font_render_string_center (&font_fixed10, 64, 7, "ARTWORK AND");
-	font_render_string_center (&font_fixed10, 64, 20, "ANIMATIONS BY");
+	font_render_string_center (&font_var5, 64, 7, "ARTWORK AND");
+	font_render_string_center (&font_var5, 64, 20, "ANIMATIONS BY");
 	show_text_on_stars ();
 	
 	map_and_clean ();
@@ -140,8 +157,32 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	show_text_on_stars ();
 	
 	map_and_clean ();
-	font_render_string_center (&font_fixed10, 64, 7, "AND");
+	font_render_string_center (&font_steel, 64, 7, "AND");
 	font_render_string_center (&font_steel, 64,20, "POW STUDIOS");
+	show_text_on_stars ();
+	
+	map_and_clean ();
+	font_render_string_center (&font_var5, 64, 16, "THANKS GO TO");
+	show_text_on_stars ();
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 10, "HYDRA");
+	font_render_string_center (&font_var5, 64, 23, "FREEWPC CORVETTE");
+	show_text_on_stars ();
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 10, "METALLIK");
+	font_render_string_center (&font_var5, 64, 23, "HARDWARE TESTING");
+	show_text_on_stars ();
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 10, "LITZ");
+	font_render_string_center (&font_var5, 64, 23, "RULES AND IDEAS");
+	show_text_on_stars ();
+	
+	map_and_clean ();
+	font_render_string_center (&font_var5, 64, 7, "AND EVERYBODY IN");
+	font_render_string_center (&font_var5, 64, 20, "EFNET PINBALL");
 	show_text_on_stars ();
 	
 	map_and_clean ();
@@ -155,7 +196,7 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	show_driver_animation ();
 	
 	dmd_sched_transition (&trans_bitfade_slow);
-	/* Clean the low screen for the transition */
+	/* Clean the low screen for the transition scroll*/
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 

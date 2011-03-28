@@ -31,7 +31,7 @@ extern U8 mball_locks_lit;
 extern U8 gumball_enable_count;
 extern U8 chaosmb_level;
 extern U8 chaosmb_hits_to_relight;
-
+extern U8 three_way_combos;
 
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
@@ -229,15 +229,23 @@ void mpf_collected_task (void)
 CALLSET_ENTRY (camera, sw_camera)
 {
 	device_switch_can_follow (camera, slot, TIME_3S);
-	
-	if (event_did_follow (gumball_exit, camera) 
+	if (event_did_follow (mpf_top, camera))
+	{
+		task_create_anon (mpf_collected_task);
+	}
+	else if (event_did_follow (gumball_exit, camera) 
 		|| event_did_follow (dead_end, camera))
 	{
 		/* Do nothing */
 	}
-	else if (event_did_follow (mpf_top, camera))
+	else if (event_did_follow (leftramplock, camera))
 	{
-		task_create_anon (mpf_collected_task);
+		sound_send (SND_THREE_WAY_COMBO);
+		score (SC_20M);
+		deff_start_sync (DEFF_THREE_WAY_COMBO);
+		bounded_increment (three_way_combos, 99);
+		/* Award the camera even if unlit */
+		do_camera_award ();
 	}
 	else if (can_award_camera ())
 	{

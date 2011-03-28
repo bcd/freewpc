@@ -47,27 +47,39 @@ struct timed_mode_ops fastlock_mode = {
 	
 void fastlock_mode_deff (void)
 {
+	/* Fudge loop time in ms into
+	 * something semi-meaningful to display */
+	U8 display_loop_time;
+	U16 fno;
+	dmd_alloc_pair_clean ();
+
 	for (;;)
 	{
-		/* Fudge loop time in ms into
-		 * something semi-meaningful to display */
-		U8 display_loop_time;
-		display_loop_time = 100;
-		display_loop_time -= loop_time;
-		if (display_loop_time < 1)
-			display_loop_time = 1;
-
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_var5, 64, 5, "SHOOT FAST LOOPS");
-		sprintf("%d MILLION", fastlock_award);
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		sprintf ("LAST LOOP WAS %dMPH", display_loop_time);
-		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
-		sprintf ("%d", fastlock_mode_timer);
-		font_render_string (&font_var5, 2, 2, sprintf_buffer);
-		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		//for (fno = IMG_NIGHTDRIVER_START; fno <= IMG_NIGHTDRIVER_END; fno += 2)
+		//{
+			display_loop_time = 100;
+			display_loop_time -= loop_time;
+			if (display_loop_time < 1)
+				display_loop_time = 1;
+			
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			font_render_string_center (&font_var5, 64, 5, "SHOOT FAST LOOPS");
+			sprintf("%d MILLION", fastlock_award);
+			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			sprintf ("LAST LOOP WAS %dMPH", display_loop_time);
+			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+			sprintf ("%d", fastlock_mode_timer);
+			font_render_string (&font_var5, 2, 2, sprintf_buffer);
+			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			dmd_text_outline ();
+			
+			dmd_alloc_pair ();
+		//	frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_33MS);
+			//}
 	}
 }
 

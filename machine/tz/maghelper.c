@@ -18,6 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* TODO 
+ * Detect a succesful ball throw:
+ * If we try to throw, but the same switch triggers in under 200ms, grab and try again
+ */
+
 #include <freewpc.h>
 extern __fastram__ enum magnet_state {
 	MAG_DISABLED,
@@ -33,6 +38,7 @@ extern struct timed_mode_ops spiral_mode;
 extern struct timed_mode_ops fastlock_mode;
 extern struct timed_mode_ops hitch_mode;
 
+extern __fastram__ bool left_magnet_enabled_to_throw, lower_right_magnet_enabled_to_throw;
 extern U8 chaosmb_level;
 extern U8 gumball_enable_count;
 
@@ -53,7 +59,7 @@ bool magnet_enabled (U8 magnet)
 		return FALSE;
 }
 
-/* Ceck whether the magnet is busy holding/grabbing/throwing 
+/* Check whether the magnet is busy holding/grabbing/throwing 
  * but NOT enabled */
 bool magnet_busy (U8 magnet)
 {
@@ -65,6 +71,77 @@ bool magnet_busy (U8 magnet)
 		return TRUE;
 }
 
+/* Check to see if we have successfully grabbed a ball */
+
+static void monitor_left_throw_task (void)
+{
+	U8 i = 0;
+	//callset_invoke (left_ball_throw_attempt);
+	while (switch_poll_logical (SW_LEFT_MAGNET))
+	{	
+		i++;
+		if (i > 4)
+			callset_invoke (magnet_throw_left_grab_failure);
+		task_sleep (TIME_66MS);
+	}
+	/* Give the ball a generous 2.5 seconds to make it round the loop */
+	task_sleep_sec (2);
+	task_sleep (TIME_500MS);
+	callset_invoke (magnet_throw_left_failure); 
+	task_exit ();
+}
+
+
+static void monitor_left_grab_task (void)
+{
+	callset_invoke (left_ball_grabbed);
+	
+	while (switch_poll_logical (SW_LEFT_MAGNET))
+	{
+		task_sleep (TIME_66MS);
+	}
+	/* Sleep again so we don't get retriggered before the
+	 * ball has had a chance to roll away */
+	task_sleep (TIME_500MS);
+	task_exit ();
+}
+
+static void monitor_right_grab_task (void)
+{
+	callset_invoke (right_ball_grabbed);
+	while (switch_poll_logical (SW_LOWER_RIGHT_MAGNET))
+	{
+		task_sleep (TIME_66MS);
+	}
+	task_sleep (TIME_500MS);
+	task_exit ();
+}
+
+void magnet_ball_grab_monitor_rtt (void)
+{
+	if (magnets_enabled)
+	{
+		enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+		
+		if (((magstates[MAG_LEFT] == MAG_ON_HOLD) || magstates[MAG_LEFT] == MAG_THROW_DROP)
+			&& switch_poll_logical (SW_LEFT_MAGNET)
+			&& !task_find_gid (GID_LEFT_BALL_GRABBED))
+		{
+			if (left_magnet_enabled_to_throw && !task_find_gid (GID_LEFT_TO_RIGHT_THROW))
+				task_recreate_gid (GID_LEFT_TO_RIGHT_THROW, monitor_left_throw_task);
+			task_recreate_gid (GID_LEFT_BALL_GRABBED, monitor_left_grab_task);
+		}
+		
+		if ((magstates[MAG_RIGHT] == MAG_ON_HOLD)
+			&& switch_poll_logical (SW_LOWER_RIGHT_MAGNET)
+			&& !task_find_gid (GID_RIGHT_BALL_GRABBED))
+		{
+			task_recreate_gid (GID_RIGHT_BALL_GRABBED, monitor_right_grab_task);
+		}
+	}
+}
+
+/* Task to handle enabling the magnets during certain game situations */
 void magnet_enable_monitor_task (void)
 {
 	while (magnets_enabled)
@@ -83,6 +160,10 @@ void magnet_enable_monitor_task (void)
 		{	
 			magnet_enable_catch_and_hold (MAG_RIGHT, 2);
 		}
+		/* Enable catch for misdetected powerball */
+		if (timer_find_gid (GID_SPIRALAWARD) && global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY))
+			magnet_enable_catch_and_hold (MAG_RIGHT, 2);
+
 		/* disable catch during certain game situations */
 		if ((timer_find_gid (GID_SPIRALAWARD)
 			|| timer_find_gid (GID_LOCK_KICKED)
@@ -99,7 +180,8 @@ void magnet_enable_monitor_task (void)
 		}
 			
 		/* Left Magnet grabs */
-		if (magnet_busy (MAG_LEFT) || task_find_gid (GID_LEFT_BALL_GRABBED))
+		if (magnet_busy (MAG_LEFT) || task_find_gid (GID_LEFT_BALL_GRABBED)
+			|| task_find_gid (GID_LEFT_TO_RIGHT_THROW))
 		{
 			/* Do nothing, magnet is busy */
 		}
@@ -145,65 +227,48 @@ void magnet_enable_monitor_task (void)
 				magnet_enable_catch_and_throw (MAG_LEFT);
 			}
 		}
-		task_sleep (TIME_300MS);
+		task_sleep (TIME_100MS);
 	}
 	task_exit ();
 }
 
-/* Check to see if the ball is still being held */
-static void monitor_left_grab_task (void)
-{
-	callset_invoke (left_ball_grabbed);
-	while (switch_poll_logical (SW_LEFT_MAGNET))
-	{
-		task_sleep (TIME_66MS);
-	}
-	/* Sleep again so we don't get retriggered before the
-	 * ball has had a chance to roll away */
-	task_sleep (TIME_500MS);
-	task_exit ();
-}
-
-static void monitor_right_grab_task (void)
-{
-	callset_invoke (right_ball_grabbed);
-	while (switch_poll_logical (SW_LOWER_RIGHT_MAGNET))
-	{
-		task_sleep (TIME_66MS);
-	}
-	task_sleep (TIME_500MS);
-	task_exit ();
-}
-
-/* Check to see if we have successfully grabbed a ball */
-void magnet_ball_grab_monitor_rtt (void)
-{
-	if (magnets_enabled)
-	{
-		enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
-		if ((magstates[MAG_LEFT] == MAG_ON_HOLD)
-			&& switch_poll_logical (SW_LEFT_MAGNET)
-			&& !task_find_gid (GID_LEFT_BALL_GRABBED))
-		{
-			task_recreate_gid (GID_LEFT_BALL_GRABBED, monitor_left_grab_task);
-		}
-		
-		if ((magstates[MAG_RIGHT] == MAG_ON_HOLD)
-			&& switch_poll_logical (SW_LOWER_RIGHT_MAGNET)
-			&& !task_find_gid (GID_RIGHT_BALL_GRABBED))
-		{
-			task_recreate_gid (GID_RIGHT_BALL_GRABBED, monitor_right_grab_task);
-		}
-	}
-}
-
-/* Start another timer so we only enable the magnet
- * for the spiralaward catch if it has gone round the
- * loop the right way */
 CALLSET_ENTRY (maghelper, sw_lower_right_magnet)
 {
+	/* Start another timer so we only enable the magnet
+	 * for the spiralaward catch if it has gone round the
+	 * loop the right way */
 	if (timer_find_gid (GID_SPIRALAWARD))
+	{
+		magnet_enable_catch_and_throw (MAG_LEFT);
 		timer_restart_free (GID_SPIRALAWARD_APPROACHING, TIME_2S);
+	}
+	if (task_kill_gid (GID_LEFT_TO_RIGHT_THROW))
+	{
+		/* Ball has successfully been thrown */
+		sound_send (SND_ADDAMS_FASTLOCK_STARTED);
+		callset_invoke (magnet_throw_left_success);
+	}
+	/* Check to see if powerball slips out undetected 
+	 * We are expecting to grab the ball, if this doesn't
+	 * happen after a certain amount of time we can say
+	 * that the powerball has slipped through 
+	 * Code is in powerball.c */
+	if (!global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY)
+		&& magnet_enabled (MAG_RIGHT)
+		&& single_ball_play ())
+		callset_invoke (check_magnet_grab);
+}
+
+CALLSET_ENTRY (maghelper, sw_left_magnet)
+{
+	/* Buggy, seems to conflict with the throw and misdetect a PB */
+	/*
+	if (!global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY)
+		&& magnet_enabled (MAG_LEFT)
+		&& single_ball_play ())
+		callset_invoke (check_magnet_grab);
+	timer_kill_gid (GID_SPIRALAWARD);
+	*/
 }
 
 CALLSET_ENTRY (maghelper, start_ball)

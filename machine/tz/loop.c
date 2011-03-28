@@ -58,8 +58,9 @@ static void award_loop (void)
 {
 	/* loops includes powerball and spiral_loops */
 	bounded_increment (loops, 255);
-	
+	event_can_follow (loop, ball_grab, TIME_400MS);
 	callset_invoke (award_spiral_loop);
+	
 	if (global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 	{
 		bounded_increment (powerball_loops, 3);
@@ -246,8 +247,13 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 	if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
 	{
 		/* Left loop aborted */
+		if (task_find_gid (GID_LEFT_TO_RIGHT_THROW))
+		{
+			callset_invoke (magnet_throw_left_same_side);
+		}
+
 		abort_loop ();
-	}
+			}
 	else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
 	{
 		/* Right loop completed */

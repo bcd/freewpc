@@ -427,6 +427,9 @@ Fire when detected empty: yes_no, NO
 # Do not grab the ball on the right magnet if gumball is lit
 Gumball over Camera: yes_no, NO
 
+# Show advanced info during bonus
+Advanced bonus info:yes_no, YES
+
 ##########################################################################
 # Items for the Feature Audits menu.
 ##########################################################################
@@ -546,9 +549,9 @@ Combo master Entry: page(MACHINE3_PAGE), PRI_HSENTRY
 Combo master Exit: page(MACHINE3_PAGE), PRI_HSENTRY
 
 Extra Ball: page(MACHINE_PAGE), PRI_EB, D_PAUSE+D_QUEUED
-Shoot Again: page(MACHINE_PAGE), PRI_SHOOT_AGAIN, D_PAUSE+D_QUEUED
+Shoot Again: page(MACHINE3_PAGE), PRI_SHOOT_AGAIN, D_PAUSE+D_QUEUED
 
-Greed Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE2
+Greed Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE2, D_QUEUED+D_TIMEOUT
 Greed Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED+D_PAUSE
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5, D_QUEUED+D_TIMEOUT
 
@@ -588,7 +591,7 @@ BG Flash: page(MACHINE_PAGE), PRI_GAME_MODE4
 Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Inlane lights Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
-Left ramp lights camera: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
+Left ramp lights camera: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_RESTARTABLE+D_TIMEOUT
 Shoot Hitch: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
@@ -609,7 +612,7 @@ MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
 MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
-MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_LOW6
+MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 MB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 MB Ten Million Added: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_RESTARTABLE
 
@@ -638,7 +641,7 @@ Home and Dry: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 PB Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 Lucky Bounce: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
-Shoot Camera: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT
+Shoot Camera: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT
 Shoot Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT
 Button Masher: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
@@ -663,6 +666,7 @@ Snake Ready: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
 Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
 Explosion: page(MACHINE_PAGE), PRI_EGG1
 
+Paused: page(MACHINE3_PAGE), PRI_STATUS, D_PAUSE+D_QUEUED
 ##########################################################################
 # Lamp effects
 ##########################################################################
@@ -677,6 +681,7 @@ Left Ramp: shared, PRI_LEFF2, page(MACHINE2_PAGE)
 No GI: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
 Piano Jackpot Collected: PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 Flash GI: PRI_LEFF2, GI(ALL), page(MACHINE2_PAGE)
+Flash GI2: PRI_LEFF2, GI(ALL), page(MACHINE2_PAGE)
 Flash All: PRI_LEFF5, LAMPS(AMODE_ALL), page(MACHINE2_PAGE)
 Slot Kickout: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
 Gumball Strobe: PRI_LEFF2, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)

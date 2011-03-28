@@ -509,7 +509,7 @@ void snake_ready_deff (void)
 			frame_draw (fno);
 			dmd_overlay_outline ();
 			dmd_show2 ();
-			task_sleep (TIME_100MS);
+			task_sleep (TIME_33MS);
 		}
 	}
 	task_sleep (TIME_700MS);

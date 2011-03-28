@@ -33,7 +33,6 @@ U8 jackpot_level_stored;
 bool mball_jackpot_uncollected;
 bool mball_restart_collected;
 U8 mball_restart_timer;
-U8 last_number_called;
 
 void mball_restart_mode_init (void);
 void mball_restart_mode_exit (void);
@@ -58,15 +57,18 @@ extern U8 gumball_enable_count;
 extern U8 autofire_request_count;
 extern bool fastlock_running (void);
 extern U8 lucky_bounces;
-extern __machine__ void mpf_countdown_task (void);
 
-static void mball_restart_countdown_task (void)
+void mball_restart_countdown_task (void)
 {
-	do {
+	U8 last_number_called = 6;
+	while (mball_restart_timer <= 5 && mball_restart_timer != 0)
+	{
 		if (last_number_called != mball_restart_timer)
 		{
-			switch (mball_restart_timer)
+			last_number_called = mball_restart_timer;
+			switch (last_number_called)
 			{
+				default:
 				case 5:
 					sound_send (SND_FIVE);
 					break;
@@ -83,12 +85,9 @@ static void mball_restart_countdown_task (void)
 					sound_send (SND_ONE);
 					break;
 			}
-			last_number_called = mball_restart_timer;
-			task_sleep (TIME_900MS);
 		}
-		task_sleep (TIME_100MS);
-	}while (mball_restart_timer <= 5 && mball_restart_timer != 0
-			&& !system_timer_pause ());
+		task_sleep (TIME_500MS);
+	}
 	task_exit ();
 }
 
@@ -143,6 +142,7 @@ void mball_restart_mode_init (void)
 
 void mball_restart_mode_expire (void)
 {
+	task_kill_gid (GID_MBALL_RESTART_COUNTDOWN_TASK);
 }
 
 void mball_restart_mode_exit (void)
@@ -514,7 +514,7 @@ void mball_left_ramp_exit (void)
 	if (multiball_ready ())
 	{
 		leff_start (LEFF_STROBE_DOWN);
-		leff_start (LEFF_FLASH_GI);
+		leff_start (LEFF_FLASH_GI2);
 		lamp_tristate_off (LM_MULTIBALL);
 		callset_invoke (mball_start);
 		callset_invoke (mball_start_3_ball);

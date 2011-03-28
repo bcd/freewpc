@@ -118,8 +118,10 @@ __machine__ bool fastlock_running (void);
 #define PB_MAYBE_IN_PLAY 0x10
 #define PB_IN_PLAY 0x8
 __machine__ void pb_clear_location (U8 location);
+__machine__ void powerball_magnet_detect_task (void);
 __machine__ bool pb_maybe_in_play (void);
 __machine__ bool pb_in_lock (void);
+__machine__ void pb_announce (void);
 /* thingfl.c */
 /* outhole.c */
 __common__ bool ballsave_test_active (void);

@@ -112,13 +112,22 @@ void autofire_monitor (void)
 		sound_send (SND_EXPLOSION_1);
 		leff_start (LEFF_STROBE_UP);
 	}
-	/* Say that the ball is heading into the right loop */
-	timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
+	/* Say that the ball is heading into the right loop 
+	 * This stops the right magnet from trying to grab the ball */
+	timer_restart_free (GID_BALL_LAUNCH, TIME_2S);
 	event_can_follow (autolaunch, right_loop, TIME_4S);
 	/* Clear the magnet so we can fire a ball */
 	magnet_disable_catch (MAG_RIGHT);
 	/* Launch the ball */
-	sol_request (SOL_AUTOFIRE);
+	if (feature_config.fire_when_detected_empty == YES)
+	{
+		if (switch_poll_logical (SW_AUTOFIRE1)
+			|| switch_poll_logical (SW_AUTOFIRE2))
+			sol_request (SOL_AUTOFIRE);
+	}
+	else
+		sol_request (SOL_AUTOFIRE);
+
 	/* Wait for the ball to clear the divertor 
 	 * before closing*/
 	task_sleep (TIME_700MS);
@@ -221,7 +230,14 @@ CALLSET_ENTRY (autofire, clear_autofire)
 	 * during attract mode */
 	shooter_div_start ();
 	task_sleep_sec (2);
-	sol_request (SOL_AUTOFIRE);
+	if (feature_config.fire_when_detected_empty == YES)
+	{
+		if (switch_poll_logical (SW_AUTOFIRE1)
+			|| switch_poll_logical (SW_AUTOFIRE2))
+			sol_request (SOL_AUTOFIRE);
+	}
+	else
+		sol_request (SOL_AUTOFIRE);
 	task_sleep_sec (1);
 	shooter_div_stop ();
 }
@@ -235,7 +251,7 @@ CALLSET_ENTRY (autofire, ball_search)
 	{
 		callset_invoke (clear_autofire);
 	}
-	else if (feature_config.fire_when_detected_empty == YES)
+	else if (feature_config.fire_when_detected_empty == NO)
 	{
 		callset_invoke (clear_autofire);
 	}
@@ -243,6 +259,9 @@ CALLSET_ENTRY (autofire, ball_search)
 
 CALLSET_ENTRY (autofire, start_ball)
 {
+	/* Bug in trough mech, multidrain can cause all other balls to be autofired 
+	 * live_balls > 0 even at the start of a ball*/
+	live_balls = 0;
 	autofire_request_count = 0;
 	autofire_busy = FALSE;
 }

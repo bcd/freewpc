@@ -100,7 +100,7 @@ void gumball_load_from_trough (void)
 
 void gumball_release_task (void)
 {
-	event_should_follow (gumball_release, gumball_exit, TIME_3S);
+	event_should_follow (gumball_release, gumball_exit, TIME_4S);
 	while (gumball_pending_releases > 0)
 	{
 		gumball_geneva_tripped = FALSE;
@@ -193,6 +193,7 @@ CALLSET_ENTRY (gumball, sw_gumball_exit)
 	if (event_did_follow (gumball_geneva, gumball_exit) 
 		|| event_did_follow (gumball_release, gumball_exit))
 	{
+		device_switch_can_follow (gumball_exit, camera, TIME_4S);
 		/* Signal the release motor to stop */
 		gumball_exit_tripped = TRUE;
 		/* A ball successfully came out of the gumball machine.*/
@@ -202,9 +203,6 @@ CALLSET_ENTRY (gumball, sw_gumball_exit)
 			lamp_off (LM_GUM);
 			lamp_off (LM_BALL);
 		}
-		device_switch_can_follow (gumball_exit, slot, TIME_5S);
-		event_can_follow (gumball_exit, camera, TIME_5S);
-		event_can_follow (gumball_exit, slot, TIME_5S);
 	}
 }
 
@@ -215,7 +213,7 @@ CALLSET_ENTRY (gumball, sw_gumball_geneva)
 	/* Don't trigger too early */
 	if (timeout < 10)
 		gumball_geneva_tripped = TRUE;
-	event_should_follow (gumball_geneva, gumball_exit, TIME_2S);
+	event_should_follow (gumball_geneva, gumball_exit, TIME_4S);
 }
 
 CALLSET_ENTRY (gumball, sw_gumball_enter)
@@ -236,6 +234,7 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 		if (powerball_loaded_into_gumball == TRUE)
 		{
 			powerball_loaded_into_gumball = FALSE;
+			leff_start (LEFF_FLASH_GI2);
 			callset_invoke (mball_start);
 			callset_invoke (mball_start_3_ball);
 			callset_invoke (powerball_in_gumball);	
@@ -328,9 +327,19 @@ void sw_far_left_trough_monitor (void)
 	task_exit ();
 }
 
+static void gumball_music_bug_task (void)
+{
+	task_sleep_sec (5);
+	music_disable ();
+	task_sleep (TIME_66MS);
+	music_enable ();
+	task_exit ();
+}
+
 void gumball_deff (void)
 {
 	sound_send (SND_GUMBALL_LOAD_START);
+	task_recreate_gid (GID_GUMBALL_MUSIC_BUG, gumball_music_bug_task);
 	U16 fno;
 	for (fno = IMG_GUMBALL_START; fno <= IMG_GUMBALL_END; fno += 2)
 	{

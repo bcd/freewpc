@@ -175,7 +175,7 @@ void sslot_award (void)
 	lamp_tristate_off (LM_SLOT_MACHINE);
 }
 
-void shot_slot_task (void)
+static void shot_slot_task (void)
 {
 	callset_invoke (shot_slot_machine);
 	task_exit ();
@@ -200,13 +200,12 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		callset_invoke (skill_missed);
 		return;
 	}
-	if (timed_mode_running_p (&sslot_mode))
+	else if (timed_mode_running_p (&sslot_mode))
 	{
 		//TODO If shot from lite slot lane, allow player to choose award
 		sslot_award ();
 		score (SC_10M);
 		timed_mode_end (&sslot_mode);
-		return;
 	}
 	else
 	{

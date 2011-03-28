@@ -120,6 +120,22 @@ void greed_mode_total_deff (void)
 	deff_exit ();
 }
 
+/* Award 500K for a clock hit during Greed and cycle lamps */
+
+static inline void rotate_greed_lamps (void)
+{
+	greed_set = (greed_set >> 1) | (greed_set << (7 - 1));
+}
+
+CALLSET_ENTRY (greed, sw_clock_target)
+{
+	if (timed_mode_running_p (&greed_mode))
+	{
+		score_add (greed_mode_total, score_table[SC_500K]);
+		rotate_greed_lamps ();
+	}
+}
+
 void standup_lamp_update1 (U8 mask, U8 lamp)
 {
 	if (timed_mode_running_p (&greed_mode))

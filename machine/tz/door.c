@@ -151,8 +151,6 @@ void door_award_rotate (void)
 	while (in_live_game)
 	{
 		door_advance_flashing ();
-		while (kickout_locks != 0)
-			task_sleep (TIME_200MS);
 		task_sleep_sec (2);
 	}
 	task_exit ();
@@ -328,6 +326,7 @@ void door_award_deff (void)
 	task_sleep_sec (1);	
 	/* Play backwards */
 	sound_send (SND_SPIRAL_EB_LIT);
+	bool on = TRUE;
 	for (fno = IMG_DOOR_END; fno >= IMG_DOOR_START; fno -= 2)
 	{
 		dmd_alloc_pair ();
@@ -340,15 +339,24 @@ void door_award_deff (void)
 		else
 			frame_draw (fno);
 		
-		/* Flip it, as text is drawn to the low page */
-		dmd_flip_low_high ();	
 		font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
-		font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
+		if (on)
+		{
+			font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
+			on = FALSE;
+		}
+		else
+			on = TRUE;
+
 		/* Flip it again so text is now on high page */
 		dmd_flip_low_high ();	
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
+	dmd_alloc_pair_clean ();
+	font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
+	font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
+	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 }
@@ -466,9 +474,11 @@ CALLSET_ENTRY (door, shot_slot_machine)
 	{
 		/* Relight the slot if it was unlit when hit */
 		if ( feature_config.easy_light_door_panels == YES
-			&& door_panels_started < 8)
+			&& door_panels_started < 8
+			&& single_ball_play ())
 		{
 			flag_on (FLAG_SLOT_DOOR_LIT);
+			sound_send (SND_FEEL_LUCKY);
 		}
 		award_unlit_shot (SW_SLOT);
 		score (SC_5130);
