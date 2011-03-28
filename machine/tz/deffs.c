@@ -427,11 +427,6 @@ void ball_explode_deff (void)
 	extern bool powerball_death;
 	if (!multi_ball_play () && !ballsave_test_active ())
 		music_request (MUS_POWERFIELD, PRI_GAME_MODE1);
-
-	dmd_alloc_pair_clean ();
-	dmd_show2 ();
-	task_sleep (TIME_200MS);
-
 	dmd_sched_transition (&trans_scroll_down_fast);
 	dmd_alloc_pair ();
 	frame_draw (IMG_BALLEXPLODE_START);
