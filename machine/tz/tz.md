@@ -406,7 +406,7 @@ Chaosmb Jackpots: Multiball, Ramp Battle, Piano Jackpot, Camera, Power Payoff, D
 Ball Saves: integer, 1
 Ball Save Time: integer, 7
 Installed Balls: integer, 6
-Disable Clock: yes_no, YES
+Disable Clock: yes_no, NO
 Disable Gumball: yes_no, NO
 Powerball Missing: yes_no, NO
 Have Third Magnet: yes_no, NO
