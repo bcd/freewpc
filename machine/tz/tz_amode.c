@@ -107,8 +107,27 @@ static void map_and_clean (void)
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 }
+static inline draw_bttzwave (void)
+{
+	U16 fno;
+	for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 
-CALLSET_ENTRY (tz_amode, amode_page)
+	for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
+}
+
+static inline draw_bttzmelt (void)
 {
 	U16 fno;
 	for (fno = IMG_BTTZMELT_START; fno <= IMG_BTTZMELT_MIDDLE; fno += 2)
@@ -126,7 +145,10 @@ CALLSET_ENTRY (tz_amode, amode_page)
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
 	}
+}
 
+CALLSET_ENTRY (tz_amode, amode_page)
+{
 	map_and_clean ();
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
 	dmd_text_blur ();
@@ -191,6 +213,7 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	show_text_on_stars ();
 
 	show_random_factoid ();
+	draw_bttzwave ();
 	
 	dmd_sched_transition (&trans_scroll_left);
 	show_driver_animation ();
@@ -200,6 +223,7 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 
+	
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_var5, 64, 5, "FREEWPC WAS DESIGNED");
 	font_render_string_center (&font_var5, 64, 12, "BY BRIAN DOMINY AND IS");
@@ -217,6 +241,8 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	dmd_alloc_low_clean ();
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
+	
+	draw_bttzmelt ();
 }
 
 static void lock_and_outhole_monitor (void)

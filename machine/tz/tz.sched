@@ -20,7 +20,6 @@
 
 
 # Schedule for TZ's real-time tasks
-magnet_switch_rtt 	4	0.1
 # Handle fast solenoids: slings and jets
 !left_sling_service     8     40c
 !right_sling_service    8     40c
@@ -29,14 +28,15 @@ magnet_switch_rtt 	4	0.1
 !lower_jet_service      8     40c
 
 # Poll the loop magnet sensors
-
+magnet_switch_rtt 	4	0.1
+# Update the loop magnet
+magnet_duty_rtt    	4    40c
+# Monitor the magnet opto during ball grab
+magnet_ball_grab_monitor_rtt   64    10c
 # Update the clock
 clock_mech_service      16    80c
 tz_clock_switch_rtt     8    0.1
 
-# Update the loop magnet
-magnet_duty_rtt    	4    20c
-magnet_ball_grab_monitor_rtt   64    10c
 
 #!bridge_open_service    32    20c
 #!shooter_div_service    32    20c

@@ -499,7 +499,7 @@ void snake_ready_deff (void)
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
 			font_render_string_right (&font_var5, 128, 2, "VIDEO MODE READY");
-			if (fno % 5 == 0 && fno >= IMG_SNAKE_END)
+			if (fno % 5 == 0 || fno >= IMG_SNAKE_END)
 			{
 				sound_send (0x54);
 				font_render_string_right (&font_var5, 128, 16, "SHOOT LOCK");

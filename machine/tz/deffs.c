@@ -427,13 +427,17 @@ void ball_explode_deff (void)
 	extern bool powerball_death;
 	if (!multi_ball_play () && !ballsave_test_active ())
 		music_request (MUS_POWERFIELD, PRI_GAME_MODE1);
+	dmd_alloc_pair_clean ();
+	dmd_show2 ();
+	task_sleep (TIME_200MS);
+
 	dmd_sched_transition (&trans_scroll_down_fast);
 	dmd_alloc_pair ();
 	frame_draw (IMG_BALLEXPLODE_START);
 	dmd_show2 ();
 	if (powerball_death == FALSE)	
 		sound_send (SND_EXPLOSION_3);
-	for (fno = IMG_BALLEXPLODE_START; fno <= IMG_BALLEXPLODE_END; fno += 2)
+	for (fno = IMG_BALLEXPLODE_START + 1; fno <= IMG_BALLEXPLODE_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
