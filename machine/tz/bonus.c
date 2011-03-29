@@ -853,8 +853,18 @@ void bonus_deff (void)
 		sound_send (SND_GREED_MODE_BOOM);
 		sprintf_score (temp_score);
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		font_render_string_center (&font_mono5, 64, 29, "CONGRATULATIONS");
-		
+		if (score_compare (score_table[SC_10M], temp_score) == 1)
+		{
+			font_render_string_center (&font_mono5, 64, 29, "THAT WAS CLOSE");
+		}
+		else if (score_compare (temp_score, score_table[SC_100M]) == 1)
+		{
+			font_render_string_center (&font_mono5, 64, 29, "A LITTLE LOPSIDED");
+		}
+		else
+		{
+			font_render_string_center (&font_mono5, 64, 29, "CONGRATULATIONS");
+		}	
 		dmd_show_low ();
 		task_sleep_sec (6);
 	}
