@@ -204,7 +204,7 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	
 	map_and_clean ();
 	font_render_string_center (&font_var5, 64, 7, "AND EVERYBODY IN");
-	font_render_string_center (&font_var5, 64, 20, "EFNET PINBALL");
+	font_render_string_center (&font_var5, 64, 20, "EFNET #PINBALL");
 	show_text_on_stars ();
 	
 	map_and_clean ();
