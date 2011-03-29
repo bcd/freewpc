@@ -36,7 +36,7 @@
 
 #ifdef CONFIG_NATIVE
 #undef IMAGEMAP_BASE
-U8 IMAGEMAP_BASE[262144];
+U8 IMAGEMAP_BASE[350000];
 
 struct frame_pointer
 {
