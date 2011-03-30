@@ -271,14 +271,12 @@ void tz_clock_free (task_gid_t owner)
 		tz_clock_clear_owner ();
 }
 
-void tz_clock_request_time (U8 hours, U8 minutes)
+void tz_clock_show_time (U8 hours, U8 minutes)
 {
 	if (hours > 12)
 		hours = 12;
 	else if (hours == 0)
 		hours = 12;
-	if (minutes > 59);
-		minutes = 59;
 	
 	if (minutes < 15)
 		clock_find_target = tz_clock_hour_to_opto[hours - 1] | CLK_SW_MIN00;
@@ -429,10 +427,10 @@ CALLSET_ENTRY (tz_clock, reverse_clock_direction)
 		case CLOCK_RUNNING_FORWARD:
 			clock_mech_start_reverse ();
 			break;
+		default:
 		case CLOCK_RUNNING_BACKWARD:
 			clock_mech_start_forward ();
-		default:
-			clock_mech_start_forward ();
+			break;
 	}
 }
 
@@ -462,7 +460,6 @@ CALLSET_ENTRY (tz_clock, diagnostic_check)
 		diag_post_error ("CLOCK IS\nNOT WORKING\n", PAGE);
 }
 
-
 /**
  * Stop the clock when entering test mode
  */
@@ -470,7 +467,6 @@ CALLSET_ENTRY (tz_clock, amode_stop, test_start)
 {
 	tz_clock_stop ();
 }
-
 
 /**
  * Reset the clock to the home position at the start of
