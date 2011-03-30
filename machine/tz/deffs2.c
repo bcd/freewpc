@@ -22,6 +22,7 @@
 #include <freewpc.h>
 
 extern struct timed_mode_ops hitch_mode;
+extern U8 mute_and_pause_timeout;
 
 void shoot_again_deff (void)
 {	
@@ -93,6 +94,7 @@ void paused_deff (void)
 	while (task_find_gid (GID_MUTE_AND_PAUSE))
 	{
 		dmd_alloc_pair_clean ();
+		
 		if (on)
 		{
 			font_render_string_center (&font_fixed10, 64, 10, "PAUSED");
@@ -102,6 +104,14 @@ void paused_deff (void)
 		{
 			on  = TRUE;
 		}
+		/* mute_and_pause_timeout is stored as 5 second chunks, to save
+		 * having to use a U16 */	
+		if (mute_and_pause_timeout <= 12)
+			sprintf ("TIMEOUT IN %d SECONDS", mute_and_pause_timeout / 5);
+		else
+			sprintf ("TIMEOUT IN %d MINUTES", mute_and_pause_timeout / 12);
+
+		font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 27, "PRESS BUYIN TO CONTINUE");
 		dmd_show_low ();
 		task_sleep (TIME_500MS);

@@ -107,7 +107,7 @@ static void map_and_clean (void)
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 }
-static inline draw_bttzwave (void)
+static inline void draw_bttzwave (void)
 {
 	U16 fno;
 	for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
@@ -127,7 +127,7 @@ static inline draw_bttzwave (void)
 	}
 }
 
-static inline draw_bttzmelt (void)
+static inline void draw_bttzmelt (void)
 {
 	U16 fno;
 	for (fno = IMG_BTTZMELT_START; fno <= IMG_BTTZMELT_MIDDLE; fno += 2)
