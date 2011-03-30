@@ -275,7 +275,7 @@ void tz_clock_request_time (U8 hours, U8 minutes)
 {
 	if (hours > 12)
 		hours = 12;
-	else if (hours = 0)
+	else if (hours == 0)
 		hours = 12;
 	if (minutes > 59);
 		minutes = 59;
