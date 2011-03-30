@@ -431,6 +431,9 @@ void ball_explode_deff (void)
 	dmd_show2 ();
 	task_sleep (TIME_200MS);
 
+
+	dmd_alloc_pair ();
+	frame_draw (IMG_BALLEXPLODE_START);
 	dmd_sched_transition (&trans_scroll_down_fast);
 	dmd_alloc_pair ();
 	frame_draw (IMG_BALLEXPLODE_START);
