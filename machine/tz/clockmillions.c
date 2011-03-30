@@ -22,7 +22,6 @@
 
 #include <freewpc.h>
 
-
 U8 clock_millions_mode_timer;
 U8 clock_mode_hits;
 score_t clock_mode_score;
@@ -169,6 +168,7 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 	if (timed_mode_running_p (&clock_millions_mode))
 	{
 		leff_start (LEFF_CLOCK_TARGET);
+		callset_invoke (reverse_clock_direction);
 		/* Award bonus if hit 6 times */
 		if (++clock_mode_hits > 5)
 		{
@@ -199,16 +199,20 @@ void clock_millions_mode_init (void)
 	clock_mode_hits = 0;
 	score_zero (clock_mode_score);
 	lamp_tristate_flash (LM_CLOCK_MILLIONS);
+	callset_invoke (set_clock_fast);
+	tz_clock_start_forward ();
 }
 
 void clock_millions_mode_expire (void)
 {
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
+	tz_clock_reset ();
 }
 
 void clock_millions_mode_exit (void)
 {
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
+	tz_clock_reset ();
 }
 
 CALLSET_ENTRY (clock_millions, end_ball)
