@@ -221,6 +221,7 @@ void tz_clock_switch_rtt (void)
 			{
 				/* Yep, stop NOW! */
 				clock_mech_stop_from_interrupt ();
+				global_flag_on (GLOBAL_FLAG_CLOCK_HOME);
 			}
 			else if (CLK_SW_HOUR_EQUAL_P (clock_sw, clock_find_target)
 				&& (clock_mech_get_speed () < BIVAR_DUTY_25))
@@ -229,6 +230,12 @@ void tz_clock_switch_rtt (void)
 				clock_mech_set_speed (BIVAR_DUTY_25);
 			}
 			/* Otherwise, the clock keeps running as it was */
+			/* BUG workaround: Goes very slowly backwards when it's miles away from home */
+			else if (clock_mech_get_speed () < BIVAR_DUTY_25)
+			{
+				clock_mech_set_speed (BIVAR_DUTY_100);
+			}
+
 		}
 		else if ((clock_mode == CLOCK_CALIBRATING))
 		{
@@ -296,6 +303,7 @@ void tz_clock_start_forward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 	{
+		global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
 		clock_mech_start_forward ();
 		clock_mode = CLOCK_RUNNING_FORWARD;
 	}
@@ -306,6 +314,7 @@ void tz_clock_start_backward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 	{
+		global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
 		clock_mech_start_reverse ();
 		clock_mode = CLOCK_RUNNING_BACKWARD;
 	}
@@ -341,7 +350,7 @@ void tz_clock_reset (void)
 		dbprintf ("Clock resetting to home.\n");
 		/* See where the clock is and start it if it's not already home. */
 		clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
-		if (clock_sw != clock_find_target)
+		if (clock_sw != clock_find_target && !global_flag_test (GLOBAL_FLAG_CLOCK_HOME))
 		{
 			clock_mech_set_speed (BIVAR_DUTY_100);
 			if (clock_hour <= 6)
@@ -393,6 +402,7 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
  */
 CALLSET_ENTRY (tz_clock, init_complete)
 {
+	global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
 	clock_mode = CLOCK_STOPPED;
 	clock_sw_seen_active = 0;
 	clock_sw_seen_inactive = 0;
@@ -413,7 +423,7 @@ CALLSET_ENTRY (tz_clock, amode_start)
 
 	/* If not all of the other clock switches have been seen in both
 	 * active and inactive states, start the clock. */
-	else if ((clock_sw_seen_active & clock_sw_seen_inactive) < 0xEF)
+	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
 	{
 		dbprintf ("Clock calibration started.\n");
 		//clock_calibration_time = 500; /* 8 seconds */
