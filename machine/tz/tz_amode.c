@@ -156,8 +156,8 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	show_text_on_stars ();
 	
 	map_and_clean ();
-	font_render_string_center (&font_times10, 64, 7, "SOFTWARE BY");
-	font_render_string_center (&font_times10, 64, 21, "BCD");
+	font_render_string_center (&font_steel, 64, 7, "SOFTWARE BY");
+	font_render_string_center (&font_steel, 64, 21, "BCD");
 	show_text_on_stars ();
 	
 	map_and_clean ();
