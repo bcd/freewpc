@@ -708,7 +708,7 @@ void bonus_deff (void)
 	dmd_show_low ();	
 	task_sleep_sec (2);
 		
-	/* Add to total bonus to player score */
+	/* Add total bonus to player score */
 	score_long (total_bonus);
 	
 	/* 
