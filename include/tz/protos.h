@@ -54,9 +54,7 @@ void tz_clock_start_forward(void);
 void tz_clock_start_backward(void);
 void tz_clock_stop(void);
 void tz_clock_reset(void);
-void tz_clock_request_time (U8 hours, U8 minutes);
-__machine__ void tz_clock_free (task_gid_t owner);
-__machine__ bool tz_clock_alloc (task_gid_t owner);
+void tz_clock_show_time (U8 hours, U8 minutes);
 
 /* deffs.c */
 __machine__ void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
