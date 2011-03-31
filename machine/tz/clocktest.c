@@ -144,6 +144,12 @@ void tz_clock_test_start (void)
 	tz_clock_reset ();
 }
 
+void tz_clock_test_right (void)
+{
+	/* Set as 12:00 */
+	callset_invoke (clock_at_home);
+}
+
 void tz_clock_test_thread (void)
 {
 	for (;;)
@@ -159,6 +165,7 @@ struct window_ops tz_clock_test_window = {
 	.draw = tz_clock_test_draw,
 	.up = tz_clock_test_up,
 	.down = tz_clock_test_down,
+	.right = tz_clock_test_right,
 	.exit = tz_clock_stop,
 	.enter = tz_clock_test_enter,
 	.start = tz_clock_test_start,

@@ -240,8 +240,8 @@ void tz_clock_switch_rtt (void)
 		else if ((clock_mode == CLOCK_CALIBRATING))
 		{
 			/* Update the active/inactive switch list for calibration */
-			clock_sw_seen_active |= clock_sw;
 			clock_sw_seen_inactive |= ~clock_sw;
+			clock_sw_seen_active |= clock_sw;
 		}
 	}
 }
@@ -363,6 +363,15 @@ void tz_clock_reset (void)
 	}
 }
 
+/* Manually set the clock to home */
+CALLSET_ENTRY (tz_clock, clock_at_home)
+{
+	tz_clock_stop ();
+	global_flag_on (GLOBAL_FLAG_CLOCK_HOME);
+	clock_hour = 0;
+	clock_sw_seen_active = 0xFF;
+	clock_sw_seen_inactive = 0xFF;
+}
 
 /**
  * A periodic, lower priority function that updates the
@@ -400,7 +409,7 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 /**
  * Reinitialize the mechanical clock driver.
  */
-CALLSET_ENTRY (tz_clock, init_complete)
+CALLSET_ENTRY (tz_clock, init)
 {
 	global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
 	clock_mode = CLOCK_STOPPED;
@@ -423,7 +432,8 @@ CALLSET_ENTRY (tz_clock, amode_start)
 
 	/* If not all of the other clock switches have been seen in both
 	 * active and inactive states, start the clock. */
-	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
+	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF
+			&& !global_flag_test (GLOBAL_FLAG_CLOCK_HOME))
 	{
 		dbprintf ("Clock calibration started.\n");
 		//clock_calibration_time = 500; /* 8 seconds */
