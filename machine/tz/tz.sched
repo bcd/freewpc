@@ -37,16 +37,11 @@ magnet_ball_grab_monitor_rtt   64    10c
 clock_mech_service      16    80c
 tz_clock_switch_rtt      8  0.1
 
+!bridge_open_service	4	20c
+!ramp_div_service	16	20c
+!shooter_div_service	4	20c
+!gumball_div_service    16	20c
 
-#!bridge_open_service_slow    32    40c
-#!bridge_open_service_fast    2    20c
-#!shooter_div_service_slow    32    20c
-#!shooter_div_service_fast    2    20c
-!bridge_open_service    32    40c
-!ramp_div_service       32    40c
-!shooter_div_service       32    40c
-!gumball_div_service       32    40c
-#!gumball_div_service_slow    32    20c
-#!gumball_div_service_fast    2    20c
-!left_mpf_service    	16    40c
-!right_mpf_service    	16    40c
+# Update the miniplayfield magnets
+!left_mpf_service    	16    20c
+!right_mpf_service    	16    20c

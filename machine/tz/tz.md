@@ -281,26 +281,29 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-#Bridge Open: driver(duty2),
-#	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_16MS, duty_mask=DUTY_MASK_50
-Bridge Open: driver(duty),
-	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_16MS, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS
+Bridge Open: driver(duty2),
+	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_66MS, duty_mask=DUTY_MASK_25
 
-#Shooter Div: driver(duty2),
-#	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_2S, duty_mask=DUTY_MASK_50
+Shooter Div: driver(duty2),
+	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_500MS, duty_mask=DUTY_MASK_12
 
-Shooter Div: driver(duty),
-	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS
+Ramp Div: driver(duty2),
+	sol=SOL_RAMP_DIVERTOR, timeout=TIME_3S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
-Ramp Div: driver(duty),
-	sol=SOL_RAMP_DIVERTOR,
-	ontime=TIME_66MS, duty_ontime=TIME_66MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+Gumball Div: driver(duty2),
+	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
-#Gumball Div: driver(duty2),
-#	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_16MS, duty_mask=DUTY_MASK_12
+### old duty driver ###
+#Ramp Div: driver(duty),
+#	sol=SOL_RAMP_DIVERTOR,
+#	ontime=TIME_33MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+#Shooter Div: driver(duty),
+#	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
+#Bridge Open: driver(duty),
+#	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_16MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
+#Gumball Div: driver(duty),
+#	sol=SOL_GUMBALL_DIV, timeout=TIME_3S, ontime=TIME_16MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
 
-Gumball Div: driver(duty),
-	sol=SOL_GUMBALL_DIV, timeout=TIME_3S, ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS
 ##########################################################################
 # Containers
 # These denote devices that can hold, count, and eject pinballs.
@@ -523,13 +526,15 @@ GC: BCD, 500.000.000
 ##########################################################################
 # Bit flags.
 ##########################################################################
+
+# These should be player specific stuff
 [flags]
 PIANO_DOOR_LIT:
 SLOT_DOOR_LIT:
 SNAKE_READY:
 
+# These are for non-player specific stuff
 [globalflags]
-
 POWERBALL_IN_PLAY:
 SSSMB_RED_JACKPOT:
 SSSMB_ORANGE_JACKPOT:
@@ -542,6 +547,7 @@ MULTIBALL_RUNNING:
 SUPER_MB_RUNNING:
 BTTZ_RUNNING:
 Clock Working:
+Clock Home:
 
 ##########################################################################
 # Display effects
@@ -649,7 +655,7 @@ Home and Dry: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 PB Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 Lucky Bounce: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
-Shoot Camera: page(MACHINE3_PAGE), PRI_GAME_LOW2, D_RESTARTABLE+D_TIMEOUT+D_QUEUED
+Shoot Camera: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_RESTARTABLE+D_TIMEOUT+D_QUEUED
 Shoot Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT+D_QUEUED
 Button Masher: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
@@ -669,7 +675,7 @@ Camera Award: page(MACHINE2_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 Rules: page(MACHINE3_PAGE), PRI_EGG1
 
 Pinwheel: page(MACHINE_PAGE), PRI_GAME_QUICK3
-Snake: page(MACHINE3_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+Snake: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
 Snake Ready: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
 Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
 Explosion: page(MACHINE_PAGE), PRI_EGG1
