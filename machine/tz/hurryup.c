@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *
@@ -33,7 +33,7 @@ struct timed_mode_ops hurryup_mode = {
 	.init = hurryup_mode_init,
 	.exit = hurryup_mode_exit,
 	.gid = GID_HURRYUP_MODE_RUNNING,
-	.music = MUS_POWERFIELD,
+	.music = MUS_FASTLOCK_COUNTDOWN,
 	.deff_running = DEFF_HURRYUP_MODE,
 	.prio = PRI_GAME_MODE6,
 	.init_timer = 15,
@@ -42,24 +42,21 @@ struct timed_mode_ops hurryup_mode = {
 	.pause = system_timer_pause,
 };
 
-inline bool hurryup_running (void)
-{
-	if (timed_mode_running_p (&hurryup_mode))
-		return TRUE;
-	else
-		return FALSE;
-}
-
 void hurryup_mode_deff (void)
 {
-	while (hurryup_running ())
+//	while (hurryup_running ())
+	for (;;)
 	{
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed10, 64, 8, "HURRY UP");
 		sprintf_score (hurryup_score);
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 26, "SHOOT POWER PAYOFF");
+		font_render_string_center (&font_fixed6, 64, 17, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 27, "SHOOT POWER PAYOFF");
+		sprintf ("%d", hurryup_mode_timer);
+		font_render_string (&font_var5, 2, 2, sprintf_buffer);
+		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
+		task_sleep (TIME_500MS);
 	}
 }
 
@@ -76,13 +73,13 @@ void hurryup_awarded_deff (void)
 }
 
 /* Task to countdown the Hurry up score */
-static void hurryup_countdown_score_task (void)
+void hurryup_countdown_score_task (void)
 {
 	task_sleep_sec (2);
-	while (hurryup_running ())
+	while (hurryup_mode_timer > 0)
 	{
 		/* Pause whilst waiting for a kickout */
-		while (kickout_locks != 0)
+		while (kickout_locks > 0)
 			task_sleep (TIME_500MS);
 		score_sub (hurryup_score, score_table[SC_250K]);
 		task_sleep (TIME_500MS);
@@ -93,8 +90,9 @@ static void hurryup_countdown_score_task (void)
 
 void hurryup_mode_init (void)
 {
+	score_zero (hurryup_score);
 	score_copy (hurryup_score, score_table[SC_20M]);
-	task_create_gid (GID_HURRYUP_SCORE_COUNTDOWN, hurryup_countdown_score_task);
+//	task_create_gid (GID_HURRYUP_SCORE_COUNTDOWN, hurryup_countdown_score_task);
 }
 
 void hurryup_mode_exit (void)
@@ -110,17 +108,17 @@ void hurryup_mode_expire (void)
 }
 
 
-void award_hurryup (void)
+static inline void award_hurryup (void)
 {
 	task_kill_gid (GID_HURRYUP_SCORE_COUNTDOWN);
-	score (hurryup_score);
+	score_long (hurryup_score);
 	deff_start (DEFF_HURRYUP_AWARDED);
 	timed_mode_end (&hurryup_mode);
 }
 
 CALLSET_ENTRY (hurryup, sw_power_payoff)
 {
-	if (hurryup_running ())
+	if (timed_mode_running_p (&hurryup_mode))
 	{
 		award_hurryup ();
 	}
@@ -128,7 +126,7 @@ CALLSET_ENTRY (hurryup, sw_power_payoff)
 
 CALLSET_ENTRY (hurryup, lamp_update)
 {
-	if (hurryup_running ())
+	if (timed_mode_running_p (&hurryup_mode))
 		lamp_tristate_flash (LM_POWER_PAYOFF);
 }
 
