@@ -116,12 +116,12 @@ IMG_POWERBALL_3: machine/tz/animation/powerball/powerball03.pgm
 IMG_POWERBALL_END: machine/tz/animation/powerball/powerball04.pgm
 
 IMG_DOOR_START: machine/tz/animation/door/door01.pgm
-IMG_DOOR_2: machine/tz/animation/door/door02.pgm
-IMG_DOOR_3: machine/tz/animation/door/door03.pgm
-IMG_DOOR_4: machine/tz/animation/door/door04.pgm
-IMG_DOOR_5: machine/tz/animation/door/door05.pgm
-IMG_DOOR_6: machine/tz/animation/door/door06.pgm
-IMG_DOOR_7: machine/tz/animation/door/door07.pgm
+machine/tz/animation/door/door02.pgm
+machine/tz/animation/door/door03.pgm
+machine/tz/animation/door/door04.pgm
+machine/tz/animation/door/door05.pgm
+machine/tz/animation/door/door06.pgm
+machine/tz/animation/door/door07.pgm
 IMG_DOOR_END: machine/tz/animation/door/door08.pgm
 
 IMG_BALLEXPLODE_START: machine/tz/animation/ballexplode/ballexplode01.pgm
