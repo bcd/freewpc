@@ -624,7 +624,7 @@ CALLSET_ENTRY (snake, sw_right_button)
 
 CALLSET_ENTRY (snake, music_refresh)
 {
-	if (deff_get_active () != DEFF_SNAKE)
+	if (deff_get_active () != DEFF_SNAKE || Snake.dead == TRUE)
 		return;
 	
 	if (food_collected < 10)
@@ -655,7 +655,6 @@ CALLSET_ENTRY (snake, snake_end)
 	flag_off (FLAG_SNAKE_READY);
 	score_add (current_score, Snake.score);
 	flipper_enable ();
-	music_refresh ();
 	if (!can_lock_ball ())
 		deff_start_sync (DEFF_BALL_FROM_LOCK);
 }
