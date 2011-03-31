@@ -121,8 +121,7 @@ void autofire_monitor (void)
 	/* Launch the ball */
 	if (feature_config.fire_when_detected_empty == NO)
 	{
-		if (switch_poll_logical (SW_AUTOFIRE1)
-			|| switch_poll_logical (SW_AUTOFIRE2))
+		if (switch_poll_logical (SW_AUTOFIRE2))
 			sol_request (SOL_AUTOFIRE);
 	}
 	else
