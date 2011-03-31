@@ -334,9 +334,8 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 		task_kill_gid (GID_MPF_COUNTDOWN_SCORE_TASK);
 		timed_mode_end (&mpf_mode);
 		score (SC_5M);
-		/* This should be fine as we only disable in single ball play */
-		flipper_enable ();
 	}
+	flipper_enable ();
 	sound_send (SND_HAHA_POWERFIELD_EXIT);
 }
 
