@@ -23,7 +23,7 @@
 
 void cow_deff (void)
 {
-	dmd_alloc_pair ();
+	dmd_alloc_pair_clean ();
 	frame_draw (IMG_COW);
 	font_render_string_center (&font_var5, 40, 11, "THE POWER");
 	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
@@ -31,7 +31,7 @@ void cow_deff (void)
 	task_sleep_sec (2);
 	
 	sound_send (SND_POWER_GRUNT_1);
-	dmd_alloc_pair ();
+	dmd_alloc_pair_clean ();
 	frame_draw (IMG_COW);
 	font_render_string_center (&font_fixed6, 40, 11, "MOO");
 	dmd_show2 ();
@@ -212,7 +212,6 @@ void three_way_combo_deff (void)
 
 void shoot_right_loop_deff (void)
 {
-	sound_send (SND_INSIDE_LEFT_INLANE);
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 9, "SHOOT THE");

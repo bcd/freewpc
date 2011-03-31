@@ -119,6 +119,19 @@ void paused_deff (void)
 	deff_exit ();
 }
 
+void shoot_power_payoff_deff (void)
+{
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed10, 64, 9, "SHOOT");
+	font_render_string_center (&font_fixed10, 64, 24, "POWER PAYOFF");
+	dmd_show_low ();
+	dmd_copy_low_to_high ();
+	dmd_invert_page (dmd_low_buffer);
+	deff_swap_low_high (20, TIME_100MS);
+	deff_exit ();
+}
+
 CALLSET_ENTRY (deffs2, display_update)
 {
 	if (task_find_gid (GID_MUTE_AND_PAUSE)

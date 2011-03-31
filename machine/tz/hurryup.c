@@ -153,6 +153,15 @@ CALLSET_ENTRY (hurryup, sw_power_payoff)
 	}
 }
 
+CALLSET_ENTRY (hurryup, left_ball_grabbed)
+{
+	if (hurryup_active ())
+	{
+		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
+		deff_start (DEFF_SHOOT_POWER_PAYOFF);
+	}
+}
+
 CALLSET_ENTRY (hurryup, lamp_update)
 {
 	if (timed_mode_running_p (&hurryup_mode))

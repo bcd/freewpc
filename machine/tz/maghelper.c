@@ -148,7 +148,9 @@ void magnet_enable_monitor_task (void)
 	{
 		/* Lower Right magnet grabs */
 		/* Catch the ball for the camera and hitch shot, don't care about gumball */
-		if ((can_award_camera () || timed_mode_running_p (&hitch_mode) || pb_maybe_in_play ())
+		if ((can_award_camera () 
+			|| timed_mode_running_p (&hitch_mode) 
+			|| pb_maybe_in_play ())
 			&& (!timer_find_gid (GID_SPIRALAWARD)
 			&& !timer_find_gid (GID_LOCK_KICKED)
 			&& !timer_find_gid (GID_BALL_LAUNCH)
@@ -206,7 +208,11 @@ void magnet_enable_monitor_task (void)
 		{
 			magnet_enable_catch_and_throw (MAG_LEFT);
 		}
-		
+		/* Catch for the shot at the power payoff */
+		else if (hurryup_active ())
+		{
+			magnet_enable_catch (MAG_LEFT);
+		}
 		/* If in maybe state, turn on the magnets to help detection */
 		else if (pb_maybe_in_play ())
 		{
