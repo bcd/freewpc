@@ -675,6 +675,11 @@ Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
 Explosion: page(MACHINE_PAGE), PRI_EGG1
 
 Paused: page(MACHINE3_PAGE), PRI_STATUS, D_PAUSE+D_QUEUED
+
+
+Hurryup Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
+Hurryup awarded: page(MACHINE3_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+
 ##########################################################################
 # Lamp effects
 ##########################################################################
