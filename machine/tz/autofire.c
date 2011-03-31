@@ -119,7 +119,7 @@ void autofire_monitor (void)
 	/* Clear the magnet so we can fire a ball */
 	magnet_disable_catch (MAG_RIGHT);
 	/* Launch the ball */
-	if (feature_config.fire_when_detected_empty == YES)
+	if (feature_config.fire_when_detected_empty == NO)
 	{
 		if (switch_poll_logical (SW_AUTOFIRE1)
 			|| switch_poll_logical (SW_AUTOFIRE2))

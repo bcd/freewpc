@@ -253,7 +253,7 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 		}
 
 		abort_loop ();
-			}
+	}
 	else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
 	{
 		/* Right loop completed */
