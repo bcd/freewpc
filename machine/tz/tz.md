@@ -285,7 +285,7 @@ Bridge Open: driver(duty2),
 	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_66MS, duty_mask=DUTY_MASK_50
 
 Shooter Div: driver(duty2),
-	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_4S, duty_mask=DUTY_MASK_50
+	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_100MS, duty_mask=DUTY_MASK_25
 
 Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTOR,
