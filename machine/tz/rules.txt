@@ -262,6 +262,13 @@ right magnet for the camera shot.  Disabled by default.
 Shows advanced information such as highest 1-ball score, points this ball etc.
 Enabled by default.
 
+Clock Test
+==========
+If you find the clock maniacally spinning backwards and forwards, enter clock
+test, set the hands back to 12:00 using volume up/down and then press the
+right flipper button to set to home.  If this does not stop the spinning, then
+you can disable the clock via feature adjustments in test.
+
 Combos and Lucky bounces
 ========================
 
@@ -276,4 +283,3 @@ And 2 x 3 way combos:
 
 You get awarded a Lucky Bounce if the game thinks that skill wasn't involved
 :-p
-
