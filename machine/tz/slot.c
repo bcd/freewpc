@@ -108,8 +108,7 @@ void sslot_mode_init (void)
 
 void sslot_mode_expire (void)
 {
-	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
-	lamp_tristate_off (LM_SLOT_MACHINE);
+	callset_invoke (start_hurryup);
 }
 
 void sslot_mode_exit (void)

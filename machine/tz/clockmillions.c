@@ -206,8 +206,8 @@ void clock_millions_mode_init (void)
 
 void clock_millions_mode_expire (void)
 {
-//	lamp_tristate_off (LM_CLOCK_MILLIONS);
-//	tz_clock_reset ();
+	if (clock_mode_hits <= 2)
+		callset_invoke (start_hurryup);
 }
 
 void clock_millions_mode_exit (void)

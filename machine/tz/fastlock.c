@@ -102,6 +102,12 @@ void fastlock_mode_init (void)
 	magnet_reset ();
 }
 
+void fastlock_mode_expire (void)
+{
+	if (fastlocks_collected == 1)
+		callset_invoke (start_hurryup);
+}
+
 void fastlock_mode_exit (void)
 {
 	lamp_off (LM_LOCK_ARROW);

@@ -22,6 +22,8 @@
 
 #include <freewpc.h>
 
+#define DEFAULT_HURRYUP_TIME 15
+
 U8 hurryup_mode_timer;
 score_t hurryup_score;
 
@@ -36,7 +38,7 @@ struct timed_mode_ops hurryup_mode = {
 	.music = MUS_FASTLOCK_COUNTDOWN,
 	.deff_running = DEFF_HURRYUP_MODE,
 	.prio = PRI_GAME_MODE6,
-	.init_timer = 15,
+	.init_timer = DEFAULT_HURRYUP_TIME,
 	.timer = &hurryup_mode_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
@@ -45,29 +47,51 @@ struct timed_mode_ops hurryup_mode = {
 void hurryup_mode_deff (void)
 {
 //	while (hurryup_running ())
+	bool on = TRUE;
 	for (;;)
 	{
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed10, 64, 8, "HURRY UP");
 		sprintf_score (hurryup_score);
-		font_render_string_center (&font_fixed6, 64, 17, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 27, "SHOOT POWER PAYOFF");
+		font_render_string_center (&font_fixed6, 64, 19, sprintf_buffer);
+		if (on)
+		{
+			font_render_string_center (&font_var5, 64, 28, "SHOOT POWER PAYOFF");
+			on = FALSE;
+		}
+		else
+			on = TRUE;	
 		sprintf ("%d", hurryup_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
-		task_sleep (TIME_500MS);
+		task_sleep (TIME_200MS);
 	}
 }
 
 void hurryup_awarded_deff (void)
 {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 5, "HURRY UP AWARDED");
-	sprintf_score (hurryup_score);
-	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	dmd_alloc_pair_clean ();
+	U16 fno;
 	sound_send (SND_CLOCK_CHAOS_END_BOOM);
-	dmd_show_low ();
+	for (fno = IMG_EXPLODE_START; fno <= IMG_EXPLODE_END; fno += 2)
+	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		
+		if (fno > 4)
+		{
+			font_render_string_center (&font_var5, 64, 5, "HURRY UP AWARDED");
+			sprintf_score (hurryup_score);
+			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+		}
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+	}
 	task_sleep_sec (2);
 	deff_exit ();
 }
@@ -78,21 +102,25 @@ void hurryup_countdown_score_task (void)
 	task_sleep_sec (2);
 	while (hurryup_mode_timer > 0)
 	{
+		if (score_compare (hurryup_score, score_table[SC_500K]))
+		{
+			score_sub (hurryup_score, score_table[SC_250K]);
+		}
+		else
+			task_exit ();
 		/* Pause whilst waiting for a kickout */
 		while (kickout_locks > 0)
 			task_sleep (TIME_500MS);
-		score_sub (hurryup_score, score_table[SC_250K]);
 		task_sleep (TIME_500MS);
 	}
 	task_exit ();
-	
 }
 
 void hurryup_mode_init (void)
 {
 	score_zero (hurryup_score);
-	score_copy (hurryup_score, score_table[SC_20M]);
-//	task_create_gid (GID_HURRYUP_SCORE_COUNTDOWN, hurryup_countdown_score_task);
+	score_copy (hurryup_score, score_table[SC_10M]);
+	task_create_gid (GID_HURRYUP_SCORE_COUNTDOWN, hurryup_countdown_score_task);
 }
 
 void hurryup_mode_exit (void)
@@ -101,19 +129,20 @@ void hurryup_mode_exit (void)
 	task_kill_gid (GID_HURRYUP_SCORE_COUNTDOWN);
 }
 
-void hurryup_mode_expire (void)
-{
-	lamp_tristate_off (LM_POWER_PAYOFF);
-	task_kill_gid (GID_HURRYUP_SCORE_COUNTDOWN);
-}
-
-
 static inline void award_hurryup (void)
 {
 	task_kill_gid (GID_HURRYUP_SCORE_COUNTDOWN);
 	score_long (hurryup_score);
 	deff_start (DEFF_HURRYUP_AWARDED);
 	timed_mode_end (&hurryup_mode);
+}
+
+bool hurryup_active (void)
+{
+	if (timed_mode_running_p (&hurryup_mode))
+		return TRUE;
+	else
+		return FALSE;
 }
 
 CALLSET_ENTRY (hurryup, sw_power_payoff)
@@ -130,7 +159,7 @@ CALLSET_ENTRY (hurryup, lamp_update)
 		lamp_tristate_flash (LM_POWER_PAYOFF);
 }
 
-CALLSET_ENTRY (hurryup, end_ball)
+CALLSET_ENTRY (hurryup, end_ball, mball_start, stop_hurryup)
 {
 	timed_mode_end (&hurryup_mode);
 }
@@ -147,6 +176,9 @@ CALLSET_ENTRY (hurryup, music_refresh)
 
 CALLSET_ENTRY (hurryup, start_hurryup)
 {
-	timed_mode_begin (&hurryup_mode);
+	if (timed_mode_running_p (&hurryup_mode))
+		timed_mode_extend (&hurryup_mode, 10, DEFAULT_HURRYUP_TIME);
+	else if (single_ball_play () && !mball_restart_active ())
+		timed_mode_begin (&hurryup_mode);
 }
 

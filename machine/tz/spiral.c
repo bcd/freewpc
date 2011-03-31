@@ -156,6 +156,12 @@ void spiral_mode_init (void)
 	magnet_reset ();
 }
 
+void spiral_mode_expire (void)
+{
+	if (spiral_loops == 0)
+		callset_invoke (start_hurryup);
+}
+
 void spiral_mode_exit (void)
 {
 	lamp_tristate_off (LM_RIGHT_SPIRAL);

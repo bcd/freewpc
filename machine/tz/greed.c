@@ -214,6 +214,12 @@ void greed_mode_init (void)
 	score_zero (greed_mode_total);
 }
 
+void greed_mode_expire (void)
+{
+	if (score_compare (score_table[SC_10M], greed_mode_total) == 1)
+		callset_invoke (start_hurryup);
+}
+
 void greed_mode_exit (void)
 {
 	greed_set = NO_TARGETS;

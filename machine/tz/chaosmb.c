@@ -232,7 +232,10 @@ CALLSET_ENTRY (chaosmb, chaosmb_start)
 CALLSET_ENTRY (chaosmb, chaosmb_stop)
 {
 	if (mball_jackpot_uncollected == TRUE)
+	{
 		sound_send (SND_NOOOOOOOO);
+		callset_invoke (start_hurryup);
+	}
 	
 	global_flag_off (GLOBAL_FLAG_CHAOSMB_RUNNING);
 	/* Turn off jackpot lamps */

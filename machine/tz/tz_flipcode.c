@@ -114,7 +114,8 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 				//	juggle_ball = TRUE;
 				//	flag_on (FLAG_SNAKE_READY);
 				//	deff_start_sync (DEFF_SNAKE_READY);
-					callset_invoke (door_start_clock_millions);
+					//callset_invoke (door_start_clock_millions);
+					callset_invoke (start_hurryup);
 					//tz_clock_request_time (2, 30);
 					break;
 				/* MAC */

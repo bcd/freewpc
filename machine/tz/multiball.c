@@ -136,8 +136,18 @@ void mball_restart_deff (void)
 	}
 }
 
+bool mball_restart_active (void)
+{
+	if (timed_mode_running_p (&mball_restart_mode))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+
 void mball_restart_mode_init (void)
 {
+	callset_invoke (stop_hurryup);
 }
 
 void mball_restart_mode_expire (void)

@@ -276,11 +276,10 @@ CALLSET_ENTRY (loop, sw_upper_right_magnet)
 
 CALLSET_ENTRY (loop, sw_lower_right_magnet)
 {
-
+	deff_stop (DEFF_SHOOT_RIGHT_LOOP);
 	/* Inform gumball module that a ball may be approaching */
 	if (!task_find_gid (GID_LEFT_LOOP_ENTERED))
 		sw_gumball_right_loop_entered ();
-
 	if (event_did_follow (lock_kick, right_magnet)
 		|| timer_find_gid (GID_LOCK_KICKED))
 	{

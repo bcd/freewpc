@@ -150,6 +150,7 @@ void mpf_mode_expire (void)
 	/* Start a task to pulse the magnets
 	 * if a ball gets stuck */
 	task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);	
+	event_can_follow (mpf_expire, mpf_exit, TIME_10S);
 }
 
 void mpf_mode_init (void)
@@ -189,7 +190,8 @@ bool mpf_ready_p (void)
 		&& !global_flag_test (GLOBAL_FLAG_QUICK_MB_RUNNING)
 		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING)
 		&& !global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
-		&& !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING);
+		&& !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
+		&& !hurryup_active ();
 
 }
 
@@ -337,6 +339,8 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	}
 	flipper_enable ();
 	sound_send (SND_HAHA_POWERFIELD_EXIT);
+	if (event_did_follow (mpf_expire, mpf_exit))
+		callset_invoke (start_hurryup);
 }
 
 CALLSET_ENTRY (mpf, sw_mpf_left)

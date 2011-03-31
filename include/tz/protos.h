@@ -86,6 +86,7 @@ __machine__ void sw_gumball_right_loop_entered(void);
 void mball_light_lock (void);
 void mball_check_light_lock (void);
 __machine__ bool can_lock_ball (void);
+__machine__ bool mball_restart_active (void);
 /* mpf.c */
 __machine__ void mpf_enable (void);
 
@@ -156,3 +157,6 @@ __machine3__ void loop_master_check (void);
 __machine3__ void combo_master_check (void);
 
 __machine3__ void snake_start (void);
+
+/* hurryup.c */
+__machine3__ bool hurryup_active (void);
