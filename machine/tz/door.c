@@ -327,18 +327,16 @@ void door_award_deff (void)
 	/* Play backwards */
 	sound_send (SND_SPIRAL_EB_LIT);
 	bool on = TRUE;
+	dmd_alloc_pair_clean ();
 	for (fno = IMG_DOOR_END; fno >= IMG_DOOR_START; fno -= 2)
 	{
-		dmd_alloc_pair ();
 		/* Draw the frame, leave it blank at the end */
-		if (fno == IMG_DOOR_START)
-		{
-			dmd_clean_page_low ();
-			dmd_clean_page_high ();
-		}
+		if (fno <= IMG_DOOR_START)
+			dmd_alloc_pair_clean ();
 		else
 			frame_draw (fno);
 		
+		dmd_flip_low_high ();	
 		font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
 		if (on)
 		{
