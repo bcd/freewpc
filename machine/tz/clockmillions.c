@@ -87,6 +87,7 @@ void clock_millions_hit_deff (void)
 	U16 fno;
 	U16 img_start = 0;
 	U16 img_end = 0;
+	dmd_alloc_pair_clean ();
 	switch (random_scaled (3))
 	{
 		case 0:
@@ -123,7 +124,7 @@ void clock_millions_hit_deff (void)
 		task_sleep (TIME_33MS);
 	}
 	/* Redraw it so the 'HITS' text is centred */
-	dmd_alloc_low_clean ();
+	dmd_alloc_pair_clean ();
 	psprintf ("CLOCK HIT %d TIME", "CLOCK HIT %d TIMES", clock_mode_hits);
 	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
 	sprintf_score (clock_mode_score);
@@ -135,8 +136,8 @@ void clock_millions_hit_deff (void)
 
 void clock_millions_mode_deff (void)
 {
-	dmd_alloc_pair_clean ();
 	U16 fno;
+	dmd_alloc_pair_clean ();
 	for (;;)
 	{
 		for (fno = IMG_CLOCK_START; fno <= IMG_CLOCK_END; fno += 2)
@@ -205,8 +206,8 @@ void clock_millions_mode_init (void)
 
 void clock_millions_mode_expire (void)
 {
-	lamp_tristate_off (LM_CLOCK_MILLIONS);
-	tz_clock_reset ();
+//	lamp_tristate_off (LM_CLOCK_MILLIONS);
+//	tz_clock_reset ();
 }
 
 void clock_millions_mode_exit (void)
