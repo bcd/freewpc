@@ -26,7 +26,10 @@
 S8 clock_test_setting;
 
 U8 clock_can_run;
-
+extern U8 clock_minute_sw;
+extern U8 clock_hour;
+extern U8 clock_sw_seen_active;
+extern U8 clock_sw_seen_inactive;
 
 void tz_clock_test_update (void)
 {
@@ -98,12 +101,17 @@ void tz_clock_test_draw (void)
 	hour = intervals / 4;
 	minute = (intervals % 4 * 15);
 
-	sprintf ("%02d:%02d", hour, minute);
+	//sprintf ("%02d:%02d", hour, minute);
+	sprintf ("MIN: %02X", clock_minute_sw);
 	font_render_string_center (&font_mono5, 32, 18, sprintf_buffer);
+	sprintf ("HOUR: %d", clock_hour);
+	font_render_string_center (&font_mono5, 32, 24, sprintf_buffer);
 
 	sprintf ("SW.: %02X", clock_sw);
 	font_render_string_center (&font_mono5, 96, 18, sprintf_buffer);
 
+	sprintf ("ACTIVE: %02X", (clock_sw_seen_active & clock_sw_seen_inactive));
+	font_render_string_center (&font_mono5, 96, 24, sprintf_buffer);
 	dmd_show_low ();
 }
 
@@ -131,6 +139,11 @@ void tz_clock_test_enter (void)
 	tz_clock_test_update ();
 }
 
+void tz_clock_test_start (void)
+{
+	tz_clock_reset ();
+}
+
 void tz_clock_test_thread (void)
 {
 	for (;;)
@@ -148,6 +161,7 @@ struct window_ops tz_clock_test_window = {
 	.down = tz_clock_test_down,
 	.exit = tz_clock_stop,
 	.enter = tz_clock_test_enter,
+	.start = tz_clock_test_start,
 	.thread = tz_clock_test_thread,
 };
 

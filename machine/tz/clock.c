@@ -70,7 +70,7 @@ __fastram__ U8 clock_last_sw;
 
 /** How long calibration will be allowed to continue, before
  * giving up. */
-U16 clock_calibration_time;
+//U16 clock_calibration_time;
 
 /** The clock time "decoded" as the number of 15-minute intervals
 past 12:00, ranging from 0 to 47. */
@@ -197,6 +197,7 @@ void tz_clock_switch_rtt (void)
 				clock_hour = tz_clock_opto_to_hour[clock_sw >> 4];
 			}
 			else if (clock_minute_sw == CLK_SW_MIN00 &&
+				CLK_SW_MIN (clock_last_sw) == CLK_SW_MIN45 &&
 				clock_mode == CLOCK_RUNNING_FORWARD)
 			{
 				clock_hour++;
@@ -229,7 +230,7 @@ void tz_clock_switch_rtt (void)
 			}
 			/* Otherwise, the clock keeps running as it was */
 		}
-		if ((clock_mode == CLOCK_CALIBRATING))
+		else if ((clock_mode == CLOCK_CALIBRATING))
 		{
 			/* Update the active/inactive switch list for calibration */
 			clock_sw_seen_active |= clock_sw;
@@ -271,12 +272,14 @@ void tz_clock_free (task_gid_t owner)
 		tz_clock_clear_owner ();
 }
 
-void tz_clock_show_time (U8 hours, U8 minutes)
+void tz_clock_request_time (U8 hours, U8 minutes)
 {
 	if (hours > 12)
 		hours = 12;
 	else if (hours == 0)
 		hours = 12;
+	if (minutes > 59);
+		minutes = 59;
 	
 	if (minutes < 15)
 		clock_find_target = tz_clock_hour_to_opto[hours - 1] | CLK_SW_MIN00;
@@ -345,6 +348,7 @@ void tz_clock_reset (void)
 				clock_mech_start_reverse ();
 			else
 				clock_mech_start_forward ();
+			timer_start_free (GID_CLOCK_FINDING, TIME_15S);
 			clock_mode = CLOCK_FIND;
 		}
 	}
@@ -359,7 +363,7 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 {
 	/* When calibrating, once all switches have been active and inactive
 	 * at least once, claim victory and go back to the home position. */
-	if (unlikely (clock_mode == CLOCK_CALIBRATING))
+	if (clock_mode == CLOCK_CALIBRATING)
 	{
 		if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
 		{
@@ -376,13 +380,18 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 			tz_clock_error ();
 		}
 	}
+	else if (clock_mode == CLOCK_FIND && !timer_find_gid (GID_CLOCK_FINDING))
+	{
+		dbprintf ("Finding failed.\n");
+		tz_clock_stop ();
+	}
 }
 
 
 /**
  * Reinitialize the mechanical clock driver.
  */
-CALLSET_ENTRY (tz_clock, init)
+CALLSET_ENTRY (tz_clock, init_complete)
 {
 	clock_mode = CLOCK_STOPPED;
 	clock_sw_seen_active = 0;
@@ -404,7 +413,7 @@ CALLSET_ENTRY (tz_clock, amode_start)
 
 	/* If not all of the other clock switches have been seen in both
 	 * active and inactive states, start the clock. */
-	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
+	else if ((clock_sw_seen_active & clock_sw_seen_inactive) < 0xEF)
 	{
 		dbprintf ("Clock calibration started.\n");
 		//clock_calibration_time = 500; /* 8 seconds */
@@ -427,10 +436,10 @@ CALLSET_ENTRY (tz_clock, reverse_clock_direction)
 		case CLOCK_RUNNING_FORWARD:
 			clock_mech_start_reverse ();
 			break;
-		default:
 		case CLOCK_RUNNING_BACKWARD:
 			clock_mech_start_forward ();
-			break;
+		default:
+			clock_mech_start_forward ();
 	}
 }
 
@@ -460,6 +469,7 @@ CALLSET_ENTRY (tz_clock, diagnostic_check)
 		diag_post_error ("CLOCK IS\nNOT WORKING\n", PAGE);
 }
 
+
 /**
  * Stop the clock when entering test mode
  */
@@ -467,6 +477,7 @@ CALLSET_ENTRY (tz_clock, amode_stop, test_start)
 {
 	tz_clock_stop ();
 }
+
 
 /**
  * Reset the clock to the home position at the start of
