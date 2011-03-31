@@ -45,23 +45,26 @@
 
 
 @@
+@@file @self.sched
+@@
+!@self_service 4 20c
+
+
+@@
 @@file @self.h
 @@
 
 #include <freewpc.h>
 
-/* The number of 32ms periods that the solenoid is enabled for.
-As an 8-bit value the maximum is about 8 seconds. */
-extern __fastram__ U8 @self_timer;
+extern __fastram__ U16 @self_timer;
 
-#define DUTY_SLOW_FREQ   32
-#define DUTY_FAST_FREQ   2
+#undef DUTY_FREQ
+#define DUTY_FREQ 4
+#undef TIME_SCALE
+#define TIME_SCALE (16 / DUTY_FREQ)
 
-#define DUTY_SCALE(x)   ((x) / (DUTY_SLOW_FREQ / 16))
-
-#define DUTY_TIMER_DISABLED    0xF0U
-#define @self_DUTY_TIMER_INIT        (@timeout ? DUTY_SCALE (@timeout) : 0xE0U)
-#define @self_DUTY_TIMER_DUTY        (@self_DUTY_TIMER_INIT - DUTY_SCALE (@ontime))
+#define @self_START_TIME        (@timeout * TIME_SCALE)
+#define @self_DUTY_START_TIME   ((@timeout - @ontime) * TIME_SCALE)
 
 #define DUTY_MASK_50   0x1
 #define DUTY_MASK_25   0x3
@@ -71,50 +74,32 @@ extern __fastram__ U8 @self_timer;
 void @self_start (void);
 void @self_stop (void);
 
-extern inline bool @self_started_p (void)
-{
-	return @self_timer < DUTY_TIMER_DISABLED;
-}
-
 
 /**
  * Realtime update of a duty-cycled device.
  */
-
-extern inline void @self_service_slow (void)
+extern inline void @self_service (void)
 {
-	if (unlikely (@self_started_p ()))
+	if (unlikely (@self_timer > 0))
 	{
 		@self_timer--;
-		if (@self_timer == 0)
+		if (@timeout > 0 && @self_timer == 0)
 		{
-			@self_timer = DUTY_TIMER_DISABLED;
-			if (@timeout > 0)
+			sol_disable (@sol);
+		}
+		else if (@self_timer <= @self_DUTY_START_TIME)
+		{
+			if (unlikely (((U8)@self_timer & @duty_mask) == 0))
+			{
+				sol_enable (@sol);
+			}
+			else
 			{
 				sol_disable (@sol);
 			}
 		}
 	}
 }
-
-extern inline void @self_service_fast (void)
-{
-	/* When the timer is within the duty cycle interval,
-	we need to toggle the solenoid state; otherwise it is left
-	alone (on). */
-	if (unlikely (@self_timer <= @self_DUTY_TIMER_DUTY))
-	{
-		if (((U8)get_sys_time () & @duty_mask) == @duty_mask)
-		{
-			sol_enable (@sol);
-		}
-		else
-		{
-			sol_disable (@sol);
-		}
-	}
-}
-
 
 @@
 @@file @self.c
@@ -124,7 +109,7 @@ extern inline void @self_service_fast (void)
 #include "@self.h"
 
 /** The number of cycles for which the solenoid is kept on. */
-__fastram__ U8 @self_timer;
+__fastram__ U16 @self_timer;
 
 
 /**
@@ -133,24 +118,10 @@ __fastram__ U8 @self_timer;
 void @self_start (void)
 {
 	disable_interrupts ();
-	@self_timer = @self_DUTY_TIMER_INIT;
+	@self_timer = @self_START_TIME;
 	sol_enable (@sol);
 	enable_interrupts ();
 }
-
-
-#if 0
-/**
- * The advanced API for starting with a specific timeout.
- */
-void @self_start_for (task_ticks_t timeout)
-{
-	disable_interrupts ();
-	@self_timer = @timeout / (DUTY_SLOW_FREQ / 16);
-	sol_enable (@sol);
-	enable_interrupts ();
-}
-#endif
 
 
 /**
@@ -159,7 +130,7 @@ void @self_start_for (task_ticks_t timeout)
 void @self_stop (void)
 {
 	disable_interrupts ();
-	@self_timer = DUTY_TIMER_DISABLED;
+	@self_timer = 0;
 	sol_disable (@sol);
 	enable_interrupts ();
 }
@@ -167,7 +138,7 @@ void @self_stop (void)
 
 CALLSET_ENTRY (@self, init)
 {
-	@self_timer = DUTY_TIMER_DISABLED;
+	@self_timer = 0;
 }
 
 
