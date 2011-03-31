@@ -51,7 +51,6 @@ void fastlock_mode_deff (void)
 	 * something semi-meaningful to display */
 	U8 display_loop_time;
 	//U16 fno;
-	dmd_alloc_pair_clean ();
 
 	for (;;)
 	{
@@ -62,6 +61,7 @@ void fastlock_mode_deff (void)
 			if (display_loop_time < 1)
 				display_loop_time = 1;
 			
+			dmd_alloc_pair_clean ();
 	//		dmd_map_overlay ();
 			dmd_clean_page_low ();
 			font_render_string_center (&font_var5, 64, 5, "SHOOT FAST LOOPS");

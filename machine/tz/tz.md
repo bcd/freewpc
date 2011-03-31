@@ -268,6 +268,7 @@ X7: Clock Forward, motor, nosearch
 
 
 [templates]
+
 Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
 Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
 Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
@@ -280,19 +281,26 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-Bridge Open: driver(duty2),
-	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_66MS, duty_mask=DUTY_MASK_50
+#Bridge Open: driver(duty2),
+#	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_16MS, duty_mask=DUTY_MASK_50
+Bridge Open: driver(duty),
+	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_16MS, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS
 
-Shooter Div: driver(duty2),
-	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_4S, duty_mask=DUTY_MASK_50
+#Shooter Div: driver(duty2),
+#	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_2S, duty_mask=DUTY_MASK_50
+
+Shooter Div: driver(duty),
+	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS
 
 Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTOR,
-	ontime=TIME_200MS, duty_ontime=TIME_66MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+	ontime=TIME_66MS, duty_ontime=TIME_66MS, duty_offtime=TIME_16MS, timeout=TIME_3S
 
-Gumball Div: driver(duty2),
-	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_16MS, duty_mask=DUTY_MASK_12
+#Gumball Div: driver(duty2),
+#	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_16MS, duty_mask=DUTY_MASK_12
 
+Gumball Div: driver(duty),
+	sol=SOL_GUMBALL_DIV, timeout=TIME_3S, ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS
 ##########################################################################
 # Containers
 # These denote devices that can hold, count, and eject pinballs.
