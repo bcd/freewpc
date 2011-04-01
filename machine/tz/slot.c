@@ -74,26 +74,41 @@ void sslot_award_rotate (void)
 
 void sslot_mode_deff (void)
 {
-	for (;;)
+	U16 fno;
+	U8 i;
+	dmd_alloc_pair_clean ();
+	while (timed_mode_running_p (&sslot_mode))
 	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_var5, 64, 5, "SHOOT SLOT MACHINE");
-		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 27, sslot_award_names[sslot_award_index]);
-		sprintf ("%d", sslot_mode_timer);
-		font_render_string (&font_var5, 2, 2, sprintf_buffer);
-		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		for (fno = IMG_REELSTRIP_START; fno <= IMG_REELSTRIP_END; fno += 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+		
+			font_render_string_center (&font_var5, 64, 5, "SHOOT SLOT MACHINE");
+			sprintf_current_score ();
+			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_var5, 64, 27, sslot_award_names[sslot_award_index]);
+			sprintf ("%d", sslot_mode_timer);
+			font_render_string (&font_var5, 2, 2, sprintf_buffer);
+			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
 	}
+	deff_exit ();
+
 }
 
 void sslot_award_deff (void)
 {
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_var5, 64, 5, "SLOT MACHINE AWARD");
-		font_render_string_center (&font_var5, 64, 27, sslot_award_names[sslot_award_index_stored]);
+		font_render_string_center (&font_var5, 64, 20, sslot_award_names[sslot_award_index_stored]);
 		dmd_show_low ();
 		task_sleep_sec (2);
 		deff_exit ();

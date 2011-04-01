@@ -349,18 +349,37 @@ IMG_BTTZMELT_MIDDLE: !machine/tz/animation/bttzmelt/bttzmelt_020.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_039.pgm
 IMG_BTTZMELT_END: !machine/tz/animation/bttzmelt/bttzmelt_040.pgm
 
-IMG_BTTZWAVE_START: bttzwave/bttzwave_0001_001.pgm machine/tz/animation/bttzwave/bttzwave_0001_001.pgm
-bttzwave/bttzwave_0001_002.pgm machine/tz/animation/bttzwave/bttzwave_0001_002.pgm
-bttzwave/bttzwave_0001_003.pgm machine/tz/animation/bttzwave/bttzwave_0001_003.pgm
-bttzwave/bttzwave_0001_004.pgm machine/tz/animation/bttzwave/bttzwave_0001_004.pgm
-bttzwave/bttzwave_0001_005.pgm machine/tz/animation/bttzwave/bttzwave_0001_005.pgm
-bttzwave/bttzwave_0001_006.pgm machine/tz/animation/bttzwave/bttzwave_0001_006.pgm
-bttzwave/bttzwave_0001_007.pgm machine/tz/animation/bttzwave/bttzwave_0001_007.pgm
-bttzwave/bttzwave_0001_008.pgm machine/tz/animation/bttzwave/bttzwave_0001_008.pgm
-bttzwave/bttzwave_0001_009.pgm machine/tz/animation/bttzwave/bttzwave_0001_009.pgm
-bttzwave/bttzwave_0001_010.pgm machine/tz/animation/bttzwave/bttzwave_0001_010.pgm
-bttzwave/bttzwave_0001_011.pgm machine/tz/animation/bttzwave/bttzwave_0001_011.pgm
-bttzwave/bttzwave_0001_012.pgm machine/tz/animation/bttzwave/bttzwave_0001_012.pgm
-bttzwave/bttzwave_0001_013.pgm machine/tz/animation/bttzwave/bttzwave_0001_013.pgm
-bttzwave/bttzwave_0001_014.pgm machine/tz/animation/bttzwave/bttzwave_0001_014.pgm
-IMG_BTTZWAVE_END: bttzwave/bttzwave_0001_015.pgm machine/tz/animation/bttzwave/bttzwave_0001_015.pgm
+IMG_BTTZWAVE_START: machine/tz/animation/bttzwave/bttzwave_0001_001.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_002.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_003.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_004.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_005.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_006.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_007.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_008.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_009.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_010.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_011.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_012.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_013.pgm
+machine/tz/animation/bttzwave/bttzwave_0001_014.pgm
+IMG_BTTZWAVE_END: machine/tz/animation/bttzwave/bttzwave_0001_015.pgm 
+
+IMG_REELSTRIP_START: machine/tz/animation/reelstrip/reelstrip_0001.pgm
+machine/tz/animation/reelstrip/reelstrip_0002.pgm
+machine/tz/animation/reelstrip/reelstrip_0003.pgm
+machine/tz/animation/reelstrip/reelstrip_0004.pgm
+machine/tz/animation/reelstrip/reelstrip_0005.pgm
+machine/tz/animation/reelstrip/reelstrip_0006.pgm
+machine/tz/animation/reelstrip/reelstrip_0007.pgm
+machine/tz/animation/reelstrip/reelstrip_0008.pgm
+machine/tz/animation/reelstrip/reelstrip_0009.pgm
+machine/tz/animation/reelstrip/reelstrip_0010.pgm
+machine/tz/animation/reelstrip/reelstrip_0011.pgm
+machine/tz/animation/reelstrip/reelstrip_0012.pgm
+machine/tz/animation/reelstrip/reelstrip_0013.pgm
+machine/tz/animation/reelstrip/reelstrip_0014.pgm
+machine/tz/animation/reelstrip/reelstrip_0015.pgm
+machine/tz/animation/reelstrip/reelstrip_0016.pgm
+machine/tz/animation/reelstrip/reelstrip_0017.pgm
+IMG_REELSTRIP_END: machine/tz/animation/reelstrip/reelstrip_0018.pgm
