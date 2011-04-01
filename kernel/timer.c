@@ -52,6 +52,10 @@ extern bool mpf_active;
  */
 bool system_timer_pause (void)
 {
+	#ifdef CONFIG_MUTE_AND_PAUSE
+	if (task_find_gid (GID_MUTE_AND_PAUSE))
+		return TRUE;
+	#endif
 	if (!in_game || in_bonus || !valid_playfield)
 		return TRUE;
 
