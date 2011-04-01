@@ -229,10 +229,9 @@ CALLSET_ENTRY (autofire, clear_autofire)
 	 * during attract mode */
 	shooter_div_start ();
 	task_sleep_sec (2);
-	if (feature_config.fire_when_detected_empty == YES)
+	if (feature_config.fire_when_detected_empty == NO)
 	{
-		if (switch_poll_logical (SW_AUTOFIRE1)
-			|| switch_poll_logical (SW_AUTOFIRE2))
+		if (switch_poll_logical (SW_AUTOFIRE2))
 			sol_request (SOL_AUTOFIRE);
 	}
 	else
@@ -246,14 +245,7 @@ CALLSET_ENTRY (autofire, ball_search)
 	/* The shooter divertor/autofire are both kicked here
 	since there is a dependency between the two.  The main
 	ball search routine is told not to kick either one of them. */
-	if (switch_poll_logical (SW_AUTOFIRE2) || switch_poll_logical (SW_AUTOFIRE1))
-	{
-		callset_invoke (clear_autofire);
-	}
-	else if (feature_config.fire_when_detected_empty == NO)
-	{
-		callset_invoke (clear_autofire);
-	}
+	callset_invoke (clear_autofire);
 }
 
 CALLSET_ENTRY (autofire, start_ball)
