@@ -230,14 +230,14 @@ H6: Gumball Div, duty(SOL_DUTY_50), time(TIME_133MS)
 H7: Knocker, knocker
 H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
-L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_66MS)
-L2: Right Sling
-L3: Left Sling
-L4: Lower Jet
-L5: Left Jet
-L6: Right Jet
+L1: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_133MS)
+L2: Right Sling, duty(SOL_DUTY_100)
+L3: Left Sling, duty(SOL_DUTY_100)
+L4: Lower Jet, duty(SOL_DUTY_100)
+L5: Left Jet, duty(SOL_DUTY_100)
+L6: Right Jet, duty(SOL_DUTY_100)
 L7: Lock Release, duty(SOL_DUTY_75), time(TIME_133MS)
-L8: Shooter Div, nosearch
+L8: Shooter Div, nosearch, duty(SOL_DUTY_100)
 
 G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
@@ -273,26 +273,24 @@ Right Sling: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, of
 Left Jet: driver(jet), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
 Right Jet: driver(jet), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
 Lower Jet: driver(jet), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
-
-Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=3, offtime=20
-Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=3, offtime=20
+Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=3, offtime=16
+Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=3, offtime=16
 
 Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
 Bridge Open: driver(duty2),
-	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_66MS, duty_mask=DUTY_MASK_50
+	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_33MS, duty_mask=DUTY_MASK_25
 
 Shooter Div: driver(duty2),
-	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_100MS, duty_mask=DUTY_MASK_25
+	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_500MS, duty_mask=DUTY_MASK_12
 
-Ramp Div: driver(duty),
-	sol=SOL_RAMP_DIVERTOR,
-	ontime=TIME_200MS, duty_ontime=TIME_66MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+Ramp Div: driver(duty2),
+	sol=SOL_RAMP_DIVERTOR, timeout=TIME_3S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
 Gumball Div: driver(duty2),
-	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_16MS, duty_mask=DUTY_MASK_12
+	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
 ##########################################################################
 # Containers
