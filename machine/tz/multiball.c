@@ -101,7 +101,7 @@ bool multiball_ready (void)
 		|| global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
 		|| global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
 		|| multi_ball_play ()
-		|| flag_test (FLAG_POWERBALL_IN_PLAY))
+		|| global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY))
 		return FALSE;
 	/* Require one locked ball first multiball, 2 locks after */
 	else if ((mball_locks_made > 0) && (mballs_played == 0))

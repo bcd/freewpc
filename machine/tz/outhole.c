@@ -71,7 +71,9 @@ CALLSET_ENTRY (outhole, sw_outhole)
 		}
 		
 		/* Whoops, lost the powerball before getting it in the gumball */
-		if (!multi_ball_play () && flag_test (FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
+		if (!multi_ball_play () &&
+			 global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) &&
+			 !ballsave_test_active ())
 		{
 			sound_send (SND_NOOOOOOOO);
 			powerball_death = TRUE;

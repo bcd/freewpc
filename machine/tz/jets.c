@@ -207,7 +207,7 @@ CALLSET_ENTRY (jet, sw_jet)
 	if (!multi_ball_play () && mpf_timer > 0)
 		callset_invoke (sw_mpf_exit);
 	
-	if (flag_test(FLAG_POWERBALL_IN_PLAY))
+	if (global_flag_test(GLOBAL_FLAG_POWERBALL_IN_PLAY))
 		jets_scored += 2;
 	else
 		jets_scored++;

@@ -147,7 +147,7 @@ bool mpf_ready_p (void)
 {
 	return (mpf_enable_count > 0)
 		/* Don't allow if PB might be on playfield */
-		&& !flag_test (FLAG_POWERBALL_IN_PLAY)
+		&& !global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY)
 		&& !(pb_location & PB_MAYBE_IN_PLAY)
 		&& !global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING)
 		&& !global_flag_test (GLOBAL_FLAG_QUICK_MB_RUNNING)

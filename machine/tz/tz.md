@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # TZ machine description for FreeWPC
-# (C) Copyright 2006, 2007, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+# (C) Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
@@ -515,10 +515,9 @@ GC: BCD, 500.000.000
 [flags]
 PIANO_DOOR_LIT:
 SLOT_DOOR_LIT:
-POWERBALL_IN_PLAY:
 
 [globalflags]
-
+POWERBALL_IN_PLAY:
 SSSMB_RED_JACKPOT:
 SSSMB_ORANGE_JACKPOT:
 SSSMB_YELLOW_JACKPOT:

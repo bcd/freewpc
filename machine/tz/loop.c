@@ -60,7 +60,7 @@ static void award_loop (void)
 	loops++;
 	
 	callset_invoke (award_spiral_loop);
-	if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
+	if (global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 	{
 		powerball_loops++;
 

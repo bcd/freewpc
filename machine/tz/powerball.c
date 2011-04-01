@@ -152,7 +152,7 @@ void pb_set_location (U8 location, U8 depth)
 		pb_location = location;
 		if (pb_location & PB_HELD)
 		{
-			flag_off (FLAG_POWERBALL_IN_PLAY);
+			global_flag_off (GLOBAL_FLAG_POWERBALL_IN_PLAY);
 			pb_depth = depth;
 			pb_announce_needed = 0;
 			magnet_disable_catch (MAG_LEFT);
@@ -160,7 +160,7 @@ void pb_set_location (U8 location, U8 depth)
 		}
 		else if (pb_location & PB_IN_PLAY)
 		{
-			flag_on (FLAG_POWERBALL_IN_PLAY);
+			global_flag_on (GLOBAL_FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 1;
 			callset_invoke (powerball_present);
 			/* Turn the magnets on to help with detection */
@@ -172,7 +172,7 @@ void pb_set_location (U8 location, U8 depth)
 		}
 		else if (pb_location & PB_MAYBE_IN_PLAY)
 		{
-			flag_off (FLAG_POWERBALL_IN_PLAY);
+			global_flag_off (GLOBAL_FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 0;
 			callset_invoke (powerball_lost);
 			/* in the 'maybe' state, try to grab ball with
@@ -209,7 +209,7 @@ void pb_clear_location (U8 location)
 	if (pb_location == location)
 	{
 		pb_location = PB_MISSING;
-		flag_off (FLAG_POWERBALL_IN_PLAY);
+		global_flag_off (GLOBAL_FLAG_POWERBALL_IN_PLAY);
 		pb_announce_needed = 0;
 		callset_invoke (powerball_absent);
 		/* TODO : music is not being stopped correctly if Powerball
@@ -398,7 +398,7 @@ void pb_container_exit (U8 location)
 CALLSET_ENTRY (pb_detect, left_ball_grabbed, right_ball_grabbed)
 {
 	if (single_ball_play ())
-	{	
+	{
 		pb_clear_location (PB_IN_PLAY);
 		pb_clear_location (PB_MAYBE_IN_PLAY);
 	}
