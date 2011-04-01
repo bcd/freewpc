@@ -53,7 +53,6 @@ static inline void flash_and_exit_deff2 (U8 flash_count, task_ticks_t flash_dela
 
 void shoot_camera_deff (void)
 {
-	sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 	if (timed_mode_running_p (&hitch_mode))
 			sprintf ("SHOOT HITCH");
 		else

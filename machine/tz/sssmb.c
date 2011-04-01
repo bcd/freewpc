@@ -198,7 +198,10 @@ void sssmb_stop (void)
 	if (!global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 		return;	
 	if (mball_jackpot_uncollected == TRUE)
+	{
 		sound_send (SND_NOOOOOOOO);
+		callset_invoke (start_hurryup);
+	}
 
 	global_flag_off (GLOBAL_FLAG_SSSMB_RUNNING);
 	global_flag_off (GLOBAL_FLAG_SSSMB_RED_JACKPOT);

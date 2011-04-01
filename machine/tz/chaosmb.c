@@ -226,6 +226,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_start)
 		//ballsave_add_time (10);
 		/* Check and light jackpot lamp */
 		chaosmb_check_jackpot_lamps ();
+		tz_clock_start_forward ();
 	}
 }
 
@@ -244,6 +245,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_off);
 	deff_stop (DEFF_CHAOSMB_RUNNING);
 	music_refresh ();
+	tz_clock_reset ();
 }
 
 static inline void chaosmb_check_level (U8 level)
@@ -321,7 +323,8 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 	{
 		leff_start (LEFF_CLOCK_TARGET);
 		if (chaosmb_hits_to_relight == 0 && !timer_find_gid (GID_STOP_IT_DEBOUNCE))
-		{
+		{	
+			tz_clock_stop ();
 			sound_send (SND_STOP_IT);
 			timer_restart_free (GID_STOP_IT_DEBOUNCE, TIME_5S);
 		}
@@ -332,6 +335,7 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 				score (SC_250K);
 			else
 				score (SC_100K);
+			callset_invoke (reverse_clock_direction);
 		}
 		bounded_decrement (chaosmb_hits_to_relight, 0);
 	}

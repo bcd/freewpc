@@ -282,7 +282,7 @@ Clock Mech: driver(bivar),
 	reverse_sol=SOL_CLOCK_REVERSE
 
 Bridge Open: driver(duty2),
-	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25
+	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_33MS, duty_mask=DUTY_MASK_25
 
 Shooter Div: driver(duty2),
 	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_500MS, duty_mask=DUTY_MASK_12
@@ -655,7 +655,7 @@ Home and Dry: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 PB Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 Lucky Bounce: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
-Shoot Camera: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_RESTARTABLE+D_TIMEOUT+D_QUEUED
+Shoot Camera: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_RESTARTABLE
 Shoot Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT+D_QUEUED
 Button Masher: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 

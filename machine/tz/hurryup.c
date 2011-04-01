@@ -22,8 +22,6 @@
 
 #include <freewpc.h>
 
-#define DEFAULT_HURRYUP_TIME 15
-
 U8 hurryup_mode_timer;
 score_t hurryup_score;
 
@@ -38,7 +36,7 @@ struct timed_mode_ops hurryup_mode = {
 	.music = MUS_FASTLOCK_COUNTDOWN,
 	.deff_running = DEFF_HURRYUP_MODE,
 	.prio = PRI_GAME_MODE6,
-	.init_timer = DEFAULT_HURRYUP_TIME,
+	.init_timer = 15,
 	.timer = &hurryup_mode_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
@@ -99,7 +97,7 @@ void hurryup_awarded_deff (void)
 /* Task to countdown the Hurry up score */
 void hurryup_countdown_score_task (void)
 {
-	task_sleep_sec (2);
+	task_sleep_sec (3);
 	while (hurryup_mode_timer > 0)
 	{
 		if (score_compare (hurryup_score, score_table[SC_500K]))
@@ -186,7 +184,7 @@ CALLSET_ENTRY (hurryup, music_refresh)
 CALLSET_ENTRY (hurryup, start_hurryup)
 {
 	if (timed_mode_running_p (&hurryup_mode))
-		timed_mode_extend (&hurryup_mode, 10, DEFAULT_HURRYUP_TIME);
+		timed_mode_add (&hurryup_mode, 10);
 	else if (single_ball_play () && !mball_restart_active ())
 		timed_mode_begin (&hurryup_mode);
 }

@@ -6,6 +6,7 @@ Author: Sonny_Jim <sonny_jim@hotmail.com>
 Skill Shot
 ==========
 Launch the ball and try to land in the yellow zone for maximum points.
+Skill shot awarded becomes the minimum score for the next skill shot.
 
 Inlanes
 =======
@@ -51,8 +52,8 @@ Gumball
 Loading the gumball with a steel ball awards 5M, going up by 5M each time
 capped at 30M.
 
-Loading with the powerball scores another 20M and starts 'Super Skill Shot Multiball' with the piano
-jackpot and Skill Shot jackpot available simultaenously.
+Loading with the powerball scores another 20M and randomly starts 'Super Skill
+Shot' or 'Clock Chaos' 3 ball multiball, with the piano jackpot lit also.
 
 Camera
 ======
@@ -94,8 +95,9 @@ Multiball
 =========
 If no jackpot is scored and 2 balls drain, the player is offered a multiball
 restart.  This is collected by hitting the lock within 30 seconds of multiball
-ending.  Jackpots can be increased by hitting the camera, up to a maximum of
-50 Million.  Once collected, the jackpot is can be relit by hitting the lock.
+ending.  Jackpots can be increased by hitting the camera whilst the jackpot is
+lit, up to a maximum of 50 Million.  Once collected, the jackpot is can be 
+relit by hitting the lock.
 
 If 3 balls are in play when the jackpot is collected, 10M is added to the
 jackpot.  If the Powerball is used to collect the jackpot, the jackpot is
@@ -114,6 +116,7 @@ Slot Machine and Piano
 ======================
 Hit either when lit to award a Door panel.  If either are unlit when hit and
 you currently have less than 8 panels, both Slot and Piano will be lit.
+(phew, that nearly made sense)
 
 Door Panels
 ===========
@@ -202,9 +205,22 @@ Door Panel: Super Slot
 - 10 Million
 - 5 Million
 
+Hurry Up
+========
+If you 'fail' certain modes, you get 15 seconds to hit the Power Payoff to
+collect 10M, which counts down to 250K.
+
+Failure is defined as:
+- Failing to hit the clock more than 2 times in Clock Millions
+- Not collecting a jackpot during Fastlock, Clock Chaos or Super Skill MB
+- Failing to score more than 10M during greed
+- Draining out of the mini playfield
+- Failing to collect Super Slot award
+- Failing to shoot any loops during Spiral
+
 Video Mode: Snake
 =================
-Shoot the Dead End when lit to light Snake video mode. Now shoot the lock to
+Collect a  Dead End to light Snake video mode. Now shoot the lock to
 start.  Flipper buttons steer snake left and right, eating food adds to tail length,
 time remaining and awards the following scores:
 

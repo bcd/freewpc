@@ -145,12 +145,9 @@ void mpf_ballsearch_task (void)
 
 void mpf_mode_expire (void)
 {
-	mpf_active = FALSE;
-	leff_stop (LEFF_MPF_ACTIVE);
 	/* Start a task to pulse the magnets
 	 * if a ball gets stuck */
 	task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);	
-	event_can_follow (mpf_expire, mpf_exit, TIME_10S);
 }
 
 void mpf_mode_init (void)
@@ -160,6 +157,7 @@ void mpf_mode_init (void)
 void mpf_mode_exit (void)
 {
 	task_kill_gid (GID_MPF_COUNTDOWN);
+	task_kill_gid (GID_MPF_COUNTDOWN_SCORE_TASK);
 	task_kill_gid (GID_MPF_BALLSEARCH);
 	task_kill_gid (GID_MPF_BUTTON_MASHER);
 	mpf_active = FALSE;
@@ -262,24 +260,10 @@ CALLSET_ENTRY (mpf, mpf_collected)
 	score_multiple(SC_1M, (mpf_award * mpf_level));
 	if (mpf_ball_count == 0)
 	{
-		mpf_active = FALSE;
 		timed_mode_end (&mpf_mode);
 	}
 	leff_start (LEFF_FLASHER_HAPPY);
 	deff_start (DEFF_MPF_AWARD);
-}
-
-static void pulse_mpf_magnets_task (void)
-{
-	U8 i = 0;
-	while (mpf_ball_count > 0 && i < 10)
-	{
-		sol_request (SOL_MPF_RIGHT_MAGNET);
-		task_sleep (TIME_200MS);
-		sol_request (SOL_MPF_LEFT_MAGNET);
-		task_sleep (TIME_200MS);
-	}
-	task_exit ();
 }
 
 CALLSET_ENTRY (mpf, sw_mpf_enter)
@@ -296,8 +280,8 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 		bounded_increment (mpf_ball_count, feature_config.installed_balls);
 		task_recreate_gid (GID_MPF_COUNTDOWN_SCORE_TASK, mpf_countdown_score_task);
 		/* Add on 10 seconds for each extra ball */
-		if (mpf_ball_count > 1)
-			mpf_timer += 10;
+//		if (mpf_ball_count > 1)
+//			mpf_timer += 10;
 		bounded_increment (mpf_level, 10);
 		bounded_decrement (mpf_enable_count, 0);
 		if ((mpf_ball_count = 1))
@@ -317,7 +301,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	{
 		sound_send (SND_WITH_THE_DEVIL);
 		score (SC_5M);
-		task_create_gid (GID_PULSE_MPF_MAGNETS, pulse_mpf_magnets_task);
+		task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);	
 	}
 }
 
@@ -328,19 +312,17 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	task_kill_gid (GID_MPF_COUNTDOWN);
 	task_kill_gid (GID_MPF_BUTTON_MASHER);
 	bounded_decrement (mpf_ball_count, 0);
+	
 	if (mpf_ball_count == 0)
 	{
-		mpf_active = FALSE;
 		if (single_ball_play ())
 			leff_start (LEFF_FLASH_GI);
-		task_kill_gid (GID_MPF_COUNTDOWN_SCORE_TASK);
 		timed_mode_end (&mpf_mode);
+		callset_invoke (start_hurryup);
 		score (SC_5M);
 	}
 	flipper_enable ();
 	sound_send (SND_HAHA_POWERFIELD_EXIT);
-	if (event_did_follow (mpf_expire, mpf_exit))
-		callset_invoke (start_hurryup);
 }
 
 CALLSET_ENTRY (mpf, sw_mpf_left)
@@ -417,7 +399,7 @@ static void check_button_masher (void)
 {
 	if (masher_buttons_pressed > 20)
 	{
-		mpf_active = FALSE;
+		timed_mode_end (&mpf_mode);
 		deff_start (DEFF_BUTTON_MASHER);
 		sound_send (SND_HAHA_POWERFIELD_EXIT);
 	}

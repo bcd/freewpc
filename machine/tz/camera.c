@@ -281,6 +281,7 @@ CALLSET_ENTRY (camera, right_ball_grabbed)
 {
 	if (!multi_ball_play () && can_award_camera ())
 	{
+		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 		deff_start (DEFF_SHOOT_CAMERA);
 	}
 }
