@@ -338,22 +338,24 @@ CALLSET_ENTRY (mball, lamp_update)
 		lamp_tristate_flash (LM_LOCK_ARROW);
 	else	
 		lamp_tristate_off (LM_LOCK_ARROW);
-
-	/* Flash the appropiate lamp when multiball is ready */
-	if (multiball_ready ())
-		lamp_tristate_flash (LM_MULTIBALL);
-	else if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
-		lamp_tristate_off (LM_MULTIBALL);
 	
 	if (multi_ball_play ())
 	{
-		/* Turn off during multiball */
-		lamp_tristate_off (LM_LOCK1);
-		lamp_tristate_off (LM_LOCK2);
-		return;
+		if (multiball_ready ())
+			lamp_tristate_flash (LM_MULTIBALL);
+		/* Flash the Piano Jackpot lamp when MB Jackpot is lit */
+		if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
+			lamp_tristate_flash (LM_PIANO_JACKPOT);
+		else
+		{
+			lamp_tristate_off (LM_PIANO_JACKPOT);
+		}
+		/* Turn off lock lamps during multiball */
+	//	lamp_tristate_off (LM_LOCK1);
+	//	lamp_tristate_off (LM_LOCK2);
 	}
 	/* Turn on and flash door lock lamps during game situations */
-	if (mball_locks_made == 0 && mball_locks_lit == 0)
+	else if (mball_locks_made == 0 && mball_locks_lit == 0)
 	{
 		lamp_tristate_off (LM_LOCK1);
 		lamp_tristate_off (LM_LOCK2);
@@ -384,13 +386,6 @@ CALLSET_ENTRY (mball, lamp_update)
 		lamp_tristate_on (LM_LOCK2);
 	}
 	
-	/* Flash the Piano Jackpot lamp when MB Jackpot is lit */
-	if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT)&& multi_ball_play ())
-		lamp_tristate_flash (LM_PIANO_JACKPOT);
-	else
-	{
-		lamp_tristate_off (LM_PIANO_JACKPOT);
-	}
 }
 
 void mball_light_lock (void)
@@ -605,11 +600,10 @@ CALLSET_ENTRY (mball, single_ball_play)
 	callset_invoke (mball_stop);
 }
 
-
 CALLSET_ENTRY (mball, dev_lock_enter)
 {
 	/* Tell fastlock that the lock was entered */
-	callset_invoke (fastlock_lock_entered);
+	fastlock_lock_entered ();
 
 	if (single_ball_play () && flag_test (FLAG_SNAKE_READY))
 		callset_invoke (snake_start);
