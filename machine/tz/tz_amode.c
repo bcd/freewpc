@@ -125,6 +125,23 @@ static inline void draw_bttzwave (void)
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
 	}
+	
+	for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
+	
+	for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
+
 }
 
 static inline void draw_bttzmelt (void)
