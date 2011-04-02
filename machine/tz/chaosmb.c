@@ -209,6 +209,7 @@ static void chaosmb_score_jackpot (void)
 	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 	leff_start (LEFF_FLASH_GI2);
 	deff_start (DEFF_CHAOS_JACKPOT);
+	tz_clock_start_forward ();
 }
 
 CALLSET_ENTRY (chaosmb, chaosmb_start)
@@ -226,6 +227,8 @@ CALLSET_ENTRY (chaosmb, chaosmb_start)
 		//ballsave_add_time (10);
 		/* Check and light jackpot lamp */
 		chaosmb_check_jackpot_lamps ();
+		/* TODO vary speed based on jackpot? */
+		callset_invoke (set_clock_fast);
 		tz_clock_start_forward ();
 	}
 }
@@ -335,7 +338,9 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 				score (SC_250K);
 			else
 				score (SC_100K);
-			callset_invoke (reverse_clock_direction);
+			/* The clock will be stopped, don't try to move it */
+			if (chaosmb_hits_to_relight != 0)
+				callset_invoke (reverse_clock_direction);
 		}
 		bounded_decrement (chaosmb_hits_to_relight, 0);
 	}

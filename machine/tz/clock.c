@@ -18,6 +18,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* Full rotation of the clock takes:
+ * 	
+ * 	Duty
+ * 	100% = ~12 seconds
+ * 	50% = ~25 seconds
+ * 	25% = ~55 seconds
+ */
+
 #include <freewpc.h>
 #include <clock_mech.h>
 #include <diag.h>
@@ -194,26 +202,25 @@ void tz_clock_switch_rtt (void)
 			{
 				/* When the minute hand is at :30, the hour switches
 				tell us exactly what the hour is. */
-				clock_hour = tz_clock_opto_to_hour[clock_sw >> 4];
+				//clock_hour = tz_clock_opto_to_hour[clock_sw >> 4];
 			}
-			else if (clock_minute_sw == CLK_SW_MIN00 &&
-				CLK_SW_MIN (clock_last_sw) == CLK_SW_MIN45 &&
+			if (clock_minute_sw == CLK_SW_MIN00 &&
+			//	CLK_SW_MIN (clock_last_sw) == CLK_SW_MIN45 &&
 				clock_mode == CLOCK_RUNNING_FORWARD)
 			{
 				clock_hour++;
 				if (clock_hour == 12)
 					clock_hour = 0;
 			}
+			else if (clock_minute_sw == CLK_SW_MIN00
+			&& clock_mode == CLOCK_RUNNING_BACKWARD)
+			{	
+				if (clock_hour)
+					clock_hour--;
+				else
+					clock_hour = 11;
+			}
 		}
-		else if ((CLK_SW_MIN (clock_last_sw) == CLK_SW_MIN45
-			&& clock_mode == CLOCK_RUNNING_BACKWARD))
-		{
-			if (clock_hour)
-				clock_hour--;
-			else
-				clock_hour = 11;
-		}
-
 		/* If searching for a specific target, see if we're there */
 		if ((clock_mode == CLOCK_FIND))
 		{
@@ -231,7 +238,8 @@ void tz_clock_switch_rtt (void)
 			}
 			/* Otherwise, the clock keeps running as it was */
 			/* BUG workaround: Goes very slowly backwards when it's miles away from home */
-			else if (clock_mech_get_speed () < BIVAR_DUTY_25)
+			if (clock_mech_get_speed () < BIVAR_DUTY_25
+				&& (clock_hour != 11 || clock_hour != 0))
 			{
 				clock_mech_set_speed (BIVAR_DUTY_100);
 			}
@@ -279,7 +287,47 @@ void tz_clock_free (task_gid_t owner)
 		tz_clock_clear_owner ();
 }
 
-void tz_clock_request_time (U8 hours, U8 minutes)
+/** 
+ * Pause the clock and restart again
+ */
+void clock_pause_monitor_task (void)
+{
+	U8 clock_mode_stored;
+	U8 mech_speed_stored;
+	for (;;)
+	{
+		if (kickout_locks > 0 
+			&& clock_mode == (CLOCK_RUNNING_FORWARD || clock_mode == CLOCK_RUNNING_BACKWARD))
+		{
+			clock_mode_stored = clock_mode;
+			mech_speed_stored = clock_mech_get_speed ();
+			tz_clock_stop ();
+			
+			while (kickout_locks > 0)
+				task_sleep (TIME_200MS);
+			
+			clock_mech_set_speed(mech_speed_stored);
+			if (clock_mode_stored == CLOCK_RUNNING_FORWARD)
+				clock_mech_start_forward ();
+			else
+				clock_mech_start_reverse ();
+		}
+		task_sleep (TIME_200MS);
+	}
+}
+
+inline void start_clock_pause_monitor (void)
+{
+	if (!task_find_gid (GID_CLOCK_PAUSE))
+		task_create_gid (GID_CLOCK_PAUSE, clock_pause_monitor_task);
+}
+
+inline void stop_clock_pause_monitor (void)
+{
+	task_kill_gid (GID_CLOCK_PAUSE);
+}
+
+void tz_clock_show_time (U8 hours, U8 minutes)
 {
 	if (hours > 12)
 		hours = 12;
@@ -304,6 +352,7 @@ void tz_clock_start_forward (void)
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 	{
 		global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
+		start_clock_pause_monitor ();
 		clock_mech_start_forward ();
 		clock_mode = CLOCK_RUNNING_FORWARD;
 	}
@@ -315,6 +364,7 @@ void tz_clock_start_backward (void)
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 	{
 		global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
+		start_clock_pause_monitor ();
 		clock_mech_start_reverse ();
 		clock_mode = CLOCK_RUNNING_BACKWARD;
 	}
@@ -347,18 +397,19 @@ void tz_clock_reset (void)
 	}
 	else
 	{
+		stop_clock_pause_monitor ();
 		dbprintf ("Clock resetting to home.\n");
 		/* See where the clock is and start it if it's not already home. */
 		clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
 		if (clock_sw != clock_find_target && !global_flag_test (GLOBAL_FLAG_CLOCK_HOME))
 		{
-			clock_mech_set_speed (BIVAR_DUTY_100);
 			if (clock_hour <= 6)
 				clock_mech_start_reverse ();
 			else
 				clock_mech_start_forward ();
 			timer_start_free (GID_CLOCK_FINDING, TIME_15S);
 			clock_mode = CLOCK_FIND;
+			clock_mech_set_speed (BIVAR_DUTY_100);
 		}
 	}
 }
@@ -495,6 +546,7 @@ CALLSET_ENTRY (tz_clock, diagnostic_check)
  */
 CALLSET_ENTRY (tz_clock, amode_stop, test_start)
 {
+	stop_clock_pause_monitor ();
 	tz_clock_stop ();
 }
 
@@ -505,6 +557,6 @@ CALLSET_ENTRY (tz_clock, amode_stop, test_start)
  */
 CALLSET_ENTRY (tz_clock, start_ball, end_ball)
 {
+	stop_clock_pause_monitor ();
 	tz_clock_reset ();
 }
-

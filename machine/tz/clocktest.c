@@ -39,8 +39,12 @@ void tz_clock_test_update (void)
 	{
 		switch (clock_test_setting)
 		{
-			case -2:
+			case -3:
 				clock_mech_set_speed (BIVAR_DUTY_100);
+				tz_clock_start_backward ();
+				break;
+			case -2:
+				clock_mech_set_speed (BIVAR_DUTY_50);
 				tz_clock_start_backward ();
 				break;
 			case -1:
@@ -55,6 +59,10 @@ void tz_clock_test_update (void)
 				tz_clock_start_forward ();
 				break;
 			case 2:
+				clock_mech_set_speed (BIVAR_DUTY_50);
+				tz_clock_start_forward ();
+				break;
+			case 3:
 				clock_mech_set_speed (BIVAR_DUTY_100);
 				tz_clock_start_forward ();
 				break;
@@ -86,11 +94,13 @@ void tz_clock_test_draw (void)
 	font_render_string_center (&font_mono5, 64, 2, "CLOCK MECH. TEST");
 	switch (clock_test_setting)
 	{
-		case -2: sprintf ("REV. FAST"); break;
+		case -3: sprintf ("REV. FAST"); break;
+		case -2: sprintf ("REV. MID"); break;
 		case -1: sprintf ("REV. SLOW"); break;
 		case 0: sprintf ("NO SPEED"); break;
 		case 1: sprintf ("FWD. SLOW"); break;
-		case 2: sprintf ("FWD. FAST"); break;
+		case 2: sprintf ("FWD. MID"); break;
+		case 3: sprintf ("FWD. FAST"); break;
 	}
 	font_render_string_center (&font_mono5, 32, 11, sprintf_buffer);
 
@@ -118,7 +128,7 @@ void tz_clock_test_draw (void)
 
 void tz_clock_test_down (void)
 {
-	if (clock_test_setting > -2)
+	if (clock_test_setting > -3)
 		clock_test_setting--;
 	tz_clock_test_update ();
 }
@@ -126,7 +136,7 @@ void tz_clock_test_down (void)
 
 void tz_clock_test_up (void)
 {
-	if (clock_test_setting < 2)
+	if (clock_test_setting < 3)
 		clock_test_setting++;
 	tz_clock_test_update ();
 }
@@ -141,7 +151,8 @@ void tz_clock_test_enter (void)
 
 void tz_clock_test_start (void)
 {
-	tz_clock_reset ();
+	tz_clock_show_time (2, 28);
+	//tz_clock_reset ();
 }
 
 void tz_clock_test_right (void)

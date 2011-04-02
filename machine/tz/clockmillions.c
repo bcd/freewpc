@@ -129,7 +129,7 @@ void clock_millions_hit_deff (void)
 	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
 	sprintf_score (clock_mode_score);
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
-	
+	dmd_show_low ();	
 	task_sleep_sec (2);
 	deff_exit ();
 }
