@@ -34,8 +34,16 @@ void shoot_hitch_deff (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_sched_transition (&trans_scroll_left);	
-	font_render_string_center (&font_mono5, 64, 6, "SHOOT HITCHHIKER");
-	font_render_string_center (&font_mono5, 64, 22, "TO UNLOCK POWER");
+	if (hurryup_active ())
+	{
+		font_render_string_center (&font_fixed10, 64, 6, "SHOOT");
+		font_render_string_center (&font_fixed10, 64, 22, "POWER PAYOFF");
+	}
+	else
+	{
+		font_render_string_center (&font_mono5, 64, 6, "SHOOT HITCHHIKER");
+		font_render_string_center (&font_mono5, 64, 22, "TO UNLOCK POWER");
+	}
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();
@@ -66,7 +74,8 @@ void sw_right_ramp_enter_task (void)
 			award_unlit_shot (SW_RIGHT_RAMP);
 
 			 /* Show an animation hint if not enabled for mpf */
-			if (unlit_right_ramps == 3 && !global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
+			if ((unlit_right_ramps == 3  || hurryup_active ())
+				&& !global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 				deff_start (DEFF_SHOOT_HITCH);
 			else if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING)
 					&& global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))

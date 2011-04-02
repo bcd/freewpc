@@ -282,7 +282,7 @@ Clock Mech: driver(bivar),
 	reverse_sol=SOL_CLOCK_REVERSE
 
 Bridge Open: driver(duty2),
-	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_33MS, duty_mask=DUTY_MASK_25
+	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
 Shooter Div: driver(duty2),
 	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_500MS, duty_mask=DUTY_MASK_12
@@ -532,6 +532,8 @@ GC: BCD, 500.000.000
 PIANO_DOOR_LIT:
 SLOT_DOOR_LIT:
 SNAKE_READY:
+# Awarded for doing 88mph during fastlock
+MARTY_BONUS:
 
 # These are for non-player specific stuff
 [globalflags]
@@ -592,13 +594,13 @@ Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT
 Hitch Mode: page(MACHINE2_PAGE), runner, PRI_GAME_MODE3
 
 Clock Millions Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE3
-Clock Millions Hit: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_RESTARTABLE
+# D_PAUSE so it will stop the clock
+Clock Millions Hit: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_RESTARTABLE+D_PAUSE
 Clock Millions Explode: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_RESTARTABLE
 Clock Millions Mode Total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE
 
-MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE8
+MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT+D_PAUSE
 MPF Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
-
 
 Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE2
 BG Flash: page(MACHINE_PAGE), PRI_GAME_MODE4
@@ -634,8 +636,6 @@ MB Ten Million Added: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_RESTAR
 Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 Jackpot: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED
 Special: page(MACHINE_PAGE), PRI_SPECIAL
-
-
 
 ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
@@ -683,7 +683,6 @@ Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
 Explosion: page(MACHINE_PAGE), PRI_EGG1
 
 Paused: page(MACHINE3_PAGE), PRI_STATUS, D_PAUSE+D_QUEUED
-
 
 Hurryup Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 Hurryup awarded: page(MACHINE3_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED

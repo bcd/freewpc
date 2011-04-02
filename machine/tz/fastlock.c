@@ -44,34 +44,28 @@ struct timed_mode_ops fastlock_mode = {
 	.grace_timer = 3,
 	.pause = system_timer_pause,
 };
-	
+
 void fastlock_mode_deff (void)
 {
 	/* Fudge loop time in ms into
 	 * something semi-meaningful to display */
-	U8 display_loop_time;
 	//U16 fno;
 
 	for (;;)
 	{
 		//for (fno = IMG_NIGHTDRIVER_START; fno <= IMG_NIGHTDRIVER_END; fno += 2)
 		//{
-			display_loop_time = 100;
-			display_loop_time -= loop_time;
-			if (display_loop_time < 1)
-				display_loop_time = 1;
-			
 			dmd_alloc_pair_clean ();
 	//		dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_var5, 64, 5, "SHOOT FAST LOOPS");
+			font_render_string_center (&font_var5, 64, 5, "FASTLOOPS BUILD JACKPOT");
 			sprintf("%d MILLION", fastlock_award);
 			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-			sprintf ("LAST LOOP WAS %dMPH", display_loop_time);
-			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+	//		sprintf ("LAST LOOP WAS %dMPH", display_loop_time);
+			font_render_string_center (&font_var5, 64, 27, "SHOOT LOCK TO COLLECT");
 			sprintf ("%d", fastlock_mode_timer);
-			font_render_string (&font_var5, 2, 2, sprintf_buffer);
-			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			font_render_string (&font_var5, 2, 16, sprintf_buffer);
+			font_render_string_right (&font_var5, 126, 16, sprintf_buffer);
 	//		dmd_text_outline ();
 			
 	//		dmd_alloc_pair ();
@@ -79,7 +73,7 @@ void fastlock_mode_deff (void)
 	//		dmd_overlay_outline ();
 			//dmd_show2 ();
 			dmd_show_low ();
-			task_sleep (TIME_33MS);
+			task_sleep (TIME_66MS);
 			//}
 	}
 }
@@ -121,17 +115,21 @@ bool fastlock_running (void)
 		return FALSE;
 }
 
-CALLSET_ENTRY (fastlock, fastlock_lock_entered)
+void fastlock_award_task (void)
+{
+	fastlock_award_stored = fastlock_award;
+	deff_start_sync (DEFF_FASTLOCK_AWARD);
+	score_multiple (SC_1M, fastlock_award);
+	fastlocks_collected++;
+	fastlock_award = (fastlocks_collected * 5);
+	timed_mode_add (&fastlock_mode, 20);
+	task_exit ();
+}
+
+void fastlock_lock_entered (void)
 {
 	if (fastlock_running ())
-	{
-		deff_start (DEFF_FASTLOCK_AWARD);
-		fastlock_award_stored = fastlock_award;
-		score_multiple (SC_1M, fastlock_award);
-		fastlocks_collected++;
-		fastlock_award = (fastlocks_collected * 5);
-		fastlock_mode_timer =+ 10;
-	}
+		task_create_anon (fastlock_award_task);
 }
 
 void fastlock_loop_completed (void)

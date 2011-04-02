@@ -1,3 +1,6 @@
+Grand champion gets to enter a PIN which is stored in the machine.  This means
+they can enter in their GC flipcode
+
 Jackpot Leff
 
 Use system time for some features

@@ -188,7 +188,8 @@ void jets_hit_deff (void)
 			break;
 	}
 
-	for (fno = img_start; fno <= img_end; fno += 2)
+	dmd_alloc_pair_clean ();
+	for (fno = img_start; fno < img_end; fno += 2)
 	{
 		U8 x = random_scaled (4);
 		U8 y = random_scaled (4);
@@ -207,7 +208,7 @@ void jets_hit_deff (void)
 		task_sleep (TIME_33MS);
 	}
 	/* Redraw it so the 'HITS' text is centred */
-	dmd_alloc_low_clean ();
+	dmd_alloc_pair_clean ();
 	psprintf ("1 HIT", "%d HITS", jets_scored);
 	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
@@ -222,7 +223,7 @@ void jets_level_up_deff (void)
 	dmd_alloc_pair_clean ();
 	U16 fno;
 	sound_send (SND_GLASS_BREAKS);
-	for (fno = IMG_EXPLODE_START; fno <= IMG_EXPLODE_END; fno += 2)
+	for (fno = IMG_EXPLODE_START; fno < IMG_EXPLODE_END; fno += 2)
 	{
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
@@ -243,6 +244,14 @@ void jets_level_up_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
+	dmd_alloc_pair_clean ();
+	sprintf ("TOWN SQUARE LEVEL %d", jets_bonus_level);
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+	/* We don't use scoreget as it's likely another score
+	 * has been awarded */
+	sprintf("%d MILLION", jetscore);
+	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+	dmd_show_low ();	
 	task_sleep_sec (1);
 	deff_exit ();
 }

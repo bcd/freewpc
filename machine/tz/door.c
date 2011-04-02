@@ -443,8 +443,8 @@ CALLSET_ENTRY(door, sw_piano)
 	{
 		flag_off (FLAG_PIANO_DOOR_LIT);
 		flag_on (FLAG_SLOT_DOOR_LIT);
-		//callset_invoke (award_door_panel);
-		task_create_anon (award_door_panel_task);
+		callset_invoke (award_door_panel);
+		//task_create_anon (award_door_panel_task);
 	}
 	else
 	{

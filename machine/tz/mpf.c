@@ -148,6 +148,8 @@ void mpf_mode_expire (void)
 	/* Start a task to pulse the magnets
 	 * if a ball gets stuck */
 	task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);	
+	/* Start the hurryup */
+	callset_invoke (start_hurryup);
 }
 
 void mpf_mode_init (void)
@@ -318,7 +320,6 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 		if (single_ball_play ())
 			leff_start (LEFF_FLASH_GI);
 		timed_mode_end (&mpf_mode);
-		callset_invoke (start_hurryup);
 		score (SC_5M);
 	}
 	flipper_enable ();

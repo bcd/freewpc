@@ -44,26 +44,36 @@ struct timed_mode_ops hurryup_mode = {
 
 void hurryup_mode_deff (void)
 {
-//	while (hurryup_running ())
 	bool on = TRUE;
 	for (;;)
 	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, 64, 8, "HURRY UP");
-		sprintf_score (hurryup_score);
-		font_render_string_center (&font_fixed6, 64, 19, sprintf_buffer);
-		if (on)
+
+		U16 fno;
+		dmd_alloc_pair_clean ();
+		for (fno = IMG_BOLT_TESLA_START; fno < IMG_BOLT_TESLA_END; fno += 2)
 		{
-			font_render_string_center (&font_var5, 64, 28, "SHOOT POWER PAYOFF");
-			on = FALSE;
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			font_render_string_center (&font_fixed10, 64, 8, "HURRY UP");
+			sprintf_score (hurryup_score);
+			font_render_string_center (&font_fixed6, 64, 19, sprintf_buffer);
+			if (on)
+			{
+				font_render_string_center (&font_var5, 64, 28, "SHOOT POWER PAYOFF");
+				on = FALSE;
+			}
+			else
+				on = TRUE;	
+			sprintf ("%d", hurryup_mode_timer);
+			font_render_string (&font_var5, 2, 2, sprintf_buffer);
+			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_200MS);
 		}
-		else
-			on = TRUE;	
-		sprintf ("%d", hurryup_mode_timer);
-		font_render_string (&font_var5, 2, 2, sprintf_buffer);
-		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
 	}
 }
 
@@ -121,6 +131,11 @@ void hurryup_mode_init (void)
 	task_create_gid (GID_HURRYUP_SCORE_COUNTDOWN, hurryup_countdown_score_task);
 }
 
+void hurryup_mode_expire (void)
+{
+	sound_send (SND_OH_NO);
+}
+
 void hurryup_mode_exit (void)
 {
 	lamp_tristate_off (LM_POWER_PAYOFF);
@@ -166,7 +181,7 @@ CALLSET_ENTRY (hurryup, lamp_update)
 		lamp_tristate_flash (LM_POWER_PAYOFF);
 }
 
-CALLSET_ENTRY (hurryup, end_ball, mball_start, stop_hurryup)
+CALLSET_ENTRY (hurryup, end_ball, mball_start, stop_hurryup, award_door_panel)
 {
 	timed_mode_end (&hurryup_mode);
 }

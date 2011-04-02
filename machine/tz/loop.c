@@ -32,8 +32,19 @@ score_t loop_score;
 extern __local__ U8 gumball_enable_count;
 extern __local__ U8 thing_flips_enable_count;
 extern U8 balls_needed_to_load;
-
+extern U8 loop_time;
 extern void thing_flips (void);
+
+U8 display_loop_time;
+ 
+static inline void calc_display_loop_time (void)
+{
+	display_loop_time = 100;
+	display_loop_time -= loop_time;
+	if (display_loop_time < 1)
+		display_loop_time = 1;
+}
+
 
 /* Functions to stop leffs/deffs during certain game situations */
 static inline bool can_show_loop_leff (void)
@@ -195,7 +206,13 @@ void loop_deff (void)
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 
-		psprintf ("1 LOOP", "%d LOOPS", loops);
+		if (fastlock_running ())
+		{
+			calc_display_loop_time ();
+			sprintf ("%d MPH", display_loop_time);
+		}
+		else
+			psprintf ("1 LOOP", "%d LOOPS", loops);
 		if ( x > 3 )
 		{
 			font_render_string_center (&font_fixed6, 64, 6 + x, sprintf_buffer);

@@ -116,6 +116,7 @@ __machine2__ void tz_flipcode_default (void);
 /* fastlock.c */
 __machine__ void fastlock_loop_completed (void);
 __machine__ bool fastlock_running (void);
+__machine__ void fastlock_lock_entered (void);
 /* powerball.c */
 #define PB_IN_GUMBALL 0x4
 #define PB_MAYBE_IN_PLAY 0x10
