@@ -173,7 +173,7 @@ task_pid_t timer_start (task_gid_t gid, U16 ticks, task_function_t fn)
 }
 
 
-CALLSET_ENTRY (timer, init, end_ball)
+CALLSET_ENTRY (timer, init, start_ball, end_ball)
 {
 	timer_lock_count = 0;
 }
