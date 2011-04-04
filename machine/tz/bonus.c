@@ -235,7 +235,7 @@ inline bool check_if_last_ball_of_multiplayer_game (void)
 		return FALSE;
 }
 
-static void draw_taunts (void)
+void draw_taunts (void)
 {
 	/* 
 	 * Taunts.....
@@ -305,6 +305,28 @@ static void draw_taunts (void)
 	}	
 }
 
+void calc_and_draw_bonus (U8 award_value, U8 amount)
+{
+	dmd_alloc_low_clean ();
+	score_zero (bonus_scored);
+	score_add (bonus_scored, score_table[award_value]);
+	score_mul (bonus_scored, amount); 
+	score_add (total_bonus, bonus_scored);
+	sprintf_score (bonus_scored);
+	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+	sprintf ("%d X %10b", amount, score_table[award_value]);
+	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+}
+
+void trans_and_show (void)
+{
+	bonus_sched_transition ();
+	dmd_show_low ();
+	sound_send (SND_GREED_MODE_BOOM);
+	bonus_pause ();
+}
+
+
 void bonus_deff (void)
 {
 	draw_taunts ();
@@ -324,7 +346,7 @@ void bonus_deff (void)
 	
 	if (door_panels_started)
 	{
-		dmd_alloc_low_clean ();
+	/*	dmd_alloc_low_clean ();
 		score_zero (bonus_scored);
 		score_add (bonus_scored, score_table[SC_1M]);
 		score_mul (bonus_scored, door_panels_started); 
@@ -338,27 +360,17 @@ void bonus_deff (void)
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
-
+		bonus_pause ();*/
+		calc_and_draw_bonus (SC_1M, door_panels_started);
+		font_render_string_center (&font_mono5, 64, 4, "DOOR PANELS");
+		trans_and_show ();
 	}
 	
 	if (loops)
 	{
-		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_1M]);
-		score_mul (bonus_scored, loops); 
-		score_add (total_bonus, bonus_scored);
-		sprintf_score (bonus_scored);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sprintf ("LOOPS");
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf ("%d X 1,000,000", (loops));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		calc_and_draw_bonus (SC_1M, loops);
+		font_render_string_center (&font_mono5, 64, 4, "LOOPS");
+		trans_and_show ();
 		if (loops < loop_master_hi)
 			bonus_pause ();
 		else 
@@ -403,120 +415,49 @@ void bonus_deff (void)
 		bonus_pause ();
 	}
 	
-	if (left_ramps > 0)
+	if (left_ramps)
 	{
-		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_100K]);
-		score_mul (bonus_scored, left_ramps); 
-		score_add (total_bonus, bonus_scored);
-		sprintf_score (bonus_scored);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sprintf ("LEFT RAMPS");
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf ("%d X 100,000", (left_ramps));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		calc_and_draw_bonus (SC_100K, left_ramps);
+		font_render_string_center (&font_mono5, 64, 4, "LEFT RAMPS");
+		trans_and_show ();
 	}
 	
-	if (gumball_collected_count > 0)
+	if (gumball_collected_count)
 	{
-		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_1M]);
-		score_mul (bonus_scored, gumball_collected_count); 
-		score_add (total_bonus, bonus_scored);
-		sprintf_score (bonus_scored);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		psprintf ("%d GUMBALL", "%d GUMBALLS", gumball_collected_count);
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf ("%d X 1,000,000", (gumball_collected_count));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		calc_and_draw_bonus (SC_1M, gumball_collected_count);
+		font_render_string_center (&font_mono5, 64, 4, "GUMBALLS");
+		trans_and_show ();
 	}
 
-	if (spiralawards_collected > 0)
+	if (spiralawards_collected)
 	{
-		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_1M]);
-		score_mul (bonus_scored, spiralawards_collected); 
-		score_add (total_bonus, bonus_scored);
-		sprintf_score (bonus_scored);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		psprintf ("%d SPIRAL AWARD", "%d SPIRAL AWARDS", spiralawards_collected);
-		font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
-		sprintf ("%d X 1,000,000", (spiralawards_collected));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		calc_and_draw_bonus (SC_1M, spiralawards_collected);
+		font_render_string_center (&font_mono5, 64, 4, "SPIRALAWARDS");
+		trans_and_show ();
 	}	
 	
-	if (dead_end_count > 0)
+	if (dead_end_count)
 	{
-		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_1M]);
-		score_mul (bonus_scored, dead_end_count); 
-		score_add (total_bonus, bonus_scored);
-		sprintf_score (bonus_scored);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		psprintf ("%d DEAD END", "%d DEAD ENDS", dead_end_count);
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf ("%d X 1,000,000", (dead_end_count));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		calc_and_draw_bonus (SC_1M, dead_end_count);
+		font_render_string_center (&font_mono5, 64, 4, "DEAD ENDS");
+		trans_and_show ();
+
 	}
 
 	if (hitch_count > 0)
 	{
-		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_1M]);
-		score_mul (bonus_scored, hitch_count); 
-		score_add (total_bonus, bonus_scored);
-		psprintf ("%d HITCHHIKER", "%d HITCHHIKERS", hitch_count);
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf_score (bonus_scored);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sprintf ("%d X 1,000,000", (hitch_count));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		calc_and_draw_bonus (SC_1M, hitch_count);
+		font_render_string_center (&font_mono5, 64, 4, "HITCHHIKERS");
+		trans_and_show ();
+
 	}
 	
 	if (rollover_count)
 	{
-		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_1M]);
-		score_mul (bonus_scored, rollover_count); 
-		psprintf ("%d ROLLOVER", "%d ROLLOVERS", rollover_count);
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf_score (bonus_scored);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sprintf ("%d X 1,000,000", (rollover_count));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
-		
-		if (rollover_count < 9)
-			bonus_pause ();
-		else
+		calc_and_draw_bonus (SC_1M, rollover_count);
+		font_render_string_center (&font_mono5, 64, 4, "ROLLOVERS");
+		trans_and_show ();
+		if (rollover_count > 9)
 		{
 			task_sleep_sec (2);
 			dmd_alloc_low_clean ();
@@ -531,24 +472,10 @@ void bonus_deff (void)
 	
 	if (two_way_combos + three_way_combos)
 	{
-		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_5M]);
-		score_mul (bonus_scored, two_way_combos + three_way_combos); 
-		score_add (total_bonus, bonus_scored);
-		psprintf ("%d COMBO", "%d COMBOS", two_way_combos + three_way_combos);
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf_score (bonus_scored);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sprintf ("%d X 5,000,000", (two_way_combos + three_way_combos));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
-		
-		if (two_way_combos + three_way_combos < combo_master_hi)
-			bonus_pause ();
-		else
+		calc_and_draw_bonus (SC_5M, two_way_combos + three_way_combos);
+		font_render_string_center (&font_mono5, 64, 4, "COMBOS");
+		trans_and_show ();
+		if (two_way_combos + three_way_combos > combo_master_hi)
 		{
 			combo_master_hi = two_way_combos + three_way_combos;
 			combo_master_initial_enter = player_up;
@@ -570,20 +497,9 @@ void bonus_deff (void)
 
 	if (lucky_bounces)
 	{
-		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_5M]);
-		score_mul (bonus_scored, lucky_bounces); 
-		score_add (total_bonus, bonus_scored);
-		psprintf ("%d LUCKYS", "%d LUCKYS", lucky_bounces);
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf_score (bonus_scored);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sprintf ("%d X 5,000,000", (lucky_bounces));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
+		calc_and_draw_bonus (SC_5M, lucky_bounces);
+		font_render_string_center (&font_mono5, 64, 4, "LUCKY BOUNCES");
+		trans_and_show ();
 		
 		if (lucky_bounces > 4 && lucky_bounces < spawny_get_hi)
 		{
@@ -980,7 +896,7 @@ CALLSET_ENTRY (bonus, start_ball)
 CALLSET_ENTRY (bonus, rank_change)
 {
 	/* Don't do anything if the player up isn't now in first place */
-	if (!in_live_game && score_ranks[player_up] == 0)
+	if (!in_live_game && (score_ranks[player_up - 1] != 1))
 		return;
 	 
 	/* Check for last ball and last player of game */
