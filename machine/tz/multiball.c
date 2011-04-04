@@ -169,9 +169,9 @@ CALLSET_ENTRY (mball, display_update)
 
 CALLSET_ENTRY (mball, music_refresh)
 {
-	timed_mode_music_refresh (&mball_restart_mode);
 	if (!in_game)
 		return;
+	timed_mode_music_refresh (&mball_restart_mode);
 	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
 	if (mball_restart_timer <= 5 
@@ -347,10 +347,6 @@ CALLSET_ENTRY (mball, lamp_update)
 		/* Flash the Piano Jackpot lamp when MB Jackpot is lit */
 		if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 			lamp_tristate_flash (LM_PIANO_JACKPOT);
-		else
-		{
-			lamp_tristate_off (LM_PIANO_JACKPOT);
-		}
 		/* Turn off lock lamps during multiball */
 	//	lamp_tristate_off (LM_LOCK1);
 	//	lamp_tristate_off (LM_LOCK2);
@@ -508,6 +504,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		leff_stop (LEFF_MB_RUNNING);
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
+		lamp_tristate_off (LM_PIANO_JACKPOT);
 		music_refresh ();
 		/* If a jackpot wasn't collected, offer a restart */
 		if (mball_jackpot_uncollected && !mball_restart_collected)
