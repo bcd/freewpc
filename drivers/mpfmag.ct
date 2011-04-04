@@ -101,7 +101,7 @@ extern inline void @self_service (void)
 				switch to see that it cleared correctly.  If it hasn't,
 				extend the off phase again and continue to do so until
 				the switch is cleared. */
-				if (rt_switch_poll (@sw))
+				if (!rt_switch_poll (@sw))
 				{
 					@self_timer = @offtime;
 				}
