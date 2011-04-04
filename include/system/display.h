@@ -36,7 +36,6 @@
 #define display_show_other      dmd_show_other
 #define display_flip_low_high   dmd_flip_low_high
 #define display_clean_page      dmd_clean_page
-#define display_memset          dmd_memset
 #define display_clean_page_low  dmd_clean_page_low
 #define display_clean_page_high dmd_clean_page_high
 #define display_copy_page       dmd_copy_page
@@ -63,7 +62,6 @@
 #define display_show_other      seg_show_other
 #define display_flip_low_high   seg_flip_low_high
 #define display_clean_page      seg_clean_page
-#define display_memset          seg_memset
 #define display_clean_page_low  seg_clean_page_low
 #define display_clean_page_high seg_clean_page_high
 #define display_copy_page       seg_copy_page
@@ -85,7 +83,6 @@ equivalents. */
 #define dmd_show_other()               seg_show_other ()
 #define dmd_flip_low_high()            seg_flip_low_high ()
 #define dmd_clean_page(args...)
-#define dmd_memset(args...)
 #define dmd_clean_page_low()           seg_erase ()
 #define dmd_clean_page_high()
 #define dmd_copy_page(args...)
@@ -132,7 +129,6 @@ text and centered it well. */
 #define display_show_other      remote_dmd_show_other
 #define display_flip_low_high   remote_dmd_flip_low_high
 #define display_clean_page      remote_dmd_clean_page
-#define display_memset          remote_dmd_memset
 #define display_clean_page_low  remote_dmd_clean_page_low
 #define display_clean_page_high remote_dmd_clean_page_high
 #define display_copy_page       remote_dmd_copy_page
@@ -151,7 +147,6 @@ text and centered it well. */
 #define dmd_show_other(args...)
 #define dmd_flip_low_high(args...)
 #define dmd_clean_page(args...)
-#define dmd_memset(args...)
 #define dmd_clean_page_low()
 #define dmd_clean_page_high()
 #define dmd_copy_page(args...)

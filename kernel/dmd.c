@@ -389,11 +389,7 @@ void dmd_clean_page (dmd_buffer_t dbuf)
 
 void dmd_fill_page_low (void)
 {
-#ifdef __m6809__
-	dmd_memset (dmd_low_buffer, 0xFF);
-#else
 	memset (dmd_low_buffer, 0xFF, DMD_PAGE_SIZE);
-#endif
 }
 
 

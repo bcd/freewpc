@@ -185,7 +185,6 @@ void dmd_show_other (void);
 void dmd_flip_low_high (void);
 void dmd_show2 (void);
 void dmd_clean_page (dmd_buffer_t dbuf);
-void dmd_memset (dmd_buffer_t dbuf, U8 val);
 void dmd_clean_page_low (void);
 void dmd_clean_page_high (void);
 void dmd_fill_page_low (void);

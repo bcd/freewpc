@@ -35,55 +35,45 @@ DMD_PAGE_WIDTH=512
 	;--------------------------------------------------------
 	.globl _dmd_clean_page
 _dmd_clean_page:
-	clrb
-
-	;--------------------------------------------------------
-	;
-	; void dmd_memset (void *dst, U8 fill);
-	;
-	; X = pointer to display page
-	; B = character to fill
-	;--------------------------------------------------------
-	.globl _dmd_memset
-_dmd_memset:
 	pshs	y,u
 
 	leau	DMD_PAGE_WIDTH,x
 
-	lda	#5
+	lda	#4
 	sta	loop_count
 
-	tfr	b,a
-	tfr	d,x
-	tfr	x,y
+	ldd	#0
+	ldx	#0
+	ldy	#0
+	; Note: DP is used and is guaranteed to be zero already.
 
-	; The core loop consists of 17 pshu instructions,
-	; each initializing 6 bytes for a total of 102
-	; bytes per iteration.  Over 5 iterations, this
-	; initialized 510 of the 512 DMD display bytes.
-	; At the end one more pshu is needed to assign
-	; the final 2 bytes.
-	; (102 bytes in 17x12=204 cycles, means this takes
-	; about 0.5ms to execute.)
+	; The core loop consists of 19 pshu instructions,
+	; 14 of which set 7 bytes and 5 of which set 6 bytes.
+	; Together, that initializes 128 bytes.  Over 4 loops,
+	; this initializes all 512 DMD display bytes.
+	; Each loop takes 14x12+5x11=223 CPU cycles, so in total
+	; it takes 0.4-0.5ms.
 	;
-	; TODO - when doing zero operation, we can push
-	; DP=0 to get one extra byte moved per instruction.
-	; If interrupts are disabled, we can also set S=0 before
-	; this loop and get 2 more bytes out of it.  There
-	; would be a penalty for the setup/restore though.
+	; NOTE: If interrupts were disabled, we could also set S=0
+	; before this loop and get 2 more bytes out of it each insn.
+	; There would be a penalty for the setup/restore though, and
+	; it would delay realtime tasks for quite a while.  So we
+	; avoid this.
 1$:
-	pshu	a,b,x,y
-	pshu	a,b,x,y
-	pshu	a,b,x,y
-	pshu	a,b,x,y
-	pshu	a,b,x,y
-	pshu	a,b,x,y
-	pshu	a,b,x,y
-	pshu	a,b,x,y
-	pshu	a,b,x,y
-	pshu	a,b,x,y
-	pshu	a,b,x,y
-	pshu	a,b,x,y
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
+	pshu	a,b,x,y,dp
 	pshu	a,b,x,y
 	pshu	a,b,x,y
 	pshu	a,b,x,y
@@ -91,8 +81,6 @@ _dmd_memset:
 	pshu	a,b,x,y
 	dec	loop_count
 	bne	1$
-	pshu	x
-
 	puls	y,u,pc
 
 
