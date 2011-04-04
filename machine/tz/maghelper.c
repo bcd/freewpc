@@ -41,6 +41,7 @@ extern struct timed_mode_ops hitch_mode;
 
 extern __fastram__ bool left_magnet_enabled_to_throw, lower_right_magnet_enabled_to_throw;
 extern U8 chaosmb_level;
+extern U8 chaosmb_hits_to_relight;
 extern U8 gumball_enable_count;
 
 /* Whether the ball should be passed back and forth with
@@ -200,7 +201,8 @@ void magnet_enable_monitor_task (void)
 		}
 		/* Enable catch for Chaos MB when piano jackpot is lit */
 		else if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
-			&& chaosmb_level == 2)
+			&& chaosmb_level == 2
+			&& chaosmb_hits_to_relight == 0)
 		{
 			magnet_enable_catch (MAG_LEFT);
 		}
