@@ -29,7 +29,7 @@
 #define DEFAULT_MAG_HOLD_TIME (200 / MAG_DRIVE_RTT_FREQ)
 
 #define DEFAULT_MAG_DROP_TIME ( 336 / MAG_DRIVE_RTT_FREQ)
-#define DEFAULT_MAG_DROP_TIME_LEFT ( 360 / MAG_DRIVE_RTT_FREQ)
+#define DEFAULT_MAG_DROP_TIME_LEFT ( 380 / MAG_DRIVE_RTT_FREQ)
 #define DEFAULT_MAG_DROP_TIME_RIGHT ( 328 / MAG_DRIVE_RTT_FREQ)
 #define DEFAULT_MAG_THROW_TIME (20 / MAG_DRIVE_RTT_FREQ)
 
@@ -37,6 +37,7 @@ __fastram__ enum magnet_state {
 	MAG_DISABLED,
 	MAG_ENABLED,
 	MAG_ON_POWER,
+	MAG_THROW_POWER,
 	MAG_ON_HOLD,
 	MAG_THROW_DROP,
 } left_magnet_state, upper_right_magnet_state, lower_right_magnet_state;
@@ -94,6 +95,8 @@ static inline void magnet_rtt_duty_handler (
 			 * any drop */
 			if (*power_timer == 0)
 			{	
+
+				/* Inverted as it's an opto */
 				if (rt_switch_poll (sw_magnet))
 				{
 					/* Grab failed */
@@ -108,12 +111,21 @@ static inline void magnet_rtt_duty_handler (
 			}
 			--*power_timer;
 			break;
-
+		case MAG_THROW_POWER:
+			if (*power_timer == 0)
+			{
+				sol_disable (sol_magnet);
+				*state = MAG_DISABLED;
+			}
+			--*power_timer;
+			break;
 		case MAG_ON_HOLD:
 			/* keep magnet on with low power */
 			/* switch should remain closed in this state */
 			if (*hold_timer == 0)
 			{
+				sol_disable (sol_magnet);
+				*state = MAG_DISABLED;
 				if (*throw_enabled == TRUE)
 				{
 					*throw_enabled = FALSE;
@@ -129,23 +141,12 @@ static inline void magnet_rtt_duty_handler (
 							break;
 					}
 					/* switch to THROW_DROP */
-					sol_disable (sol_magnet);
 					*state = MAG_THROW_DROP;
-				}
-				else
-				{
-					/* switch to DISABLED */
-					sol_disable (sol_magnet);
-					*state = MAG_DISABLED;
 				}
 			}
 			/* Hold the ball at 50% duty or 100% if held
 			 * for throw (to minimize rattle */
 			else if ((*hold_timer % 2) != 0)
-			{
-				sol_enable (sol_magnet);
-			}
-			else if (*throw_enabled == TRUE)
 			{
 				sol_enable (sol_magnet);
 			}
@@ -163,9 +164,9 @@ static inline void magnet_rtt_duty_handler (
 			if (*hold_timer == 0)
 			{
 				*power_timer = DEFAULT_MAG_THROW_TIME;
+				/* switch to THROW_POWER */
 				sol_enable (sol_magnet);
-				/* switch to ON_POWER but with no hold timer */
-				*state = MAG_ON_POWER;
+				*state = MAG_THROW_POWER;
 			}
 			--*hold_timer;
 			break;

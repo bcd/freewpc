@@ -339,10 +339,11 @@ CALLSET_ENTRY (mball, lamp_update)
 	else	
 		lamp_tristate_off (LM_LOCK_ARROW);
 	
+	if (multiball_ready () && single_ball_play ())
+		lamp_tristate_flash (LM_MULTIBALL);
+	
 	if (multi_ball_play ())
 	{
-		if (multiball_ready ())
-			lamp_tristate_flash (LM_MULTIBALL);
 		/* Flash the Piano Jackpot lamp when MB Jackpot is lit */
 		if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 			lamp_tristate_flash (LM_PIANO_JACKPOT);
@@ -470,6 +471,7 @@ CALLSET_ENTRY (mball, mball_start)
 {
 	if (!global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 	{
+		lamp_tristate_off (LM_MULTIBALL);
 		magnet_reset ();
 		callset_invoke (mball_restart_stop);
 		unlit_shot_count = 0;

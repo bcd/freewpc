@@ -163,24 +163,24 @@ IMG_PINWHEEL_9: !machine/tz/animation/pinwheel/frame_0009.pgm
 IMG_PINWHEEL_END: !machine/tz/animation/pinwheel/frame_0010.pgm
 
 IMG_FLASH_START: machine/tz/animation/flash/frame_0001.pgm
-IMG_FLASH_2: machine/tz/animation/flash/frame_0002.pgm
-IMG_FLASH_3: machine/tz/animation/flash/frame_0003.pgm
-IMG_FLASH_4: machine/tz/animation/flash/frame_0004.pgm
-IMG_FLASH_5: machine/tz/animation/flash/frame_0005.pgm
+machine/tz/animation/flash/frame_0002.pgm
+machine/tz/animation/flash/frame_0003.pgm
+machine/tz/animation/flash/frame_0004.pgm
+machine/tz/animation/flash/frame_0005.pgm
 IMG_FLASH_END: machine/tz/animation/flash/frame_0006.pgm
 
 IMG_FLASHCENTRE_START: machine/tz/animation/flashcentre/frame_0001.pgm
-IMG_FLASHCENTRE_2: machine/tz/animation/flashcentre/frame_0002.pgm
-IMG_FLASHCENTRE_3: machine/tz/animation/flashcentre/frame_0003.pgm
-IMG_FLASHCENTRE_4: machine/tz/animation/flashcentre/frame_0004.pgm
-IMG_FLASHCENTRE_5: machine/tz/animation/flashcentre/frame_0005.pgm
+machine/tz/animation/flashcentre/frame_0002.pgm
+machine/tz/animation/flashcentre/frame_0003.pgm
+machine/tz/animation/flashcentre/frame_0004.pgm
+machine/tz/animation/flashcentre/frame_0005.pgm
 IMG_FLASHCENTRE_END: machine/tz/animation/flashcentre/frame_0006.pgm
 
 IMG_FLASHLEFT_START: machine/tz/animation/flashleft/frame_0001.pgm
-IMG_FLASHLEFT_2: machine/tz/animation/flashleft/frame_0002.pgm
-IMG_FLASHLEFT_3: machine/tz/animation/flashleft/frame_0003.pgm
-IMG_FLASHLEFT_4: machine/tz/animation/flashleft/frame_0004.pgm
-IMG_FLASHLEFT_5: machine/tz/animation/flashleft/frame_0005.pgm
+machine/tz/animation/flashleft/frame_0002.pgm
+machine/tz/animation/flashleft/frame_0003.pgm
+machine/tz/animation/flashleft/frame_0004.pgm
+machine/tz/animation/flashleft/frame_0005.pgm
 IMG_FLASHLEFT_END: machine/tz/animation/flashleft/frame_0006.pgm
 
 IMG_LOOP_START: machine/tz/animation/loop/frame_0001.pgm

@@ -25,6 +25,7 @@ U8 fastlock_award;
 /* Stored for Deff */
 U8 fastlock_award_stored;
 U8 fastlocks_collected;
+U8 display_loop_time;
 
 void fastlock_mode_init (void);
 void fastlock_mode_exit (void);
@@ -45,6 +46,15 @@ struct timed_mode_ops fastlock_mode = {
 	.pause = system_timer_pause,
 };
 
+static inline void calc_display_loop_time (void)
+{
+	display_loop_time = 100;
+	display_loop_time -= loop_time;
+	if (display_loop_time < 1)
+		display_loop_time = 1;
+}
+
+
 void fastlock_mode_deff (void)
 {
 	/* Fudge loop time in ms into
@@ -59,10 +69,20 @@ void fastlock_mode_deff (void)
 	//		dmd_map_overlay ();
 			dmd_clean_page_low ();
 			font_render_string_center (&font_var5, 64, 5, "FASTLOOPS BUILD JACKPOT");
-			sprintf("%d MILLION", fastlock_award);
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			if (timer_find_gid (GID_FASTLOCK_LOOP_AWARDED))
+			{
+				calc_display_loop_time ();
+				sprintf ("%d MPH", display_loop_time);
+				font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+				font_render_string_center (&font_var5, 64, 27, "LAST LOOP");
+			}
+			else
+			{	
+				sprintf("%d MILLION", fastlock_award);
+				font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+				font_render_string_center (&font_var5, 64, 27, "SHOOT LOCK TO COLLECT");
+			}
 	//		sprintf ("LAST LOOP WAS %dMPH", display_loop_time);
-			font_render_string_center (&font_var5, 64, 27, "SHOOT LOCK TO COLLECT");
 			sprintf ("%d", fastlock_mode_timer);
 			font_render_string (&font_var5, 2, 16, sprintf_buffer);
 			font_render_string_right (&font_var5, 126, 16, sprintf_buffer);

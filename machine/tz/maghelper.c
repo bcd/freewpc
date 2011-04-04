@@ -27,6 +27,7 @@
 extern __fastram__ enum magnet_state {
 	MAG_DISABLED,
 	MAG_ENABLED,
+	MAG_THROW_POWER,
 	MAG_ON_POWER,
 	MAG_ON_HOLD,
 	MAG_THROW_DROP,
@@ -123,7 +124,7 @@ void magnet_ball_grab_monitor_rtt (void)
 	{
 		enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
 		
-		if (((magstates[MAG_LEFT] == MAG_ON_HOLD) || magstates[MAG_LEFT] == MAG_THROW_DROP)
+		if ( magstates[MAG_LEFT] == MAG_ON_HOLD
 			&& switch_poll_logical (SW_LEFT_MAGNET)
 			&& !task_find_gid (GID_LEFT_BALL_GRABBED))
 		{
@@ -132,7 +133,7 @@ void magnet_ball_grab_monitor_rtt (void)
 			task_recreate_gid (GID_LEFT_BALL_GRABBED, monitor_left_grab_task);
 		}
 		
-		if ((magstates[MAG_RIGHT] == MAG_ON_HOLD)
+		if ( magstates[MAG_RIGHT] == MAG_ON_HOLD
 			&& switch_poll_logical (SW_LOWER_RIGHT_MAGNET)
 			&& !task_find_gid (GID_RIGHT_BALL_GRABBED))
 		{

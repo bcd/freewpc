@@ -20,6 +20,7 @@
 
 /* CALLSET_SECTION (tz_amode, __machine2__) */
 #include <freewpc.h>
+//TODO if sys date == blah, say "FOR MALC" 
 
 void amode_lamp_toggle_task (void)
 {

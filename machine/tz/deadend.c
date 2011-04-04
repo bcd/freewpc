@@ -66,10 +66,9 @@ void dead_end_deff (void)
 		task_sleep (TIME_66MS);
 	}
 
-	dmd_alloc_low_clean ();
-	dmd_map_overlay ();
 	dmd_clean_page_low ();
-	
+	dmd_clean_page_high ();
+	dmd_alloc_low ();
 	psprintf ("1 DEAD END", "%d DEAD ENDS", dead_end_count);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 	
@@ -97,11 +96,7 @@ void dead_end_deff (void)
 	}
 	
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
-	dmd_text_outline ();
-	dmd_alloc_pair ();
-	frame_draw (fno);
-	dmd_overlay_outline ();
-	dmd_show2 ();
+	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 }

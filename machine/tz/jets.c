@@ -170,14 +170,15 @@ void tsm_mode_deff (void)
 void jets_hit_deff (void)
 {
 	U16 fno;
-	U16 img_start = 0;
-	U16 img_end = 0;
+	U16 img_start;
+	U16 img_end;
 	switch (random_scaled (3))
 	{
 		case 0:
 			img_start = IMG_FLASH_START;
 			img_end = IMG_FLASH_END;
 			break;
+		default:
 		case 1:
 			img_start = IMG_FLASHCENTRE_START;
 			img_end = IMG_FLASHCENTRE_END;
@@ -208,7 +209,9 @@ void jets_hit_deff (void)
 		task_sleep (TIME_33MS);
 	}
 	/* Redraw it so the 'HITS' text is centred */
-	dmd_alloc_pair_clean ();
+	dmd_clean_page_high ();
+	dmd_clean_page_low ();
+	dmd_alloc_low ();
 	psprintf ("1 HIT", "%d HITS", jets_scored);
 	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));

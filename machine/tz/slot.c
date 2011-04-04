@@ -88,8 +88,8 @@ void sslot_mode_deff (void)
 			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 			font_render_string_center (&font_var5, 64, 27, sslot_award_names[sslot_award_index]);
 			sprintf ("%d", sslot_mode_timer);
-			font_render_string (&font_var5, 6, 16, sprintf_buffer);
-			font_render_string_right (&font_var5, 122, 16, sprintf_buffer);
+			font_render_string (&font_var5, 8, 16, sprintf_buffer);
+			font_render_string_right (&font_var5, 120, 16, sprintf_buffer);
 			
 			dmd_text_outline ();
 			dmd_alloc_pair ();

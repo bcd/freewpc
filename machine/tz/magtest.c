@@ -25,6 +25,13 @@
 
 extern void magnet_enable_catch (U8);
 extern void magnet_disable_catch (U8);
+extern bool juggle_ball;
+
+extern __fastram__ bool left_magnet_enabled_to_throw, lower_right_magnet_enabled_to_throw;
+/* 'Fudge' number to try and learn timings of the magnet throw */
+extern __fastram__ U8 left_magnet_swag, lower_right_magnet_swag;
+extern __fastram__ U8 left_magnet_throw_successes, lower_right_magnet_throw_successes;
+
 
 struct magnet_test_option {
 	U8 sw;
@@ -45,6 +52,11 @@ void tz_magnet_test_init (void)
 {
 }
 
+void tz_magnet_test_exit (void)
+{
+	juggle_ball = FALSE;
+}
+
 void tz_magnet_test_draw (void)
 {
 	struct magnet_test_option *opt = &magnet_test_options[mode];
@@ -52,8 +64,16 @@ void tz_magnet_test_draw (void)
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 4, "MAGNET TEST");
-	font_render_string_center (&font_mono5, 64, 12, opt->name);
-
+	font_render_string_center (&font_mono5, 64, 8, opt->name);
+	sprintf ("SW: %d", left_magnet_swag);
+	font_render_string_center (&font_mono5, 32, 16, sprintf_buffer);
+	sprintf ("SU: %d", left_magnet_throw_successes);
+	font_render_string_center (&font_mono5, 32, 24, sprintf_buffer);
+	sprintf ("SW: %d", lower_right_magnet_swag);
+	font_render_string_right (&font_mono5, 96, 16, sprintf_buffer);
+	sprintf ("SU: %d", lower_right_magnet_throw_successes);
+	font_render_string_right (&font_mono5, 96, 24, sprintf_buffer);
+	
 	for (id = 0; id < 3; id++)
 		if (opt->id & (1 << id))
 		{
@@ -84,6 +104,39 @@ void tz_magnet_test_down (void)
 	mode &= 3;
 }
 
+void tz_magnet_test_left (void)
+{
+	if (mode == 1)
+	{
+		left_magnet_swag--;
+	}
+	else if (mode == 2)
+	{
+		lower_right_magnet_swag--;
+	}
+}
+
+void tz_magnet_test_right (void)
+{	
+	if (mode == 1)
+	{
+		left_magnet_swag++;
+	}
+	else if (mode == 2)
+	{
+		lower_right_magnet_swag++;
+	}
+
+}
+
+void tz_magnet_test_start (void)
+{
+	if (juggle_ball)
+		juggle_ball = FALSE;
+	else
+		juggle_ball = TRUE;
+}
+
 struct window_ops tz_magnet_test_window = {
 	DEFAULT_WINDOW,
 	.init = tz_magnet_test_init,
@@ -91,6 +144,9 @@ struct window_ops tz_magnet_test_window = {
 	.enter = tz_magnet_test_enter,
 	.up = tz_magnet_test_up,
 	.down = tz_magnet_test_down,
+	.left = tz_magnet_test_left,
+	.right = tz_magnet_test_right,
+	.start = tz_magnet_test_start,
 };
 
 

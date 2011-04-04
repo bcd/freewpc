@@ -202,9 +202,9 @@ void tz_clock_switch_rtt (void)
 			{
 				/* When the minute hand is at :30, the hour switches
 				tell us exactly what the hour is. */
-				//clock_hour = tz_clock_opto_to_hour[clock_sw >> 4];
+				clock_hour = tz_clock_opto_to_hour[clock_sw >> 4];
 			}
-			if (clock_minute_sw == CLK_SW_MIN00 &&
+			else if (clock_minute_sw == CLK_SW_MIN00 &&
 			//	CLK_SW_MIN (clock_last_sw) == CLK_SW_MIN45 &&
 				clock_mode == CLOCK_RUNNING_FORWARD)
 			{
@@ -318,13 +318,13 @@ void clock_pause_monitor_task (void)
 
 inline void start_clock_pause_monitor (void)
 {
-	if (!task_find_gid (GID_CLOCK_PAUSE))
-		task_create_gid (GID_CLOCK_PAUSE, clock_pause_monitor_task);
+//	if (!task_find_gid (GID_CLOCK_PAUSE))
+//		task_create_gid (GID_CLOCK_PAUSE, clock_pause_monitor_task);
 }
 
 inline void stop_clock_pause_monitor (void)
 {
-	task_kill_gid (GID_CLOCK_PAUSE);
+//	task_kill_gid (GID_CLOCK_PAUSE);
 }
 
 void tz_clock_show_time (U8 hours, U8 minutes)
@@ -509,8 +509,12 @@ CALLSET_ENTRY (tz_clock, reverse_clock_direction)
 			break;
 		case CLOCK_RUNNING_BACKWARD:
 			clock_mech_start_forward ();
+			break;
 		default:
-			clock_mech_start_forward ();
+		case CLOCK_STOPPED:
+		case CLOCK_FIND:
+		case CLOCK_CALIBRATING:
+			break;
 	}
 }
 

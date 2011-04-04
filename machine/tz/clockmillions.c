@@ -104,7 +104,7 @@ void clock_millions_hit_deff (void)
 			break;
 	}
 
-	for (fno = img_start; fno <= img_end; fno += 2)
+	for (fno = img_start; fno < img_end; fno += 2)
 	{
 		U8 x = random_scaled (4);
 		U8 y = random_scaled (4);
@@ -124,7 +124,9 @@ void clock_millions_hit_deff (void)
 		task_sleep (TIME_33MS);
 	}
 	/* Redraw it so the 'HITS' text is centred */
-	dmd_alloc_pair_clean ();
+	dmd_clean_page_low ();
+	dmd_clean_page_high ();
+	dmd_alloc_low ();
 	psprintf ("CLOCK HIT %d TIME", "CLOCK HIT %d TIMES", clock_mode_hits);
 	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
 	sprintf_score (clock_mode_score);

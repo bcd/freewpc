@@ -17,7 +17,7 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* CALLSET_SECTION (bonus, __machine2__) */
+/* CALLSET_SECTION (bonus, __machine4__) */
 #include <freewpc.h>
 #include <eb.h>
 #include <status.h>
@@ -74,7 +74,6 @@ extern U8 two_way_combos;
 extern U8 three_way_combos;
 extern U8 lucky_bounces;
 
-
 /* Function to find who holds what score position 
  * eg
  * find_player_ranked (N) returns the player ranked first
@@ -94,7 +93,7 @@ static U8 find_player_ranked (U8 ranking)
 
 
 /* Speed up the bonus if both flipper buttons are pressed */
-static void bonus_button_monitor (void)
+void bonus_button_monitor (void)
 {
 	buttons_held = TRUE;
 	while (in_bonus)
@@ -142,7 +141,7 @@ void countup_pause (void)
 
 /* Function so we can call two different transistions
  * depending on whether the buttons were pressed */
-static void bonus_sched_transition (void)
+static inline void bonus_sched_transition (void)
 {
 	if (buttons_held == TRUE)
 		dmd_sched_transition (&trans_scroll_down_fast);
@@ -151,7 +150,7 @@ static void bonus_sched_transition (void)
 }
 
 /* Function to calculate bonus score */
-static void bonus_add_up_score (U8 award_count, score_id_t award_amount)
+void bonus_add_up_score (U8 award_count, score_id_t award_amount)
 {
 	/* Zero the temporary score */
 	score_zero (bonus_scored);
@@ -192,7 +191,7 @@ static void bonus_talking_task (void)
 }
 
 /* Used to announce if the player has played well */
-static bool check_for_big_score (void)
+inline bool check_for_big_score (void)
 {
 	if (score_compare (points_this_ball, score_table[SC_100M]) == 1)
 		return TRUE;
@@ -200,7 +199,7 @@ static bool check_for_big_score (void)
 		return FALSE;
 }
 
-static bool check_for_puny_score (void)
+inline bool check_for_puny_score (void)
 {
 	if (score_compare (score_table[SC_10M], points_this_ball) == 1)
 		return TRUE;
@@ -209,7 +208,7 @@ static bool check_for_puny_score (void)
 
 }
 
-static void points_this_ball_sound_task (void)
+void points_this_ball_sound_task (void)
 {
 	sound_send (SND_NOT_AN_ORDINARY_GAME);
 	task_sleep_sec (2);
@@ -219,7 +218,7 @@ static void points_this_ball_sound_task (void)
 }
 
 /* See if it's the players last ball */
-static bool check_if_last_ball_for_multiplayer (void)
+inline bool check_if_last_ball_for_multiplayer (void)
 {
 	if (ball_up == system_config.balls_per_game && num_players > 1 && extra_balls == 0)
 		return TRUE;
@@ -227,7 +226,7 @@ static bool check_if_last_ball_for_multiplayer (void)
 		return FALSE;
 }
 
-static bool check_if_last_ball_of_multiplayer_game (void)
+inline bool check_if_last_ball_of_multiplayer_game (void)
 {
 	if (ball_up == system_config.balls_per_game && player_up == num_players && 
 		num_players > 1 && extra_balls == 0)
@@ -236,14 +235,13 @@ static bool check_if_last_ball_of_multiplayer_game (void)
 		return FALSE;
 }
 
-void bonus_deff (void)
+static void draw_taunts (void)
 {
 	/* 
 	 * Taunts.....
 	 * */
-
-	/* Wait a bit so the previous music_stop doesn't kill the taunt sounds */
-	task_sleep (TIME_100MS);
+	
+	task_sleep (TIME_500MS);
 	if (multidrain_count >= 3)
 	{
 		dmd_alloc_low_clean ();
@@ -255,7 +253,7 @@ void bonus_deff (void)
 		task_sleep_sec (2);
 	}
 	
-	if (stdm_death == TRUE)
+	else if (stdm_death == TRUE)
 	{
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
 		dmd_alloc_low_clean ();
@@ -266,7 +264,7 @@ void bonus_deff (void)
 		task_sleep_sec (2);
 	}
 	
-	if (unfair_death == TRUE)
+	else if (unfair_death == TRUE)
 	{
 		sound_send (SND_HAHA_POWERFIELD_EXIT);
 		dmd_alloc_low_clean ();
@@ -280,7 +278,7 @@ void bonus_deff (void)
 		quickdeath_timer_running = FALSE;
 	}
 
-	if (quickdeath_timer_running == TRUE)
+	else if (quickdeath_timer_running == TRUE)
 	{
 	/* TODO This should only taunt if the game time was <10 seconds
 	 * atm it does so when any ball is served, rather than the first */
@@ -293,7 +291,7 @@ void bonus_deff (void)
 		task_sleep_sec (2);
 	}
 	
-	if (powerball_death == TRUE)
+	else if (powerball_death == TRUE)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("POWERBALL");
@@ -305,7 +303,11 @@ void bonus_deff (void)
 		sound_send (SND_NEVER_UNDERESTIMATE_POWER);
 		task_sleep_sec (4);
 	}	
-	
+}
+
+void bonus_deff (void)
+{
+	draw_taunts ();
 	/* Clear the bonus score */
 	score_zero (total_bonus);
 
@@ -323,33 +325,40 @@ void bonus_deff (void)
 	if (door_panels_started)
 	{
 		dmd_alloc_low_clean ();
-		score_multiple (SC_1M, door_panels_started);
-		psprintf ("%d DOOR PANEL", "%d DOOR PANELS", door_panels_started);
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		
-		bonus_add_up_score (door_panels_started, SC_1M);
+		score_zero (bonus_scored);
+		score_add (bonus_scored, score_table[SC_1M]);
+		score_mul (bonus_scored, door_panels_started); 
+		score_add (total_bonus, bonus_scored);
+		sprintf_score (bonus_scored);
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sprintf ("%d X 1,000,000", door_panels_started);
+		sprintf ("DOOR PANELS");
+		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+		sprintf ("%d X 1,000,000", (door_panels_started));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
+
 	}
 	
 	if (loops)
 	{
 		dmd_alloc_low_clean ();
-		psprintf ("%d LOOP", "%d LOOPS", loops);
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		
-		bonus_add_up_score (loops, SC_100K);
+		score_zero (bonus_scored);
+		score_add (bonus_scored, score_table[SC_1M]);
+		score_mul (bonus_scored, loops); 
+		score_add (total_bonus, bonus_scored);
+		sprintf_score (bonus_scored);
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sprintf ("%d X 100,000", loops);
+		sprintf ("LOOPS");
+		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+		sprintf ("%d X 1,000,000", (loops));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_MODE_BOOM);
+		bonus_pause ();
 		if (loops < loop_master_hi)
 			bonus_pause ();
 		else 
@@ -798,7 +807,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		task_sleep_sec (3);
+		task_sleep_sec (2);
 	
 
 		/* Calculate lead into temp_score */
@@ -834,7 +843,7 @@ void bonus_deff (void)
 				font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 			}
 			dmd_show_low ();
-			task_sleep_sec (4);
+			task_sleep_sec (3);
 			
 		
 		}
@@ -866,7 +875,7 @@ void bonus_deff (void)
 			font_render_string_center (&font_mono5, 64, 29, "CONGRATULATIONS");
 		}	
 		dmd_show_low ();
-		task_sleep_sec (6);
+		task_sleep_sec (5);
 	}
 	
 	/* Show final score */
@@ -971,7 +980,7 @@ CALLSET_ENTRY (bonus, start_ball)
 CALLSET_ENTRY (bonus, rank_change)
 {
 	/* Don't do anything if the player up isn't now in first place */
-	if (!in_live_game && score_ranks[player_up-1] == 1)
+	if (!in_live_game && score_ranks[player_up] == 0)
 		return;
 	 
 	/* Check for last ball and last player of game */
