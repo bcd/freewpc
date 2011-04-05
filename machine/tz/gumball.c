@@ -77,16 +77,16 @@ void award_gumball_score (void)
  * the gumball */
 bool gumball_load_is_enabled (void)
 {
-	if (pb_maybe_in_play () )
+	if (!in_live_game)
 		return FALSE;
-	else if (in_live_game && (gumball_enable_count > 0) 
-		&& !multi_ball_play ())
-		return TRUE;
-	/* If powerball is out during single ball play, enable */
-	else if (global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
-		return TRUE;
 	/* Don't enable if the powerball is likely to be out undetected 
 	 * We should wait for a detection event first */
+	else if (pb_maybe_in_play () )
+		return FALSE;
+	/* If powerball is out during single ball play, enable */
+	else if ((global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) || gumball_enable_count)
+		&& !multi_ball_play ())
+		return TRUE;
 	else
 		return FALSE;
 }
@@ -156,23 +156,20 @@ void sw_gumball_right_loop_entered (void)
 	{
 		magnet_disable_catch (MAG_RIGHT);
 		gumball_divertor_open ();
-		return;
 	}
 	/* Don't open if autofired into play or dropped from the lock*/
-	if (event_did_follow (autolaunch, right_loop)
+	else if (event_did_follow (autolaunch, right_loop)
 		|| event_did_follow (dev_lock_kick_attempt, right_loop)
 		|| timer_find_gid (GID_LOCK_KICKED))
 	{
-		return;
 	}
 	/* Don't open if the magnet is about to grab the ball
 	 * but remembering that it will always let the powerball through */
-	if ((magnet_enabled (MAG_RIGHT) || magnet_busy (MAG_RIGHT))
+	else if ((magnet_enabled (MAG_RIGHT) || magnet_busy (MAG_RIGHT))
 		&& !global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY))
 	{
-		return;
 	}
-	if (gumball_load_is_enabled ())
+	else if (gumball_load_is_enabled ())
 	{
 		gumball_divertor_open ();
 		if (in_live_game && !multi_ball_play ())
@@ -411,7 +408,7 @@ CALLSET_ENTRY (gumball, end_ball)
 	gumball_divertor_close ();
 }
 
-CALLSET_ENTRY (gumball, start_player)
+CALLSET_ENTRY (gumball, start_player, init)
 {
 	gumball_enable_count = 0;
 }
