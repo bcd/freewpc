@@ -899,7 +899,7 @@ CALLSET_ENTRY (bonus, rank_change)
 	if (!in_live_game && (score_ranks[player_up - 1] != 1))
 		return;
 	 
-	/* Check for last ball and last player of game */
+	/* Check if last ball of game */
 	/* Don't count extra balls because we don't need to */
 	if (ball_up == system_config.balls_per_game 
 		&& player_up == num_players 

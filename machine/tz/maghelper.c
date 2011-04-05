@@ -34,6 +34,7 @@ extern __fastram__ enum magnet_state {
 } left_magnet_state, upper_right_magnet_state, lower_right_magnet_state;
 
 extern U8 left_magnet_hold_timer, lower_right_magnet_hold_timer;
+extern bool lower_right_magnet_enabled_to_throw;
 
 extern struct timed_mode_ops spiral_mode;
 extern struct timed_mode_ops fastlock_mode;
@@ -263,8 +264,9 @@ CALLSET_ENTRY (maghelper, sw_lower_right_magnet)
 	 * that the powerball has slipped through 
 	 * Code is in powerball.c */
 	if (!global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY)
-		&& magnet_enabled (MAG_RIGHT)
-		&& single_ball_play ())
+		&& magnet_busy (MAG_RIGHT)
+		&& single_ball_play ()
+		&& !lower_right_magnet_enabled_to_throw)
 		callset_invoke (check_magnet_grab);
 }
 
