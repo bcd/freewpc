@@ -122,8 +122,11 @@ static void award_loop (void)
 
 static inline void abort_loop (void)
 {
-	score (SC_1K);
-	sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
+	if (in_live_game)
+	{
+		score (SC_1K);
+		sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
+	}
 }
 
 CALLSET_ENTRY (loop, award_left_loop)
