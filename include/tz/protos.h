@@ -144,10 +144,10 @@ void magnet_enable_catch_and_throw (U8 magnet);
 void magnet_disable_catch (U8 magnet);
 void magnet_reset (void);
 
-/* maghelpers.c */
+/* maghelper.c */
 __machine3__ bool magnet_enabled (U8 magnet);
 __machine3__ bool magnet_busy (U8 magnet);
-
+__machine3__ void magnet_enable_monitor_task (void);
 __machine3__ void start_bttz_outhole_monitor (void);
 
 /* factoids.c */

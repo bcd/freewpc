@@ -441,6 +441,9 @@ Gumball over Camera: yes_no, NO
 # Show advanced info during bonus
 Advanced bonus info:yes_no, YES
 
+# Tweak the drop time for the throw automatically
+Auto SWAG:yes_no, NO
+
 ##########################################################################
 # Items for the Feature Audits menu.
 ##########################################################################
