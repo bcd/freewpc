@@ -99,7 +99,7 @@ bool sound_version_render (void)
 	}
 	else
 	{
-#ifdef MACHINE_DCS
+#if (MACHINE_DCS == 1)
 		sprintf ("%d.%d", sound_version_major, sound_version_minor);
 #else
 		sprintf ("L-%d", sound_version_major);
