@@ -2922,6 +2922,9 @@ void sound_test_set_draw (void)
 	s = sprintf_buffer;
 #endif
 	font_render_string_center (&font_mono5, 64, 9, s);
+	/* Render the sound board version */
+	sound_version_render ();
+	font_render_string_center (&font_mono5, 64, 28, sprintf_buffer);
 }
 
 void sound_test_set_change (void)
