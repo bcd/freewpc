@@ -437,6 +437,11 @@ void award_door_panel_task (void)
 	task_exit ();
 }
 
+CALLSET_ENTRY (door, chaosmb_stop, sssmb_stop)
+{
+	door_award_enable ();
+}
+
 CALLSET_ENTRY(door, sw_piano)
 {
 	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))

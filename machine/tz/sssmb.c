@@ -195,6 +195,7 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 
 void sssmb_stop (void)
 {
+	callset_invoke (sssmb_stop);
 	if (!global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 		return;	
 	if (mball_jackpot_uncollected == TRUE)
