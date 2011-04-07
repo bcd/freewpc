@@ -86,7 +86,7 @@ void shoot_camera_deff (void)
 		flash_and_exit_deff2 (15, TIME_66MS);
 	}
 }
-
+#if 0
 void paused_deff (void)
 {
 	bool on = TRUE;	
@@ -118,6 +118,7 @@ void paused_deff (void)
 	deff_exit ();
 }
 
+#endif
 void shoot_power_payoff_deff (void)
 {
 	dmd_alloc_pair ();
@@ -131,11 +132,3 @@ void shoot_power_payoff_deff (void)
 	deff_exit ();
 }
 
-CALLSET_ENTRY (deffs2, display_update)
-{
-	if (task_find_gid (GID_MUTE_AND_PAUSE)
-		&& deff_get_active () != DEFF_PAUSED)
-	{
-		deff_start_bg (DEFF_PAUSED, 0);	
-	}
-}
