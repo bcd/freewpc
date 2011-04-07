@@ -64,9 +64,9 @@ struct rtc_state
 
 
 /* Year is stored as an offset from 2000 */
-static __nvram__ U8 year;
-static __nvram__ U8 month;
-static __nvram__ U8 day;
+__nvram__ U8 year;
+__nvram__ U8 month;
+__nvram__ U8 day;
 static __nvram__ U8 hour;
 static __nvram__ U8 day_of_week;
 
