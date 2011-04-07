@@ -75,11 +75,6 @@ __fastram__ U8 clock_find_target;
  * switch transitions */
 __fastram__ U8 clock_last_sw;
 
-
-/** How long calibration will be allowed to continue, before
- * giving up. */
-//U16 clock_calibration_time;
-
 /** The clock time "decoded" as the number of 15-minute intervals
 past 12:00, ranging from 0 to 47. */
 U8 clock_decode;
@@ -238,11 +233,11 @@ void tz_clock_switch_rtt (void)
 			}
 			/* Otherwise, the clock keeps running as it was */
 			/* BUG workaround: Goes very slowly backwards when it's miles away from home */
-			if (clock_mech_get_speed () < BIVAR_DUTY_25
-				&& (clock_hour != 11 || clock_hour != 0))
-			{
-				clock_mech_set_speed (BIVAR_DUTY_100);
-			}
+		//	if (clock_mech_get_speed () == BIVAR_DUTY_25
+		//		&& (clock_hour != 11 || clock_hour != 0))
+		//	{
+		//		clock_mech_set_speed (BIVAR_DUTY_100);
+		//	}
 
 		}
 		else if ((clock_mode == CLOCK_CALIBRATING))
@@ -294,10 +289,11 @@ void clock_pause_monitor_task (void)
 {
 	U8 clock_mode_stored;
 	U8 mech_speed_stored;
+	extern bool mpf_active;
 	for (;;)
 	{
-		if (kickout_locks > 0 
-			&& clock_mode == (CLOCK_RUNNING_FORWARD || clock_mode == CLOCK_RUNNING_BACKWARD))
+		if ((kickout_locks > 0 || mpf_active) 
+			&& (clock_mode == CLOCK_RUNNING_FORWARD || clock_mode == CLOCK_RUNNING_BACKWARD))
 		{
 			clock_mode_stored = clock_mode;
 			mech_speed_stored = clock_mech_get_speed ();
@@ -318,15 +314,15 @@ void clock_pause_monitor_task (void)
 
 inline void start_clock_pause_monitor (void)
 {
-//	if (!task_find_gid (GID_CLOCK_PAUSE))
-//		task_create_gid (GID_CLOCK_PAUSE, clock_pause_monitor_task);
+	if (!task_find_gid (GID_CLOCK_PAUSE))
+		task_create_gid (GID_CLOCK_PAUSE, clock_pause_monitor_task);
 }
 
 inline void stop_clock_pause_monitor (void)
 {
-//	task_kill_gid (GID_CLOCK_PAUSE);
+	task_kill_gid (GID_CLOCK_PAUSE);
 }
-
+#if 0
 void tz_clock_show_time (U8 hours, U8 minutes)
 {
 	if (hours > 12)
@@ -346,7 +342,7 @@ void tz_clock_show_time (U8 hours, U8 minutes)
 		clock_find_target = tz_clock_hour_to_opto[hours - 1] | CLK_SW_MIN45;
 	clock_mode = CLOCK_FIND;
 }
-
+#endif
 void tz_clock_start_forward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
@@ -442,7 +438,6 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 		}
 		/* If calibration doesn't succeed within a certain number
 		 * of iterations, give up. */
-		//if (clock_calibration_time-- == 0)
 		if (!timer_find_gid (GID_CLOCK_CALIBRATING))
 		{
 			dbprintf ("Calibration aborted.\n");
@@ -487,7 +482,6 @@ CALLSET_ENTRY (tz_clock, amode_start)
 			&& !global_flag_test (GLOBAL_FLAG_CLOCK_HOME))
 	{
 		dbprintf ("Clock calibration started.\n");
-		//clock_calibration_time = 500; /* 8 seconds */
 		timer_restart_free (GID_CLOCK_CALIBRATING, TIME_15S);
 		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 		clock_mech_set_speed (BIVAR_DUTY_100);
@@ -500,15 +494,15 @@ CALLSET_ENTRY (tz_clock, amode_start)
 	}
 }
 
-CALLSET_ENTRY (tz_clock, reverse_clock_direction)
+void tz_clock_reverse_direction (void)
 {
 	switch (clock_mode)
 	{
 		case CLOCK_RUNNING_FORWARD:
-			clock_mech_start_reverse ();
+			tz_clock_start_backward ();
 			break;
 		case CLOCK_RUNNING_BACKWARD:
-			clock_mech_start_forward ();
+			tz_clock_start_forward ();
 			break;
 		default:
 		case CLOCK_STOPPED:
@@ -518,20 +512,25 @@ CALLSET_ENTRY (tz_clock, reverse_clock_direction)
 	}
 }
 
-CALLSET_ENTRY (tz_clock, set_clock_slow)
+void tz_clock_set_speed (U8 speed)
 {
-	clock_mech_set_speed (BIVAR_DUTY_25);
-}
-
-CALLSET_ENTRY (tz_clock, set_clock_mid)
-{
-	clock_mech_set_speed (BIVAR_DUTY_50);
-}
-
-
-CALLSET_ENTRY (tz_clock, set_clock_fast)
-{
-	clock_mech_set_speed (BIVAR_DUTY_100);
+	if (speed > 3)
+		speed = 3;
+	switch (speed)
+	{	
+		default:
+		case 0:
+		case 1:
+			clock_mech_set_speed (BIVAR_DUTY_25);
+			break;
+		case 2:
+			clock_mech_set_speed (BIVAR_DUTY_50);
+			break;
+		case 3:
+			clock_mech_set_speed (BIVAR_DUTY_100);
+			break;
+			
+	}
 }
 
 CALLSET_ENTRY (tz_clock, diagnostic_check)
