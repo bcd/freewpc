@@ -322,15 +322,19 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	task_kill_gid (GID_MPF_BUTTON_MASHER);
 	bounded_decrement (mpf_ball_count, 0);
 	
-	if (mpf_ball_count == 0)
+	if (mpf_ball_count == 0 && timed_mode_running_p (&mpf_mode))
 	{
 		if (single_ball_play ())
 			leff_start (LEFF_FLASH_GI);
 		timed_mode_end (&mpf_mode);
-		score (SC_5M);
+		score (SC_1M);
+		sound_send (SND_HAHA_POWERFIELD_EXIT);
+	}
+	else if (mpf_ball_count == 0)
+	{
+		callset_invoke (start_hurryup);
 	}
 	flipper_enable ();
-	sound_send (SND_HAHA_POWERFIELD_EXIT);
 }
 
 CALLSET_ENTRY (mpf, sw_mpf_left)
