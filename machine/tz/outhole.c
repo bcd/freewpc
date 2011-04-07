@@ -59,8 +59,9 @@ static inline void multidrain_check (void)
 
 CALLSET_ENTRY (outhole, sw_outhole)
 {	
-	if (in_live_game)
+	if (in_live_game && !timer_find_gid (GID_OUTHOLE_DEBOUNCE))
 	{
+		timer_start_free (GID_OUTHOLE_DEBOUNCE, TIME_500MS);
 		/* Whoops, lost the powerball before getting it in the gumball */
 		if (!multi_ball_play () && global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
 		{
