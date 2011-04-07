@@ -442,7 +442,11 @@ Gumball over Camera: yes_no, NO
 Advanced bonus info:yes_no, YES
 
 # Tweak the drop time for the throw automatically
+# Doesnt currenly work
 Auto SWAG:yes_no, NO
+
+# Dont allow throw, as the drag may cause damage to the table
+Mag Throw:yes_no, YES
 
 ##########################################################################
 # Items for the Feature Audits menu.

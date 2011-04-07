@@ -27,13 +27,14 @@
 
 //#define MAG_POWER_TIME (512 / MAG_DRIVE_RTT_FREQ)
 #define MAG_POWER_TIME (512 / MAG_DRIVE_RTT_FREQ)
-#define DEFAULT_MAG_HOLD_TIME (256 / MAG_DRIVE_RTT_FREQ)
+#define DEFAULT_MAG_HOLD_TIME (512 / MAG_DRIVE_RTT_FREQ)
 
 #define DEFAULT_MAG_DROP_TIME ( 336 / MAG_DRIVE_RTT_FREQ)
 #define DEFAULT_MAG_DROP_TIME_LEFT ( 256 / MAG_DRIVE_RTT_FREQ)
 #define DEFAULT_MAG_DROP_TIME_RIGHT ( 196 / MAG_DRIVE_RTT_FREQ)
 #define DEFAULT_MAG_THROW_TIME (32 / MAG_DRIVE_RTT_FREQ)
-#define DEF_LEFT_OPTO_SWAG 6
+#define DEF_LEFT_OPTO_SWAG 22
+#define DEF_LOWER_RIGHT_OPTO_SWAG 32
 
 __fastram__ enum magnet_state {
 	MAG_DISABLED,
@@ -154,7 +155,6 @@ static inline void magnet_rtt_duty_handler (
 				sol_enable (sol_magnet);
 			else
 				sol_disable (sol_magnet);
-			/* This has to go here for some reason */
 			break;
 		
 		case MAG_THROW_DROP:
@@ -268,9 +268,11 @@ void magnet_enable_catch_and_throw (U8 magnet)
 {
 	if (timer_find_gid (GID_LEFT_TO_RIGHT_THROW) && magnet == MAG_LEFT)
 		return;
+	if (feature_config.mag_throw == NO)
+		return;
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
 	/* Hold the ball for 2 sec@100% before we throw to stabilise it*/
-	set_mag_hold_time (magnet, (64  / MAG_DRIVE_RTT_FREQ));
+//	set_mag_hold_time (magnet, (64  / MAG_DRIVE_RTT_FREQ));
 	enable_magnet_throw (magnet);
 	magstates[magnet] = MAG_ENABLED;
 }
@@ -342,8 +344,8 @@ CALLSET_ENTRY (magnet, init)
 
 CALLSET_ENTRY (magnet, factory_reset)
 {
-	left_magnet_swag = 22; // Start in the middle
-	lower_right_magnet_swag = 128; // Start in the middle
+	left_magnet_swag = DEF_LEFT_OPTO_SWAG;
+	lower_right_magnet_swag = DEF_LOWER_RIGHT_OPTO_SWAG;
 	left_magnet_throw_successes = 0;
 	lower_right_magnet_throw_successes = 0;
 }
