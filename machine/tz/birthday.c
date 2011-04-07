@@ -31,11 +31,15 @@ const struct {
 	const U8 month;
 	const char *message_line1;
 	const char *message_line2;
+	const U8 background;
 } birthday_msgs[] = {
-	{ 3, 7, "HAPPY BIRTHDAY", "BCD" },
-	{ 10, 10, "HAPPY BIRTHDAY", "FEK" },
-	{ 25, 12, "HAPPY BIRTHDAY", "JESUS" },
-	{ 1, 1, "HAPPY", "NEW YEAR" },
+	{ 3, 7, "HAPPY BIRTHDAY", "BCD", IMG_BIRTHDAY },
+	{ 10, 10, "HAPPY BIRTHDAY", "FEK", IMG_BIRTHDAY },
+	{ 25, 12, "HAPPY BIRTHDAY", "JESUS", IMG_BIRTHDAY },
+	{ 30, 10, "HAPPY", "HALLOWEEN", NULL },
+	{ 4, 6, "HAPPY", "INDEPENDENCE DAY", NULL },
+	{ 4, 11, "HAPPY BIRTHDAY", "JIM", NULL },
+	{ 1, 1, "HAPPY", "NEW YEAR", NULL },
 };
 
 extern U8 month;
@@ -43,15 +47,31 @@ extern U8 day;
 
 static void draw_birthday_msg (U8 birthday_msg)
 {
-	dmd_alloc_low_clean ();
+	if (birthday_msg > NUM_BIRTHDAYS)
+		birthday_msg = NUM_BIRTHDAYS;
+	dmd_alloc_pair_clean ();
 	dmd_sched_transition (&trans_bitfade_fast);
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+	
 	sprintf ("%s", birthday_msgs[birthday_msg].message_line1);
 	font_render_string_center (&font_fixed6, 64, 6, sprintf_buffer);
 	sprintf ("%s", birthday_msgs[birthday_msg].message_line2);
 	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (5);
-	deff_exit ();
+	
+	dmd_text_outline ();
+	dmd_alloc_pair ();
+	if (birthday_msgs[birthday_msg].background != NULL)
+	{
+		frame_draw (birthday_msgs[birthday_msg].background);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+	}
+	else
+	{
+		dmd_show_low ();
+	}
+		task_sleep_sec (6);
 }
 
 void check_birthdays (void)
