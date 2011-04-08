@@ -52,6 +52,7 @@ NATIVE_OBJS += $(if $(CONFIG_PIC), $(D)/wpc-pic.o)
 # For ASCII DMD
 NATIVE_OBJS += $(if $(CONFIG_DMD), $(D)/asciidmd.o, $(D)/segment.o)
 NATIVE_OBJS += $(if $(CONFIG_DMD), tools/imglib/imglib.o)
+NATIVE_OBJS += $(if $(CONFIG_DMD), cpu/native/dot.o)
 $(D)/asciidmd.o : CFLAGS += -Itools/imglib
 
 # For Ubuntu 8.10 and higher: The default compiler flags will try to

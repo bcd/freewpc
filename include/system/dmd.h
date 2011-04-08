@@ -215,10 +215,10 @@ __transition__ void dmd_overlay_color (void);
 __transition__ void dmd_overlay_onto_color (void);
 __transition__ void dmd_dup_mapped (void);
 
-#ifdef __m6809__
 void dmd_and_page (void);
 void dmd_or_page (void);
 void dmd_xor_page (void);
+#ifdef __m6809__
 void frame_decode_rle_asm (U8 *);
 void frame_decode_sparse_asm (U8 *);
 void dmd_copy_asm (dmd_buffer_t, dmd_buffer_t);
@@ -226,9 +226,6 @@ void dmd_copy_asm (dmd_buffer_t, dmd_buffer_t);
 #define frame_decode_sparse frame_decode_sparse_asm
 #else
 /* TODO - no C versions for some of these */
-#define dmd_and_page()
-#define dmd_or_page()
-#define dmd_xor_page()
 #define frame_decode_rle frame_decode_rle_c
 #define frame_decode_sparse(p)
 #endif
