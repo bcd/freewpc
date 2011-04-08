@@ -416,7 +416,6 @@ void ball_drain_outlane_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
-	dmd_sched_transition (&trans_scroll_down_fast);
 	deff_exit ();
 }
 
@@ -424,19 +423,17 @@ void ball_explode_deff (void)
 {
 	U16 fno;
 	extern bool powerball_death;
-	if (!multi_ball_play () && !ballsave_test_active ())
-		music_request (MUS_POWERFIELD, PRI_GAME_MODE1);
-//	dmd_alloc_pair_clean ();
-//	dmd_show2 ();
-//	task_sleep (TIME_200MS);
-
-
+	
 	dmd_alloc_pair ();
-	frame_draw (IMG_BALLEXPLODE_START);
-	if (deff_get_active () == DEFF_BALL_DRAIN_OUTLANE)
-		dmd_sched_transition (&trans_vstripe_left2right);
+	/* Do a vstripe wipe if ball went down the outlanes
+	 * otherwise scroll down, so it looks like the ball
+	 * falls then explodes */
+	if (timer_find_gid (GID_BALL_DRAIN_OUTLANE))
+		dmd_sched_transition (&trans_bitfade_fast);
 	else
 		dmd_sched_transition (&trans_scroll_down_fast);
+		
+	frame_draw (IMG_BALLEXPLODE_START);
 	dmd_show2 ();
 	if (powerball_death == FALSE)	
 		sound_send (SND_EXPLOSION_3);

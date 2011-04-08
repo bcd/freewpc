@@ -142,7 +142,7 @@ define CONFIG_TZONE_IP y
 [switches]
 11: Right Inlane, ingame, sound(SND_INSIDE_LEFT_INLANE)
 12: Right Outlane, ingame, sound(SND_DRAIN)
-13: Start Button, start-button, intest, debounce(TIME_100MS)
+13: Start Button, start-button, intest
 14: Tilt, tilt, ingame, noplay, cabinet
 15: Right Trough, noscore
 16: Center Trough, noscore

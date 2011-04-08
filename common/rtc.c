@@ -67,7 +67,7 @@ struct rtc_state
 __nvram__ U8 year;
 __nvram__ U8 month;
 __nvram__ U8 day;
-static __nvram__ U8 hour;
+__nvram__ U8 hour;
 static __nvram__ U8 day_of_week;
 
 U8 rtc_edit_field;
@@ -92,7 +92,7 @@ const struct area_csum rtc_csum_info = {
 	.reset_page = PAGE,
 };
 
-static U8 minute;
+U8 minute;
 
 /** Keeps track of when the minute changes, for auditing */
 static U8 last_minute;

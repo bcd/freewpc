@@ -22,29 +22,20 @@
 
 /* Turns a pinball table into an Egg Timer */
 #include <freewpc.h>
-
-bool alarm_enabled;
+/* TODO Store a specific time and watch the rtc instead */
+__permanent__ bool alarm_enabled;
 /* Time in minutes before the alarm goes off */
-U8 alarm_timer;
+__permanent__ U8 alarm_timer;
 
 extern U8 mute_and_pause_timeout;
 
 void paused_deff (void)
 {
-	bool on = TRUE;	
 	while (task_find_gid (GID_MUTE_AND_PAUSE))
 	{
 		dmd_alloc_pair_clean ();
 		
-		if (on)
-		{
-			font_render_string_center (&font_fixed10, 64, 10, "PAUSED");
-			on = FALSE;
-		}
-		else
-		{
-			on  = TRUE;
-		}
+		font_render_string_center (&font_fixed10, 64, 10, "PAUSED");
 		/* mute_and_pause_timeout is stored as 5 second chunks, to save
 		 * having to use a U16 */
 		if (!alarm_enabled)
@@ -60,7 +51,7 @@ void paused_deff (void)
 		font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 27, "PRESS BUYIN TO CONTINUE");
 		dmd_show_low ();
-		task_sleep (TIME_500MS);
+		task_sleep (TIME_200MS);
 	}
 	deff_exit ();
 }
@@ -97,6 +88,14 @@ CALLSET_ENTRY (alarm, sw_left_button)
 		bounded_decrement (alarm_timer, 0);
 		if (alarm_timer == 0)
 			alarm_enabled = FALSE;
+		else
+		{
+			while (switch_poll_logical (SW_LEFT_BUTTON))
+			{
+				task_sleep (TIME_200MS);
+				bounded_decrement (alarm_timer, 0);
+			}
+		}
 	}
 }
 
@@ -106,14 +105,21 @@ CALLSET_ENTRY (alarm, sw_right_button)
 	{
 		alarm_enabled = TRUE;
 		bounded_increment (alarm_timer, 60);
+		if (alarm_timer < 60)
+		{
+			while (switch_poll_logical (SW_RIGHT_BUTTON))
+			{
+				task_sleep (TIME_200MS);
+				bounded_increment (alarm_timer, 60);
+			}
+		}
 	}
 }
 
-
-CALLSET_ENTRY (alarm, init)
+CALLSET_ENTRY (alarm, factory_reset)
 {
 	alarm_enabled = FALSE;
-	alarm_timer = 5;
+	alarm_timer = 4;
 }
 
 static void alarm_task (void)

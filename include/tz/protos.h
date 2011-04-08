@@ -49,13 +49,14 @@ __machine__ void door_start_camera (void);
 __machine2__ bool can_award_camera (void);
 
 /* clock.c */
-void tz_dump_clock(void);
-void tz_clock_start_forward(void);
-void tz_clock_start_backward(void);
-void tz_clock_stop(void);
-void tz_clock_reset(void);
-void tz_clock_show_time (U8 hours, U8 minutes);
-
+__machine__ void tz_dump_clock(void);
+__machine__ void tz_clock_start_forward(void);
+__machine__ void tz_clock_start_backward(void);
+__machine__ void tz_clock_stop(void);
+__machine__ void tz_clock_reset(void);
+//__machine__ void tz_clock_show_time (U8 hours, U8 minutes);
+__machine__ void tz_clock_reverse_direction (void);
+__machine__ void tz_clock_set_speed (U8 speed);
 /* deffs.c */
 __machine__ void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
 __machine__ void printf_millions(U8 n);

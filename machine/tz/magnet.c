@@ -97,7 +97,8 @@ static inline void magnet_rtt_duty_handler (
 			/* switch to MAG_ON_HOLD fairly quickly though */
 			/* But leave solenoid enabled so it doesn't suffer 
 			 * any drop */
-			if (--*power_timer == 0)
+			--*power_timer;
+			if (*power_timer == 0)
 			{	
 				/* Inverted as it's an opto */
 				if (rt_switch_poll (sw_magnet))

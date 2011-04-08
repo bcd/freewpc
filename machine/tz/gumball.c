@@ -33,7 +33,6 @@ U8 timeout;
 
 /* How many balls are in the gumball */
 __fastram__ U8 gumball_count;
-extern sound_code_t music_active;
 
 /* How many times can the player enter the Gumball */
 __local__ U8 gumball_enable_count;
@@ -42,7 +41,6 @@ U8 gumball_score;
 
 extern U8 pb_location;
 extern bool hold_balls_in_autofire;
-
 
 //TODO Start a timer to check if a ball came out, if not, turn again 
 
@@ -67,8 +65,8 @@ void award_gumball_score (void)
 
 	if (global_flag_test(GLOBAL_FLAG_POWERBALL_IN_PLAY))
 	{	
-		score (SC_20M);
-		gumball_score =+ 20;
+		score (SC_5M);
+		gumball_score =+ 5;
 	}
 	
 }
@@ -185,8 +183,8 @@ void sw_gumball_right_loop_entered (void)
 
 CALLSET_ENTRY (gumball, sw_gumball_exit)
 {
-	if (!global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
-		sound_send (SND_GUMBALL_LOADED);
+//	if (!global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
+//		sound_send (SND_GUMBALL_LOADED);
 	if (event_did_follow (gumball_geneva, gumball_exit) 
 		|| event_did_follow (gumball_release, gumball_exit))
 	{
@@ -324,19 +322,11 @@ void sw_far_left_trough_monitor (void)
 	task_exit ();
 }
 
-static void gumball_music_bug_task (void)
-{
-	task_sleep_sec (5);
-	music_disable ();
-	task_sleep (TIME_66MS);
-	music_enable ();
-	task_exit ();
-}
-
 void gumball_deff (void)
 {
 	sound_send (SND_GUMBALL_LOAD_START);
-	task_recreate_gid (GID_GUMBALL_MUSIC_BUG, gumball_music_bug_task);
+	//music_effect_start (SND_GUMBALL_LOAD_START, SL_3S);
+//	task_recreate_gid (GID_GUMBALL_MUSIC_BUG, gumball_music_bug_task);
 	U16 fno;
 	for (fno = IMG_GUMBALL_START; fno <= IMG_GUMBALL_END; fno += 2)
 	{
@@ -358,7 +348,7 @@ void gumball_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
 	}
-	sound_send (SND_GUMBALL_LOAD_END);
+	music_effect_start (SND_GUMBALL_LOAD_END, SL_3S);
 	task_sleep_sec (2);
 	dmd_alloc_low_clean ();
 	psprintf("1 GUMBALL", "%d GUMBALLS", gumball_collected_count);

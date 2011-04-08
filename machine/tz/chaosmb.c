@@ -227,7 +227,6 @@ CALLSET_ENTRY (chaosmb, chaosmb_start)
 		/* Check and light jackpot lamp */
 		chaosmb_check_jackpot_lamps ();
 		/* TODO vary speed based on jackpot? */
-		callset_invoke (set_clock_fast);
 		tz_clock_start_forward ();
 	}
 }
@@ -339,7 +338,7 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 				score (SC_100K);
 			/* The clock will be stopped, don't try to move it */
 			if (chaosmb_hits_to_relight != 0)
-				tz_clock_reverse_direction ();
+				callset_invoke (tz_clock_reverse_direction);
 		}
 		bounded_decrement (chaosmb_hits_to_relight, 0);
 	}

@@ -241,7 +241,7 @@ void draw_taunts (void)
 	 * Taunts.....
 	 * */
 	
-	task_sleep (TIME_500MS);
+//	task_sleep (TIME_500MS);
 	if (multidrain_count >= 3)
 	{
 		dmd_alloc_low_clean ();
@@ -253,35 +253,30 @@ void draw_taunts (void)
 		task_sleep_sec (2);
 	}
 	
-	else if (stdm_death == TRUE)
+	if (stdm_death)
 	{
-		sound_send (SND_HEY_ITS_ONLY_PINBALL);
 		dmd_alloc_low_clean ();
 		sprintf ("SDTM DEATH");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
+		sound_send (SND_HEY_ITS_ONLY_PINBALL);
 		task_sleep_sec (2);
 	}
 	
-	else if (unfair_death == TRUE)
+	if (unfair_death)
 	{
-		sound_send (SND_HAHA_POWERFIELD_EXIT);
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed10, 64, 11, "BAD SHOW");
 		font_render_string_center (&font_var5, 64, 26, "UNFAIR DEATH");
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
+		sound_send (SND_HAHA_POWERFIELD_EXIT);
 		task_sleep_sec (2);
-		/* Don't bother taunting the player about a quick death
-		 * Hardly seems fair! */
-		quickdeath_timer_running = FALSE;
 	}
 
-	else if (quickdeath_timer_running == TRUE)
+	if (quickdeath_timer_running && !unfair_death)
 	{
-	/* TODO This should only taunt if the game time was <10 seconds
-	 * atm it does so when any ball is served, rather than the first */
 		dmd_alloc_low_clean ();
 		sprintf ("YOU LASTED LONG");
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
@@ -291,7 +286,7 @@ void draw_taunts (void)
 		task_sleep_sec (2);
 	}
 	
-	else if (powerball_death == TRUE)
+	if (powerball_death == TRUE)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("POWERBALL");
@@ -301,7 +296,7 @@ void draw_taunts (void)
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_NEVER_UNDERESTIMATE_POWER);
-		task_sleep_sec (4);
+		task_sleep_sec (3);
 	}	
 }
 
@@ -326,6 +321,98 @@ void trans_and_show (void)
 	bonus_pause ();
 }
 
+void one_ball_score_task (void)
+{
+	/* 
+	 *
+	 * Total points this ball 
+	 * 
+	 */
+	
+	/* Calculate */
+	score_zero (points_this_ball);
+	score_copy (points_this_ball, current_score);
+	score_sub (points_this_ball, start_ball_score);
+	
+	score_zero (temp_score);
+
+	/* Don't show if on first ball, you can just look at the scoreboard */
+	if (ball_up != 1 && feature_config.advanced_bonus_info == YES)
+	{	
+		task_kill_gid (GID_BONUS_TALKING);
+		
+		countup_pause_iterations = 0;
+		do {
+			dmd_alloc_low_clean ();
+			
+			/* Shake the text */
+			U8 x = random_scaled (8);
+			U8 y = random_scaled (4);
+			
+			font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
+			sprintf_score (temp_score);
+			font_render_string_center (&font_fixed10, 60 + x, 22 + y, sprintf_buffer);
+			/* TODO : points this ball counts up very slow for really good balls */
+			dmd_show_low ();
+			score_add (temp_score, score_table[SC_5130]);
+			score_add (temp_score, score_table[SC_500K]);
+			/* Make some noise based on points */
+			if (score_compare (temp_score, score_table[SC_100M]) == 1 \
+				&& !task_find_gid (GID_BONUS_TALKING))
+				task_create_gid (GID_BONUS_TALKING, points_this_ball_sound_task);
+			else if (!task_find_gid (GID_BONUS_TALKING))
+				sound_send (SND_THUD);
+			bounded_increment (countup_pause_iterations, 254);
+			if (buttons_held == TRUE)
+				score_copy (temp_score, points_this_ball);
+			countup_pause ();
+		} while ( score_compare (points_this_ball, temp_score) == 1 );
+		
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
+		sprintf_score (points_this_ball);
+		font_render_string_center (&font_fixed10, 64, 24, sprintf_buffer);
+		dmd_show_low ();
+		if (check_for_puny_score ())
+			sound_send (SND_BUYIN_CANCELLED);
+		else if (check_for_big_score ())
+			task_sleep_sec (2);
+		else
+			sound_send (SND_GREED_MODE_BOOM);
+		
+		bonus_sched_transition ();
+		task_sleep_sec (2);
+	}
+	
+	/* Store and sort the current one ball hi scores during multiplayer */
+	if (num_players > 1 && score_compare (points_this_ball, current_one_ball_hi_score) == 1)
+	{
+		score_zero (current_one_ball_hi_score);
+		score_copy (current_one_ball_hi_score, points_this_ball);
+		current_one_ball_hi_player = player_up;
+		current_one_ball_hi_ball_number = ball_up;
+	}
+		
+	/* If it's the last player of a multi player game ... */
+	if (num_players > 1 && player_up == num_players && ball_up != 1 && extra_balls == 0 && feature_config.advanced_bonus_info == YES)
+	{
+	 	/* show highest 1 ball score so far*/
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_mono5, 64, 4, "HIGHEST 1 BALL SCORE");
+		sprintf_score (current_one_ball_hi_score);
+		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		if (current_one_ball_hi_ball_number == ball_up)
+			sprintf ("P%d ON THEIR LAST BALL", current_one_ball_hi_player);
+		else if (current_one_ball_hi_ball_number == ball_up && current_one_ball_hi_player == player_up)
+			sprintf ("P%d ON THE LAST BALL", current_one_ball_hi_player);
+		else
+			sprintf ("PLAYER %d ON BALL %d", current_one_ball_hi_player, current_one_ball_hi_ball_number);
+		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+		bonus_sched_transition ();
+		dmd_show_low ();
+		task_sleep_sec (2);
+	}
+}
 
 void bonus_deff (void)
 {
@@ -346,21 +433,6 @@ void bonus_deff (void)
 	
 	if (door_panels_started)
 	{
-	/*	dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_1M]);
-		score_mul (bonus_scored, door_panels_started); 
-		score_add (total_bonus, bonus_scored);
-		sprintf_score (bonus_scored);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sprintf ("DOOR PANELS");
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf ("%d X 1,000,000", (door_panels_started));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();*/
 		calc_and_draw_bonus (SC_1M, door_panels_started);
 		font_render_string_center (&font_mono5, 64, 4, "DOOR PANELS");
 		trans_and_show ();
@@ -371,9 +443,7 @@ void bonus_deff (void)
 		calc_and_draw_bonus (SC_1M, loops);
 		font_render_string_center (&font_mono5, 64, 4, "LOOPS");
 		trans_and_show ();
-		if (loops < loop_master_hi)
-			bonus_pause ();
-		else 
+		if (loops > loop_master_hi)
 		{
 			loop_master_hi = loops;
 			loop_master_initial_enter = player_up;
@@ -636,134 +706,47 @@ void bonus_deff (void)
 	/* Add total bonus to player score */
 	score_long (total_bonus);
 	
-	/* 
-	 *
-	 * Total points this ball 
-	 * 
-	 */
-	
-	/* Calculate */
-	score_zero (points_this_ball);
-	score_copy (points_this_ball, current_score);
-	score_sub (points_this_ball, start_ball_score);
-	
-	score_zero (temp_score);
-
-	/* Don't show if on first ball, you can just look at the scoreboard */
-	if (ball_up != 1 && feature_config.advanced_bonus_info == YES)
-	{	
-		task_kill_gid (GID_BONUS_TALKING);
-		
-		countup_pause_iterations = 0;
-		do {
-			dmd_alloc_low_clean ();
-			
-			/* Shake the text */
-			U8 x = random_scaled (8);
-			U8 y = random_scaled (4);
-			
-			font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
-			sprintf_score (temp_score);
-			font_render_string_center (&font_fixed10, 60 + x, 22 + y, sprintf_buffer);
-			/* TODO : points this ball counts up very slow for really good balls */
-			dmd_show_low ();
-			score_add (temp_score, score_table[SC_5130]);
-			score_add (temp_score, score_table[SC_500K]);
-			/* Make some noise based on points */
-			if (score_compare (temp_score, score_table[SC_100M]) == 1 \
-				&& !task_find_gid (GID_BONUS_TALKING))
-				task_create_gid (GID_BONUS_TALKING, points_this_ball_sound_task);
-			else if (!task_find_gid (GID_BONUS_TALKING))
-				sound_send (SND_THUD);
-			bounded_increment (countup_pause_iterations, 254);
-			if (buttons_held == TRUE)
-				score_copy (temp_score, points_this_ball);
-			countup_pause ();
-		} while ( score_compare (points_this_ball, temp_score) == 1 );
-		
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
-		sprintf_score (points_this_ball);
-		font_render_string_center (&font_fixed10, 64, 24, sprintf_buffer);
-		dmd_show_low ();
-		if (check_for_puny_score ())
-			sound_send (SND_BUYIN_CANCELLED);
-		else if (check_for_big_score ())
-			task_sleep_sec (2);
-		else
-			sound_send (SND_GREED_MODE_BOOM);
-		
-		bonus_sched_transition ();
-		task_sleep_sec (2);
-	}
-	
-	/* Store and sort the current one ball hi scores during multiplayer */
-	if (num_players > 1 && score_compare (points_this_ball, current_one_ball_hi_score) == 1)
+	/* Calculate and show 1 ball hiscores */
+	one_ball_score_task ();
+	/* Calculate lead into temp_score */
+	if (num_players > 1)
 	{
-		score_zero (current_one_ball_hi_score);
-		score_copy (current_one_ball_hi_score, points_this_ball);
-		current_one_ball_hi_player = player_up;
-		current_one_ball_hi_ball_number = ball_up;
-	}
-		
-	/* If it's the last player of a multi player game ... */
-	if (num_players > 1 && player_up == num_players && ball_up != 1 && extra_balls == 0 && feature_config.advanced_bonus_info == YES)
-	{
-	 	/* show highest 1 ball score so far*/
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_mono5, 64, 4, "HIGHEST 1 BALL SCORE");
-		sprintf_score (current_one_ball_hi_score);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		if (current_one_ball_hi_ball_number == ball_up)
-			sprintf ("P%d ON THEIR LAST BALL", current_one_ball_hi_player);
-		else if (current_one_ball_hi_ball_number == ball_up && current_one_ball_hi_player == player_up)
-			sprintf ("P%d ON THE LAST BALL", current_one_ball_hi_player);
-		else
-			sprintf ("PLAYER %d ON BALL %d", current_one_ball_hi_player, current_one_ball_hi_ball_number);
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		task_sleep_sec (2);
-	
-
-		/* Calculate lead into temp_score */
 		score_zero (temp_score);
 		score_copy (temp_score, scores[find_player_ranked(1)]);
 		score_sub (temp_score, scores[find_player_ranked(2)]);
 		sprintf_score (temp_score);
-
-
-		if (check_if_last_ball_of_multiplayer_game ())
-		{
-			task_sleep_sec (2);
-		}
-		else
-		{
-			sound_send (SND_RABBLE_RABBLE);
-			dmd_alloc_low_clean ();
-			sprintf("PLAYER %d LEADS BY", find_player_ranked(1) + 1);
-			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-			sprintf_score(temp_score);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-			
-			if (num_players == 3)
-			{
-				sprintf("2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1);
-				font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-			}
-			else if (num_players == 4)
-			{
-				sprintf("2ND P%d 3RD P%d 4TH P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1,
-					find_player_ranked(4) + 1);
-
-				font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
-			}
-			dmd_show_low ();
-			task_sleep_sec (3);
-			
-		
-		}
 	}
+
+	if (check_if_last_ball_of_multiplayer_game ())
+	{
+		task_sleep_sec (2);
+	}
+	else if (num_players > 1 && player_up == num_players && ball_up != 1)
+	{
+		sound_send (SND_RABBLE_RABBLE);
+		dmd_alloc_low_clean ();
+		sprintf("PLAYER %d LEADS BY", find_player_ranked(1) + 1);
+		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+		sprintf_score(temp_score);
+		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		
+		if (num_players == 3)
+		{
+			sprintf("2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1);
+			font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+		}
+		else if (num_players == 4)
+		{
+			sprintf("2ND P%d 3RD P%d 4TH P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1,
+				find_player_ranked(4) + 1);
+				font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+		}
+		dmd_show_low ();
+		task_sleep_sec (3);
+		
+	
+	}
+
 
 	if (check_if_last_ball_of_multiplayer_game ()
 		&& feature_config.advanced_bonus_info == YES)

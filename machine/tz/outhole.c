@@ -49,7 +49,7 @@ static inline void multidrain_check (void)
 			&& multi_ball_play ()
 			&& multidrain_count == 0)
 		{
-			timer_restart_free (GID_MULTIDRAIN, TIME_7S);
+			timer_restart_free (GID_MULTIDRAIN, TIME_9S);
 		}
 		
 		if (timer_find_gid (GID_MULTIDRAIN))

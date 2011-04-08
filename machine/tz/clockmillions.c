@@ -172,7 +172,7 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 	{
 		leff_start (LEFF_CLOCK_TARGET);
 		if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
-			tz_clock_reverse_direction ();
+			callset_invoke (tz_clock_reverse_direction);
 		/* Award bonus if hit 6 times */
 		if (++clock_mode_hits > 5)
 		{

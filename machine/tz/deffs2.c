@@ -86,39 +86,7 @@ void shoot_camera_deff (void)
 		flash_and_exit_deff2 (15, TIME_66MS);
 	}
 }
-#if 0
-void paused_deff (void)
-{
-	bool on = TRUE;	
-	while (task_find_gid (GID_MUTE_AND_PAUSE))
-	{
-		dmd_alloc_pair_clean ();
-		
-		if (on)
-		{
-			font_render_string_center (&font_fixed10, 64, 10, "PAUSED");
-			on = FALSE;
-		}
-		else
-		{
-			on  = TRUE;
-		}
-		/* mute_and_pause_timeout is stored as 5 second chunks, to save
-		 * having to use a U16 */	
-		if (mute_and_pause_timeout <= 12)
-			sprintf ("TIMEOUT IN %d SECONDS", mute_and_pause_timeout / 5);
-		else
-			sprintf ("TIMEOUT IN %d MINUTES", mute_and_pause_timeout / 12);
 
-		font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 27, "PRESS BUYIN TO CONTINUE");
-		dmd_show_low ();
-		task_sleep (TIME_500MS);
-	}
-	deff_exit ();
-}
-
-#endif
 void shoot_power_payoff_deff (void)
 {
 	dmd_alloc_pair ();
@@ -132,3 +100,19 @@ void shoot_power_payoff_deff (void)
 	deff_exit ();
 }
 
+CALLSET_ENTRY (deffs2, amode_page)
+{
+	extern U8 hour;
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+	if (hour < 12)
+		sprintf ("GOOD MORNING");
+	else if (hour < 18)
+		sprintf ("GOOD AFTERNOON");
+	else if (hour < 21)
+		sprintf ("GOOD EVENING");
+	else
+		sprintf ("THE TWILIGHT HOUR");
+	font_render_string_center (&font_var5, 64, 24, sprintf_buffer);
+	show_text_on_stars ();
+}

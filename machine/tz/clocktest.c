@@ -151,7 +151,6 @@ void tz_clock_test_enter (void)
 
 void tz_clock_test_start (void)
 {
-	tz_clock_show_time (2, 28);
 	//tz_clock_reset ();
 }
 

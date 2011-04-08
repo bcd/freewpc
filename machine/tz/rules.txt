@@ -231,7 +231,7 @@ time remaining and awards the following scores:
 Bonus
 =====
 
-Press both flipper buttons in together to speed up the bonus animation.
+Press both flipper buttons in together to slow down the bonus animation.
 
 - Door panels	1M each
 - Loops		100K each
@@ -299,3 +299,25 @@ And 2 x 3 way combos:
 
 You get awarded a Lucky Bounce if the game thinks that skill wasn't involved
 :-p
+
+Magnet test
+===========
+
+Buttons:
+Vol +/-: 	Select magnet
+Flippers: 	Change magnet drop time
+Start:	 	toggle juggle ball
+Enter:		Autofire ball
+
+Clock test
+==========
+Right flipper:	Manually set 12:00
+Vol +/-:	Change clock speed
+
+Pause and alarm
+===============
+Press buyin to pause during a game, it will keep the flippers on hold power if
+they are activated and timeout after 15 minutes.  Press buyin to resume.
+
+Whilst paused you can press the left and right flipper buttons to set an alarm
+(no more burnt food!).  I know most phones let you do this nowadays, but this is way cooler :-)

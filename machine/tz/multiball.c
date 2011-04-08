@@ -58,6 +58,18 @@ extern U8 autofire_request_count;
 extern bool fastlock_running (void);
 extern U8 lucky_bounces;
 
+bool check_for_midnight (void)
+{
+	extern U8 hour;
+	extern U8 minute;
+	if ((hour == 0 && minute < 15)
+		|| (hour == 23 && minute > 45))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+
 void mball_restart_countdown_task (void)
 {
 	U8 last_number_called = 6;
@@ -209,6 +221,12 @@ void mb_lit_deff (void)
 void mb_start_deff (void)
 {
 	sound_send (SND_DONT_TOUCH_THE_DOOR_AD_INF);
+	
+	if (check_for_midnight ())
+		sprintf ("MIDNIGHT");
+	else
+		sprintf ("MULTI BALL");
+			
 	U16 fno;
 	U8 i;
 	for (i = 0; i < 6; i++)
@@ -218,14 +236,14 @@ void mb_start_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			
+		
 			j++;
 			if (j % 2 != 0)
 			{
 				font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
 			}
 			else
-				font_render_string_center (&font_fixed6, 64, 16, "MULTI BALL");
+				font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 			
 			dmd_text_outline ();
 			dmd_alloc_pair ();
@@ -347,9 +365,8 @@ CALLSET_ENTRY (mball, lamp_update)
 		/* Flash the Piano Jackpot lamp when MB Jackpot is lit */
 		if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 			lamp_tristate_flash (LM_PIANO_JACKPOT);
-		/* Turn off lock lamps during multiball */
-	//	lamp_tristate_off (LM_LOCK1);
-	//	lamp_tristate_off (LM_LOCK2);
+		else
+			lamp_tristate_off (LM_PIANO_JACKPOT);
 	}
 	/* Turn on and flash door lock lamps during game situations */
 	else if (mball_locks_made == 0 && mball_locks_lit == 0)
@@ -467,7 +484,6 @@ CALLSET_ENTRY (mball, mball_start)
 {
 	if (!global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 	{
-		lamp_tristate_off (LM_MULTIBALL);
 		magnet_reset ();
 		callset_invoke (mball_restart_stop);
 		unlit_shot_count = 0;
@@ -476,7 +492,6 @@ CALLSET_ENTRY (mball, mball_start)
 		music_refresh ();
 		kickout_lock (KLOCK_DEFF);
 		deff_start (DEFF_MB_START);
-		leff_start (LEFF_MB_RUNNING);
 		/* Set the jackpot higher if two balls were locked */
 		if (mball_locks_made > 1)
 			jackpot_level = 3;
@@ -486,8 +501,16 @@ CALLSET_ENTRY (mball, mball_start)
 		mball_locks_made = 0;
 		mball_jackpot_uncollected = TRUE;
 		mballs_played++;
+		/* Turn off all the lamps for the leff to use */
+		lamp_off (LM_MULTIBALL);
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
+		lamp_off (LM_LOCK1);
+		lamp_off (LM_LOCK2);
+		if (check_for_midnight ())
+			leff_start (LEFF_BONUS);
+		else
+			leff_start (LEFF_MB_RUNNING);
 	}
 }
 

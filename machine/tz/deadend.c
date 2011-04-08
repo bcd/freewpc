@@ -66,9 +66,7 @@ void dead_end_deff (void)
 		task_sleep (TIME_66MS);
 	}
 
-	dmd_clean_page_low ();
-	dmd_clean_page_high ();
-	dmd_alloc_low ();
+	dmd_alloc_pair_clean ();
 	psprintf ("1 DEAD END", "%d DEAD ENDS", dead_end_count);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 	

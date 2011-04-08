@@ -26,6 +26,7 @@
  * 	25% = ~55 seconds
  */
 
+/* CALLSET_SECTION (clock, __machine__) */
 #include <freewpc.h>
 #include <clock_mech.h>
 #include <diag.h>
@@ -404,8 +405,10 @@ void tz_clock_reset (void)
 			else
 				clock_mech_start_forward ();
 			timer_start_free (GID_CLOCK_FINDING, TIME_15S);
+			
+			if (clock_mode != CLOCK_FIND && clock_mode != CLOCK_CALIBRATING)
+				clock_mech_set_speed (BIVAR_DUTY_100);
 			clock_mode = CLOCK_FIND;
-			clock_mech_set_speed (BIVAR_DUTY_100);
 		}
 	}
 }
@@ -494,7 +497,8 @@ CALLSET_ENTRY (tz_clock, amode_start)
 	}
 }
 
-void tz_clock_reverse_direction (void)
+//void tz_clock_reverse_direction (void)
+CALLSET_ENTRY (clock, tz_clock_reverse_direction)
 {
 	switch (clock_mode)
 	{

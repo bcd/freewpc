@@ -92,7 +92,7 @@ void check_birthdays (void)
 	}
 }
 
-CALLSET_ENTRY (birthday, amode_page)
+CALLSET_ENTRY (birthday, amode_page, start_game)
 {
 	check_birthdays ();
 }

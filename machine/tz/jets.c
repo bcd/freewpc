@@ -209,9 +209,8 @@ void jets_hit_deff (void)
 		task_sleep (TIME_33MS);
 	}
 	/* Redraw it so the 'HITS' text is centred */
-	dmd_clean_page_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
-	dmd_alloc_low ();
 	psprintf ("1 HIT", "%d HITS", jets_scored);
 	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));

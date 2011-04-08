@@ -116,6 +116,7 @@ CALLSET_ENTRY (lanes, sw_right_button)
 /* 'Extra Ball' outlane */
 CALLSET_ENTRY (lanes, sw_left_outlane)
 {
+	timer_restart_free (GID_BALL_DRAIN_OUTLANE, TIME_5S);
 	score (SC_10K);
 	handle_outlane ();
 }
@@ -123,6 +124,7 @@ CALLSET_ENTRY (lanes, sw_left_outlane)
 /* 'Special' outlane */
 CALLSET_ENTRY (lanes, sw_right_outlane)
 {
+	timer_restart_free (GID_BALL_DRAIN_OUTLANE, TIME_5S);
 	score (SC_10K);
 	handle_outlane ();
 }
