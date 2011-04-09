@@ -52,7 +52,9 @@ match_draw_scores (void)
 {
 	U8 n;
 
+#if (MACHINE_DMD == 1)
 	dmd_map_overlay ();
+#endif
 	dmd_clean_page_low ();
 	font_render_string_right (&font_fixed6, 126, 1, "MATCH");
 
@@ -73,7 +75,10 @@ match_deff (void)
 	U8 n;
 	U8 last_value = 0xFF;
 
+#if (MACHINE_DMD == 1)
 	match_draw_scores ();
+#endif
+
 	for (n=0; n < 20; n++)
 	{
 		if (n == 19)
@@ -85,6 +90,7 @@ match_deff (void)
 			} while (value == last_value);
 		}
 		last_value = value;
+
 #ifdef MACHINE_TZ
 		if (n == 19 && match_count)
 			sound_send (SND_JET_BUMPER_ADDED);
@@ -93,7 +99,11 @@ match_deff (void)
 #endif
 
 		dmd_alloc_low_clean ();
+#if (MACHINE_DMD == 1)
 		dmd_overlay ();
+#else
+		match_draw_scores ();
+#endif
 		sprintf ("%2b", &value);
 		font_render_string_right (&font_fixed6, 126, 22, sprintf_buffer);
 		dmd_show_low ();
