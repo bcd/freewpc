@@ -118,7 +118,7 @@ BUILD_YEAR := $(shell date +%Y)
 
 
 .PHONY : platform_target
-ifeq ($(CONFIG_SIM), y)
+ifeq ($(CPU), native)
 platform_target : native
 else
 ifdef TARGET_ROMPATH
