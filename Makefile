@@ -870,7 +870,7 @@ fonts clean-fonts:
 sched: $(SCHED_SRC) tools/sched/sched.make
 
 $(SCHED_SRC): $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(SCHED) $(SCHED_HEADERS) $(MAKE_DEPS)
-	$(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(MACHINE_SCHED_FLAGS)
+	shopt -s nullglob && $(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(MACHINE_SCHED_FLAGS)
 
 #######################################################################
 ###	Tracing
