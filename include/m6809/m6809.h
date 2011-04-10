@@ -74,9 +74,11 @@ do { \
 	asm ("jsr\t_far_call_pointer_handler"); \
 } while (0);
 
-void *malloc (U8 size);
-void free (void *ptr);
-
+#define __common__ __attribute__((section ("page56")))
+__common__ void *malloc (U8 size);
+__common__ void free (void *ptr);
+__common__ void malloc_chunk_dump ();
+#undef __common__
 
 extern inline void set_stack_pointer (const U16 s)
 {
