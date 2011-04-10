@@ -66,7 +66,7 @@ EXTRA_CFLAGS += -DCONFIG_MUTE_PAUSE
 SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h \
 	build/right_jet.h build/lower_jet.h build/left_mpf.h build/right_mpf.h
 
-GAME_OBJS = sling.o jets.o autofire.o gumball.o \
+GAME_OBJS = jets.o autofire.o gumball.o \
 	config.o loop.o rampdiv.o magnet.o \
 	maghelper.o clock.o
 
@@ -75,7 +75,7 @@ GAME_TEST_OBJS = gumball_test.o powerball_test.o clocktest.o magtest.o
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = leftramp.o rightramp.o skill.o \
-	fastlock.o door.o slot.o \
+	fastlock.o door.o slot.o sling.o \
 	mpf.o chaosmb.o powerball.o \
 	multiball.o sssmb.o deffs.o
 
