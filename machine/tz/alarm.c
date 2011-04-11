@@ -179,13 +179,11 @@ CALLSET_ENTRY (alarm, sw_left_button)
 	if (deff_get_active () == DEFF_PAUSED)
 	{
 		check_alarm_enabled ();
-		timer_restart_free (GID_ALARM_BUTTON_PUSH, TIME_2S);
 		bounded_decrement (alarm_time, 0);
 		task_sleep (TIME_200MS);
 		while (switch_poll_logical (SW_LEFT_BUTTON))
 			{
 				task_sleep (TIME_100MS);
-				timer_restart_free (GID_ALARM_BUTTON_PUSH, TIME_2S);
 				bounded_decrement (alarm_time, 0);
 			}
 
@@ -197,13 +195,11 @@ CALLSET_ENTRY (alarm, sw_right_button)
 	if (deff_get_active () == DEFF_PAUSED)
 	{
 		check_alarm_enabled ();
-		timer_restart_free (GID_ALARM_BUTTON_PUSH, TIME_2S);
 		bounded_increment (alarm_time, 0);
 		task_sleep (TIME_200MS);
 		while (switch_poll_logical (SW_RIGHT_BUTTON))
 			{
 				task_sleep (TIME_100MS);
-				timer_restart_free (GID_ALARM_BUTTON_PUSH, TIME_2S);
 				bounded_increment (alarm_time, ALARM_DISABLED - 1);
 			}
 	}
