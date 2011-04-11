@@ -30,48 +30,47 @@ __permanent__ U16 alarm_time;
 __permanent__ bool alarm_persistant;
 
 extern U8 mute_and_pause_timeout;
+extern U8 hour;
+extern U8 minute;
 
-/* How long in minutes before the alarm goes off */
-static void render_alarm_time (void)
+/* returns how many minutes from midnight we are */
+static U16 rtc_minutes_from_midnight (void)
 {
-	static const U8 rtc_us_hours[] = {
-		12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-		12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-	};
-
-	switch (system_config.clock_style)
+	U16 minutes;
+	if (hour)
 	{
-		case CLOCK_STYLE_AMPM:
-		default:
-			sprintf ("%d:%02d %s",
-				rtc_us_hours[alarm_hour], alarm_minute, (alarm_hour >= 12)?"PM":"AM");
-			break;
-
-		case CLOCK_STYLE_24HOUR:
-			sprintf ("%02d:%02d", alarm_hour, alarm_minute);
-			break;
+		minutes = hour * 60;
+		minutes += minute;
+		return minutes;
 	}
+	else
+		return minute;
 }
 
 static void render_minutes_to_alarm (void)
 {
 	U16 minutes_to_alarm;
+	U8 hours_to_alarm;
 
-	char s;
-	if (alarm_hour > hour)
-	{	
-		minutes_to_alarm = ((alarm_hour - hour) * 60);
-		minutes_to_alarm += alarm_minute;
-	}
-	else if (alarm_hour < hour)
+	if (alarm_time > rtc_minutes_from_midnight ())
 	{
-		minutes_to_alarm = (24 - hour) - alarm_hour;minutes_to_alarm
-		minutes_to_alarm += alarm_minute;
-		//Erm....
+		minutes_to_alarm = alarm_time;
+		minutes_to_alarm -= rtc_minutes_from_midnight ();
 	}
-	else if (alarm_hour = hour)
-		minutes_to_alarm = alarm_minute - minute;
-	sprintf ("ALARM IN %s MINUTES", minutes_to_alarm);
+	else
+	{
+		minutes_to_alarm = rtc_minutes_from_midnight ();
+		minutes_to_alarm -= alarm_time;
+	}
+		
+	if (minutes_to_alarm < 60)
+		sprintf ("ALARM IN %ld MINUTES", minutes_to_alarm);
+	else
+	{
+		hours_to_alarm = minutes_to_alarm / 60;
+		minutes_to_alarm = minutes_to_alarm % 60;
+		sprintf ("ALARM IN %d:%ld", hours_to_alarm, minutes_to_alarm);
+	}
 }
 
 void paused_deff (void)
@@ -81,7 +80,7 @@ void paused_deff (void)
 		dmd_alloc_pair_clean ();
 		
 		font_render_string_center (&font_fixed10, 64, 10, "PAUSED");
-		if (alarm_hour >= ALARM_DISABLED)
+		if (alarm_time >= ALARM_DISABLED)
 		{
 			/* mute_and_pause_timeout is stored as 5 second chunks, to save
 			 * having to use a U16 */
@@ -118,7 +117,9 @@ void alarm_deff (void)
 
 static void alarm_task (void)
 {
-	alarm_hour = ALARM_DISABLED;
+	if (deff_get_active () == DEFF_PAUSED)
+		task_exit ();
+	alarm_time = ALARM_DISABLED;
 	U8 i;
 	for (i = 0; i < 4; i++)
 	{
@@ -135,7 +136,7 @@ static inline bool check_alarm_time (void)
 		return FALSE;
 	/* This should cover cases where the machine was switched off before the
 	 * alarm could sound */
-	else if (hour >= alarm_hour && minute >= alarm_minute)
+	else if (alarm_time == rtc_minutes_from_midnight ())
 		return TRUE;
 	else
 		return FALSE;
@@ -149,10 +150,11 @@ CALLSET_ENTRY (alarm, minute_elapsed)
 
 CALLSET_ENTRY (alarm, amode_page)
 {
-	if (alarm_hour < ALARM_DISABLED)
+	if (alarm_time < ALARM_DISABLED)
 	{
 		dmd_alloc_pair_clean ();
-		sprintf ("ALARM IN %d MINUTES", alarm_timer);
+		render_minutes_to_alarm ();
+		sprintf ("ALARM IN %d MINUTES", sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
 		show_text_on_stars ();
 	}
@@ -166,15 +168,24 @@ CALLSET_ENTRY (alarm, sw_start_button)
 	}
 }
 
+static inline void check_alarm_enabled (void)
+{
+	if (alarm_time == ALARM_DISABLED)
+		alarm_time = rtc_minutes_from_midnight ();
+}	
+
 CALLSET_ENTRY (alarm, sw_left_button)
 {
 	if (deff_get_active () == DEFF_PAUSED)
 	{
-		timer_restart_gid (GID_ALARM_BUTTON_PUSH, TIME_2S);
+		check_alarm_enabled ();
+		timer_restart_free (GID_ALARM_BUTTON_PUSH, TIME_2S);
 		bounded_decrement (alarm_time, 0);
+		task_sleep (TIME_200MS);
 		while (switch_poll_logical (SW_RIGHT_BUTTON))
 			{
-				task_sleep (TIME_200MS);
+				task_sleep (TIME_100MS);
+				timer_restart_free (GID_ALARM_BUTTON_PUSH, TIME_2S);
 				bounded_decrement (alarm_time, 0);
 			}
 
@@ -185,11 +196,14 @@ CALLSET_ENTRY (alarm, sw_right_button)
 {
 	if (deff_get_active () == DEFF_PAUSED)
 	{
-		timer_restart_gid (GID_ALARM_BUTTON_PUSH, TIME_2S);
+		check_alarm_enabled ();
+		timer_restart_free (GID_ALARM_BUTTON_PUSH, TIME_2S);
 		bounded_increment (alarm_time, 0);
-			while (switch_poll_logical (SW_RIGHT_BUTTON))
+		task_sleep (TIME_200MS);
+		while (switch_poll_logical (SW_RIGHT_BUTTON))
 			{
-				task_sleep (TIME_200MS);
+				task_sleep (TIME_100MS);
+				timer_restart_free (GID_ALARM_BUTTON_PUSH, TIME_2S);
 				bounded_increment (alarm_time, ALARM_DISABLED - 1);
 			}
 	}
