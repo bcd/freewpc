@@ -182,7 +182,7 @@ CALLSET_ENTRY (alarm, sw_left_button)
 		timer_restart_free (GID_ALARM_BUTTON_PUSH, TIME_2S);
 		bounded_decrement (alarm_time, 0);
 		task_sleep (TIME_200MS);
-		while (switch_poll_logical (SW_RIGHT_BUTTON))
+		while (switch_poll_logical (SW_LEFT_BUTTON))
 			{
 				task_sleep (TIME_100MS);
 				timer_restart_free (GID_ALARM_BUTTON_PUSH, TIME_2S);
