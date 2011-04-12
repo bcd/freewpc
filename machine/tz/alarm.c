@@ -69,7 +69,7 @@ static void render_minutes_to_alarm (void)
 	{
 		hours_to_alarm = minutes_to_alarm / 60;
 		minutes_to_alarm = minutes_to_alarm % 60;
-		sprintf ("ALARM IN %d:%ld", hours_to_alarm, minutes_to_alarm);
+		sprintf ("ALARM IN %02dH%ldM", hours_to_alarm, minutes_to_alarm);
 	}
 }
 
@@ -117,9 +117,9 @@ void alarm_deff (void)
 
 static void alarm_task (void)
 {
+	/* To stop accidental triggering*/
 	if (deff_get_active () == DEFF_PAUSED)
 		task_exit ();
-	alarm_time = ALARM_DISABLED;
 	U8 i;
 	for (i = 0; i < 4; i++)
 	{
@@ -145,7 +145,10 @@ static inline bool check_alarm_time (void)
 CALLSET_ENTRY (alarm, minute_elapsed)
 {
 	if (check_alarm_time ())
+	{
+		alarm_time = ALARM_DISABLED;
 		task_create_anon (alarm_task);
+	}
 }
 
 CALLSET_ENTRY (alarm, amode_page)
@@ -168,23 +171,39 @@ CALLSET_ENTRY (alarm, sw_start_button)
 	}
 }
 
-static inline void check_alarm_enabled (void)
+static inline void enable_alarm (void)
 {
 	if (alarm_time == ALARM_DISABLED)
 		alarm_time = rtc_minutes_from_midnight ();
 }	
 
+static inline void decrease_alarm_time (void)
+{
+	if (alarm_time > rtc_minutes_from_midnight ()
+		&& alarm_time < ALARM_DISABLED)
+		alarm_time--;
+
+	if (alarm_time == rtc_minutes_from_midnight ())
+		alarm_time = ALARM_DISABLED;
+}
+
+static inline void increase_alarm_time (void)
+{
+	if (alarm_time < ALARM_DISABLED)
+		alarm_time++;
+}
+
+
 CALLSET_ENTRY (alarm, sw_left_button)
 {
 	if (deff_get_active () == DEFF_PAUSED)
 	{
-		check_alarm_enabled ();
-		bounded_decrement (alarm_time, 0);
+		decrease_alarm_time ();
 		task_sleep (TIME_200MS);
 		while (switch_poll_logical (SW_LEFT_BUTTON))
 			{
 				task_sleep (TIME_100MS);
-				bounded_decrement (alarm_time, 0);
+				decrease_alarm_time ();
 			}
 
 	}
@@ -194,18 +213,18 @@ CALLSET_ENTRY (alarm, sw_right_button)
 {
 	if (deff_get_active () == DEFF_PAUSED)
 	{
-		check_alarm_enabled ();
-		bounded_increment (alarm_time, 0);
+		enable_alarm ();
+		increase_alarm_time ();
 		task_sleep (TIME_200MS);
 		while (switch_poll_logical (SW_RIGHT_BUTTON))
 			{
 				task_sleep (TIME_100MS);
-				bounded_increment (alarm_time, ALARM_DISABLED - 1);
+				increase_alarm_time ();
 			}
 	}
 }
 
-CALLSET_ENTRY (alarm, factory_reset)
+CALLSET_ENTRY (alarm, factory_reset, time_modified)
 {
 	alarm_time = ALARM_DISABLED;
 }

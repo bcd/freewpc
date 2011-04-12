@@ -376,6 +376,9 @@ void rtc_show_date_time (void)
 
 void rtc_begin_modify (void)
 {
+#ifdef MACHINE_TZ
+	callset_invoke (time_modified);
+#endif
 	rtc_edit_field = 0;
 }
 
