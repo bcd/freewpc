@@ -1,4 +1,80 @@
 
+Preliminary Rules to
+THE NEW THEATRE OF MAGIC
+
+
+
+Conflict modes:
+Grand Finale, Trick/Super Trick Multiball, Main Multiball, and Midnight Multiball
+are all mutually exclusive.
+Theatre Hurry-Up
+Quick Multiball
+
+
+TBD
+===
+- Need a rule for the Basement
+- Need a rule for the Tiger Saw Lock (2-ball multiball)
+- Need a rule for Hocus Pocus
+- Bonus rule should not be as large.  Bonus X is single increase.
+	- 100K minimum.
+	- +10K per shot.
+	- +50K per shot completed.
+	- All times bonus X (up to max 10X).
+
+
+Trunk position driver:
+======================
+- If Final Battle running:
+	(special rules apply)
+- If Main Multiball running:
+	If Trunk Super Jackpot lit, then WIGGLE.
+	Else WALL.
+- If Midnight Multiball running, then WALL.
+- If Trick Multiball running, then:	
+	- If Trunk Escape not completed, then WALL.
+	- Else HOLE.
+
+- If Main Multiball lit, then MAGNET.
+- If Midnight Multiball lit, then MAGNET.
+- If Trick Multiball lit, then HOLE.
+
+- If Theatre Hurry-Up running, then HOLE.
+
+- Default state for completion illusions:
+	- If Trunk Escape not completed, then WALL.
+	- If Trunk Hole not completed, then HOLE.
+
+
+Basement Popup driver rules (TBD):
+===========================
+
+Right Ramp divertor rule:
+- On left inlane, Spirit Ring lamp becomes timed lit.  Making Ramp
+	shot in time will divert the ball.
+
+
+Left Orbit divertor rule:
+- Generally, it should not divert.  Use Right Orbit to get to jets.
+
+
+Trunk pin divertor rule:
+- Only when locking a ball?
+
+
+
+Skill Shot
+==========
+- First shot scored immediately after plunge counts as two shots
+	within 2 seconds after inlane (as if it had been twice in a row) +
+	skill shot point value if that shot has not been hit before:
+	200K, 400K, 600K, 800K, 1M max.
+- Valid shots are: Left Orbit, Captive Ball, Left Center Loop,
+	Trunk Hole/Wall, Center Ramp, Right Center Loop, Right Ramp,
+	Right Orbit
+
+
+
 Illusions:
 ==========
 Tiger Saw = Captive Ball (3)
@@ -45,12 +121,6 @@ At ball start:
 - Flashing lamps (shots completed previous ball) become solid.  Their counts
 	are also reset, so that you can try to make it flashing again.
 
-Trunk driver rules (TBD):
-- Trunk shows WALL in order to spell THEATRE to light Lock.  When lock is
-lit, Trunk shows HOLE.  When Multiball is lit, Trunk shows MAGNET and
-scores Trunk Escape hit.  During multiball, Trunk alternates between
-HOLE (Jackpot lit) and WALL (unlit).
-
 Trick Multiball:
 - Starting this awards the Illusions badge.
 - This is initially a 2-ball multiball.  Second ball sent to manual
@@ -67,6 +137,8 @@ Trick Multiball:
 
 - At completion of Trick Multiball, all lamps go OFF and everything is reset.
 Goal values are increased (4 per shot, 20 bumpers)
+- Getting N shots flashing lights Extra Ball #1 (default N=4).  Once per
+	run, reenabled after Trick MB but N++.
 
 
 Theatre:
@@ -75,7 +147,7 @@ Theatre:
 	at any time, even during multiballs (?).
 - When spelled, ball is diverted to the saucer lock, and then ejected back the
 	left loop.  Letters are cleared.
-- Trunk is then lit for Theatre Hurry-Up.  Value counts down rapidly from
+- Trunk Hole is then lit for Theatre Hurry-Up.  Value counts down rapidly from
 	1M to 200K in 15 seconds.  Collect it to award the Theatre badge.
 - Hurry-Up can be collected more than once during the 15 seconds.  Timer is
 	paused briefly during effect and kickout.  Subsequent values are higher:
@@ -88,16 +160,35 @@ Theatre:
 
 Main Multiball:
 ===============
-- Center white targets needed to qualify Magic Ramps to light Lock
+- Spell MAGIC to light Center Locks.  Shoot Lit Ramps to add letters.
+- Shoot Left Ramp Standup to relight Center Ramp.
+	Shoot Right Ramp Standup to relight Right Ramp.
+- At ball start, both Ramps are lit.  Ramp goes unlit once letter added.
+- Lock 2 balls to qualify Multiball at the magnet, shoot magnet to start.
+- During multiball, bang away on the trunk to light Jackpot, then shoot
+	another shot to collect it:
+	- 3 hits (200K) to light Left Ramp for 2M.
+	- 4 hits (300K) to light Left Orbit for 4M.
+	- 5 hits (400K) to light Right Ramp for 6M.
+	- 6 hits (500K) to light Right Orbit for 8M.
+	- 7 hits (600K) to light Trunk Hole (wiggling) for 10M.
+	- then return to step 1 -- values reset as well.
+- Next jackpot level is retained across Multiballs, but progress on level is reset.
 
 
 Midnight:
 =========
+- Each bumper adds time ala Funhouse.  Base time is 12PM.
+	- Unlit adds 10min, lit = 20 min, flashing = 30min.
+- Right orbit shot enables 2X time while ball is in the jet bumpers.
+- Advance bumpers by shooting the Captive Ball at any time.
+- At Midnight, badge is collected and a Frenzy mode starts:
+	- All switches score 50K
+	- Timer = 30 seconds
+	- Right orbit collects Midnight Jackpot = 250K+5K per switch so far.
+	- Trunk wall increases switch value by 10K.
+- Bumpers becomes unlit at ball start and at the end of Midnight Multiball.
 
-	- Right orbit shot enables Clock advance while ball is in the jet bumpers.
-	- Each bumper adds time ala Funhouse.  Base time is 5PM.
-		- Unlit adds 10min, lit = 20 min, flashing = 30min.
-	- Advance bumpers by shooting the Captive Ball.
 
 Final Battle:
 =============
@@ -117,4 +208,5 @@ Final Battle:
 - Stage 4: Big Multiball!!!
 - At completion of Big Multiball, badges are reset and progress can continue
 	on other things.
+
 
