@@ -1,0 +1,120 @@
+
+Illusions:
+==========
+Tiger Saw = Captive Ball (3)
+Levitating Woman = Center Ramp (3)
+Trunk Escape = Trunk Box (3)
+Spirit Cards = Spinners (15)
+Safe Escape = Center Loops (3)
+Metamorphoses = Right Ramp (3)
+Strait Jacket = Jet Bumpers (15)
+Hat Magic = Trunk Hole (3)
+
+count[n] = # of shots that have been made towards the goal.
+	Initialized at game start.
+goal[n] = goal, initially as above but increase at higher levels
+value[n] = basic scoring value of the next shot.
+	Initialized at ball start.	 Increases on each shot made up to a maximum.
+	For 3-shots, values are 100K, 125K, 150K, ... up to 250K.
+
+Lamp states:
+OFF = goal not collected
+FLASING = goal collected same ball
+ON = goal collected previous ball
+quick pulsing effect = shot just made
+
+Scoring:
+- See above for base value.
+- The final shot to complete the mode scores 3X.
+- Combos earned when 3 or more shots made sequentially.
+	- Same shot cannot be made twice in a row.
+	- Combo Bonus starts at 250K, up 25K each time to max of 500K.
+	- Slingshots/jets cancel the combo timer.
+	- 4-way combo scores 2X Combo Bonus.
+	- 5-way combo scores 3X.
+
+When a shot is completed:
+- Start 15 seconds of 2X scoring.  (Does not stack, but timer will restart.)
+- Light goes flashing.
+- When all lamps become solid/flashing, Trunk hole lights for Trick Multiball.
+If there are any solid lamps, you can continue to try to complete them again
+same ball to flash everything to qualify Super Trick Multiball.
+
+At ball start:
+- Shot values are reset.
+- Flashing lamps (shots completed previous ball) become solid.  Their counts
+	are also reset, so that you can try to make it flashing again.
+
+Trunk driver rules (TBD):
+- Trunk shows WALL in order to spell THEATRE to light Lock.  When lock is
+lit, Trunk shows HOLE.  When Multiball is lit, Trunk shows MAGNET and
+scores Trunk Escape hit.  During multiball, Trunk alternates between
+HOLE (Jackpot lit) and WALL (unlit).
+
+Trick Multiball:
+- Starting this awards the Illusions badge.
+- This is initially a 2-ball multiball.  Second ball sent to manual
+	plunger before first one is released.
+- All shots score maximum.
+- Illusion lamps track which shots have been made at least once.
+- Complete all 8 shots to light the Right Loop for Super Jackpot,
+	worth 2.5M the first time, then 5M, then 7.5M maximum.
+- 30 second ballsaver/restart feature in effect: with one ball in play,
+	timer begins to count down and you must relock the ball in either
+	center loop to return another ball to the plunger.  You can play
+	multiball restarts until the timer expires (minimum 5 sec. required).
+	During restart, jackpots/Super Jackpot cannot be scored.
+
+- At completion of Trick Multiball, all lamps go OFF and everything is reset.
+Goal values are increased (4 per shot, 20 bumpers)
+
+
+Theatre:
+========
+- Shoot Left Loop to add Theatre letters as usual.  This feature is available
+	at any time, even during multiballs (?).
+- When spelled, ball is diverted to the saucer lock, and then ejected back the
+	left loop.  Letters are cleared.
+- Trunk is then lit for Theatre Hurry-Up.  Value counts down rapidly from
+	1M to 200K in 15 seconds.  Collect it to award the Theatre badge.
+- Hurry-Up can be collected more than once during the 15 seconds.  Timer is
+	paused briefly during effect and kickout.  Subsequent values are higher:
+		1.5X, 2X, 2.5X, 3X at max.
+- Difficulty of Theatre increases for subsequent attempts:
+	- Letters no longer carry over from ball to ball.
+	- Timer reduced to 10 seconds.
+- Once Final Battle played, Theatre difficulty is reset.
+
+
+Main Multiball:
+===============
+- Center white targets needed to qualify Magic Ramps to light Lock
+
+
+Midnight:
+=========
+
+	- Right orbit shot enables Clock advance while ball is in the jet bumpers.
+	- Each bumper adds time ala Funhouse.  Base time is 5PM.
+		- Unlit adds 10min, lit = 20 min, flashing = 30min.
+	- Advance bumpers by shooting the Captive Ball.
+
+Final Battle:
+=============
+- Once all 4 badges are earned, shoot center loop to begin.
+- Single ball mode, with 2-ball multiball at the beginning of various stages,
+	similar to Cirqus Voltaire.
+- Global 2X scoring in effect when 2-balls are in play, but draining 1 ball
+	does not end the mode.  Also mode continues across balls.
+- Stage 1: Trunk Battle - shoot Trunk wall 30 times.  Each shot is worth 500K.
+	After last shot, hole will open to lock ball for effect and completion
+	bonus of 2M (total 17M)
+- Stage 2: Shoot each Illusion again in order.  Each shot is worth 3M.
+	Final shot is Hat Magic to lock ball for effect.  Total 24M.
+- Stage 3: Super Spinner - 100 spins needed to win.  But the count will go
+	up slowly if you don't make the shot quickly enough.  20K per spin.
+	Minimum 20M, likely more.
+- Stage 4: Big Multiball!!!
+- At completion of Big Multiball, badges are reset and progress can continue
+	on other things.
+
