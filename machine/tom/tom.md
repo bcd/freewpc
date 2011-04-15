@@ -208,6 +208,7 @@ Vanish: Top Kickout, Vanish Lock 2, Vanish Lock 1, init_max_count(0)
 [globalflags]
 
 [deffs]
+Shot: page(MACHINE_PAGE), c_decl(shot_deff), PRI_GAME_QUICK1, D_RESTARTABLE
 
 [leffs]
 
@@ -233,4 +234,7 @@ Bottom Jet: driver(jet), sw=SW_BOTTOM_JET, sol=SOL_BOTTOM_JET
 #Hocus Pocus:
 #Ramp Magnet:
 #Trunk Magnet:
-#Trunk Motor:
+
+Trunk Motor: driver(bivar),
+	forward_sol=SOL_TRUNK_CLOCKWISE,
+	reverse_sol=SOL_TRUNK_C_CLOCKWISE
