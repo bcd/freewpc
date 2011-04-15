@@ -16,14 +16,9 @@ Lamp-Matrix-Height: 25
 
 define MACHINE_TOM
 define MACHINE_NUMBER 539
-#define MACHINE_CUSTOM_AMODE
-define MACHINE_GRAND_CHAMPION_INITIALS { 'T', 'O', 'M' }
-define MACHINE_GRAND_CHAMPION_SCORE { 0x00, 0x20, 0x00, 0x00, 0x00 }
-define MACHINE_HIGH_SCORE_INITIALS { 'J', ' ', 'P' }, { 'B', 'C', 'D' }, { 'C', 'O', 'P' }, { 'H', 'A', 'T' }
-define MACHINE_HIGH_SCORES { 0x00, 0x40, 0x00, 0x00, 0x00 }, { 0x00, 0x35, 0x00, 0x00, 0x00 }, { 0x00, 0x30, 0x50, 0x00, 0x00 }, { 0x00, 0x25, 0x00, 0x00, 0x00 }
-#define MACHINE_START_BALL_MUSIC   MUS_MAIN_PLUNGER
-#define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
-define MACHINE_LACKS_ALL_INCLUDES
+define MACHINE_START_BALL_MUSIC   MUS_PLUNGER
+define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN_THEME
+define MACHINE_LACKS_PROTOS_H
 
 [lamps]
 11: Theatre 1
@@ -98,7 +93,7 @@ define MACHINE_LACKS_ALL_INCLUDES
 26: Left Inlane
 27: Right Inlane
 28: Right Outlane
-31: Trough Jam, opto
+31: Trough Jam, opto, intest
 32: Trough 1, opto, noscore
 33: Trough 2, opto, noscore
 34: Trough 3, opto, noscore
@@ -113,14 +108,14 @@ define MACHINE_LACKS_ALL_INCLUDES
 45: Left Drain Eddy
 47: Subway Micro
 48: Right Drain Eddy
-51: Left Bank
-52: Captive Ball Rest
+51: Left Bank, lamp(LM_HOCUS_POCUS)
+52: Captive Ball Rest, edge
 53: Right Lane Enter
 54: Left Lane Enter
-55: Cube Pos. 4, opto
-56: Cube Pos. 1, opto
-57: Cube Pos. 2, opto
-58: Cube Pos. 3, opto
+55: Cube Pos. 4, opto, intest
+56: Cube Pos. 1, opto, intest
+57: Cube Pos. 2, opto, intest
+58: Cube Pos. 3, opto, intest
 61: Left Sling, ingame, noplay
 62: Right Sling, ingame, noplay
 63: Bottom Jet, ingame, noplay
@@ -147,7 +142,7 @@ H1: Ball Trough
 H2: Magnet Diverter
 H3: Trap Door Up
 H4: Subway Popper
-H5: Right Drain Magnet, magnet
+H5: R. Drain Magnet, magnet
 H6: Center Loop Post
 H7: Knocker, knocker
 H8: Top Diverter Post
@@ -176,12 +171,13 @@ A3: Jet Flasher, flash
 A4: Trunk Flasher, flash
 
 F5: Cube Magnet
-F6: Sub Ball Release
-F7: Left Drain Magnet, magnet
+F6: Subway Release
+F7: L. Drain Magnet, magnet
 
 [gi]
 
 [tests]
+TOM Trunk:
 
 #############################################################
 
@@ -191,19 +187,54 @@ Magic Spell: Magic 1, Magic 2, Magic 3, Magic 4, Magic 5
 Modes: Tiger Saw, Levitate Woman, Trunk Escape, Spirit Cards, Safe Escape, Metamorphosis, Strait Jacket, Hat Magic
 Finale Tasks: Theatre, Multiball, Midnight, Illusions
 Rollovers: Rollover 1, Rollover 2
+Left Ramp: Open Trap Door, Center Magic, Levitate Award
+Loops: Lock Ball, Safe Award
+Right Ramp: Basement, Metamorphosis Award, Right Magic, Spirit Ring
+Right Orbit: Advance Clock, Jacket Award, Saw Multiball
+Left Orbit: Extra Ball, Vanish, Spell Theatre
+Captive Ball: Tiger Saw Award, Light Vanish
+Trunk Vertical: Jackpot, Hurry Up, Escape Award, Hat Trick Award, Start Illusion, Start Multiball
+Trunk Count: Trunk 1, Trunk 2, Trunk 3
 
 [containers]
 Trough: trough, Ball Trough, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(4)
-Subway: Sub Ball Release, Lock 3, Lock 2, Lock 1, init_max_count(0)
+Subway: Subway Release, Lock 3, Lock 2, Lock 1, init_max_count(0)
 Vanish: Top Kickout, Vanish Lock 2, Vanish Lock 1, init_max_count(0)
 
 #############################################################
 
 [scores]
+170:
+10K:
+25K:
+50K:
+100K:
+150K:
+200K:
+250K:
+500K:
+2500K:
 
 [highscores]
+GC: TOM, 50.000.000
+1: POP, 40.000.000
+2: BCD, 35.000.000
+3: COP, 30.000.000
+4: HAT, 25.000.000
 
 [flags]
+Trick MB Lit:
+Main MB Lit:
+Midnight MB Lit:
+Quick MB Lit:
+Skill Shot Lit:
+Spirit Ring Lit:
+Hard Magic:
+Finale Lit:
+Basement Lit:
+Hold Bonus X:
+Hocus Pocus Lit:
+
 
 [globalflags]
 
@@ -211,6 +242,7 @@ Vanish: Top Kickout, Vanish Lock 2, Vanish Lock 1, init_max_count(0)
 Shot: page(MACHINE_PAGE), c_decl(shot_deff), PRI_GAME_QUICK1, D_RESTARTABLE
 
 [leffs]
+Amode: page(MACHINE_PAGE)
 
 [fonts]
 pcsenior:
@@ -218,6 +250,10 @@ misctype:
 lithograph:
 
 [timers]
+Combo:
+Right Ramp Entered:
+Left Ramp Entered:
+Loop to Lock:
 
 [templates]
 Left Sling: driver(sling), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING
@@ -226,15 +262,14 @@ Top Jet: driver(jet), sw=SW_TOP_JET, sol=SOL_TOP_JET
 Middle Jet: driver(jet), sw=SW_MIDDLE_JET, sol=SOL_MIDDLE_JET
 Bottom Jet: driver(jet), sw=SW_BOTTOM_JET, sol=SOL_BOTTOM_JET
 
-#Spinner: driver(spinner), sw_event=sw_spinner, sw_number=SW_SPINNER
-#Left Gate: driver(duty), sol=SOL_LOOP_GATE, ontime=TIME_300MS, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=60
-#Right Gate:
+Spinner: driver(spinner), sw_event=sw_spinner, sw_number=SW_SPINNER
+Left Gate: driver(duty2), sol=SOL_LEFT_GATE, timeout=TIME_3S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25
+Right Gate: driver(duty2), sol=SOL_RIGHT_GATE, timeout=TIME_3S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25
+Trap Door: driver(duty2), sol=SOL_TRAP_DOOR_UP, timeout=0, ontime=TIME_66MS, duty_mask=DUTY_MASK_25
 #Trunk Divert:
 #Vanish Divert:
 #Hocus Pocus:
 #Ramp Magnet:
 #Trunk Magnet:
 
-Trunk Motor: driver(bivar),
-	forward_sol=SOL_TRUNK_CLOCKWISE,
-	reverse_sol=SOL_TRUNK_C_CLOCKWISE
+Trunk Motor: driver(bivar), forward_sol=SOL_TRUNK_CLOCKWISE, reverse_sol=SOL_TRUNK_C_CLOCKWISE

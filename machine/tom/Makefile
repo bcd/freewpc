@@ -54,7 +54,7 @@ PINMAME_OTHER_ROMS = tm_u*s.l2
 #
 
 GAME_OBJS =
-GAME_TEST_OBJS =
+GAME_TEST_OBJS = trunktest.o
 GAME_INCLUDES =
-GAME_PAGED_OBJS = shots.o trunk.o
+GAME_PAGED_OBJS = shots.o trunk.o tom_amode.o rules.o
 

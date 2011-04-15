@@ -65,18 +65,33 @@ Trunk pin divertor rule:
 
 Skill Shot
 ==========
-- First shot scored immediately after plunge counts as two shots
-	within 2 seconds after inlane (as if it had been twice in a row) +
-	skill shot point value if that shot has not been hit before:
-	200K, 400K, 600K, 800K, 1M max.
-- Valid shots are: Left Orbit, Captive Ball, Left Center Loop,
-	Trunk Hole/Wall, Center Ramp, Right Center Loop, Right Ramp,
-	Right Orbit
+
+At the beginning of each ball (not counting after balls are locked
+or ball saves), the major playfield shots are all lit for a Skill Shot.
+Hit any shot right away (without bricking; it will timeout quickly)
+to score *two shots* instead of one, as far as "Illusions" scoring
+is concerned (see below).
+
+The shots are: Captive Ball, Left Center Loop, Trunk Hole/Wall,
+Center Ramp, Right Center Loop (Spinner), Right Ramp, Right Orbit.
+There are 2 Trunk modes, only one of which is active at a time
+depending on which Trunk face is showing.
+
+In addition, if that particular shot has not been hit previously
+for a skill shot, bonus points are also awarded: 200K, 400K, etc.
+up to a maximum 1M.
+
+The "Spirit Cards" award, which is collected on the spinner, will
+award 2X spins for a maximum of 5 spins before it reverts to single
+scoring.
+
+The Award lamps on each shot will flash if a Skill Shot is available
+there, or be steady if already collected.
 
 
+Illusions
+=========
 
-Illusions:
-==========
 Tiger Saw = Captive Ball (3)
 Levitating Woman = Center Ramp (3)
 Trunk Escape = Trunk Box (3)
@@ -86,42 +101,50 @@ Metamorphoses = Right Ramp (3)
 Strait Jacket = Jet Bumpers (15)
 Hat Magic = Trunk Hole (3)
 
-count[n] = # of shots that have been made towards the goal.
-	Initialized at game start.
-goal[n] = goal, initially as above but increase at higher levels
-value[n] = basic scoring value of the next shot.
-	Initialized at ball start.	 Increases on each shot made up to a maximum.
-	For 3-shots, values are 100K, 125K, 150K, ... up to 250K.
+There are two basic objectives:
+1. Complete each shot a certain number of times.  For most shots, it
+takes 3 hits to "complete it".  For spinners and bumpers, it takes 10x,
+or 30.  Progress here carries over from ball to ball.  The goal
+increases on every run through all the modes.
 
-Lamp states:
-OFF = goal not collected
-FLASING = goal collected same ball
-ON = goal collected previous ball
-quick pulsing effect = shot just made
+2. Complete all of the shots at least once on the same ball.
 
-Scoring:
-- See above for base value.
-- The final shot to complete the mode scores 3X.
-- Combos earned when 3 or more shots made sequentially.
-	- Same shot cannot be made twice in a row.
-	- Combo Bonus starts at 250K, up 25K each time to max of 500K.
-	- Slingshots/jets cancel the combo timer.
-	- 4-way combo scores 2X Combo Bonus.
-	- 5-way combo scores 3X.
+The grid of Mode lamps (4x2) on the lower playfield tracks your progress
+towards objective #1:
+	OFF = goal has not been reached
+	FLASHING = goal reached on this ball
+	ON = goal reached on previous ball
 
-When a shot is completed:
-- Start 15 seconds of 2X scoring.  (Does not stack, but timer will restart.)
-- Light goes flashing.
-- When all lamps become solid/flashing, Trunk hole lights for Trick Multiball.
+The lamps on each shot track progress towards objective #2.  Lamps
+are OFF until they are collected, then they become ON.
+
+The value of a shot is based on the number of times it has been hit
+on that ball.  Initial value is 100K, then 125K, up to 25K each time to
+a maximum 250K.  For spinners/bumpers, divide by 5. (20K+5K to 50K).
+This value resets every ball start.
+
+Reaching the goal on any shot scores 500K, 600K, etc. with no limit.
+This bonus resets at the start of each ball.  It also starts Double Scoring;
+see below.
+
+Making any 3 different shots in a row (they can be lit/unlit, it doesn't matter)
+will award a Combo for the final shot; see Combos below.
+
+When all 8 shots have been completed, Trick Multiball becomes lit at the
+Trunk hole.  If all are flashing, because you finished all on the same ball,
+you'll get Super Trick Multiball instead.  See below.
+
+When all lamps become solid/flashing, Trunk hole lights for Trick Multiball.
 If there are any solid lamps, you can continue to try to complete them again
 same ball to flash everything to qualify Super Trick Multiball.
 
-At ball start:
-- Shot values are reset.
-- Flashing lamps (shots completed previous ball) become solid.  Their counts
-	are also reset, so that you can try to make it flashing again.
+At ball start, any flashing lamps (shots completed previous ball) become solid.
+Their counts are also reset, so that you can try to make it flashing again.
 
-Trick Multiball:
+
+Trick Multiball
+===============
+
 - Starting this awards the Illusions badge.
 - This is initially a 2-ball multiball.  Second ball sent to manual
 	plunger before first one is released.
@@ -141,6 +164,35 @@ Goal values are increased (4 per shot, 20 bumpers)
 	run, reenabled after Trick MB but N++.
 
 
+Double Scoring
+==============
+
+Reaching a shot goal starts a 15 second Double Scoring timer.
+This applies to EVERYTHING.
+
+If Double Scoring is already running, and you complete another shot goal,
+an additional 15 seconds is awarded.  You can theoretically earn up to
+2 min of double scoring time this way.
+
+This timer does not stop for anything like jets, etc.
+
+
+
+Combos
+======
+- Combos earned when 3 or more shots made sequentially.
+	- Same shot cannot be made twice in a row.
+	- Combo Bonus starts at 250K, up 25K each time to max of 500K.
+	- Slingshots/jets cancel the combo timer.
+	- 4-way combo scores 2X Combo Bonus.
+	- 5-way combo scores 3X.  Cannot collect more than a 5-way.
+- Number of combos made is counted across game:
+	- Hold Bonus X at 3
+	- Light Extra Ball at 6
+	- Spot Illusion at 9
+	- Light Lock at 12
+
+
 Theatre:
 ========
 - Shoot Left Loop to add Theatre letters as usual.  This feature is available
@@ -151,7 +203,7 @@ Theatre:
 	1M to 200K in 15 seconds.  Collect it to award the Theatre badge.
 - Hurry-Up can be collected more than once during the 15 seconds.  Timer is
 	paused briefly during effect and kickout.  Subsequent values are higher:
-		1.5X, 2X, 2.5X, 3X at max.
+		1.5X, 2X, 2.5X, 3X at max.  This multiplier carries over between balls?
 - Difficulty of Theatre increases for subsequent attempts:
 	- Letters no longer carry over from ball to ball.
 	- Timer reduced to 10 seconds.
@@ -179,16 +231,19 @@ Main Multiball:
 
 Midnight:
 =========
-- Each bumper/right orbit adds time ala Funhouse.  Base time is 12PM.
-	- Unlit adds 10min, lit = 20 min, flashing = 30min.
-- Advance bumpers by shooting the Captive Ball at any time.
-- Right orbit advances one hour.
+- Base time is 12PM.
+- Each bumper/right orbit adds time:
+	- Bumpers add 10min initially, add 5min per hit each time Captive Ball hit
+	on same ball, up to 20 min. per hit.
+	- Right orbit advances one hour.
+- Right orbit behavior gets progressively harder:
 	- For first run, always advances.
 	- For second run, advances only on left inlane before shot.
 	- For third+ runs, never advances.
 - At Midnight, badge is collected and Multiball is lit at the magnet:
+	- Immediate score 1.2M.
 	- Frenzy mode starts: All switches score 100K
-	- Timer = 30 seconds
+	- Timer = 30 seconds (minimum time played)
 	- Right orbit collects Midnight Jackpot = 500K+10K per switch so far.
 		Each jackpot also boosts the base value by 250K.  Maximum base is 1.5M.
 		Switch addition resets after each collection.
