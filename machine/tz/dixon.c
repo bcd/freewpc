@@ -58,18 +58,22 @@ static void anti_cradle_monitor (U8 flipper_button)
 
 static bool anti_cradle_enabled (void)
 {
-	if (in_live_game && live_balls > 1 && feature_config.dixon_anti_cradle == YES)
+	if (in_live_game && live_balls > 1 
+#ifdef CONFIG_MUTE_AND_PAUSE
+			&& !task_find_gid (GID_MUTE_AND_PAUSE)
+#endif
+			&& feature_config.dixon_anti_cradle == YES)
 		return TRUE;
 	else
 		return FALSE;
 }
 
-CALLSET_ENTRY (dixon, init, start_ball, end_ball)
+CALLSET_ENTRY (dixon, init, end_game, start_ball, end_ball)
 {
 	flippers_dixoned = FALSE;
 }
 
-CALLSET_ENTRY (dixon, sw_left_button)
+static void check_flipper_button (U8 flipper_button)
 {
 	if (flippers_dixoned)
 	{
@@ -77,16 +81,15 @@ CALLSET_ENTRY (dixon, sw_left_button)
 		flipper_enable ();
 	}
 	else if (anti_cradle_enabled ())
-		anti_cradle_monitor (SW_LEFT_BUTTON);
+		anti_cradle_monitor (flipper_button);
+}
+
+CALLSET_ENTRY (dixon, sw_left_button)
+{
+	check_flipper_button (SW_LEFT_BUTTON);
 }
 
 CALLSET_ENTRY (dixon, sw_right_button)
 {
-	if (flippers_dixoned)
-	{
-		flippers_dixoned = FALSE;
-		flipper_enable ();
-	}
-	else if (anti_cradle_enabled ())
-		anti_cradle_monitor (SW_RIGHT_BUTTON);
+	check_flipper_button (SW_RIGHT_BUTTON);
 }
