@@ -6,7 +6,7 @@
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
-GAME_ROM_PREFIX = fwcs
+GAME_ROM_PREFIX = ftom
 
 # Set ROM_PAGE_COUNT to the number of 16KB pages
 # that should be present in the output image.
@@ -36,35 +36,25 @@ ROM_PAGE_COUNT = 32
 #
 #################################################
 
-MACHINE_FILE = wcs.md
+MACHINE_FILE = tom.md
 
 MACHINE_MAJOR = 0
-MACHINE_MINOR = 62
+MACHINE_MINOR = 01
 
-IMAGE_MAP += $(M)/wcs.ild
+#IMAGE_MAP += $(M)/wcs.ild
 
-MACHINE_SCHEDULE := $(M)/wcs.sched
+#MACHINE_SCHEDULE := $(M)/wcs.sched
 
-PINMAME_MACHINE = wcs_l2
-
-PINMAME_GAME_ROM = wcup_lx2.rom
-
-PINMAME_OTHER_ROMS = wcup_u*.rom
+PINMAME_MACHINE = tom_13
+PINMAME_GAME_ROM = tom1_3x.rom
+PINMAME_OTHER_ROMS = tm_u*s.l2
 
 #
 # Object files exported by this game
 #
 
 GAME_OBJS =
-
-GAME_TEST_OBJS = goalie_test.o
-
+GAME_TEST_OBJS =
 GAME_INCLUDES =
-
-GAME_PAGED_OBJS = goalie_driver.o amode.o pitypoints.o \
-	shot.o lock.o driver.o kickback.o freekick.o \
-	toplane.o deffs.o jets.o goal_round.o \
-	combo.o multiball.o tv.o leffs.o mode.o ultra.o \
-	effect.o skill.o rampdiv.o magna_goalie.o penalty.o \
-	quickmb.o city.o final.o multiplier.o ball_driver.o
+GAME_PAGED_OBJS = shots.o
 

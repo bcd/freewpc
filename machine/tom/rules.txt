@@ -174,19 +174,25 @@ Main Multiball:
 	- 7 hits (600K) to light Trunk Hole (wiggling) for 10M.
 	- then return to step 1 -- values reset as well.
 - Next jackpot level is retained across Multiballs, but progress on level is reset.
+- For multiball #3, ramps must be alternated.
 
 
 Midnight:
 =========
-- Each bumper adds time ala Funhouse.  Base time is 12PM.
+- Each bumper/right orbit adds time ala Funhouse.  Base time is 12PM.
 	- Unlit adds 10min, lit = 20 min, flashing = 30min.
-- Right orbit shot enables 2X time while ball is in the jet bumpers.
 - Advance bumpers by shooting the Captive Ball at any time.
-- At Midnight, badge is collected and a Frenzy mode starts:
-	- All switches score 50K
+- Right orbit advances one hour.
+	- For first run, always advances.
+	- For second run, advances only on left inlane before shot.
+	- For third+ runs, never advances.
+- At Midnight, badge is collected and Multiball is lit at the magnet:
+	- Frenzy mode starts: All switches score 100K
 	- Timer = 30 seconds
-	- Right orbit collects Midnight Jackpot = 250K+5K per switch so far.
-	- Trunk wall increases switch value by 10K.
+	- Right orbit collects Midnight Jackpot = 500K+10K per switch so far.
+		Each jackpot also boosts the base value by 250K.  Maximum base is 1.5M.
+		Switch addition resets after each collection.
+	- Trunk wall increases switch value by 10K, and jackpot boost by 10K.
 - Bumpers becomes unlit at ball start and at the end of Midnight Multiball.
 
 
@@ -206,7 +212,20 @@ Final Battle:
 	up slowly if you don't make the shot quickly enough.  20K per spin.
 	Minimum 20M, likely more.
 - Stage 4: Big Multiball!!!
+	- Unlimited Balls served for 45 seconds, like World Cup Soccer.
+	- All shots score Jackpot Value that increases as each shot is made.
+		1M, 1.1M, 1.2M, etc. up to 2.5M per shot.
+	- Trunk remains at WALL.
 - At completion of Big Multiball, badges are reset and progress can continue
 	on other things.
+
+
+
+Quick Multiball:
+- Total hits on captive ball are counted and awards at various levels:
+	- Quick Multiball Lit at 8, then 10 more, then 12 more etc.
+	- Halfway towards Quick MB, lights Basement Mystery Award.
+
+
 
 
