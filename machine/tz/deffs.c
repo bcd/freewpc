@@ -104,6 +104,12 @@ void printf_thousands (U8 n)
 	sprintf ("%d,000", n);
 }
 
+void anti_cradle_deff (void)
+{
+	sprintf ("ANTICRADLE");
+	flash_and_exit_deff (20, TIME_66MS);
+}
+
 void replay_deff (void)
 {
 	sprintf ("REPLAY");

@@ -448,6 +448,9 @@ Auto SWAG:yes_no, NO
 # Dont allow throw, as the drag may cause damage to the table
 Mag Throw:yes_no, YES
 
+# Dont allow cradling during multiball
+Dixon anti cradle:yes_no, NO
+
 ##########################################################################
 # Items for the Feature Audits menu.
 ##########################################################################
@@ -691,6 +694,7 @@ Explosion: page(MACHINE_PAGE), PRI_EGG1
 
 Paused: page(MACHINE2_PAGE), PRI_STATUS, D_PAUSE+D_QUEUED
 Alarm: page(MACHINE2_PAGE), PRI_SLAMTILT, D_PAUSE+D_QUEUED
+Anti Cradle: page(MACHINE2_PAGE), PRI_TILT, D_PAUSE+D_QUEUED
 
 Hurryup Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 Hurryup awarded: page(MACHINE3_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
