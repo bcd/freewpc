@@ -65,8 +65,7 @@ static void anti_cradle_monitor (U8 flipper_button)
 
 static bool anti_cradle_enabled (void)
 {
-	if (in_live_game && global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING)
-			&& feature_config.dixon_anti_cradle == YES)
+	if (in_live_game && live_balls > 1 && feature_config.dixon_anti_cradle == YES)
 		return TRUE;
 	else
 		return FALSE;
