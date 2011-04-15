@@ -24,8 +24,6 @@
 
 /* Total bonus score */
 score_t total_bonus;
-/* Temp variable used to calculate bonus per door/loop etc */
-score_t bonus_scored;
 /* 1 Ball Hi score values */
 score_t start_ball_score;
 score_t points_this_ball;
@@ -95,19 +93,18 @@ static U8 find_player_ranked (U8 ranking)
 /* Speed up the bonus if both flipper buttons are pressed */
 void bonus_button_monitor (void)
 {
-	buttons_held = TRUE;
+	buttons_held = FALSE;
 	while (in_bonus)
 	{
 		if ((switch_poll_logical (SW_LEFT_BUTTON) 
 			&& switch_poll_logical (SW_RIGHT_BUTTON)) 
-			&& buttons_held == TRUE)
+			&& buttons_held == FALSE)
 		{	
-			buttons_held = FALSE;
-		//	sound_send (SND_FIST_BOOM1);
+			buttons_held = TRUE;
 		}
 		else
 		{
-			
+			buttons_held = FALSE;
 		}
 		task_sleep (TIME_100MS);
 	}
@@ -117,9 +114,9 @@ void bonus_button_monitor (void)
 static void bonus_pause (void)
 {
 	if (buttons_held)
-		task_sleep (TIME_100MS);
-	else
 		task_sleep_sec (1);
+	else
+		task_sleep (TIME_100MS);
 }
 
 void countup_pause (void)
@@ -143,24 +140,10 @@ void countup_pause (void)
  * depending on whether the buttons were pressed */
 static inline void bonus_sched_transition (void)
 {
-	if (buttons_held == TRUE)
+	if (!buttons_held)
 		dmd_sched_transition (&trans_scroll_down_fast);
 	else
 		dmd_sched_transition (&trans_scroll_down);
-}
-
-/* Function to calculate bonus score */
-void bonus_add_up_score (U8 award_count, score_id_t award_amount)
-{
-	/* Zero the temporary score */
-	score_zero (bonus_scored);
-	/* Add the award amount to the temp score */
-	score_add (bonus_scored, score_table[award_amount]);
-	/* Multiply it by award_count */
-	score_mul (bonus_scored, award_count);
-	/* Add the temp score to the total bonus */
-	score_add (total_bonus, bonus_scored);
-	sprintf_score (bonus_scored);	
 }
 
 static void bonus_talking_task (void)
@@ -300,14 +283,40 @@ void draw_taunts (void)
 	}	
 }
 
-void calc_and_draw_bonus (U8 award_value, U8 amount)
+/* Function to calculate bonus score */
+static void bonus_add_up_score (U8 award_value, U8 amount)
+{
+	score_t bonus_score;
+	/* Zero the temporary score */
+	score_zero (bonus_score);
+	/* Add the award amount to the temp score */
+	score_add (bonus_score, score_table[award_value]);
+	/* Multiply it by award_count */
+	score_mul (bonus_score, amount);
+	/* Store in sprintf_buffer */
+	score_add (total_bonus, bonus_score);
+	sprintf_score (bonus_score);	
+}
+
+static void bonus_add_up_jets (void)
+{
+	score_t bonus_score;
+	score_zero (bonus_score);
+	score_add (bonus_score, score_table[SC_100K]);
+	score_mul (bonus_score, jets_scored); 
+	score_add (total_bonus, bonus_score);
+		
+	score_zero (bonus_score);
+	score_add (bonus_score, score_table[SC_1M]);
+	score_mul (bonus_score, jets_bonus_level);
+	score_add (total_bonus, bonus_score);
+	sprintf_score (bonus_score);
+}
+
+static void calc_and_draw_bonus (U8 award_value, U8 amount)
 {
 	dmd_alloc_low_clean ();
-	score_zero (bonus_scored);
-	score_add (bonus_scored, score_table[award_value]);
-	score_mul (bonus_scored, amount); 
-	score_add (total_bonus, bonus_scored);
-	sprintf_score (bonus_scored);
+	bonus_add_up_score (award_value, amount);
 	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 	sprintf ("%d X %10b", amount, score_table[award_value]);
 	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
@@ -334,40 +343,9 @@ void one_ball_score_task (void)
 	score_copy (points_this_ball, current_score);
 	score_sub (points_this_ball, start_ball_score);
 	
-	score_zero (temp_score);
-
 	/* Don't show if on first ball, you can just look at the scoreboard */
 	if (ball_up != 1 && feature_config.advanced_bonus_info == YES)
 	{	
-		task_kill_gid (GID_BONUS_TALKING);
-		
-		countup_pause_iterations = 0;
-		do {
-			dmd_alloc_low_clean ();
-			
-			/* Shake the text */
-			U8 x = random_scaled (8);
-			U8 y = random_scaled (4);
-			
-			font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
-			sprintf_score (temp_score);
-			font_render_string_center (&font_fixed10, 60 + x, 22 + y, sprintf_buffer);
-			/* TODO : points this ball counts up very slow for really good balls */
-			dmd_show_low ();
-			score_add (temp_score, score_table[SC_5130]);
-			score_add (temp_score, score_table[SC_500K]);
-			/* Make some noise based on points */
-			if (score_compare (temp_score, score_table[SC_100M]) == 1 \
-				&& !task_find_gid (GID_BONUS_TALKING))
-				task_create_gid (GID_BONUS_TALKING, points_this_ball_sound_task);
-			else if (!task_find_gid (GID_BONUS_TALKING))
-				sound_send (SND_THUD);
-			bounded_increment (countup_pause_iterations, 254);
-			if (buttons_held == TRUE)
-				score_copy (temp_score, points_this_ball);
-			countup_pause ();
-		} while ( score_compare (points_this_ball, temp_score) == 1 );
-		
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
 		sprintf_score (points_this_ball);
@@ -465,24 +443,11 @@ void bonus_deff (void)
 	if (jets_scored > 0)
 	{
 		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_100K]);
-		score_mul (bonus_scored, jets_scored); 
-		score_add (total_bonus, bonus_scored);
-		
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_1M]);
-		score_mul (bonus_scored, jets_bonus_level);
-		score_add (total_bonus, bonus_scored);
-
-		sprintf_score (bonus_scored);
+		bonus_add_up_jets ();
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		sprintf ("TOWNSQUARE JETS");
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		bonus_sched_transition ();
-		dmd_show_low ();
-		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		trans_and_show ();
 	}
 	
 	if (left_ramps)
@@ -594,9 +559,6 @@ void bonus_deff (void)
 			bonus_pause ();
 	}
 
-	/* Do not allow the player to skip the next bonuses */
-	task_kill_gid (GID_BONUS_BUTTON_MONITOR);
-
 	if (backdoor_award_collected == TRUE)
 	{
 		dmd_alloc_low_clean ();
@@ -636,78 +598,22 @@ void bonus_deff (void)
 		task_sleep_sec (6);
 	}
 
-	score_zero (temp_score);
-	
-	bonus_sched_transition ();
-	
-	/* Restart the button monitor in case the user wants to skip
-	 * total points shown but hasn't pressed the buttons yet */
-	if (!task_find_gid (GID_BONUS_BUTTON_MONITOR) 
-		&& buttons_held == FALSE)
-	{
-		task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor);	
-	}
-	
-	countup_pause_iterations = 0;
+	/* Add total bonus to player score */
+	score_long (total_bonus);
 	/* Show total Bonus */	
-	do {
-	/* TODO:
-	 * Make prettier
-	 */
-		dmd_alloc_low_clean ();
-		/* Shake the text */
-		U8 x;
-		U8 y;
-		bounded_increment (countup_pause_iterations, 254);
-		if (countup_pause_iterations < 10)
-		{
-			x = random_scaled (1);
-			y = random_scaled (2);
-		}
-		else if (countup_pause_iterations < 20)
-		{
-			x = random_scaled (2);
-			y = random_scaled (3);
-		}
-		else if (countup_pause_iterations < 30)
-		{
-			x = random_scaled (4);
-			y = random_scaled (5);
-		}
-		else if (countup_pause_iterations < 40)
-		{
-			x = random_scaled (8);
-			y = random_scaled (4);
-		}
-		else 
-		{
-			x = random_scaled (10);
-			y = random_scaled (5);
-		}
-		
-		font_render_string_center (&font_fixed6, 64, 6, "TOTAL BONUS");
-		sprintf_score (temp_score);
-		font_render_string_center (&font_fixed10, 60 + x, 22 + y, sprintf_buffer);
-		dmd_show_low ();
-		score_add (temp_score, score_table[SC_5130]);
-		score_add (temp_score, score_table[SC_500K]);
-		sound_send (SND_THUD);
-		countup_pause ();
-	} while ( score_compare (total_bonus, temp_score) == 1 );
-	
-	sound_send (SND_GREED_MODE_BOOM);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 6, "TOTAL BONUS");
 	sprintf_score (total_bonus);
 	font_render_string_center (&font_fixed10, 64, 24, sprintf_buffer);
-	dmd_show_low ();	
-	task_sleep_sec (2);
+	bonus_sched_transition ();
+	dmd_show_low ();
+	sound_send (SND_GREED_MODE_BOOM);
+	bonus_pause ();
+	task_sleep_sec (1);
 		
-	/* Add total bonus to player score */
-	score_long (total_bonus);
 	
 	/* Calculate and show 1 ball hiscores */
-	one_ball_score_task ();
+//	one_ball_score_task ();
 	/* Calculate lead into temp_score */
 	if (num_players > 1)
 	{
@@ -835,9 +741,18 @@ void score_to_beat_deff (void)
 	deff_exit ();
 }
 
+CALLSET_ENTRY (bonus, start_ball)
+{
+	/* Store the start ball store */
+	score_copy (start_ball_score, current_score);
+	quickdeath_timer_already_run = FALSE;
+	quickdeath_timer_running = FALSE;
+}
+
 CALLSET_ENTRY (bonus, start_game)
 {
 	/* Initiliase hi score storage variables */
+	score_zero (start_ball_score);
 	score_zero (current_one_ball_hi_score);
 	current_one_ball_hi_player = 0;
 	current_one_ball_hi_ball_number = 0;
@@ -865,15 +780,6 @@ CALLSET_ENTRY (bonus, valid_playfield)
 	 * a ball has entered the playfield */
 	if (quickdeath_timer_already_run == FALSE && quickdeath_timer_running == FALSE)
 		task_create_gid (GID_QUICKDEATH, quickdeath_timer_task);
-}
-
-CALLSET_ENTRY (bonus, start_ball)
-{
-	/* Store the start ball store */
-	score_zero (start_ball_score);
-	score_copy (start_ball_score, current_score);
-	quickdeath_timer_already_run = FALSE;
-	quickdeath_timer_running = FALSE;
 }
 
 CALLSET_ENTRY (bonus, rank_change)
