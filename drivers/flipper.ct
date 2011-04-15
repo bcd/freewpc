@@ -64,13 +64,9 @@ extern inline void @class_refresh (void)
 #include <freewpc.h>
 #include <@self.h>
 
-/* see doc/hardware.texi WPC_FLIPTRONIC_PORT_A for more info */
 @@classvar __fastram__ U8 @class_enabled;
 #define ALL_FLIPPERS 0xFF
 #define NO_FLIPPERS 0x0
-#define ALL_BAR_LR_FLIPPER 0xFC
-#define ALL_BAR_LL_FLIPPER 0xF3
-#define LOWER_FLIPPERS_ONLY 0x0F
 
 @@classvar __fastram__ U8 @class_running;
 
@@ -83,7 +79,7 @@ CALLSET_ENTRY (@self, init)
 }
 
 /* Enable the device at start ball */
-CALLSET_ENTRY (@self, start_ball, all_flippers_enable)
+CALLSET_ENTRY (@self, start_ball)
 {
 	@class_enabled = ALL_FLIPPERS;
 }
@@ -92,16 +88,6 @@ CALLSET_ENTRY (@self, start_ball, all_flippers_enable)
 CALLSET_ENTRY (@self, end_ball, tilt)
 {
 	@class_enabled = NO_FLIPPERS;
-}
-
-CALLSET_ENTRY (@self, left_flipper_disable)
-{
-	@class_enabled = ALL_BAR_LL_FLIPPER;
-}
-
-CALLSET_ENTRY (@self, right_flipper_disable)
-{
-	@class_enabled = ALL_BAR_LR_FLIPPER;
 }
 
 @@

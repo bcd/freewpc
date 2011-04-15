@@ -27,39 +27,32 @@
  * seconds, the flipper is momentarily disabled, until the player releases the
  * button
  */
-bool left_flipper_dixoned;
-bool right_flipper_dixoned;
 
-static void kill_flipper (U8 flipper_button)
+bool flippers_dixoned;
+
+static void dixon_the_flippers (void)
 {
 	sound_send (SND_WITH_THE_DEVIL);
 	deff_start (DEFF_ANTI_CRADLE);
-	switch (flipper_button)
-	{
-		case SW_LEFT_BUTTON:
-			callset_invoke (left_flipper_disable);
-			left_flipper_dixoned = TRUE;
-			break;
-		case SW_RIGHT_BUTTON:
-			callset_invoke (right_flipper_disable);
-			right_flipper_dixoned = TRUE;
-			break;
-	}
+	flippers_dixoned = TRUE;
+	flipper_disable ();
+	task_exit ();
 }
 
 /* Monitor the flipper button for 5 seconds */
 static void anti_cradle_monitor (U8 flipper_button)
 {
-	U8 timer;
-	timer = 0;
+	U8 timer = 0;
 	while (switch_poll_logical (flipper_button)
 		&& timer <= 50
 		&& in_live_game)
 	{
-		task_sleep (TIME_100MS);
-		bounded_increment (timer, 50);
-		if (timer == 50)
-			kill_flipper (flipper_button);
+		task_sleep (TIME_500MS);
+		if (++timer == 10 && !task_find_gid (GID_DIXON_THE_FLIPPERS))
+		{
+			task_create_gid (GID_DIXON_THE_FLIPPERS, dixon_the_flippers);
+			break;
+		}
 	}
 }
 
@@ -71,27 +64,29 @@ static bool anti_cradle_enabled (void)
 		return FALSE;
 }
 
+CALLSET_ENTRY (dixon, init, start_ball, end_ball)
+{
+	flippers_dixoned = FALSE;
+}
+
 CALLSET_ENTRY (dixon, sw_left_button)
 {
-	if (left_flipper_dixoned == TRUE)
-		callset_invoke (all_flippers_enable);
+	if (flippers_dixoned)
+	{
+		flippers_dixoned = FALSE;
+		flipper_enable ();
+	}
 	else if (anti_cradle_enabled ())
 		anti_cradle_monitor (SW_LEFT_BUTTON);
 }
 
 CALLSET_ENTRY (dixon, sw_right_button)
 {
-	if (right_flipper_dixoned == TRUE)
-		callset_invoke (all_flippers_enable);
+	if (flippers_dixoned)
+	{
+		flippers_dixoned = FALSE;
+		flipper_enable ();
+	}
 	else if (anti_cradle_enabled ())
 		anti_cradle_monitor (SW_RIGHT_BUTTON);
 }
-
-/* Pretty sure that something else will take care of reenabling the flippers at the
- * start of a new ball */
-CALLSET_ENTRY (dixon, start_ball, all_flippers_enable)
-{
-	left_flipper_dixoned = FALSE;
-	right_flipper_dixoned = FALSE;
-}
-
