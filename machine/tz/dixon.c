@@ -44,15 +44,20 @@ static void anti_cradle_monitor (U8 flipper_button)
 {
 	U8 timer = 0;
 	while (switch_poll_logical (flipper_button)
-		&& timer <= 50
 		&& in_live_game)
 	{
 		task_sleep (TIME_500MS);
-		if (++timer == 10 && !task_find_gid (GID_DIXON_THE_FLIPPERS))
+		if (++timer == 10)
 		{
-			task_create_gid (GID_DIXON_THE_FLIPPERS, dixon_the_flippers);
+			if (!task_find_gid (GID_DIXON_THE_FLIPPERS))
+				task_create_gid (GID_DIXON_THE_FLIPPERS, dixon_the_flippers);
 			break;
 		}
+		/* Warn the player 2 seconds before disabling*/
+		else if (timer == 6)
+			deff_start (DEFF_TILT_WARNING);
+		if (timer > 5)
+			sound_send (SND_TILT_WARNING);
 	}
 }
 
