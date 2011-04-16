@@ -1,0 +1,16 @@
+The files in directory are only used when building FreeWPC to run
+in standalone simulation.  Reads and writes from the memory-mapped
+hardware registers are replaced by functions builtin to the program.
+These are then simulated.
+
+The effect is best described as taking a game ROM and PinMAME,
+and compiling them together into a single program.
+
+This program becomes an executable that runs on your build machine.
+This means you can debug it like any other software.  It contains
+no target processor specific code, like 6809 assembly language.
+
+The core simulator files contain logic to emulate common pinball
+devices.  You will need to write machine-specific or platform-
+specific code to define what your machine actually has.
+
