@@ -1559,6 +1559,7 @@ dmd_transition_t *transition_table[] = {
 	&trans_scroll_up_avg,
 	&trans_scroll_up_slow,
 	&trans_scroll_down,
+	&trans_scroll_down_fast,
 	&trans_scroll_left,
 	&trans_scroll_right,
 	&trans_sequential_boxfade,
@@ -1608,11 +1609,18 @@ void dev_trans_test_task (void)
 #endif
 #if (MACHINE_DMD == 1)
 	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 10, "OLD DISPLAY");
+	font_render_string_center (&font_fixed6, 64, 21, "PAGE TEXT");
+	dmd_show_low ();
+	task_sleep (TIME_300MS);
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 10, "AFTER TRANSITION");
+	font_render_string_center (&font_fixed6, 64, 21, "IS COMPLETED");
 	dmd_sched_transition (transition_table[menu_selection]);
-	font_render_string_center (&font_fixed10, 64, 16, "TRANSITION");
 	dmd_show_low ();
 #endif
 	task_sleep_sec (1);
+	window_redraw ();
 	task_exit ();
 }
 
