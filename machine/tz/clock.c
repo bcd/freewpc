@@ -89,6 +89,11 @@ task_gid_t clock_owner;
 /** The current clock hour, as an integer from 0-11 */
 U8 clock_hour;
 
+extern struct timed_mode_ops mpf_mode;
+
+/* rtc hour and minute */
+extern U8 hour;
+extern U8 minute;
 
 void tz_dump_clock (void)
 {
@@ -286,14 +291,13 @@ void tz_clock_free (task_gid_t owner)
 /** 
  * Pause the clock and restart again
  */
-void clock_pause_monitor_task (void)
+static void clock_pause_monitor_task (void)
 {
-	U8 clock_mode_stored;
-	U8 mech_speed_stored;
-	extern bool mpf_active;
+	U8 clock_mode_stored = clock_mode;
+	U8 mech_speed_stored = clock_mech_get_speed ();
 	for (;;)
 	{
-		if ((kickout_locks > 0 || mpf_active) 
+		if ((kickout_locks > 0 || timed_mode_running_p (&mpf_mode)) 
 			&& (clock_mode == CLOCK_RUNNING_FORWARD || clock_mode == CLOCK_RUNNING_BACKWARD))
 		{
 			clock_mode_stored = clock_mode;
@@ -313,17 +317,17 @@ void clock_pause_monitor_task (void)
 	}
 }
 
-inline void start_clock_pause_monitor (void)
+static void start_clock_pause_monitor (void)
 {
 	if (!task_find_gid (GID_CLOCK_PAUSE))
 		task_create_gid (GID_CLOCK_PAUSE, clock_pause_monitor_task);
 }
 
-inline void stop_clock_pause_monitor (void)
+static void stop_clock_pause_monitor (void)
 {
 	task_kill_gid (GID_CLOCK_PAUSE);
 }
-#if 0
+
 void tz_clock_show_time (U8 hours, U8 minutes)
 {
 	if (hours > 12)
@@ -343,7 +347,7 @@ void tz_clock_show_time (U8 hours, U8 minutes)
 		clock_find_target = tz_clock_hour_to_opto[hours - 1] | CLK_SW_MIN45;
 	clock_mode = CLOCK_FIND;
 }
-#endif
+
 void tz_clock_start_forward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
@@ -491,29 +495,18 @@ CALLSET_ENTRY (tz_clock, amode_start)
 		clock_mode = CLOCK_CALIBRATING;
 		clock_mech_start_forward ();
 	}
-	else
-	{
+	else if (global_flag_test (GLOBAL_FLAG_CLOCK_HOME))
+		tz_clock_show_time (hour, minute);
+	else	
 		tz_clock_reset ();
-	}
 }
 
-//void tz_clock_reverse_direction (void)
-CALLSET_ENTRY (clock, tz_clock_reverse_direction)
+void tz_clock_reverse_direction (void)
 {
-	switch (clock_mode)
-	{
-		case CLOCK_RUNNING_FORWARD:
+	if (clock_mode == CLOCK_RUNNING_FORWARD)
 			tz_clock_start_backward ();
-			break;
-		case CLOCK_RUNNING_BACKWARD:
+	else if (clock_mode == CLOCK_RUNNING_BACKWARD)
 			tz_clock_start_forward ();
-			break;
-		default:
-		case CLOCK_STOPPED:
-		case CLOCK_FIND:
-		case CLOCK_CALIBRATING:
-			break;
-	}
 }
 
 void tz_clock_set_speed (U8 speed)

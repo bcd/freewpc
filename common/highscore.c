@@ -34,11 +34,14 @@ struct high_score
 	score_t score;
 	U8 initials[HIGH_SCORE_NAMESZ];
 };
-
 #define HS_COUNT (NUM_HIGH_SCORES + 1)
 
 /** The high score table */
 __nvram__ struct high_score high_score_table[HS_COUNT];
+
+#ifdef CONFIG_ONE_HS_PER_PLAYER
+struct high_score high_score_table_backup[HS_COUNT];
+#endif
 
 
 /** A checksum descriptor for the high scores/initials */
@@ -310,10 +313,14 @@ void high_score_free (U8 position)
 	if (position < HS_COUNT-1)
 		high_score_free (position+1);
 
+#ifdef CONFIG_ONE_HS_PER_PLAYER
+	memcpy (&high_score_table_backup[position+1], &high_score_table_backup[position],
+		sizeof (struct high_score_backup));
+#else
 	memcpy (&high_score_table[position+1], &high_score_table[position],
 		sizeof (struct high_score));
+#endif
 }
-
 
 /**
  * Check if player PLAYER has qualified for the high score board
@@ -322,11 +329,17 @@ void high_score_free (U8 position)
 void high_score_check_player (U8 player)
 {
 	U8 hs;
-	/* Invalidate the score if a flipcode was used */
 
 #ifdef MACHINE_TZ
+	/* Invalidate the score if a flipcode was used */
 	if (flipcode_used)
 		return;
+#endif
+
+#ifdef CONFIG_ONE_HS_PER_PLAYER
+	/* Copy the hs table to a backup location */
+	if (feature_config.one_hs_entry == YES)
+		memcpy (&high_score_table_backup, &high_score_table, sizeof high_score_table);
 #endif
 
 	for (hs = 0; hs < HS_COUNT; hs++)
@@ -339,6 +352,17 @@ void high_score_check_player (U8 player)
 			 * Set the initials to the player number */
 			dbprintf ("High score %d achieved by player %d\n",
 				hs, player+1);
+#ifdef CONFIG_ONE_HS_PER_PLAYER
+			/* Write the high score entry to a seperate array */
+			if (feature_config.one_hs_entry == YES)
+			{
+				struct high_score *hsbp = &high_score_table_backup[hs];
+				high_score_free (hs);
+				memcpy (hsbp->score, scores[player], sizeof (score_t));
+				hsbp->initials[0] = player;
+				return;
+			}
+#endif
 			pinio_nvram_unlock ();
 			high_score_free (hs);
 			memcpy (hsp->score, scores[player], sizeof (score_t));
@@ -393,12 +417,25 @@ void high_score_enter_initials (U8 position)
 #endif
 		SECTION_VOIDCALL (__common__, initials_enter);
 
+
+#ifdef CONFIG_ONE_HS_PER_PLAYER
+		/* Scan the backup high score table for the initials and don't
+		 * write if the player has a higher score on the table */
+		if (feature_config.one_hs_entry == YES)
+		{
+		}
+		else
+		{
+#endif
 		/* Save the initials to table entry */
 		pinio_nvram_unlock ();
 		memcpy (hsp->initials, initials_data, HIGH_SCORE_NAMESZ);
 		pinio_nvram_lock ();
 		csum_area_update (&high_csum_info);
 
+#ifdef CONFIG_ONE_HS_PER_PLAYER
+		}
+#endif
 		/* Award credits */
 		if (position == 0)
 		{

@@ -117,13 +117,11 @@ void mpf_award_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	dmd_clean_page_low ();
-	dmd_clean_page_high ();
-	dmd_alloc_low ();
+	dmd_alloc_pair_clean ();
 	sprintf ("%d,000,000", (mpf_award * mpf_level));
 	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
 	font_render_string_center (&font_var5, 64, 20, "AND SPOT DOOR PANEL");
-	dmd_show_low ();
+	dmd_show2 ();
 	task_sleep (TIME_700MS);
 	deff_exit ();
 }

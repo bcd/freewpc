@@ -90,18 +90,24 @@ void tnf_exit_deff (void)
 	deff_exit ();
 }
 
+static void tnf_sound_task (void)
+{
+	if (masher_buttons_pressed < 80)
+		sound_send (SND_BUYIN_CANCELLED);
+	else
+		sound_send (SND_CLOCK_CHAOS_END_BOOM);
+	task_exit ();
+}
+
 CALLSET_ENTRY (tnf, sw_left_button, sw_right_button)
 {
 	if (deff_get_active () == DEFF_TNF)
 	{
 		bounded_increment (masher_buttons_pressed, 255);
-		if (masher_buttons_pressed < 80)
-			sound_send (SND_BUYIN_CANCELLED);
-		else
-			sound_send (SND_CLOCK_CHAOS_END_BOOM);
 		score_add (tnf_score, score_table[SC_250K]);
 		tnf_x = random_scaled(10);
 		tnf_y = random_scaled(8);
+		task_recreate_gid (GID_TNF_SOUND, tnf_sound_task);
 	}
 }
 

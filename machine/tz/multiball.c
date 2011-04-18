@@ -69,6 +69,28 @@ bool check_for_midnight (void)
 		return FALSE;
 }
 
+static void call_number (U8 number)
+{
+	switch (number)
+	{
+		default:
+		case 5:
+			sound_send (SND_FIVE);
+			break;
+		case 4:
+			sound_send (SND_FOUR);
+			break;
+		case 3:
+			sound_send (SND_THREE);
+			break;
+		case 2:
+			sound_send (SND_TWO);
+			break;
+		case 1:
+			sound_send (SND_ONE);
+		break;
+	}
+}
 
 void mball_restart_countdown_task (void)
 {
@@ -78,25 +100,7 @@ void mball_restart_countdown_task (void)
 		if (last_number_called != mball_restart_timer)
 		{
 			last_number_called = mball_restart_timer;
-			switch (last_number_called)
-			{
-				default:
-				case 5:
-					sound_send (SND_FIVE);
-					break;
-				case 4:
-					sound_send (SND_FOUR);
-					break;
-				case 3:
-					sound_send (SND_THREE);
-					break;
-				case 2:
-					sound_send (SND_TWO);
-					break;
-				case 1:
-					sound_send (SND_ONE);
-					break;
-			}
+			call_number (last_number_called);	
 		}
 		task_sleep (TIME_500MS);
 	}
@@ -127,6 +131,7 @@ bool multiball_ready (void)
 void mball_restart_deff (void)
 {
 	U16 fno;
+	U8 j = 0;
 	dmd_alloc_pair_clean ();
 	while (mball_restart_timer > 0)
 	{
@@ -135,7 +140,13 @@ void mball_restart_deff (void)
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
 			font_render_string_center (&font_var5, 64, 16, "SHOOT LOCK TO RESTART");
+			j++;
+			if (j > 255)
+				j = 0;
+			if (j % 2 != 0)
+			{
 			font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
+			}
 			sprintf ("%d", mball_restart_timer);
 			font_render_string_center (&font_fixed6, 64, 25, sprintf_buffer);
 			dmd_text_outline ();
@@ -222,11 +233,7 @@ void mb_start_deff (void)
 {
 	sound_send (SND_DONT_TOUCH_THE_DOOR_AD_INF);
 	
-	if (check_for_midnight ())
-		sprintf ("MIDNIGHT");
-	else
-		sprintf ("MULTI BALL");
-			
+		
 	U16 fno;
 	U8 i;
 	for (i = 0; i < 6; i++)
@@ -238,19 +245,28 @@ void mb_start_deff (void)
 			dmd_clean_page_low ();
 		
 			j++;
+			if (j > 255)
+				j = 0;
 			if (j % 2 != 0)
 			{
 				font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
 			}
+			else if (check_for_midnight ())
+			{
+				font_render_string_center (&font_fixed10, 64, 16, "MIDNIGHT");
+			}
 			else
-				font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-			
+			{
+				font_render_string_center (&font_fixed6, 64, 16, "MULTI BALL");
+			}
 			dmd_text_outline ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
 			dmd_overlay_outline ();
 			dmd_show2 ();
 			if (i < 3)
+				task_sleep (TIME_100MS);
+			else if (i < 5)
 				task_sleep (TIME_66MS);
 			else
 				task_sleep (TIME_33MS);
@@ -305,8 +321,16 @@ void mb_running_deff (void)
 			{
 				font_render_string_center (&font_var5, 64, 27, "SHOOT LOCK TO RELIGHT");
 			}
-			if ((i% 2) != 0)
+			
+			if (i % 2 != 0)
+			{
 				font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
+			}
+			else if (check_for_midnight ())
+			{
+				font_render_string_center (&font_fixed6, 64, 4, "MIDNIGHT");
+			}
+
 			dmd_text_outline ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
@@ -525,6 +549,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		deff_stop (DEFF_MB_RUNNING);
 		deff_stop (DEFF_JACKPOT_RELIT);
 		leff_stop (LEFF_MB_RUNNING);
+		leff_stop (LEFF_BONUS);
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
 		lamp_tristate_off (LM_PIANO_JACKPOT);
@@ -588,7 +613,8 @@ CALLSET_ENTRY (mball, sw_piano)
 		if (live_balls == 3)
 			bounded_increment (jackpot_level, 5);
 		jackpot_level_stored = jackpot_level;
-		leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
+		if (!check_for_midnight ())
+			leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 		deff_start (DEFF_JACKPOT);
 		deff_start (DEFF_MB_JACKPOT_COLLECTED);
 		mball_jackpot_uncollected = FALSE;
@@ -613,6 +639,10 @@ CALLSET_ENTRY (mball, any_pf_switch)
 	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 	{
 		score (SC_20K);
+	}
+	if (check_for_midnight () && global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
+	{
+		leff_start (LEFF_FLASHER_HAPPY);
 	}
 }
 

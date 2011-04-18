@@ -42,6 +42,8 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 define MACHINE_HAS_UPPER_RIGHT_FLIPPER
 define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 define CONFIG_TZONE_IP y
+# Allow only one high score entry per player
+#define CONFIG_ONE_HS_PER_PLAYER 
 
 ##########################################################################
 # Lamp Description
@@ -451,6 +453,9 @@ Mag Throw:yes_no, YES
 # Dont allow cradling during multiball
 Dixon anti cradle:yes_no, NO
 
+# Only allow one high score entry per player
+One HS entry:yes_no, YES
+
 ##########################################################################
 # Items for the Feature Audits menu.
 ##########################################################################
@@ -698,6 +703,8 @@ Anti Cradle: page(MACHINE_PAGE), PRI_TILT, D_PAUSE+D_QUEUED
 
 Hurryup Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 Hurryup awarded: page(MACHINE3_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+
+Match loop: page(MACHINE3_PAGE), PRI_MATCH, D_PAUSE+D_QUEUED
 
 ##########################################################################
 # Lamp effects

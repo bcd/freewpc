@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//TODO Make this play nice with Skill shot animation
 /* CALLSET_SECTION (rocket, __machine2__) */
 #include <freewpc.h>
 
@@ -39,16 +38,13 @@ void rocket_deff (void)
 	U16 fno;
 	for (fno = IMG_ROCKET_LOAD_START; fno <= IMG_ROCKET_LOAD_END; fno += 2)
 	{
-		//dmd_alloc_pair ();
 		dmd_map_overlay ();
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
-		//dmd_overlay_onto_color ();
 		dmd_overlay_outline ();
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
-	//	dmd_map_overlay ();
 	}
 	task_sleep (TIME_100MS);
 	/* Rocket takes 500ms before kick 
@@ -57,20 +53,31 @@ void rocket_deff (void)
 	for (fno = IMG_NEWROCKET_START; fno <= IMG_NEWROCKET_END; fno += 2)
 	{
 		dmd_alloc_pair_clean ();
-	//	dmd_map_overlay ();
-	//	dmd_text_outline ();
-	//	dmd_alloc_pair ();
-		
 		frame_draw (fno);
-	//	dmd_overlay_outline ();
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
 	deff_exit ();
 }
 
+/* Give the player 1M if he hits the right flipper on
+ * the rocket launch, within 66ms before or 100ms after */
+CALLSET_ENTRY (rocket, sw_right_button)
+{
+	if (event_did_follow (rocket, flipper))
+	{
+		sound_send (SND_CUCKOO);
+		score (SC_1M);
+	}
+}
+
+
 static void rocket_kick_sound (void)
 {
+	/* The event_can_follow is in the sound task as the rocket_deff may get
+	 * delayed and the player can use it for notification without having to
+	 * look away from the playfield.
+	 */
 	event_can_follow (rocket, flipper, TIME_100MS);
 	sound_send (SND_ROCKET_KICK_DONE);
 	flasher_pulse (FLASH_UR_FLIPPER);
@@ -85,17 +92,6 @@ CALLSET_ENTRY (rocket, dev_rocket_enter)
 		}
 }
 
-/* Give the player 1M if he hits the right flipper on
- * the rocket launch */
-CALLSET_ENTRY (rocket, sw_right_button)
-{
-	if (event_did_follow (rocket, flipper))
-	{
-		sound_send (SND_CUCKOO);
-		score (SC_1M);
-	}
-}
-
 CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 {
 	if (in_live_game)
@@ -107,7 +103,9 @@ CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 			leff_start (LEFF_ROCKET);
 		sound_send (SND_ROCKET_KICK_REVVING);
 		deff_start (DEFF_ROCKET);
-		task_sleep (TIME_500MS);
+		task_sleep (TIME_400MS);
+		event_can_follow (rocket, flipper, TIME_66MS);
+		task_sleep (TIME_66MS);
 		task_create_gid (0, rocket_kick_sound);
 	}
 }
