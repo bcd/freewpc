@@ -128,6 +128,8 @@ static void sssmb_award_jackpot (void)
 	mball_jackpot_uncollected = FALSE;
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	sssmb_initial_ramps_to_divert++;
+	if (feature_config.dixon_anti_cradle == YES)
+		sssmb_jackpot_value += 5;
 	score_1M (sssmb_jackpot_value);
 	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 	deff_start (DEFF_JACKPOT);
