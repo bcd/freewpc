@@ -66,6 +66,7 @@
 #define ERR_FAILED_DEFF          45
 #define ERR_NOT_SOUND_PROC       46
 #define ERR_BALL_SEARCH_TIMEOUT  47
+#define ERR_ZERO_SCORE_MULT      48
 
 #ifndef __ASSEMBLER__
 

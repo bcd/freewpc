@@ -39,9 +39,16 @@ U8 global_score_multiplier;
 /** The last score award, with multipliers applied */
 score_t last_score;
 
+/** The multiplier attached to the last score award.  This does not
+factor in the global score multiplier. */
+U8 last_multiplier;
+
 /** The score award that is being displayed.  This is a latched
  * version of last_score. */
 score_t deff_score;
+
+/** The last multiplier as displayed */
+U8 deff_multiplier;
 
 
 /** Clears a score */
@@ -173,6 +180,7 @@ multipliers. */
 void score_long_unmultiplied (const score_t score)
 {
 	score_copy (last_score, score);
+	last_multiplier = 1;
 	score_award (last_score);
 }
 
@@ -181,6 +189,7 @@ an additional multiplier can be specified too. */
 void score_long_multiple (const score_t score, U8 multiplier)
 {
 	score_copy (last_score, score);
+	last_multiplier = multiplier;
 	score_mul (last_score, multiplier);
 	score_mul (last_score, global_score_multiplier);
 	score_award (last_score);
@@ -216,6 +225,7 @@ is saved to separate storage so that future scores do not clobber it. */
 void score_deff_set (void)
 {
 	score_copy (deff_score, last_score);
+	deff_multiplier = last_multiplier;
 }
 
 /** Called by a display effect to get the last score */
@@ -235,6 +245,11 @@ void scores_reset (void)
 
 void score_multiplier_set (U8 m)
 {
+	if (m == 0)
+	{
+		nonfatal (ERR_ZERO_SCORE_MULT);
+		m = 1;
+	}
 	global_score_multiplier = m;
 }
 

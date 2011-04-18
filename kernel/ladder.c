@@ -60,15 +60,31 @@ void fixed_ladder_reset (const struct fixed_ladder *ladder)
 	score_copy (ladder->current, ladder->base);
 }
 
-void fixed_ladder_score_multiple (const struct fixed_ladder *ladder, U8 multiplier)
+void fixed_ladder_advance (const struct fixed_ladder *ladder)
 {
-	score_long_multiple (ladder->current, multiplier);
 	if (score_compare (ladder->current, ladder->max) == -1)
 		score_add (ladder->current, ladder->increment);
 }
 
+void fixed_ladder_scorex (const struct fixed_ladder *ladder, U8 multiplier)
+{
+	score_long_multiple (ladder->current, multiplier);
+}
+
 void fixed_ladder_score (const struct fixed_ladder *ladder)
 {
-	fixed_ladder_score_multiple (ladder, 1);
+	fixed_ladder_scorex (ladder, 1);
+}
+
+void fixed_ladder_score_and_advance (const struct fixed_ladder *ladder)
+{
+	fixed_ladder_score (ladder);
+	fixed_ladder_advance (ladder);
+}
+
+void fixed_ladder_scorex_and_advance (const struct fixed_ladder *ladder, U8 multiplier)
+{
+	fixed_ladder_scorex (ladder, multiplier);
+	fixed_ladder_advance (ladder);
 }
 

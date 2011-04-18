@@ -33,6 +33,8 @@
 /** The standard score type, kept in packed BCD, 2 digits per byte */
 typedef bcd_t score_t[BYTES_PER_SCORE], *score_pointer_t;
 
+typedef bcd_t * const const_score_pointer_t;
+
 typedef U8 score_id_t;
 
 /**
@@ -59,9 +61,9 @@ struct generic_ladder
  */
 struct fixed_ladder
 {
-	const score_t base;
-	const score_t increment;
-	const score_t max;
+	const const_score_pointer_t base;
+	const const_score_pointer_t increment;
+	const const_score_pointer_t max;
 	score_pointer_t current;
 };
 
@@ -156,7 +158,10 @@ void generic_ladder_score (const struct generic_ladder *ladder);
 void generic_ladder_score_and_advance (const struct generic_ladder *ladder);
 
 void fixed_ladder_reset (const struct fixed_ladder *ladder);
-void fixed_ladder_score_multiple (const struct fixed_ladder *ladder, U8 multiplier);
+void fixed_ladder_advance (const struct fixed_ladder *ladder);
+void fixed_ladder_scorex (const struct fixed_ladder *ladder, U8 multiplier);
 void fixed_ladder_score (const struct fixed_ladder *ladder);
+void fixed_ladder_score_and_advance (const struct fixed_ladder *ladder);
+void fixed_ladder_scorex_and_advance (const struct fixed_ladder *ladder, U8 multiplier);
 
 #endif /* _SCORE_H */
