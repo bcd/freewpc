@@ -275,7 +275,7 @@ struct dmd_rough_args
  * height is the height of the area to be erased in pixels.
  * All pixel values should be a multiple of 8 for correct results.
  */
-#define dmd_rough_erase(x, y, width, height) \
+#define dmd_rough_erase(x, y, w, h) \
 	do { \
 		extern struct dmd_rough_args dmd_rough_args; \
 		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1) + \
