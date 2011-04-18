@@ -386,7 +386,14 @@ void high_score_award_credits (U8 *adjptr)
 
 bool score_is_players_highest (U8 position)
 {
-
+	struct high_score *hsp = &high_score_table_backup[position];
+	U8 hs;	
+	for (hs = 0; hs < position; hs++)
+	{
+		if (hsp->initials == initial_data)
+			return FALSE;
+	}
+	return TRUE;
 }
 #endif
 
@@ -428,6 +435,7 @@ void high_score_enter_initials (U8 position)
 		if (feature_config.one_hs_entry == YES
 			&& score_is_players_highest (position) == NO)
 		{
+			//deff_start (DEFF_YOU_HAVE_DONE_BETTER);
 		}
 		else
 		{
