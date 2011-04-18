@@ -383,7 +383,6 @@ void high_score_award_credits (U8 *adjptr)
 }
 
 #ifdef CONFIG_ONE_HS_PER_PLAYER
-
 bool score_is_players_highest (U8 position)
 {
 	struct high_score *hsp = &high_score_table_backup[position];
@@ -394,6 +393,19 @@ bool score_is_players_highest (U8 position)
 			return FALSE;
 	}
 	return TRUE;
+}
+
+void you_have_done_better_deff (void)
+{
+	dmd_alloc_low_clean ();
+#if (MACHINE_DMD == 1)
+	font_render_string_center (&font_var5, 64, 3, "NOT YOUR BEST");
+#endif
+	font_render_string_center (&font_var5, 64, 10, "TRY HARDER");
+	font_render_string_center (&font_var5, 64, 17, "NEXT TIME");
+	dmd_show_low ();
+	task_sleep_sec (3);
+	deff_exit ();
 }
 #endif
 
@@ -435,19 +447,23 @@ void high_score_enter_initials (U8 position)
 		if (feature_config.one_hs_entry == YES
 			&& score_is_players_highest (position) == NO)
 		{
-			//deff_start (DEFF_YOU_HAVE_DONE_BETTER);
+	//		deff_start_sync (DEFF_YOU_HAVE_DONE_BETTER);
 		}
 		else
 		{
-#endif
+			/* Pointer to the 'real' high score table */
+			struct high_score *hsrp = &high_score_table[position];
+			pinio_nvram_unlock ();
+			memcpy (hsrp->initials, initials_data, HIGH_SCORE_NAMESZ);
+			pinio_nvram_lock ();
+			csum_area_update (&high_csum_info);
+		}
+#else
 		/* Save the initials to table entry */
 		pinio_nvram_unlock ();
 		memcpy (hsp->initials, initials_data, HIGH_SCORE_NAMESZ);
 		pinio_nvram_lock ();
 		csum_area_update (&high_csum_info);
-
-#ifdef CONFIG_ONE_HS_PER_PLAYER
-		}
 #endif
 		/* Award credits */
 		if (position == 0)
