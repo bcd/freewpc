@@ -267,6 +267,8 @@ struct dmd_rough_args
 		dmd_rough_copy1 (); \
 	} while (0)
 
+void dmd_rough_copy1 (void);
+
 /**
  * Zero a portion of the low DMD page.
  *
@@ -285,5 +287,6 @@ struct dmd_rough_args
 		dmd_rough_erase1 (); \
 	} while (0)
 
+void dmd_rough_erase1 (void);
 
 #endif /* _SYS_DMD_H */
