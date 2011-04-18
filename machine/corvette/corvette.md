@@ -167,7 +167,7 @@ H2: ZR-1 Low Rev Gate, duty(SOL_DUTY_50), time(TIME_66MS)
 H3: Kickback, duty(SOL_DUTY_75), time(TIME_66MS)
 H4: Pit Stop Popper, duty(SOL_DUTY_75), time(TIME_66MS)
 H5: ZR-1 Up Rev Gate, duty(SOL_DUTY_50), time(TIME_66MS)
-H6: Not Used 1,nosearch
+H6: Not Used 1, nosearch
 H7: Knocker, knocker, duty(SOL_DUTY_75), time(TIME_33MS)
 H8: Route 66 Kickout, duty(SOL_DUTY_75), time(TIME_66MS)
 
@@ -176,12 +176,12 @@ L2: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L3: Left Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L4: Lower Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L5: Upper Jet, duty(SOL_DUTY_75), time(TIME_33MS) # actually the RIGHT jet
-L6: Not Used 2,nosearch
+L6: Not Used 2, nosearch
 L7: ZR-1 Lockup, duty(SOL_DUTY_100), time(TIME_100MS)
 L8: Loop Gate, duty(SOL_DUTY_50), time(TIME_66MS)
 
 # G = J126 on Power Driver Board
-G1: Race Direction,nosearch
+G1: Race Direction, nosearch
 G2: Left Race Enable, motor
 G3: Right Race Enable, motor
 G4: Future Car, flash, duty(SOL_DUTY_75), time(TIME_16MS)
