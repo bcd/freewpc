@@ -181,7 +181,7 @@ L7: ZR-1 Lockup, duty(SOL_DUTY_100), time(TIME_100MS)
 L8: Loop Gate, duty(SOL_DUTY_50), time(TIME_66MS)
 
 # G = J126 on Power Driver Board
-G1: Race Direction
+G1: Race Direction,nosearch
 G2: Left Race Enable, motor
 G3: Right Race Enable, motor
 G4: Future Car, flash, duty(SOL_DUTY_75), time(TIME_16MS)
