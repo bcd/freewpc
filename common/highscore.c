@@ -315,7 +315,7 @@ void high_score_free (U8 position)
 
 #ifdef CONFIG_ONE_HS_PER_PLAYER
 	memcpy (&high_score_table_backup[position+1], &high_score_table_backup[position],
-		sizeof (struct high_score_backup));
+		sizeof (struct high_score));
 #else
 	memcpy (&high_score_table[position+1], &high_score_table[position],
 		sizeof (struct high_score));
@@ -389,7 +389,7 @@ bool score_is_players_highest (U8 position)
 	U8 hs;	
 	for (hs = 0; hs < position; hs++)
 	{
-		if (hsp->initials == initial_data)
+		if (hsp->initials[hs] == initials_data)
 			return FALSE;
 	}
 	return TRUE;
@@ -445,16 +445,16 @@ void high_score_enter_initials (U8 position)
 		/* Scan the backup high score table for the initials and don't
 		 * write if the player has a higher score on the table */
 		if (feature_config.one_hs_entry == YES
-			&& score_is_players_highest (position) == NO)
+			&& score_is_players_highest (position) == FALSE)
 		{
 	//		deff_start_sync (DEFF_YOU_HAVE_DONE_BETTER);
 		}
 		else
 		{
-			/* Pointer to the 'real' high score table */
-			struct high_score *hsrp = &high_score_table[position];
 			pinio_nvram_unlock ();
-			memcpy (hsrp->initials, initials_data, HIGH_SCORE_NAMESZ);
+			memcpy (hsp->initials, initials_data, HIGH_SCORE_NAMESZ);
+			/* Copy the backup to the real table */
+			memcpy (&high_score_table, &high_score_backup, sizeof high_score_table);
 			pinio_nvram_lock ();
 			csum_area_update (&high_csum_info);
 		}
