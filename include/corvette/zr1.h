@@ -15,7 +15,7 @@ enum mech_zr1_state {
 	/** The engine should be moving full left/full right with 1/2 second delays between movements to free stuck balls */
 	ZR1_BALL_SEARCH,
 	/** The engine should be shaking */
-	ZR1_SHAKE
+	ZR1_SHAKE,
 };
 
 // CC = calibration code
@@ -33,6 +33,8 @@ enum mech_zr1_calibration_codes {
 #define ZR1_SHAKE_SPEED_FASTEST ZR1_SHAKE_SPEED_MIN
 #define ZR1_SHAKE_SPEED_SLOWEST ZR1_SHAKE_SPEED_MAX
 #define ZR1_SHAKE_SPEED_DEFAULT ZR1_SHAKE_SPEED_FASTEST
+
+#define ZR1_BALL_SEARCH_SPEED 20 // slow
 
 #define ZR1_SHAKE_RANGE_MIN 1
 #define ZR1_SHAKE_RANGE_MAX 5

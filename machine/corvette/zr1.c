@@ -46,6 +46,9 @@
 // Specifies how long it takes the engine to move from one side to the other at full speed using the default range.
 #define ZR1_SHAKE_TICKS 4 // 16 * 4 = 64MS
 
+// Specifies how long it takes the engine to move from one side to the other at full speed using the default range.
+#define ZR1_BALL_SEARCH_TICKS 8 // 16 * 8 = 128MS
+
 // Specifies how long the RTT should wait before changing the position of the engine during calibration.
 #define ZR1_CALIBRATE_MOVE_TICKS 5 // 16 * 5 = 80MS
 
@@ -400,6 +403,39 @@ void zr1_state_shake_run(void) {
 	}
 }
 
+// Ball searching reuses some of the shake variables to save space
+// zr1_shake_ticks_remaining, zr1_shake_direction
+
+void zr1_state_ball_search_enter(void) {
+	zr1_shake_ticks_remaining = ZR1_BALL_SEARCH_TICKS / 2; // we assume engine is in the center before searching starts, that being the case it only has to travel half the distance when beginning the search
+
+	// always begin by moving left
+	zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
+	zr1_set_position(zr1_pos_full_left_opto_on);
+	zr1_enable_solenoids();
+}
+
+void zr1_state_ball_search_run(void) {
+	zr1_enable_solenoids();
+
+	if (zr1_shake_ticks_remaining > 0) {
+		zr1_shake_ticks_remaining--;
+		return;
+	}
+	// reset counter
+	zr1_shake_ticks_remaining = (U8)ZR1_BALL_SEARCH_TICKS * (U8)ZR1_BALL_SEARCH_SPEED;
+
+	// reverse direction
+	if (zr1_shake_direction == ZR1_SHAKE_DIRECTION_LEFT) {
+		zr1_shake_direction = ZR1_SHAKE_DIRECTION_RIGHT;
+		zr1_set_position(zr1_pos_full_right_opto_on);
+	} else {
+		zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
+		zr1_set_position(zr1_pos_full_left_opto_on);
+	}
+}
+
+
 void corvette_zr1_engine_rtt (void) {
 
 	switch (zr1_state) {
@@ -432,6 +468,14 @@ void corvette_zr1_engine_rtt (void) {
 				zr1_state_shake_enter();
 			} else {
 				zr1_state_shake_run();
+			}
+		break;
+
+		case ZR1_BALL_SEARCH:
+			if (zr1_previous_state != zr1_state) {
+				zr1_state_ball_search_enter();
+			} else {
+				zr1_state_ball_search_run();
 			}
 		break;
 
@@ -504,6 +548,10 @@ void zr1_shake(void) {
 	zr1_enter_state(ZR1_SHAKE);
 }
 
+void zr1_start_ball_search(void) {
+	zr1_enter_state(ZR1_BALL_SEARCH);
+}
+
 /**
  * Sets the shake speed
  *
@@ -548,13 +596,6 @@ void zr1_set_shake_range(U8 new_shake_range) {
 	zr1_calculate_shake_range();
 	enable_interrupts();
 }
-
-// TODO
-/*
-void zr1_ball_search(void) {
-	zr1_enter_state(ZR1_BALL_SEARCH);
-}
-*/
 
 CALLSET_ENTRY (zr1, init)
 {
@@ -605,4 +646,9 @@ CALLSET_ENTRY (zr1, init_complete, amode_start) {
 	}
 
 	dbprintf ("zr1: init_complete/amode_start exit\n");
+}
+
+CALLSET_ENTRY (zr1, ball_search) {
+	dbprintf ("zr1: ball_search\n");
+	zr1_start_ball_search();
 }

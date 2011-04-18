@@ -39,9 +39,8 @@ enum {
 	SHAKE,
 	CENTER,
 	IDLE,
-	ENABLE_SOLENOIDS,  // XXX
-	DISABLE_SOLENOIDS, // XXX
-	LAST_TEST = DISABLE_SOLENOIDS
+	BALL_SEARCH,
+	LAST_TEST = BALL_SEARCH
 } zr1_test_command;
 
 char *short_names[] = {
@@ -49,8 +48,7 @@ char *short_names[] = {
 	"SHAKE",
 	"CENTER",
 	"IDLE",
-	"ENABLE SOL.", // XXX
-	"DISABLE SOL." // XXX
+	"BALL_SEARCH"
 };
 
 // error messages, see enum mech_zr1_calibration_codes;
@@ -271,23 +269,16 @@ void zr1_test_enter (void)
   			zr1_idle();
   		break;
 
-  		// TODO remove when real-machine testing is complete - begin
-
-  		case ENABLE_SOLENOIDS:
- 			dbprintf ("zr1_test_enter: calling 'zr1_enable_solenoids'\n");
- 			disable_interrupts();
-  			zr1_enable_solenoids();
-  			enable_interrupts();
+  		case BALL_SEARCH:
+  			if (zr1_state == ZR1_SHAKE) {
+ 				dbprintf ("zr1_test_enter: engine already shaking, starting 'idle' instead\n");
+  				zr1_idle();
+  				break;
+  			}
+ 			dbprintf ("zr1_test_enter: starting 'idle'\n");
+  			zr1_start_ball_search();
   		break;
 
-  		case DISABLE_SOLENOIDS:
- 			dbprintf ("zr1_test_enter: calling 'zr1_disable_solenoids'\n");
- 			disable_interrupts();
-  			zr1_disable_solenoids();
-  			enable_interrupts();
-  		break;
-
- 		// TODO remove when testing complete - end
   	}
 
 }
