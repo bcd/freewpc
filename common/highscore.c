@@ -338,13 +338,16 @@ void high_score_check_player (U8 player)
 
 #ifdef CONFIG_ONE_HS_PER_PLAYER
 	/* Copy the hs table to a backup location */
-	if (feature_config.one_hs_entry == YES)
-		memcpy (&high_score_table_backup, &high_score_table, sizeof high_score_table);
+	memcpy (&high_score_table_backup, &high_score_table, sizeof high_score_table);
 #endif
 
 	for (hs = 0; hs < HS_COUNT; hs++)
 	{
+#ifdef CONFIG_ONE_HS_PER_PLAYER
+		struct high_score *hsp = &high_score_table_backup[hs];
+#else
 		struct high_score *hsp = &high_score_table[hs];
+#endif
 		if ((score_compare (scores[player], hsp->score)) > 0)
 		{
 			/* The score qualifies for this position.  Push all
@@ -352,17 +355,6 @@ void high_score_check_player (U8 player)
 			 * Set the initials to the player number */
 			dbprintf ("High score %d achieved by player %d\n",
 				hs, player+1);
-#ifdef CONFIG_ONE_HS_PER_PLAYER
-			/* Write the high score entry to a seperate array */
-			if (feature_config.one_hs_entry == YES)
-			{
-				struct high_score *hsbp = &high_score_table_backup[hs];
-				high_score_free (hs);
-				memcpy (hsbp->score, scores[player], sizeof (score_t));
-				hsbp->initials[0] = player;
-				return;
-			}
-#endif
 			pinio_nvram_unlock ();
 			high_score_free (hs);
 			memcpy (hsp->score, scores[player], sizeof (score_t));
@@ -390,13 +382,25 @@ void high_score_award_credits (U8 *adjptr)
 	}
 }
 
+#ifdef CONFIG_ONE_HS_PER_PLAYER
+
+bool score_is_players_highest (U8 position)
+{
+
+}
+#endif
 
 /** See if the given position in the high score table was modified and
  * needs initials entered.  POSITION is 1-4 for the regular spots
  * and 0 for the grand champion. */
 void high_score_enter_initials (U8 position)
 {
+
+#ifdef CONFIG_ONE_HS_PER_PLAYER
+	struct high_score *hsp = &high_score_table_backup[position];
+#else
 	struct high_score *hsp = &high_score_table[position];
+#endif
 	if (hsp->initials[0] < ' ')
 	{
 		dbprintf ("High score %d needs initials\n", position);
@@ -421,7 +425,8 @@ void high_score_enter_initials (U8 position)
 #ifdef CONFIG_ONE_HS_PER_PLAYER
 		/* Scan the backup high score table for the initials and don't
 		 * write if the player has a higher score on the table */
-		if (feature_config.one_hs_entry == YES)
+		if (feature_config.one_hs_entry == YES
+			&& score_is_players_highest (position) == NO)
 		{
 		}
 		else
