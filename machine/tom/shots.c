@@ -1,6 +1,47 @@
+/*
+ * Copyright 2011 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <freewpc.h>
 #include <trap_door.h>
+
+/* This file implements the shot detection logic.  Its main purpose is to
+	receive switch inputs and generate shot events.  The complexity arises
+	from:
+	1. Some shots require multiple switch closures to detect properly.
+	2. Some switches are shared by multiple shots.
+	3. Some shots are never to be generated during multiballs because
+	   they cannot be detected reliably.
+	4. Switch compensation can require a shot to be awarded from a totally
+		different switch if the primary means of detection isn't reliable.
+
+	Although possible to implement score rules here, it is discouraged
+	except for the simplest possible circumstances: default switch score
+	rules and default sounds.  For simple shots where there is only a
+	single switch closure to generate it, nothing need be added here;
+	the game rules logic can handle the switch event directly.
+
+	For NTOM, calls to the combo rules are done directly from here
+	because combos affect scoring of all other rules on the shot, and
+	thus turning on the multiplier must be done first.  With regular
+	callsets, order cannot be specified.
+	*/
 
 const char *shot_name;
 
@@ -17,44 +58,24 @@ void shot_deff (void)
 	deff_exit ();
 }
 
+void combo_detect (U8 id);
+void combo_reset (void);
+
 void shot_define (const char *name)
 {
 	shot_name = name;
 	deff_start (DEFF_SHOT);
 }
 
-U8 last_combo_shot;
-U8 combo_count;
-
-void combo_reset (void)
-{
-	combo_count = 0;
-	last_combo_shot = 0xFF;
-}
-
-void combo_detect (U8 id)
-{
-	if (id == last_combo_shot)
-		return;
-	if (!free_timer_test (TIM_COMBO))
-		combo_reset ();
-
-	free_timer_restart (TIM_COMBO, TIME_4S);
-	last_combo_shot = id;
-	combo_count++;
-	if (combo_count == 3)
-	{
-	}
-}
-
 CALLSET_ENTRY (shot, init, start_ball)
 {
-	combo_reset ();
 	shot_name = NULL;
 }
 
 CALLSET_ENTRY (shot, sw_left_lane_enter)
 {
+	/* TBD - debounce this, and don't generate it
+	on a vanish kickout or right orbit passthrough. */
 	shot_define ("LEFT ORBIT");
 	combo_detect (0);
 	callset_invoke (left_orbit_shot);
@@ -67,6 +88,7 @@ CALLSET_ENTRY (shot, sw_left_lane_exit)
 
 CALLSET_ENTRY (shot, sw_center_ramp_enter)
 {
+	/* do sound/lamp effect */
 }
 
 CALLSET_ENTRY (shot, sw_center_ramp_exit)
@@ -95,15 +117,6 @@ CALLSET_ENTRY (shot, sw_right_ramp_exit_1, sw_right_ramp_exit_2)
 	callset_invoke (right_ramp_shot);
 }
 
-CALLSET_ENTRY (shot, sw_top_lane_1)
-{
-	shot_define ("LEFT ROLLOVER");
-}
-
-CALLSET_ENTRY (shot, sw_top_lane_2)
-{
-	shot_define ("RIGHT ROLLOVER");
-}
 
 /* Right orbit shot not awarded on falloff from the bumpers */
 CALLSET_ENTRY (shot, sw_right_lane_enter)
@@ -113,15 +126,23 @@ CALLSET_ENTRY (shot, sw_right_lane_enter)
 	callset_invoke (right_orbit_shot);
 }
 
+/* TBD - handle better */
+
 CALLSET_ENTRY (shot, sw_captive_ball_top)
 {
-	shot_define ("CAPTIVE BALL");
-	combo_detect (4);
-	callset_invoke (captive_ball_shot);
+	score (SC_25K);
+	callset_invoke (captive_ball_hard_shot);
 }
 
 CALLSET_ENTRY (shot, sw_captive_ball_rest)
 {
+	if (!switch_poll_logical (SW_CAPTIVE_BALL_REST))
+	{
+		score (SC_25K);
+		shot_define ("CAPTIVE BALL");
+		combo_detect (4);
+		callset_invoke (captive_ball_shot);
+	}
 }
 
 CALLSET_ENTRY (shot, sw_loop_left)
@@ -132,14 +153,13 @@ CALLSET_ENTRY (shot, sw_loop_left)
 		combo_detect (5);
 		callset_invoke (left_loop_shot);
 		timer_restart_free (GID_LEFT_LOOP_DEBOUNCE, TIME_3S);
-		free_timer_restart (TIM_LOOP_TO_LOCK, TIME_2S);
+		free_timer_restart (TIM_LOOP_TO_LOCK, TIME_3S);
 	}
 }
 
-CALLSET_ENTRY (shot, sw_spinner)
+CALLSET_ENTRY (shot, sw_spinner_start)
 {
-	/* TBD - ignore spinner on right ramp drain out.
-	Also require left loop switch to be seen before awarding
+	/* TBD - Also require left loop switch to be seen before awarding
 	the right loop - spinner by itself is not enough */
 	if (!task_kill_gid (GID_LEFT_LOOP_DEBOUNCE) &&
 			!task_find_gid (GID_RIGHT_LOOP_DEBOUNCE) &&
@@ -147,11 +167,16 @@ CALLSET_ENTRY (shot, sw_spinner)
 	{
 		shot_define ("RIGHT LOOP");
 		combo_detect (6);
-		sound_send (SND_RIFFLE);
 		callset_invoke (right_loop_shot);
 		timer_restart_free (GID_RIGHT_LOOP_DEBOUNCE, TIME_3S);
-		free_timer_restart (TIM_LOOP_TO_LOCK, TIME_2S);
+		free_timer_restart (TIM_LOOP_TO_LOCK, TIME_3S);
 	}
+}
+
+CALLSET_ENTRY (shot, sw_spinner_slow)
+{
+	sound_send (SND_RIFFLE);
+	score (SC_170);
 }
 
 CALLSET_ENTRY (shot, sw_trunk_hit)
@@ -166,39 +191,78 @@ CALLSET_ENTRY (shot, sw_trunk_hit)
 	}
 }
 
+CALLSET_ENTRY (shot, sw_subway_opto)
+{
+	free_timer_start (TIM_LOOP_TO_LOCK, TIME_4S);
+}
+
 CALLSET_ENTRY (shot, sw_subway_micro)
 {
 	if (free_timer_test (TIM_LOOP_TO_LOCK))
-	{
-		shot_define ("TRUNK HOLE");
-		callset_invoke (trunk_lock_shot);
-	}
+		return;
 	else if (task_find_gid (GID_TRUNK_DEBOUNCE))
 	{
 		shot_define ("TRUNK HOLE");
 		combo_detect (7);
 		callset_invoke (trunk_hole_shot);
+		/* TBD - if back diverter pin is not working, then a front
+		shot can be used to spot a back shot */
 	}
 }
 
 CALLSET_ENTRY (shot, dev_subway_enter)
 {
-	shot_define ("SUBWAY ENTER");
+	if (free_timer_test (TIM_LOOP_TO_LOCK))
+	{
+		shot_define ("TRUNK BACK");
+		callset_invoke (trunk_back_shot);
+	}
+}
+
+CALLSET_BOOL_ENTRY (shot, dev_subway_kick_request)
+{
+	/* return FALSE if there's already a ball in the
+	popper */
+	return TRUE;
+}
+
+CALLSET_ENTRY (shot, dev_subway_kick_attempt)
+{
+	free_timer_restart (TIM_SUBWAY_TO_POPPER, TIME_3S);
 }
 
 CALLSET_ENTRY (shot, dev_popper_enter)
 {
-	shot_define ("POPPER ENTER");
+	if (!free_timer_test (TIM_SUBWAY_TO_POPPER))
+	{
+		shot_define ("BASEMENT");
+		callset_invoke (basement_shot);
+	}
 }
 
 CALLSET_ENTRY (shot, dev_popper_kick_attempt)
 {
-	/* open the Trap Door first */
 	trap_door_start ();
 }
 
 CALLSET_ENTRY (shot, dev_popper_kick_success, dev_popper_kick_failure)
 {
 	trap_door_stop ();
+}
+
+CALLSET_ENTRY (shot, sw_top_jet, sw_bottom_jet, sw_middle_jet)
+{
+	score (SC_170);
+	free_timer_restart (TIM_PAUSE_TIMERS, TIME_250MS);
+}
+
+CALLSET_ENTRY (shot, sw_left_sling, sw_right_sling)
+{
+	score (SC_170);
+}
+
+CALLSET_ENTRY (shot, sw_left_inlane, sw_right_inlane)
+{
+	score (SC_1K);
 }
 
