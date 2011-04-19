@@ -87,7 +87,6 @@ fixed6:
 cu17:
 fixed10:
 term6:
-times8:
 bitmap8:
 symbol:
 
