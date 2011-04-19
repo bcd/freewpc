@@ -972,7 +972,7 @@ void font_test_change (void)
 			font_test_char_width = 8;
 			break;
 		default:
-			font_test_char_width = 7;
+			font_test_char_width = 6;
 			break;
 	}
 }
@@ -986,7 +986,7 @@ void font_test_draw (void)
 	font_render_string_left (&font_mono5, 0, 1, sprintf_buffer);
 	sprintf_far_string (names_of_fonts + menu_selection);
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
-	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 8);
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 7);
 
 	font = font_test_lookup ();
 	font_test_change ();
@@ -1004,7 +1004,7 @@ void font_test_draw (void)
 	else
 	{
 		sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
-		font_render_string_center (font, 64, 21, sprintf_buffer);
+		font_render_string_center (font, 64, 18, sprintf_buffer);
 	}
 	dmd_show_low ();
 }

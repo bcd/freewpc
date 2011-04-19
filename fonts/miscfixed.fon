@@ -108,6 +108,7 @@ static char *misctype_glyphs[] = {
    ['%' - BASECHAR] = glyph_misctype_percent_bits,
    ['=' - BASECHAR] = glyph_misctype_equal_bits,
    ['@' - BASECHAR] = glyph_misctype_at_bits,
+   ['A' - BASECHAR] = NULL,
 };
 const font_t font_misctype = {
 	.spacing = 2,
