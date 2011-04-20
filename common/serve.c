@@ -19,7 +19,7 @@
  */
 
 #include <freewpc.h>
-
+#include <search.h>
 
 /**
  * \file
@@ -243,6 +243,7 @@ CALLSET_ENTRY (serve, dev_trough_kick_success)
  */
 CALLSET_ENTRY (serve, sw_shooter)
 {
+	ball_search_timer_reset ();
 	if (valid_playfield
 		&& !tournament_mode_enabled
 		&& !global_flag_test (GLOBAL_FLAG_COIN_DOOR_OPENED))
