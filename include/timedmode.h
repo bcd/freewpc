@@ -30,6 +30,10 @@ struct timed_mode_ops
 	/* The destructor, called when the mode ends. */
 	void (*exit) (void);
 
+	/* The update function, called repeatedly while the mode is
+	running.  Currently, the frequency is about every 200ms. */
+	void (*update) (void);
+
 	/* Called to determine when the timer should be paused.
 	Use 'null_false_function' for a timer that should always run.
 	Use 'system_timer_pause' for a default function that pauses
@@ -75,6 +79,7 @@ fields which are different from the default need to be said. */
 #define DEFAULT_MODE \
 	.init = null_function, \
 	.exit = null_function, \
+	.update = null_function, \
 	.pause = null_false_function, \
 	.deff_starting = DEFF_NULL, \
 	.deff_running = DEFF_NULL, \

@@ -26,6 +26,9 @@
  * a structure 'timed_mode_ops' which describes the mode.  They should also
  * implement several event callbacks so that the mode is properly updated
  * on key events.
+ *
+ * Callback functions provided in the mode_ops structure should reside in
+ * the same ROM page as the structure itself.  No far calls are used.
  */
 
 #include <freewpc.h>
@@ -72,6 +75,7 @@ static void timed_mode_monitor (void)
 			do {
 				task_sleep (TIME_200MS + TIME_16MS);
 			} while (ops->pause ());
+			ops->update ();
 		}
 		the_timer--;
 	}
