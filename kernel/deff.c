@@ -67,6 +67,11 @@ U8 deff_running;
 /** The priority of the running display effect */
 U8 deff_prio;
 
+/** Display effect data management (see deffdata.h) */
+U8 deff_data_pending[MAX_DEFF_DATA];
+U8 deff_data_pending_count;
+U8 deff_data_active[MAX_DEFF_DATA];
+U8 deff_data_active_count;
 
 #define MAX_QUEUED_DEFFS 8
 
@@ -129,9 +134,11 @@ static void deff_start_task (const deff_t *deff)
 		kickout_lock (KLOCK_DEFF);
 
 	/* If this deff wants to show the last score, hold
-	 * on to that value */
+	 * on to that value.  Newer deffs can use the deff data
+	 * functions to load arbitrary data, not just scores. */
 	if (deff->flags & D_SCORE)
 		score_deff_set ();
+	deff_data_load ();
 
 	/* Create a task for the new deff */
 	tp = task_create_gid (GID_DEFF, deff->fn);
