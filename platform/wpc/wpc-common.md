@@ -90,4 +90,3 @@ term6:
 bitmap8:
 symbol:
 
-

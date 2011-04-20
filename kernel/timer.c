@@ -89,6 +89,11 @@ bool system_timer_pause (void)
 	if (!in_game || !valid_playfield || timer_lock_count)
 		return TRUE;
 
+#ifdef TIM_PAUSE_TIMERS
+	if (free_timer_test (TIM_PAUSE_TIMERS))
+		return TRUE;
+#endif
+
 	if (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER) && single_ball_play ())
 		return TRUE;
 
