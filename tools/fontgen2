@@ -6,7 +6,7 @@ echo "#include <freewpc.h>"
 
 for char in ${charlist}; do
 	prefix="glyph_${font}_${char}"
-	convert -font ${font}.ttf label:$char xbm:- | sed -e "s/-/${prefix}/" | sed -e "s/{/{ ${prefix}_width, ${prefix}_height,/"
+	convert -font ${font}.ttf label:$char pbm:- | pnmcrop | pbmtoxbm | sed -e "s/noname/${prefix}/" | sed -e "s/{/{ ${prefix}_width, ${prefix}_height,/"
 done
 
 echo "static char *${font}_glyphs[] = {"

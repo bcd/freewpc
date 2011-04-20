@@ -1,0 +1,187 @@
+#include <freewpc.h>
+#define glyph_retroville_A_width 8
+#define glyph_retroville_A_height 8
+static char glyph_retroville_A_bits[] = { glyph_retroville_A_width, glyph_retroville_A_height,
+ 0x3c,0x66,0xc3,0xc3,0xc3,0xff,0xc3,0xc3};
+#define glyph_retroville_B_width 8
+#define glyph_retroville_B_height 8
+static char glyph_retroville_B_bits[] = { glyph_retroville_B_width, glyph_retroville_B_height,
+ 0x7f,0xc3,0xc3,0x7f,0x73,0xc3,0xc3,0x7f};
+#define glyph_retroville_C_width 8
+#define glyph_retroville_C_height 8
+static char glyph_retroville_C_bits[] = { glyph_retroville_C_width, glyph_retroville_C_height,
+ 0x7c,0xc6,0x03,0x03,0x03,0x03,0xc6,0x7c};
+#define glyph_retroville_D_width 8
+#define glyph_retroville_D_height 8
+static char glyph_retroville_D_bits[] = { glyph_retroville_D_width, glyph_retroville_D_height,
+ 0x3f,0x63,0xc3,0xc3,0xc3,0xc3,0x63,0x3f};
+#define glyph_retroville_E_width 8
+#define glyph_retroville_E_height 8
+static char glyph_retroville_E_bits[] = { glyph_retroville_E_width, glyph_retroville_E_height,
+ 0xff,0x03,0x03,0x7f,0x03,0x03,0x03,0xff};
+#define glyph_retroville_F_width 8
+#define glyph_retroville_F_height 8
+static char glyph_retroville_F_bits[] = { glyph_retroville_F_width, glyph_retroville_F_height,
+ 0xff,0x03,0x03,0x7f,0x03,0x03,0x03,0x03};
+#define glyph_retroville_G_width 8
+#define glyph_retroville_G_height 8
+static char glyph_retroville_G_bits[] = { glyph_retroville_G_width, glyph_retroville_G_height,
+ 0xfc,0x06,0x03,0xe3,0xc3,0xc3,0xc6,0xfc};
+#define glyph_retroville_H_width 8
+#define glyph_retroville_H_height 8
+static char glyph_retroville_H_bits[] = { glyph_retroville_H_width, glyph_retroville_H_height,
+ 0xc3,0xc3,0xc3,0xff,0xc3,0xc3,0xc3,0xc3};
+#define glyph_retroville_I_width 6
+#define glyph_retroville_I_height 8
+static char glyph_retroville_I_bits[] = { glyph_retroville_I_width, glyph_retroville_I_height,
+ 0x3f,0x0c,0x0c,0x0c,0x0c,0x0c,0x0c,0x3f};
+#define glyph_retroville_J_width 8
+#define glyph_retroville_J_height 8
+static char glyph_retroville_J_bits[] = { glyph_retroville_J_width, glyph_retroville_J_height,
+ 0xf0,0xc0,0xc0,0xc0,0xc0,0xc3,0xc3,0x7e};
+#define glyph_retroville_K_width 8
+#define glyph_retroville_K_height 8
+static char glyph_retroville_K_bits[] = { glyph_retroville_K_width, glyph_retroville_K_height,
+ 0xc3,0x63,0x33,0x37,0x3f,0x3f,0x73,0xe3};
+#define glyph_retroville_L_width 7
+#define glyph_retroville_L_height 8
+static char glyph_retroville_L_bits[] = { glyph_retroville_L_width, glyph_retroville_L_height,
+ 0x03,0x03,0x03,0x03,0x03,0x03,0x03,0x7f};
+#define glyph_retroville_M_width 8
+#define glyph_retroville_M_height 8
+static char glyph_retroville_M_bits[] = { glyph_retroville_M_width, glyph_retroville_M_height,
+ 0xc3,0xef,0xff,0xff,0xd3,0xd3,0xc3,0xc3};
+#define glyph_retroville_N_width 8
+#define glyph_retroville_N_height 8
+static char glyph_retroville_N_bits[] = { glyph_retroville_N_width, glyph_retroville_N_height,
+ 0xc3,0xc7,0xcf,0xdf,0xfb,0xf3,0xe3,0xc3};
+#define glyph_retroville_O_width 8
+#define glyph_retroville_O_height 8
+static char glyph_retroville_O_bits[] = { glyph_retroville_O_width, glyph_retroville_O_height,
+ 0x7e,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0x7e};
+#define glyph_retroville_P_width 8
+#define glyph_retroville_P_height 8
+static char glyph_retroville_P_bits[] = { glyph_retroville_P_width, glyph_retroville_P_height,
+ 0x7f,0xc3,0xc3,0xc3,0xc3,0x7f,0x03,0x03};
+#define glyph_retroville_Q_width 8
+#define glyph_retroville_Q_height 8
+static char glyph_retroville_Q_bits[] = { glyph_retroville_Q_width, glyph_retroville_Q_height,
+ 0x7e,0xc3,0xc3,0xc3,0xc3,0xf3,0x63,0xbe};
+#define glyph_retroville_R_width 8
+#define glyph_retroville_R_height 8
+static char glyph_retroville_R_bits[] = { glyph_retroville_R_width, glyph_retroville_R_height,
+ 0x7f,0xc3,0xc3,0xc3,0xe3,0x3f,0x7b,0xf3};
+#define glyph_retroville_S_width 8
+#define glyph_retroville_S_height 8
+static char glyph_retroville_S_bits[] = { glyph_retroville_S_width, glyph_retroville_S_height,
+ 0x3e,0x63,0x03,0x7e,0xf0,0xc0,0xc3,0x7e};
+#define glyph_retroville_T_width 6
+#define glyph_retroville_T_height 8
+static char glyph_retroville_T_bits[] = { glyph_retroville_T_width, glyph_retroville_T_height,
+ 0x3f,0x0c,0x0c,0x0c,0x0c,0x0c,0x0c,0x0c};
+#define glyph_retroville_U_width 8
+#define glyph_retroville_U_height 8
+static char glyph_retroville_U_bits[] = { glyph_retroville_U_width, glyph_retroville_U_height,
+ 0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0x7e};
+#define glyph_retroville_V_width 8
+#define glyph_retroville_V_height 8
+static char glyph_retroville_V_bits[] = { glyph_retroville_V_width, glyph_retroville_V_height,
+ 0xc3,0xc3,0xc3,0xc3,0xef,0x7e,0x3c,0x10};
+#define glyph_retroville_W_width 8
+#define glyph_retroville_W_height 8
+static char glyph_retroville_W_bits[] = { glyph_retroville_W_width, glyph_retroville_W_height,
+ 0xc3,0xc3,0xd3,0xd3,0xff,0xff,0xef,0xc3};
+#define glyph_retroville_X_width 8
+#define glyph_retroville_X_height 8
+static char glyph_retroville_X_bits[] = { glyph_retroville_X_width, glyph_retroville_X_height,
+ 0xc3,0xe7,0x7e,0x3c,0x3c,0x7e,0xe7,0xc3};
+#define glyph_retroville_Y_width 6
+#define glyph_retroville_Y_height 8
+static char glyph_retroville_Y_bits[] = { glyph_retroville_Y_width, glyph_retroville_Y_height,
+ 0x33,0x33,0x33,0x12,0x1e,0x0c,0x0c,0x0c};
+#define glyph_retroville_Z_width 8
+#define glyph_retroville_Z_height 8
+static char glyph_retroville_Z_bits[] = { glyph_retroville_Z_width, glyph_retroville_Z_height,
+ 0xff,0xe0,0x70,0x38,0x3c,0x1e,0x0f,0xff};
+#define glyph_retroville_0_width 8
+#define glyph_retroville_0_height 8
+static char glyph_retroville_0_bits[] = { glyph_retroville_0_width, glyph_retroville_0_height,
+ 0x3c,0x62,0xc3,0xc3,0xc3,0xc3,0x46,0x3c};
+#define glyph_retroville_1_width 6
+#define glyph_retroville_1_height 8
+static char glyph_retroville_1_bits[] = { glyph_retroville_1_width, glyph_retroville_1_height,
+ 0x0c,0x0e,0x0c,0x0c,0x0c,0x0c,0x0c,0x3f};
+#define glyph_retroville_2_width 8
+#define glyph_retroville_2_height 8
+static char glyph_retroville_2_bits[] = { glyph_retroville_2_width, glyph_retroville_2_height,
+ 0x7e,0xc3,0xe0,0xf8,0x7c,0x3e,0x0f,0xff};
+#define glyph_retroville_3_width 8
+#define glyph_retroville_3_height 8
+static char glyph_retroville_3_bits[] = { glyph_retroville_3_width, glyph_retroville_3_height,
+ 0xfe,0x60,0x30,0x7c,0xf0,0xc0,0xc3,0x7e};
+#define glyph_retroville_4_width 8
+#define glyph_retroville_4_height 8
+static char glyph_retroville_4_bits[] = { glyph_retroville_4_width, glyph_retroville_4_height,
+ 0x78,0x7c,0x66,0x63,0xff,0x60,0x60,0x60};
+#define glyph_retroville_5_width 8
+#define glyph_retroville_5_height 8
+static char glyph_retroville_5_bits[] = { glyph_retroville_5_width, glyph_retroville_5_height,
+ 0x7f,0x03,0x7f,0xc0,0xc0,0xc0,0xc3,0x7e};
+#define glyph_retroville_6_width 8
+#define glyph_retroville_6_height 8
+static char glyph_retroville_6_bits[] = { glyph_retroville_6_width, glyph_retroville_6_height,
+ 0x7c,0x06,0x03,0x7f,0x73,0xc3,0xc3,0x7e};
+#define glyph_retroville_7_width 8
+#define glyph_retroville_7_height 8
+static char glyph_retroville_7_bits[] = { glyph_retroville_7_width, glyph_retroville_7_height,
+ 0xff,0xc3,0x30,0x30,0x0c,0x0c,0x0c,0x0c};
+#define glyph_retroville_8_width 8
+#define glyph_retroville_8_height 8
+static char glyph_retroville_8_bits[] = { glyph_retroville_8_width, glyph_retroville_8_height,
+ 0x3e,0x43,0x47,0x3e,0x79,0xc1,0xc1,0x7e};
+#define glyph_retroville_9_width 8
+#define glyph_retroville_9_height 8
+static char glyph_retroville_9_bits[] = { glyph_retroville_9_width, glyph_retroville_9_height,
+ 0x7e,0xc3,0xc3,0xfe,0xc0,0xc0,0x60,0x3e};
+static char *retroville_glyphs[] = {
+	['A'] = glyph_retroville_A_bits,
+	['B'] = glyph_retroville_B_bits,
+	['C'] = glyph_retroville_C_bits,
+	['D'] = glyph_retroville_D_bits,
+	['E'] = glyph_retroville_E_bits,
+	['F'] = glyph_retroville_F_bits,
+	['G'] = glyph_retroville_G_bits,
+	['H'] = glyph_retroville_H_bits,
+	['I'] = glyph_retroville_I_bits,
+	['J'] = glyph_retroville_J_bits,
+	['K'] = glyph_retroville_K_bits,
+	['L'] = glyph_retroville_L_bits,
+	['M'] = glyph_retroville_M_bits,
+	['N'] = glyph_retroville_N_bits,
+	['O'] = glyph_retroville_O_bits,
+	['P'] = glyph_retroville_P_bits,
+	['Q'] = glyph_retroville_Q_bits,
+	['R'] = glyph_retroville_R_bits,
+	['S'] = glyph_retroville_S_bits,
+	['T'] = glyph_retroville_T_bits,
+	['U'] = glyph_retroville_U_bits,
+	['V'] = glyph_retroville_V_bits,
+	['W'] = glyph_retroville_W_bits,
+	['X'] = glyph_retroville_X_bits,
+	['Y'] = glyph_retroville_Y_bits,
+	['Z'] = glyph_retroville_Z_bits,
+	['0'] = glyph_retroville_0_bits,
+	['1'] = glyph_retroville_1_bits,
+	['2'] = glyph_retroville_2_bits,
+	['3'] = glyph_retroville_3_bits,
+	['4'] = glyph_retroville_4_bits,
+	['5'] = glyph_retroville_5_bits,
+	['6'] = glyph_retroville_6_bits,
+	['7'] = glyph_retroville_7_bits,
+	['8'] = glyph_retroville_8_bits,
+	['9'] = glyph_retroville_9_bits,
+};
+const font_t font_retroville = {
+	.height = 8,
+	.glyphs = retroville_glyphs,
+};
