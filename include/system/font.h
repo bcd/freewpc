@@ -124,10 +124,10 @@ void bitmap_draw (union dmd_coordinate coord, U8 c);
  * The top-level API for writing a string, left justified.
  */
 #define font_render_string_left(f,x,y,s) \
-{ \
+do { \
 	DECL_FONTARGS(f,x,y,s); \
 	fontargs_render_string_left (s); \
-}
+} while (0)
 #define font_render_string font_render_string_left
 
 
@@ -136,10 +136,10 @@ void bitmap_draw (union dmd_coordinate coord, U8 c);
  * given coordinate.
  */
 #define font_render_string_center(f,x,y,s) \
-{ \
+do { \
 	DECL_FONTARGS(f,x,y,s); \
 	fontargs_render_string_center (s); \
-}
+} while (0)
 
 
 /**
@@ -147,9 +147,9 @@ void bitmap_draw (union dmd_coordinate coord, U8 c);
  * The pixel given is the upperrightmost.
  */
 #define font_render_string_right(f,x,y,s) \
-{ \
+do { \
 	DECL_FONTARGS(f,x,y,s); \
 	fontargs_render_string_right (s); \
-}
+} while (0)
 
 #endif /* _SYS_FONT_H */
