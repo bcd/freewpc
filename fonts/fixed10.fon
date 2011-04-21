@@ -214,6 +214,10 @@ static char glyph_fixed10_equal_bits[] = { glyph_fixed10_equal_width, glyph_fixe
 static char glyph_fixed10_at_bits[] = { glyph_fixed10_at_width, glyph_fixed10_at_height,
  0xe0,0x0f,0x38,0x10,0x0c,0x60,0x86,0x43,0x66,0x8c,0x63,0x8c,0x33,0x8c,0x33,
  0x8c,0x33,0x46,0x73,0x66,0xe6,0x1d,0x0c,0x00,0x18,0x08,0xe0,0x0f};
+#define glyph_fixed10_colon_width 7
+#define glyph_fixed10_colon_height 12
+static char glyph_fixed10_colon_bits[] = { glyph_fixed10_colon_width, glyph_fixed10_colon_height,
+ 0x00, 0x00, 0x1E, 0x1E, 0x1E, 0x00, 0x00, 0x1E, 0x1E, 0x1E, 0x00, 0x00};
 
 #define BASECHAR ' '
 #
@@ -265,6 +269,7 @@ static char *fixed10_glyphs[] = {
    ['%' - BASECHAR] = glyph_fixed10_percent_bits,
    ['=' - BASECHAR] = glyph_fixed10_equal_bits,
    ['@' - BASECHAR] = glyph_fixed10_at_bits,
+   [':' - BASECHAR] = glyph_fixed10_colon_bits,
 };
 const font_t font_fixed10 = {
 	.spacing = 2,
