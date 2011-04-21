@@ -169,6 +169,7 @@ void ball_search_run (void)
 		if (ball_search_timer == 0)
 			break;
 	}
+	callset_invoke (ball_search_end);
 }
 
 
