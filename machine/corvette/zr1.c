@@ -661,3 +661,11 @@ CALLSET_ENTRY (zr1, ball_search_end) {
 		zr1_idle();
 	}
 }
+
+CALLSET_ENTRY (zr1, start_game) {
+	zr1_center();
+}
+
+CALLSET_ENTRY (zr1, end_game) {
+	zr1_idle();
+}
