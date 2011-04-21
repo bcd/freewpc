@@ -652,3 +652,8 @@ CALLSET_ENTRY (zr1, ball_search) {
 	dbprintf ("zr1: ball_search\n");
 	zr1_start_ball_search();
 }
+
+CALLSET_ENTRY (zr1, ball_search_end) {
+	dbprintf ("zr1: ball_search\n");
+	zr1_center();
+}
