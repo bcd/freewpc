@@ -177,8 +177,10 @@ void zr1_enable_solenoids(void) {
 		zr1_set_position_to_center();
 	}
 	writeb (ZR1_ENGINE_CONTROL, 1); // disable the DISABLE_A/DISABLE_B lines
-	global_flag_on(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
-	sample_start (SND_STARTER_MOTOR, SL_500MS); // XXX
+	if (!global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
+		sample_start (SND_STARTER_MOTOR, SL_500MS); // XXX - trigger sound when changing power
+		global_flag_on(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
+	}
 }
 
 /**
@@ -192,8 +194,10 @@ void zr1_disable_solenoids(void) {
 	}
 
 	writeb (ZR1_ENGINE_CONTROL, 0); // enable the DISABLE_A/DISABLE_B lines
-	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
-	sample_start (SND_SPARK_PLUG_01, SL_500MS); // XXX
+	if (global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
+		global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
+		sample_start (SND_SPARK_PLUG_01, SL_500MS); // XXX - trigger sound when changing power
+	}
 }
 
 void zr1_calculate_center_pos(void) {
@@ -210,7 +214,7 @@ void zr1_state_center_run(void) {
 	if (zr1_center_ticks_remaining > 0) {
 		zr1_center_ticks_remaining--;
 	}
-	// do nothing
+	zr1_enable_solenoids();
 }
 
 void zr1_state_calibrate_exit(void) {
@@ -254,6 +258,7 @@ void zr1_state_calibrate_enter(void) {
 }
 
 void zr1_state_calibrate_run(void) {
+	zr1_enable_solenoids();
 
 	zr1_calibrate_move_ticks_remaining--;
 	if (zr1_calibrate_move_ticks_remaining != 0) {
@@ -360,11 +365,10 @@ void zr1_state_idle_enter(void) {
 void zr1_state_idle_run(void) {
 	if (zr1_center_ticks_remaining > 0) {
 		zr1_center_ticks_remaining--;
-		// turn the solenoids after the engine has centered
-		if (zr1_center_ticks_remaining == 0) {
-			zr1_disable_solenoids();
-		}
+		return;
 	}
+	// turn the solenoids after the engine has centered
+	zr1_disable_solenoids();
 }
 
 void zr1_state_shake_enter(void) {
@@ -377,6 +381,8 @@ void zr1_state_shake_enter(void) {
 }
 
 void zr1_state_shake_run(void) {
+	zr1_enable_solenoids();
+
 	if (zr1_shake_ticks_remaining > 0) {
 		zr1_shake_ticks_remaining--;
 		return;
