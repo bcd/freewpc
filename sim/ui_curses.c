@@ -160,13 +160,15 @@ void ui_write_sound_reset (void)
 
 void ui_write_task (int taskno, int gid)
 {
-	int x = (taskno / 14) * 8 + 2;
-	int y = (taskno % 14) + 1;
+	int x = (taskno / 11) * 7 + 1;
+	int y = (taskno % 11) + 1;
+	if (taskno >= 32)
+		return;
 	wmove (task_win, y, x);
 	if (gid == 0)
-		wprintw (task_win, "%02d:    ", taskno);
+		wprintw (task_win, "%02d:   ", taskno);
 	else
-		wprintw (task_win, "%02d: %3d", taskno, gid);
+		wprintw (task_win, "%02d:%2d ", taskno, gid);
 	wrefresh (task_win);
 }
 
@@ -211,41 +213,41 @@ void ui_init (void)
 	clear ();
 	int x = 0, y = 0;
 
-	ui_window_create (COLS, 2, x, y, " FreeWPC - Linux Simulator ");
-	y += 2;
-
 	switch_win = ui_window_create (34, 10, x, y, " Switches ");
-	x += 34 + 2;
+	cmdline_win = ui_window_create (62, 3, x, y + 10, " Command Line ");
+	x += 33 + 1;
 
 	lamp_win = ui_window_create (28, 10, x, y, " Lamps ");
-	x += 28 + 2;
+	x += 27 + 1;
 
 	sol_win = ui_window_create (20, 10, x, y, " Solenoids ");
 	triac_win = ui_window_create (12, 3, x, y+10, " Triacs ");
-	sound_win = ui_window_create (10, 3, x, y+13, " Sound ");
+	sound_win = ui_window_create (10, 3, x+12, y+10, " Sound ");
 	scrollok (sound_win, 1);
-	x += 20 + 2;
-
-	task_win = ui_window_create (27, 16, x, y, " Tasks ");
-	x += 27 + 2;
+	x += 20 + 1;
 
 	ball_tracker_win = ui_window_create (24, 10, x, y, " Ball Tracker ");
-	cmdline_win = ui_window_create (24, 3, x, y + 10, " Command Line ");
-	x += 24 + 2;
+	x += 24 + 1;
 
-	y += 9 + 1;
+	task_win = ui_window_create (22, 13, x, y, " Tasks ");
+	x += 27 + 1;
+
+	y += 12 + 1;
 	x = 0;
-	debug_win = ui_window_create (64, 40, x, y, NULL);
-	scrollok (debug_win, 1);
-	x += 64 + 2;
-	y += 6;
 
 #if (MACHINE_DMD == 1)
 	display_win = ui_window_create (130, 34, x, y, " ASCII-Matrix ");
+	x += 130 + 1;
 #else
 	display_win = ui_window_create (20, 4, x, y, " Display Panel ");
+	x += 20 + 1;
 #endif
 
+	y = 0;
+	debug_win = ui_window_create (64, 46, x, y, NULL);
+	scrollok (debug_win, 1);
+	x += 64 + 1;
+	y += 2;
 }
 
 
