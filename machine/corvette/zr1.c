@@ -655,5 +655,9 @@ CALLSET_ENTRY (zr1, ball_search) {
 
 CALLSET_ENTRY (zr1, ball_search_end) {
 	dbprintf ("zr1: ball_search\n");
-	zr1_center();
+	if (in_live_game) {
+		zr1_center();
+	} else {
+		zr1_idle();
+	}
 }
