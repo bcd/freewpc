@@ -112,7 +112,6 @@ void amode_score_page (void)
 
 
 #if (MACHINE_DMD == 1)
-#if 0 // this just shows up as display corruption on Corvette
 void amode_logo_page (void)
 {
 	U16 fno;
@@ -126,7 +125,6 @@ void amode_logo_page (void)
 	}
 	amode_page_end (3);
 }
-#endif
 #endif
 
 void amode_credits_page (void)
@@ -206,9 +204,7 @@ void amode_tz_page (void)
 void (*amode_page_table[]) (void) = {
 	amode_score_page,
 #if (MACHINE_DMD == 1)
-#if 0 // this just shows up as display corruption on Corvette
 	amode_logo_page,
-#endif
 #endif
 #ifdef MACHINE_TZ
 	amode_tz_page,
