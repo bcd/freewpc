@@ -605,7 +605,7 @@ CALLSET_ENTRY (zr1, init)
 CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 {
 	dbprintf ("zr1: amode_stop, test_start, stop_game entry\n");
-	zr1_enter_state(ZR1_IDLE);
+	zr1_idle();
 }
 
 /**
@@ -613,7 +613,7 @@ CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
  */
 CALLSET_ENTRY (zr1, start_ball, end_ball)
 {
-	zr1_idle();
+	zr1_center();
 }
 
 
