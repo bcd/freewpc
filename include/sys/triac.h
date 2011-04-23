@@ -35,12 +35,12 @@ typedef U8 triacbits_t;
 void triac_rtt (void);
 void triac_enable (triacbits_t bits);
 void triac_disable (triacbits_t bits);
-void triac_leff_allocate (U8 triac);
-void triac_leff_free (U8 triac);
-void triac_leff_enable (U8 triac);
-void triac_leff_disable (U8 triac);
+void gi_leff_allocate (U8 triac);
+void gi_leff_free (U8 triac);
+void gi_leff_enable (U8 triac);
+void gi_leff_disable (U8 triac);
 void gi_dim (U8 bits, U8 brightness);
-void triac_leff_dim (U8 bits, U8 brightness);
+void gi_leff_dim (U8 bits, U8 brightness);
 
 void triac_init (void);
 

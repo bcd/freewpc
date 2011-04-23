@@ -26,7 +26,6 @@
 extern __fastram__ U8 in_game;
 extern __fastram__ U8 in_bonus;
 extern __fastram__ U8 in_tilt;
-extern U8 in_test;
 extern U8 valid_playfield;
 extern __nvram__ U8 num_players;
 extern U8 player_up;
@@ -36,7 +35,6 @@ extern U8 tournament_mode_enabled;
 
 #define in_live_game		(in_game && !in_tilt)
 
-void serve_ball (void);
 void start_ball (void);
 void end_game (void);
 void end_ball (void);

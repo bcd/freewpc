@@ -73,6 +73,7 @@
 #include <text.h>
 
 #undef CONFIG_TEST_DURING_GAME
+//#define CONFIG_FIXED_TEST_FONT
 
 #define MAX_WIN_STACK 6
 
@@ -83,7 +84,7 @@ struct window *win_top;
 /* Equivalent to (win_top != NULL), but as a byte, this can
  * be tested with a single instruction.
  * IDEA: these two variables could be overlapped into a union. */
-__fastram__ U8 in_test;
+__fastram__ enum test_mode in_test;
 
 
 /* The window stack keeps track of where you came from, so when you
@@ -96,7 +97,7 @@ struct window win_stack[MAX_WIN_STACK];
  * marks 'in test'.  It also resets sound, display, and lamps. */
 void window_push_first (void)
 {
-	in_test = 1;
+	set_test_mode (TEST_DEFAULT);
 	task_setgid (GID_TEST_MODE_STARTING);
 #ifdef CONFIG_TEST_DURING_GAME
 	if (!switch_poll_logical (SW_LEFT_BUTTON))
@@ -133,7 +134,7 @@ void window_pop_first (void)
 	{
 		amode_start ();
 	}
-	in_test = 0;
+	set_test_mode (NO_TEST);
 }
 
 /** Starts the window's thread function, if it exists. */
@@ -174,6 +175,7 @@ void window_push (struct window_ops *ops, void *priv)
 	window_stop_thread ();
 	if (win_top == NULL)
 	{
+		flipper_enable ();
 		if (!in_test)
 			window_push_first ();
 		else
@@ -185,6 +187,7 @@ void window_push (struct window_ops *ops, void *priv)
 	}
 	else if (win_top < &win_stack[MAX_WIN_STACK])
 	{
+		flipper_disable ();
 		win_top++;
 	}
 	else
@@ -210,6 +213,7 @@ void window_pop_quiet (void)
 
 	window_stop_thread ();
 	window_call_op (win_top, exit);
+	set_test_mode (TEST_DEFAULT);
 
 	if (win_top == &win_stack[0])
 	{
@@ -221,6 +225,8 @@ void window_pop_quiet (void)
 	else
 	{
 		win_top--;
+		if (win_top == &win_stack[0])
+			flipper_enable ();
 		window_start_thread ();
 		window_redraw ();
 	}
@@ -726,9 +732,16 @@ struct window_ops confirm_window = {
 /* A window class for actual menus */
 
 #if (MACHINE_DMD == 1)
-#define MENU_DRAW_X         8
 #define MENU_DRAW_NAME_Y    4
+#ifdef CONFIG_FIXED_TEST_FONT
+#define MENU_FONT           &font_bitmap8
+#define MENU_DRAW_X         0
+#define MENU_DRAW_ITEM_Y    18
+#else
+#define MENU_FONT           &font_mono5
+#define MENU_DRAW_X         8
 #define MENU_DRAW_ITEM_Y    14
+#endif
 #else
 #define MENU_DRAW_X         0
 #define MENU_DRAW_NAME_Y    0
@@ -770,7 +783,7 @@ void menu_draw (void)
 	U8 *sel = &win_top->w_class.menu.selected;
 
 	/* First print the name of the menu itself */
-	font_render_string_left (&font_mono5,
+	font_render_string_left (MENU_FONT,
 		MENU_DRAW_X, MENU_DRAW_NAME_Y, m->name);
 
 	/* Now try to print the current item.  *sel is the
@@ -789,7 +802,7 @@ void menu_draw (void)
 		{
 			sprintf ("%d. %s", (*sel)+1, subm[*sel]->name);
 		}
-		font_render_string_left (&font_mono5,
+		font_render_string_left (MENU_FONT,
 			MENU_DRAW_X, MENU_DRAW_ITEM_Y, sprintf_buffer);
 	}
 	else
@@ -1480,7 +1493,7 @@ void dev_balldev_test_thread (void)
 		}
 
 #if defined(MACHINE_LAUNCH_SOLENOID) && defined(MACHINE_LAUNCH_SWITCH)
-		if (switch_poll (MACHINE_LAUNCH_SWITCH))
+		if (switch_poll_logical (MACHINE_LAUNCH_SWITCH))
 		{
 			sol_request_async (MACHINE_LAUNCH_SOLENOID);
 		}
@@ -1554,6 +1567,7 @@ dmd_transition_t *transition_table[] = {
 	&trans_vstripe_right2left,
 	&trans_bitfade_slow,
 	&trans_bitfade_fast,
+	&trans_unroll_vertical,
 };
 #else
 seg_transition_t *transition_table[] = {
@@ -2717,6 +2731,7 @@ void switch_window_title (const char *title)
 void switch_edges_init (void)
 {
 	extern U8 sw_last_scheduled;
+	set_test_mode (TEST_SWITCHES);
 	browser_init ();
 	sw_last_scheduled = 0;
 	switch_display_timer = 0;
@@ -2802,6 +2817,7 @@ void switch_item_number (U8 val)
 
 void single_switch_init (void)
 {
+	set_test_mode (TEST_SWITCHES);
 	browser_init ();
 	browser_item_number = switch_item_number;
 	browser_max = NUM_SWITCHES-1;
@@ -3060,6 +3076,7 @@ void driver_test_init (void)
 
 void solenoid_test_init (void)
 {
+	set_test_mode (TEST_COILS);
 	flasher_test_mode = 0;
 	driver_test_init ();
 	sol_min_time = 32;
@@ -3213,12 +3230,12 @@ void gi_test_init (void)
 	browser_init ();
 	browser_max = NUM_GI_TRIACS+1;
 	gi_test_brightness = 8;
-	triac_leff_allocate (TRIAC_GI_MASK);
+	gi_leff_allocate (TRIAC_GI_MASK);
 }
 
 void gi_test_exit (void)
 {
-	triac_leff_free (TRIAC_GI_MASK);
+	gi_leff_free (TRIAC_GI_MASK);
 }
 
 void gi_test_draw (void)
@@ -3238,8 +3255,8 @@ void gi_test_draw (void)
 	sprintf ("BRIGHTNESS %d", gi_test_brightness);
 	print_row_center (&font_mono5, 29);
 
-	triac_leff_disable (TRIAC_GI_MASK);
-	triac_leff_dim (gi_test_values[menu_selection], gi_test_brightness);
+	gi_leff_disable (TRIAC_GI_MASK);
+	gi_leff_dim (gi_test_values[menu_selection], gi_test_brightness);
 }
 
 void gi_test_right (void)
@@ -3533,7 +3550,7 @@ void empty_balls_test_thread (void)
 {
 	for (;;)
 	{
-		task_sleep_sec (1);
+		task_sleep_sec (2);
 		dmd_alloc_low_clean ();
 		window_title ("EMPTY BALLS DONE");
 		dmd_show_low ();
@@ -3780,11 +3797,7 @@ void scroller_thread (void)
 		if (ws->offset < ws->size - 1)
 			ws->offset++;
 		else
-		{
-			callset_invoke (sw_enter);
-			task_exit ();
-		}
-
+			ws->offset = 0;
 		dmd_alloc_low_clean ();
 		scroller_draw ();
 	}
@@ -3875,18 +3888,10 @@ void sysinfo_enter (void)
 	window_push (&menu_window, &main_menu);
 }
 
-void sysinfo_up (void)
-{
-	if (++win_top->w_class.scroller.offset >= win_top->w_class.scroller.size)
-		sysinfo_enter ();
-	else
-		sound_send (SND_TEST_UP);
-}
 
 struct window_ops sysinfo_scroller_window = {
 	INHERIT_FROM_SCROLLER,
 	.enter = sysinfo_enter,
-	.up = sysinfo_up,
 };
 
 /**********************************************************/
@@ -3896,7 +3901,7 @@ struct window_ops sysinfo_scroller_window = {
 void test_init (void)
 {
 	window_init ();
-	in_test = 0;
+	set_test_mode (NO_TEST);
 }
 
 void test_up_button (void)
@@ -3998,16 +4003,6 @@ CALLSET_ENTRY (test_mode, start_button_handler)
 	{
 		window_call_op (win_top, start);
 		window_redraw ();
-	}
-}
-
-
-CALLSET_ENTRY (test_mode, sw_buyin_button)
-{
-	if (win_top)
-	{
-		dmd_alloc_low_clean ();
-		dmd_show_low ();
 	}
 }
 

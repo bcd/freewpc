@@ -229,6 +229,22 @@ void coin_door_render (U8 val)
 }
 
 
+void payment_method_render (U8 val)
+{
+	switch (val)
+	{
+		case PAY_COIN:
+			sprintf ("COIN"); break;
+		case PAY_BILL:
+			sprintf ("BILL"); break;
+		case PAY_TOKEN:
+			sprintf ("TOKEN"); break;
+		case PAY_CARD:
+			sprintf ("CARD"); break;
+	}
+}
+
+
 void percentage_of_games_audit (audit_t val)
 {
 	/* Avoid divide-by-zero error */

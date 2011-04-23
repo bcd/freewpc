@@ -16,6 +16,9 @@ define MACHINE_SOL_EXTBOARD1
 define MACHINE_CUSTOM_AMODE
 define MACHINE_BALL_SAVE_LAMP LM_RETURN_TO_BATTLE
 
+# For Challenge rules
+define MACHINE_BALL_SAVE_TIME 0
+
 [lamps]
 11: RTU Super Jets
 12: RTU Super Jackpot
@@ -78,8 +81,8 @@ define MACHINE_BALL_SAVE_LAMP LM_RETURN_TO_BATTLE
 83: Left Inlane
 84: Right Inlane
 85: Right Outlane
-86: Backbox Saucer
-88: Backbox Eyes
+86: Launch Button
+88: Start Button
 
 [switches]
 11: Launch Button, launch-button, cabinet, noplay
@@ -103,9 +106,9 @@ define MACHINE_BALL_SAVE_LAMP LM_RETURN_TO_BATTLE
 42: Martian 7, lamp(LM_MARTIAN_7)
 43: Martian 4, lamp(LM_MARTIAN_4)
 44: Martian 5, lamp(LM_MARTIAN_5)
-45: Motor Bank 1
-46: Motor Bank 2
-47: Motor Bank 3
+45: Motor Bank 1, ingame
+46: Motor Bank 2, ingame
+47: Motor Bank 3, ingame
 48: Right Top Lane
 51: Left Slingshot, noplay
 52: Right Slingshot, noplay
@@ -122,12 +125,14 @@ define MACHINE_BALL_SAVE_LAMP LM_RETURN_TO_BATTLE
 65: Right Ramp Exit
 66: Motor Bank Down, noplay, intest, service
 67: Motor Bank Up, noplay, intest, service
-71: Right Loop High
-72: Right Loop Low
+71: Right Loop High, noplay
+72: Right Loop Low, noplay
 73: Left Loop High
 74: Left Loop Low
 75: L. Saucer Tgt.
 76: R. Saucer Tgt.
+77: Drop Target
+78: Center Trough
 
 [drives]
 H1: Auto Launch, launch
@@ -216,23 +221,72 @@ Right Hole: Right Popper, Right Popper
 [system_music]
 
 [scores]
-12370:
-25K:
-100K:
-500K:
-1M:
-5M:
+1:
+10:
+100:
 
 [highscores]
 
 [flags]
 
+[globalflags]
+Divertor Open:
+Bank Up:
+Drop Up:
+
 [deffs]
+Chal Running: PRI_GAME_MODE1, page(MACHINE_PAGE)
+Chal Sudden Death: PRI_GAME_MODE1, page(MACHINE_PAGE)
+Chal Award: PRI_GAME_QUICK1, page(MACHINE_PAGE), D_SCORE+D_RESTARTABLE
+Chal Phase Finished: PRI_GAME_QUICK1, page(MACHINE_PAGE), D_QUEUED+D_PAUSE, c_decl(chal_all_shots_deff)
+Chal Ball Drain: PRI_GAME_QUICK2, page(MACHINE_PAGE)
+Chal Timeout Endgame: PRI_GAME_QUICK1, page(MACHINE_PAGE)
+Martian Kill: PRI_GAME_QUICK2, page(MACHINE_PAGE), D_RESTARTABLE
+
+BonusMB Running: PRI_GAME_MODE3, page(MACHINE_PAGE)
+BonusMB Ending: PRI_GAME_MODE3, page(MACHINE_PAGE), D_QUEUED
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Flashfest: PRI_LEFF2, page(MACHINE_PAGE)
 Flash Random: PRI_LEFF3, page(MACHINE_PAGE)
+GI Strobe: PRI_LEFF4, GI(ALL), page(MACHINE_PAGE)
+GI Flash: PRI_LEFF4, GI(ALL), page(MACHINE_PAGE)
 
 [fonts]
+
+[timers]
+Center Ramp Entered:
+Right Ramp Entered:
+Center Trough Entered:
+Ball In Jets:
+
+[templates]
+Left Sling: driver(spsol),
+	sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLINGSHOT,
+	ontime=3, offtime=16
+
+Right Sling: driver(spsol),
+	sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLINGSHOT,
+	ontime=3, offtime=16
+
+Left Jet: driver(spsol),
+	sw=SW_LEFT_JET, sol=SOL_LEFT_JET,
+	ontime=3, offtime=16
+
+Right Jet: driver(spsol),
+	sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET,
+	ontime=3, offtime=16
+
+Bottom Jet: driver(spsol),
+	sw=SW_BOTTOM_JET, sol=SOL_BOTTOM_JET,
+	ontime=3, offtime=16
+
+Left Gate: driver(duty),
+	sol=SOL_LEFT_GATE,
+	ontime=TIME_300MS, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=60
+
+Right Gate: driver(duty),
+	sol=SOL_RIGHT_GATE,
+	ontime=TIME_300MS, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=60
 

@@ -42,6 +42,12 @@
 @@parameter timeout
 
 @@
+@@file @self.sched
+@@
+!@self_service		16		40c
+
+
+@@
 @@file @self.h
 @@
 

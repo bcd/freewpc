@@ -103,6 +103,7 @@ bool lamp_test_off (lampnum_t lamp);
 void lamp_flash_on (lampnum_t lamp);
 void lamp_flash_off (lampnum_t lamp);
 bool lamp_flash_test (lampnum_t lamp);
+void lamp_power_set (U8 level);
 void leff_on (lampnum_t lamp);
 void leff_off (lampnum_t lamp);
 void leff_toggle (lampnum_t lamp);

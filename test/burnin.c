@@ -39,15 +39,15 @@ void burnin_sound_thread (void)
 
 void burnin_gi_thread (void)
 {
-	triac_leff_allocate (TRIAC_GI_MASK);
+	gi_leff_allocate (TRIAC_GI_MASK);
 	for (;;)
 	{
 		U8 gi;
 		for (gi = (1 << 0); gi <= (1 << 4); gi <<= 1)
 		{
-			triac_leff_enable (gi);
+			gi_leff_enable (gi);
 			task_sleep (TIME_500MS);
-			triac_leff_disable (gi);
+			gi_leff_disable (gi);
 		}
 	}
 }
@@ -146,7 +146,7 @@ void burnin_exit (void)
 	timestamp_add (&burnin_total_duration, &burnin_duration);
 	lamp_all_off ();
 	sound_reset ();
-	triac_leff_free (TRIAC_GI_MASK);
+	gi_leff_free (TRIAC_GI_MASK);
 	flipper_disable ();
 }
 

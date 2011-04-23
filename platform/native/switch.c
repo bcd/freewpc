@@ -40,23 +40,11 @@ U8 *sim_switch_matrix_get (void)
 }
 
 
-/**
- * Toggle the physical state of a switch.
- */
-void sim_switch_toggle (int sw)
+static void sim_switch_update (int sw)
 {
-	U8 level;
-
-	if (sim_no_switch_power)
-		return;
-	if (sim_no_opto_power && switch_is_opto (sw))
-		return;
-
-	/* Update the current state of the switch */
-	linux_switch_matrix[sw / 8] ^= (1 << (sw % 8));
+	U8 level = linux_switch_matrix[sw/8] & (1 << (sw%8));
 
 	/* Redraw the switch */
-	level = linux_switch_matrix[sw/8] & (1 << (sw%8));
 #ifdef CONFIG_UI
 	if (show_switch_levels)
 		ui_write_switch (sw, level);
@@ -64,12 +52,36 @@ void sim_switch_toggle (int sw)
 		ui_write_switch (sw, level ^ switch_is_opto (sw));
 #endif
 
-	/* Some switch closures require additional simulation... */
-	if (level ^ switch_is_opto (sw))
-		sim_switch_effects (sw);
-
 	/* Update the signal tracker */
 	signal_update (SIGNO_SWITCH + sw, !!level);
+}
+
+
+void sim_switch_toggle (int sw)
+{
+	if (sim_no_switch_power)
+		return;
+	if (sim_no_opto_power && switch_is_opto (sw))
+		return;
+
+	linux_switch_matrix[sw / 8] ^= (1 << (sw % 8));
+	sim_switch_update (sw);
+}
+
+void sim_switch_set (int sw, int on)
+{
+	if (sim_no_switch_power)
+		return;
+	if (sim_no_opto_power && switch_is_opto (sw))
+		return;
+
+	if (switch_is_opto (sw))
+		on = !on;
+	if (on)
+		linux_switch_matrix[sw / 8] |= (1 << (sw % 8));
+	else
+		linux_switch_matrix[sw / 8] &= ~(1 << (sw % 8));
+	sim_switch_update (sw);
 }
 
 
@@ -88,12 +100,36 @@ void sim_switch_depress (int sw)
 }
 
 
+void flipper_button_depress (int sw)
+{
+	sim_switch_toggle (sw);
+	task_sleep (TIME_33MS);
+	sim_switch_toggle (sw+4);
+	task_sleep (TIME_66MS);
+
+	sim_switch_toggle (sw);
+	task_sleep (TIME_33MS);
+	sim_switch_toggle (sw+4);
+	task_sleep (TIME_66MS);
+}
+
 void sim_switch_init (void)
 {
+	switchnum_t sw;
+
+	/* Initialize switch levels to zero by default */
 	memset (linux_switch_matrix, 0, SWITCH_BITS_SIZE);
 	linux_switch_matrix[9] = 0xFF;
 
 	conf_add ("sw.no_power", &sim_no_switch_power);
 	conf_add ("sw.no_opto_power", &sim_no_opto_power);
+
+	/* For any switches declared as an opto, set initial
+	switch level to 1 */
+	for (sw = 0; sw < NUM_SWITCHES; sw++)
+		if (switch_is_opto (sw))
+		{
+			sim_switch_toggle (sw);
+		}
 }
 

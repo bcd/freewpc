@@ -212,7 +212,7 @@ typedef U8 devicenum_t;
 #define device_empty_p(dev)	(dev->actual_count == 0)
 
 /** True if the given device is full */
-#define device_full_p(dev)		(dev->actual_count == dev->max_count)
+#define device_full_p(dev)		(dev->actual_count == dev->size)
 
 /** Disable an automatic ball lock on this device */
 #define device_disable_lock(dev)	(dev->max_count--)
@@ -247,7 +247,6 @@ __common__ void device_add_live (void);
 __common__ void device_remove_live (void);
 __common__ void device_add_virtual (device_t *dev);
 __common__ void device_remove_virtual (device_t *dev);
-__common__ void device_multiball_set (U8 count);
 __common__ bool device_check_start_ok (void);
 __common__ void device_unlock_ball (device_t *dev);
 __common__ void device_lock_ball (device_t *dev);
@@ -272,5 +271,8 @@ __common__ void device_init (void);
 
 #define single_ball_play() (live_balls <= 1)
 #define multi_ball_play() (live_balls > 1)
+
+/* This API has been renamed */
+#define device_multiball_set(count)  set_ball_count(count)
 
 #endif /* _SYS_DEVICE_H */

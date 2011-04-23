@@ -23,7 +23,7 @@
 
 void bonus_leff (void)
 {
-	triac_leff_disable (TRIAC_GI_MASK);
+	gi_leff_disable (TRIAC_GI_MASK);
 	for (;;)
 		task_sleep_sec (5);
 }
@@ -32,14 +32,14 @@ void bonus_leff (void)
 void gi_cycle_leff (void)
 {
 	U8 i;
-	triac_leff_enable (TRIAC_GI_MASK);
+	gi_leff_enable (TRIAC_GI_MASK);
 	for (;;)
 	{
 		for (i=0; i < 5; i++)
 		{
-			triac_leff_disable (TRIAC_GI_STRING (i));
+			gi_leff_disable (TRIAC_GI_STRING (i));
 			task_sleep (TIME_100MS);
-			triac_leff_enable (TRIAC_GI_STRING (i));
+			gi_leff_enable (TRIAC_GI_STRING (i));
 		}
 	}
 }
@@ -86,7 +86,7 @@ void left_ramp_leff (void)
 
 void no_gi_leff (void)
 {
-	triac_leff_disable (TRIAC_GI_MASK);
+	gi_leff_disable (TRIAC_GI_MASK);
 	task_sleep_sec (1);
 	leff_exit ();
 }
@@ -97,7 +97,7 @@ void flash_all_leff (void)
 	U8 i;
 
 	lamplist_set_apply_delay (0);
-	triac_leff_enable (TRIAC_GI_MASK);
+	gi_leff_enable (TRIAC_GI_MASK);
 	lamplist_apply_leff_alternating (LAMPLIST_AMODE_ALL, 0);
 	for (i=0; i < 32; i++)
 	{
@@ -159,9 +159,9 @@ void game_timeout_leff (void)
 	for (i=0; i < 3; i++)
 	{
 		task_sleep (TIME_500MS);
-		triac_leff_enable (GI_POWERFIELD+GI_CLOCK);
+		gi_leff_enable (GI_POWERFIELD+GI_CLOCK);
 		task_sleep (TIME_100MS);
-		triac_leff_disable (GI_POWERFIELD+GI_CLOCK);
+		gi_leff_disable (GI_POWERFIELD+GI_CLOCK);
 	}
 	leff_exit ();
 }
@@ -172,9 +172,9 @@ void clock_round_started_leff (void)
 	U8 i;
 	for (i=0; i < 3; i++)
 	{
-		triac_leff_enable (GI_CLOCK);
+		gi_leff_enable (GI_CLOCK);
 		task_sleep (TIME_100MS);
-		triac_leff_disable (GI_CLOCK);
+		gi_leff_disable (GI_CLOCK);
 		task_sleep (TIME_200MS);
 	}
 	leff_exit ();
@@ -249,7 +249,7 @@ void door_strobe_subtask (void)
 
 void door_strobe_leff (void)
 {
-	triac_leff_disable (TRIAC_GI_MASK);
+	gi_leff_disable (TRIAC_GI_MASK);
 	lamplist_apply (LAMPLIST_DOOR_PANELS, leff_off);
 	lamplist_set_apply_delay (TIME_33MS);
 	leff_create_peer (door_strobe_subtask);

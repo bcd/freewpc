@@ -32,7 +32,7 @@ CONFIG_ANIMATION ?= $(CONFIG_DMD)
 INT_CFLAGS = -mint8
 # TODO : Don't hardcode code/data sections here like this!
 CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
-EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WPC
+EXTRA_ASFLAGS += -D__int8__ -DCONFIG_PLATFORM_WPC
 
 # Say which source files need to be compiled in for the WPC platform only.
 # Use KERNEL_HW_OBJS for C sources, and KERNEL_ASM_OBJS for assembler files.

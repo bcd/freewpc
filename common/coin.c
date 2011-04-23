@@ -141,9 +141,14 @@ void credits_draw (void)
 
 	if (!has_credits_p ())
 	{
-		/* TODO - this message could be customized: replace coins with "money"
-		or "tokens" or "swipe card" */
-		sprintf ("INSERT COINS");
+		if (price_config.payment_method == PAY_COIN)
+			sprintf ("INSERT COINS");
+		else if (price_config.payment_method == PAY_TOKEN)
+			sprintf ("INSERT TOKENS");
+		else if (price_config.payment_method == PAY_CARD)
+			sprintf ("SWIPE CARD");
+		else if (price_config.payment_method == PAY_BILL)
+			sprintf ("INSERT BILLS");
 	}
 	else
 	{

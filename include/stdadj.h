@@ -98,6 +98,13 @@ typedef U8 adjval_t;
 #define LANG_UK_ENGLISH 4
 #define NUM_LANGUAGES 5
 
+/* Payment Method */
+#define PAY_COIN 0
+#define PAY_TOKEN 1
+#define PAY_CARD 2
+#define PAY_BILL 3
+#define MAX_PAY_METHODS 4
+
 typedef struct
 {
 	adjval_t balls_per_game; /* done */
@@ -122,12 +129,12 @@ typedef struct
 	adjval_t clock_style; /* done */
 	adjval_t date_style; /* done */
 	adjval_t show_date_and_time; /* done */
-	adjval_t allow_dim_illum;
+	adjval_t allow_dim_illum; /* done */
 	adjval_t tournament_mode; /* done */
 	adjval_t euro_digit_sep; /* done */
 	adjval_t min_volume_control; /* done */
-	adjval_t gi_power_saver;
-	adjval_t power_saver_level;
+	adjval_t gi_power_saver; /* done */
+	adjval_t power_saver_level; /* done */
 	/* The ticket_board adjustment says if a ticket dispenser
 	is connected, or if a coin meter is attached. */
 	adjval_t ticket_board;
@@ -187,7 +194,7 @@ typedef struct
 	adjval_t max_credits; /* done */
 	adjval_t free_play; /* done */
 	adjval_t hide_coin_audits;
-	adjval_t one_coin_buyin; /* ignored */
+	adjval_t payment_method;
 	adjval_t base_coin_size;
 	adjval_t coin_meter_units;
 	adjval_t fast_bill_slot;

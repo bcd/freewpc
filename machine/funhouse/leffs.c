@@ -16,7 +16,7 @@ void amode_leff1 (void)
 
 void amode_leff (void)
 {
-	triac_leff_enable (TRIAC_GI_MASK);
+	gi_leff_enable (TRIAC_GI_MASK);
 
 	for (lamplist = LAMPLIST_GANGWAYS; lamplist <= LAMPLIST_LOWER_LANES; lamplist++)
 	{
@@ -194,9 +194,9 @@ void high_score_leff_flashers (void)
 
 void high_score_leff (void)
 {
-	triac_leff_enable (GI_ALL_ILLUMINATION);
-	triac_leff_dim (GI_FRONT_PLAYFIELD, 3);
-	triac_leff_dim (GI_REAR_PLAYFIELD, 3);
+	gi_leff_enable (GI_ALL_ILLUMINATION);
+	gi_leff_dim (GI_FRONT_PLAYFIELD, 3);
+	gi_leff_dim (GI_REAR_PLAYFIELD, 3);
 	lamplist_apply_leff_alternating (LAMPLIST_PLAYFIELD, 0);
 	leff_create_peer (high_score_leff_flashers);
 	for (;;)

@@ -203,7 +203,7 @@ void gi_dim (U8 triac, U8 intensity)
 
 /** Allocates one or more triacs for a lamp effect.
 The leff can override the default value for the strings. */
-void triac_leff_allocate (U8 triac)
+void gi_leff_allocate (U8 triac)
 {
 	/* Only allow unallocated strings to be manipulated
 	 * by this effect. */
@@ -222,7 +222,7 @@ void triac_leff_allocate (U8 triac)
 
 
 /** Frees a set of triacs at the end of a lamp effect */
-void triac_leff_free (U8 triac)
+void gi_leff_free (U8 triac)
 {
 	gi_clear_dimming (triac, gi_leff_dimming);
 	gi_leff_alloc &= ~triac;
@@ -233,7 +233,7 @@ void triac_leff_free (U8 triac)
 
 
 /** Enables a triac from a lamp effect at full brightness */
-void triac_leff_enable (U8 triac)
+void gi_leff_enable (U8 triac)
 {
 	gi_clear_dimming (triac, gi_leff_dimming);
 	gi_leff_output |= triac;
@@ -242,7 +242,7 @@ void triac_leff_enable (U8 triac)
 
 
 /** Disables a triac from a lamp effect */
-void triac_leff_disable (U8 triac)
+void gi_leff_disable (U8 triac)
 {
 	gi_clear_dimming (triac, gi_leff_dimming);
 	gi_leff_output &= ~triac;
@@ -251,7 +251,7 @@ void triac_leff_disable (U8 triac)
 
 
 /** Sets the intensity (brightness) of a single GI triac */
-void triac_leff_dim (U8 triac, U8 brightness)
+void gi_leff_dim (U8 triac, U8 brightness)
 {
 	/* Disable the GI string first. */
 	gi_clear_dimming (triac, gi_leff_dimming);
@@ -261,19 +261,20 @@ void triac_leff_dim (U8 triac, U8 brightness)
 	{
 		/* Nothing to do if brightness = off */
 	}
-	else if (brightness < 7)
+	else if (brightness < 7 && system_config.allow_dim_illum == YES)
 	{
 		/* We want to dim the lamps at levels 1-6.
 		Level 7 doesn't work because the GI string
 		would have to be turned on and off very shortly
-		because the next zerocross point, which can't be
+		before the next zerocross point, which can't be
 		guaranteed to work. */
 		gi_leff_dimming[7-brightness] |= triac;
 	}
 	else
 	{
 		/* If the brightness is greater than the threshold,
-		then just it turn on all the way, no need to do any
+		or if dimming has been disabled in the menu adjustments,
+		then just it turn on all the way -- no need to do any
 		dimming at IRQ time. */
 		gi_leff_output |= triac;
 	}

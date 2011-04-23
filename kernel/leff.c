@@ -187,11 +187,11 @@ task_pid_t leff_create_handler (const leff_t *leff)
 	else
 	{
 		/* Free any existing GI allocations. */
-		triac_leff_free (TRIAC_GI_MASK);
+		gi_leff_free (TRIAC_GI_MASK);
 
 		/* Allocate general illumination needed by the lamp effect */
 		if (leff->gi != L_NOGI)
-			triac_leff_allocate (leff->gi);
+			gi_leff_allocate (leff->gi);
 
 		/* Start the task */
 		tp = task_recreate_gid (GID_LEFF, leff->fn);
@@ -289,7 +289,7 @@ void leff_stop (leffnum_t dn)
 		lamp_leff1_erase (); /* TODO : these two functions go together */
 		lamp_leff1_free_all ();
 		if (leff->gi != L_NOGI)
-			triac_leff_free (leff->gi);
+			gi_leff_free (leff->gi);
 		leff_start_highest_priority ();
 	}
 }
@@ -350,7 +350,7 @@ __noreturn__ void leff_exit (void)
 		tasks still running ... they will eventually be
 		stopped, too */
 		if (leff->gi != L_NOGI)
-			triac_leff_free (leff->gi);
+			gi_leff_free (leff->gi);
 
 		/* Change the GID so that we are no longer
 		 * considered a leff. */
@@ -377,7 +377,7 @@ void leff_stop_all (void)
 {
 	task_kill_gid (GID_LEFF);
 	task_kill_gid (GID_SHARED_LEFF);
-	triac_leff_free (TRIAC_GI_MASK);
+	gi_leff_free (TRIAC_GI_MASK);
 	lamp_leff1_free_all ();
 	lamp_leff1_erase ();
 	lamp_leff2_free_all ();

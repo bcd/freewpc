@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -53,11 +53,6 @@ extern void exit (int);
 extern const device_properties_t device_properties_table[];
 extern const switch_info_t switch_table[];
 
-extern U8 *sim_switch_matrix_get (void);
-extern void sim_switch_toggle (int sw);
-extern int sim_switch_read (int sw);
-extern void sim_switch_init (void);
-
 
 /** The rate at which the simulated clock should run */
 int linux_irq_multiplier = 1;
@@ -83,7 +78,11 @@ int linux_irq_pending;
 /** True if the FIRQ is enabled */
 bool linux_firq_enable;
 
-volatile int sim_debug_init = 0;
+/** When nonzero, the system is held in reset afer power on.  This lets
+you fire up gdb and debug the early initialization.  From the debugger,
+you should clear this flag, e.g. "set sim_debug_init 0".  You set the
+flag by passing the --debuginit command-line option. */
+static volatile int sim_debug_init = 0;
 
 /** Pointer to the current switch matrix element */
 U8 *linux_switch_data_ptr;
@@ -101,7 +100,7 @@ U8 linux_jumpers = LC_USA_CANADA << 2;
 U8 linux_triac_latch, linux_triac_outputs;
 
 /** The actual time at which the simulation was started */
-time_t linux_boot_time;
+static time_t sim_boot_time;
 
 /** The status of the CPU board LEDs */
 U8 linux_cpu_leds;
@@ -189,22 +188,6 @@ void simlog (enum sim_log_class class, const char *format, ...)
 	}
 
 	va_end (ap);
-}
-
-
-/** Find the highest numbered bit set in a bitmask.
- * Returns -1 if no bits are set. */
-static int scanbit (U8 bits)
-{
-	if (bits & 0x80) return 7;
-	else if (bits & 0x40) return 6;
-	else if (bits & 0x20) return 5;
-	else if (bits & 0x10) return 4;
-	else if (bits & 0x08) return 3;
-	else if (bits & 0x04) return 2;
-	else if (bits & 0x02) return 1;
-	else if (bits & 0x01) return 0;
-	else return -1;
 }
 
 
@@ -383,16 +366,11 @@ __noreturn__ void linux_shutdown (U8 error_code)
 }
 
 
-bool linux_switch_poll_logical (unsigned int sw)
-{
-	return sim_switch_read (sw) ^ switch_is_opto (sw);
-}
-
 
 /** Write to a multiplexed output; i.e. a register in which distinct
- * outputs are multiplexed together into a single I/O location.
+ * outputs are multiplexed together into a single 8-bit I/O location.
  * UI_UPDATE provides a function for displaying the contents of a single
- * output; it takes the output number and a 0/1 state.
+ * output; it takes the output number and a zero(off)/non-zero(on) state.
  * INDEX gives the output number of the first bit of the byte of data.
  * MEMP points to the data byte, containing 8 outputs.
  * NEWVAL is the value to be written; it is assigned to *MEMP.
@@ -405,12 +383,17 @@ static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 new
 	{
 		if ((newval & (1 << n)) != (oldval & (1 << n)))
 		{
+			/* Update the user interface to reflect the change in output */
 #ifdef CONFIG_UI
 			ui_update (index + n, newval & (1 << n));
 #endif
+
+			/* Notify the signal tracker that the output changed */
 			signal_update (sigbase+index+n, newval & (1 << n));
 		}
 	}
+
+	/* Latch the write; save the value written */
 	*memp = newval;
 }
 
@@ -442,35 +425,6 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 
 	/* Commit the new state */
 	mux_write (ui_write_solenoid, index, memp, val, SIGNO_SOL);
-}
-
-
-/** Simulate the side effects of switch number SWNO becoming active.
- */
-void sim_switch_effects (int swno)
-{
-	int devno;
-	int n;
-
-	/* If this is switch is in a device, then simulate
-	the 'rolling' to the farthest possible point in the device. */
-	for (devno = 0; devno < NUM_DEVICES; devno++)
-	{
-		const device_properties_t *props = &device_properties_table[devno];
-		if (props->sw_count > 1)
-			for (n = 0; n < props->sw_count-1; n++)
-			{
-				if ((props->sw[n] == swno) && !linux_switch_poll_logical (props->sw[n+1]))
-				{
-					/* Turn off these switch, and turn on the next one */
-					simlog (SLC_DEBUG, "Move from switch %d to %d",
-						swno, props->sw[n+1]);
-					sim_switch_toggle (swno);
-					sim_switch_toggle (props->sw[n+1]);
-					break;
-				}
-			}
-	}
 }
 
 
@@ -599,6 +553,14 @@ void writeb (IOPTR addr, U8 val)
 			sim_sol_write (40, &linux_solenoid_outputs[5], val);
 			break;
 #endif
+#ifdef WPC_EXTBOARD2
+		case WPC_EXTBOARD2:
+			break;
+#endif
+#ifdef WPC_EXTBOARD3
+		case WPC_EXTBOARD3:
+			break;
+#endif
 
 #if (MACHINE_ALPHANUMERIC == 1)
 		case WPC_ALPHA_POS:
@@ -688,7 +650,7 @@ U8 readb (IOPTR addr)
 			simulator itself. */
 			time_t now = time (NULL);
 			int minutes_on =
-				((now - linux_boot_time) * linux_irq_multiplier) / 60;
+				((now - sim_boot_time) * linux_irq_multiplier) / 60;
 			if (addr == WPC_CLK_HOURS_DAYS)
 				return minutes_on / 60;
 			else
@@ -809,16 +771,13 @@ static switchnum_t keymaps[256] = {
 	['.'] = SW_RIGHT_BUTTON,
 	['-'] = SW_COIN_DOOR_CLOSED,
 #ifdef MACHINE_TILT_SWITCH
-	['t'] = MACHINE_TILT_SWITCH,
+	['T'] = MACHINE_TILT_SWITCH,
 #endif
 #ifdef MACHINE_SLAM_TILT_SWITCH
 	['!'] = MACHINE_SLAM_TILT_SWITCH,
 #endif
 #ifdef MACHINE_LAUNCH_SWITCH
-	['/'] = MACHINE_LAUNCH_SWITCH,
-#endif
-#ifdef MACHINE_SHOOTER_SWITCH
-	[' '] = MACHINE_SHOOTER_SWITCH,
+	[' '] = MACHINE_LAUNCH_SWITCH,
 #endif
 };
 
@@ -877,8 +836,13 @@ static void linux_interface_thread (void)
 
 	if (exec_file && exec_late_flag)
 		exec_script_file (exec_file);
+
 	for (;;)
 	{
+#ifdef CONFIG_GTK
+		gtk_poll ();
+		task_yield ();
+#else
 		*inbuf = linux_interface_readchar ();
 
 		/* If switch simulation is turned off, then keystrokes
@@ -951,14 +915,35 @@ static void linux_interface_thread (void)
 				break;
 
 			case 'q':
-#ifdef DEVNO_TROUGH
-#ifdef MACHINE_OUTHOLE_SWITCH
-				sim_switch_toggle (MACHINE_OUTHOLE_SWITCH);
-#else
-				sim_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
-#endif /* MACHINE_OUTHOLE_SWITCH */
-#endif
+				node_kick (&open_node);
 				break;
+
+#if MAX_DEVICES > 1
+			case 'w':
+				node_move (&device_nodes[1], &open_node);
+				break;
+#endif
+#if MAX_DEVICES > 2
+			case 'e':
+				node_move (&device_nodes[2], &open_node);
+				break;
+#endif
+#if MAX_DEVICES > 3
+			case 'r':
+				node_move (&device_nodes[3], &open_node);
+				break;
+#endif
+#if MAX_DEVICES > 4
+			case 't':
+				node_move (&device_nodes[3], &open_node);
+				break;
+#endif
+
+#ifndef MACHINE_LAUNCH_SWITCH
+			case ' ':
+				node_move (&open_node, &shooter_node);
+				break;
+#endif
 
 			case '`':
 				/* The tilde toggles between keystrokes being treated as switches,
@@ -1023,40 +1008,24 @@ static void linux_interface_thread (void)
 						sim_switch_toggle (sw);
 						toggle_mode = 1;
 					}
+#if (MACHINE_FLIPTRONIC == 1)
+					else if (sw >= 72)
+					{
+						flipper_button_depress (sw);
+					}
+#endif
 					else
+					{
 						sim_switch_depress (sw);
+					}
 				}
 				else
 					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)",
 						*inbuf, *inbuf);
 			}
-	}
-}
-
-
-/** Initialize the simulated trough.
- * At startup, assume that all balls are in the trough. */
-void linux_trough_init (int balls)
-{
-#ifdef DEVNO_TROUGH
-	int i;
-	const device_properties_t *trough_props;
-
-	if (balls >= 0)
-	{
-		simlog (SLC_DEBUG, "Installing %d balls into device %d",
-			balls, DEVNO_TROUGH);
-
-		trough_props = &device_properties_table[DEVNO_TROUGH];
-		for (i=trough_props->sw_count-1; i >= 0 && balls; i--, balls--)
-		{
-			U8 sw = trough_props->sw[i];
-			sim_ball_move (i, sw);
-		}
-	}
 #endif
+	}
 }
-
 
 
 /** Initialize the Linux simulation.
@@ -1077,8 +1046,8 @@ void linux_init (void)
 	/* Initial the trough to contain all the balls.  By default,
 	 * it will fill the trough, based on its actual size.  You
 	 * can use the --balls option to override this. */
-	linux_trough_init (linux_installed_balls);
-	linux_boot_time = time (NULL);
+	node_init ();
+	sim_boot_time = time (NULL);
 }
 
 
@@ -1095,7 +1064,6 @@ void malloc_init (void)
 int main (int argc, char *argv[])
 {
 	int argn = 1;
-	switchnum_t sw;
 
 	/* Parse command-line arguments */
 	linux_output_stream = stdout;
@@ -1162,6 +1130,9 @@ int main (int argc, char *argv[])
 
 #ifdef CONFIG_UI
 	/* Initialize the user interface */
+#ifdef CONFIG_GTK
+	gtk_init (&argc, &argv);
+#endif
 	ui_init ();
 #endif
 
@@ -1197,9 +1168,6 @@ int main (int argc, char *argv[])
 
 	/* Initialize the state of the switches; optos are backwards */
 	sim_switch_init ();
-	for (sw = 0; sw < NUM_SWITCHES; sw++)
-		if (switch_is_opto (sw))
-			sim_switch_toggle (sw);
 
 	/* Force always closed */
 	sim_switch_toggle (SW_ALWAYS_CLOSED);
@@ -1211,7 +1179,6 @@ int main (int argc, char *argv[])
 	protected_memory_load ();
 
 	/* Initialize the simulated ball tracker */
-	sim_ball_init ();
 	sim_coil_init ();
 
 	/* Invoke the machine-specific simulation function */

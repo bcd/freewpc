@@ -31,7 +31,7 @@
  * other things, so there are no guarantees.
  */
 
-#define RING_COUNT 32
+#define RING_COUNT 256
 
 #define ring_later(ticks) ((ring_now + (ticks)) % RING_COUNT)
 

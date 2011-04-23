@@ -37,6 +37,10 @@
 /**
  * A structure for tracking a single binary signal over a period
  * of time.
+ *
+ * When a signal is traced for a long period of time, and the
+ * array of readings becomes full, then another one of these
+ * objects is created and they are all chained together.
  */
 typedef struct signal_readings
 {
@@ -91,12 +95,29 @@ double signal_sol_voltage_value (uint32_t offset)
 }
 
 
+/**
+ * The table of auto signal types.
+ */
 const value_signal signal_value_table[] = {
+	/* SIGNO_SOL_VOLTAGE+n gives the current voltage level of solenoid N,
+	accounting for the fact that it is AC voltage.  If the solenoid is off,
+	then the value is always 0.0.  If it is on, then it will range from -1.0
+	to 1.0, depending on the current phase of the AC cycle. */
 	signal_sol_voltage_value,
+
+	/* SIGNO_AC_ANGLE is similar, but just returns the -1.0 to 1.0 value
+	that represents the phase angle, without consideration for any particular
+	solenoid line. */
 	signal_ac_angle_value,
 };
 
 
+/**
+ * Return the value of a signal.  If it is a binary signal, then the value is always
+ * 0 or 1.  However, we also support "auto signals", whose values are computed from
+ * other signals.  The signal number encodes the computing function (type) and
+ * instance number (offset).  The computation is done on the fly.
+ */
 double signal_value (uint32_t signo)
 {
 	if (signo >= SIGNO_FIRST_AUTO)
@@ -111,6 +132,9 @@ double signal_value (uint32_t signo)
 }
 
 
+/**
+ * Allocate a new signal expression tree node.
+ */
 struct signal_expression *expr_alloc (void)
 {
 	struct signal_expression *ex = malloc (sizeof (struct signal_expression));
@@ -119,6 +143,9 @@ struct signal_expression *expr_alloc (void)
 }
 
 
+/**
+ * Free (recursively) a new signal expression tree node.
+ */
 void expr_free (struct signal_expression *ex)
 {
 	if (!ex)
@@ -149,6 +176,11 @@ static signal_readings_t *signal_chunk_alloc (void)
 }
 
 
+/**
+ * Evaluate a signal expression.  The script parser converts the textual
+ * expression into a parse tree, passed in EX.  SIG_CHANGED says whether or
+ * not the current signal being scanned changed during the last time step.
+ */
 bool signal_expr_eval (unsigned int sig_changed, struct signal_expression *ex)
 {
 	if (!ex)
@@ -159,6 +191,8 @@ bool signal_expr_eval (unsigned int sig_changed, struct signal_expression *ex)
 		default:
 			return FALSE;
 
+		/* A signal name without any qualification is true when its value
+		changes */
 		case SIG_SIGNO:
 			if (ex->u.signo == sig_changed)
 				return TRUE;
@@ -174,6 +208,8 @@ bool signal_expr_eval (unsigned int sig_changed, struct signal_expression *ex)
 				return TRUE;
 			break;
 
+		/* Indicates a "<signal> is <value>" expression.  True if
+		the signal has the exact value */
 		case SIG_EQ:
 			if (ex->u.binary.left->u.signo == sig_changed
 				&& signal_readings[sig_changed]->prev_state ==
@@ -197,6 +233,10 @@ bool signal_expr_eval (unsigned int sig_changed, struct signal_expression *ex)
 }
 
 
+/**
+ * Write the header to the capture file.  This is called once when
+ * the file is created.
+ */
 void signal_write_header (void)
 {
 	int sigin;
@@ -211,6 +251,9 @@ void signal_write_header (void)
 }
 
 
+/**
+ * Write the current values of all signals to the capture file.
+ */
 void signal_write (void)
 {
 	int sigin;
@@ -229,7 +272,8 @@ void signal_write (void)
 
 
 /**
- * Update the state of a binary signal.
+ * Update the state of a binary signal.  SIGNO says which signal,
+ * STATE is a zero/nonzero value reflecting its binary state.
  *
  * If a signal is known not to have changed state, it is not necessary
  * to call this function repeatedly; however it is harmless to do so.
@@ -250,7 +294,7 @@ void signal_update (signal_number_t signo, unsigned int state)
 	if (!sigrd)
 		goto do_capture;
 
-	/* Move to the last block in the list. */
+	/* Move to the last block in the list of signal data. */
 	while (sigrd->next)
 		sigrd = sigrd->next;
 
@@ -288,12 +332,8 @@ void signal_update (signal_number_t signo, unsigned int state)
 	sigrd->prev_state = state;
 
 do_capture:
-	/* Write the new state to the capture file if active and this signal
-	is being monitored */
 	if (signal_capture_active && signal_capture_file)
 	{
-		//signal_write ();
-
 		/* Also see if tracing should stop */
 		if (signal_stop_expr && signal_expr_eval (signo, signal_stop_expr))
 		{
@@ -315,6 +355,10 @@ do_capture:
 }
 
 
+/**
+ * Set a start condition.  When this condition becomes true, capture will begin.
+ * If NULL, then capture is disabled.
+ */
 void signal_capture_start (struct signal_expression *ex)
 {
 	if (signal_start_expr)
@@ -324,6 +368,11 @@ void signal_capture_start (struct signal_expression *ex)
 }
 
 
+/**
+ * Set a stop condition.  When this condition becomes true, capture that has
+ * already started will then stop.  If NULL, then once started, a capture
+ * will run forever.
+ */
 void signal_capture_stop (struct signal_expression *ex)
 {
 	if (signal_stop_expr)
@@ -333,6 +382,9 @@ void signal_capture_stop (struct signal_expression *ex)
 }
 
 
+/**
+ * Add a signal to the capture list.
+ */
 void signal_capture_add (uint32_t signo)
 {
 	int sigin;
@@ -349,6 +401,9 @@ void signal_capture_add (uint32_t signo)
 }
 
 
+/**
+ * Delete a signal to the capture list.
+ */
 void signal_capture_del (uint32_t signo)
 {
 	int sigin;
@@ -364,6 +419,12 @@ void signal_capture_del (uint32_t signo)
 	}
 }
 
+/**
+ * The periodic handler runs every millisecond.  If a capture is active,
+ * it writes out the values of all signals being traced in this time step.
+ * If a stop expression has been defined, then it also checks to see if
+ * tracing should finish.
+ */
 static void signal_trace_periodic (void *data __attribute__((unused)))
 {
 	if (signal_capture_active)
@@ -379,6 +440,10 @@ static void signal_trace_periodic (void *data __attribute__((unused)))
 }
 
 
+/**
+ * Set the filename used to capture signal traces.  If filename is
+ * NULL, then the capture file is flushed and closed.
+ */
 void signal_capture_set_file (const char *filename)
 {
 	if (filename)
@@ -431,10 +496,13 @@ void signal_trace_stop (signal_number_t signo)
 }
 
 
-
+/**
+ * Initializing the signal tracking module.
+ */
 void signal_init (void)
 {
 	signal_start_expr = signal_stop_expr = NULL;
 	signal_capture_active = 0;
 	sim_time_register (1, TRUE, signal_trace_periodic, NULL);
 }
+

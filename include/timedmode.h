@@ -50,7 +50,7 @@ struct timed_mode_ops
 	/* The music that should be played while the mode is running. */
 	U8 music;
 
-	/* The priority for the display/music effects */
+	/* The priority for the background display/music effects */
 	U8 prio;
 
 	/* A task group ID that can be used to track the mode.  Just

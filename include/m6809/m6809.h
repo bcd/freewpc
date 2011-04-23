@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -49,6 +49,7 @@ void far_indirect_call_handler (void_function address, U8 page);
 typedef U8 (*value_function) (void);
 U8 far_indirect_call_value_handler (value_function address, U8 page);
 void bitmap_blit_asm (U8 *dst, U8 shift);
+U16 strlen (const char *);
 
 /* Other externals */
 
@@ -102,7 +103,6 @@ extern inline void m6809_andcc (const U8 bits)
 	asm __volatile__ ("andcc\t%0" :: "i" (bits));
 }
 
-
 extern inline void m6809_orcc (const U8 bits)
 {
 	asm __volatile__ ("orcc\t%0" :: "i" (bits));
@@ -117,67 +117,6 @@ extern inline void m6809_firq_restore_regs (void)
 {
 	asm __volatile__ ("puls\td,x");
 }
-
-/** Optimized memset function.
- * The length n should be a constant.
- * Based on the length, one of the blocks of code will be
- * expanded, whichever is the most optimal.
- * 8-byte aligned sizes will copy 4 words at a time.
- * When 2-byte aligned, copy a word at a time.
- * Otherwise, copy one byte at a time.
- *
- * TODO - for small, odd values of N, no optimization is
- * done and the memset occurs one byte at a time; with small
- * N the loop overhead is significant.  Better to do it
- * inline, completely unrolled.  Try a recursive call to
- * this function...
- */
-extern inline void *memset (void *s, U8 c, U16 n)
-{
-	if (n <= 5)
-	{
-		register U8 *s1 = (U8 *)s;
-		if (n > 4) *s1++ = c;
-		if (n > 3) *s1++ = c;
-		if (n > 2) *s1++ = c;
-		if (n > 1) *s1++ = c;
-		*s1 = c;
-	}
-	else if ((n % 8) == 0)
-	{
-		register U16 *s1 = (U16 *)s;
-		n /= 8;
-		while (n > 0)
-		{
-			*s1++ = ((U16)c << 8) | c;
-			*s1++ = ((U16)c << 8) | c;
-			*s1++ = ((U16)c << 8) | c;
-			*s1++ = ((U16)c << 8) | c;
-			n--;
-		}
-	}
-	else if ((n % 2) == 0)
-	{
-		register U16 *s1 = (U16 *)s;
-		n /= 2;
-		while (n > 0)
-		{
-			*s1++ = ((U16)c << 8) | c;
-			n--;
-		}
-	}
-	else
-	{
-		register char *s1 = (char *)s;
-		while (n > 0)
-		{
-			*s1++ = c & 0xFF;
-			n--;
-		}
-	}
-	return (s);
-}
-
 
 extern inline void __blockclear16 (void *s1, U16 n)
 {
@@ -199,44 +138,6 @@ extern inline void __blockclear16 (void *s1, U16 n)
 		n -= 16;
 	} while (n > 0);
 }
-
-
-extern inline void *memcpy (void *s1, const void *s2, U16 n)
-{
-	if ((n == 3) || (n == 5))
-	{
-		register U8 *_s1 = (U8 *)s1;
-		register const U8 *_s2 = (U8 *)s2;
-		*_s1 = *_s2;
-		s1 = (char *)s1 + 1;
-		s2 = (char *)s2 + 1;
-		n--;
-	}
-
-	if ((n % 2) == 0)
-	{
-		register U16 *_s1 = (U16 *)s1;
-		register const U16 *_s2 = (U16 *)s2;
-		n /= 2;
-		while (n > 0)
-		{
-			*_s1++ = *_s2++;
-			n--;
-		}
-	}
-	else
-	{
-		register U8 *_s1 = (U8 *)s1;
-		register const U8 *_s2 = (U8 *)s2;
-		while (n > 0)
-		{
-			*_s1++ = *_s2++;
-			n--;
-		}
-	}
-	return (s1);
-}
-
 
 extern inline void __blockcopy16 (void *s1, const void *s2, U16 n)
 {
@@ -261,45 +162,15 @@ extern inline void __blockcopy16 (void *s1, const void *s2, U16 n)
 }
 
 
-extern inline bool memcmp (const void *s1, const void *s2, U16 n)
-{
-	if ((n % 2) == 0)
-	{
-		register U16 *w1 = (U16 *)s1;
-		register U16 *w2 = (U16 *)s2;
-		n /= 2;
-		do
-		{
-			if (*w1 != *w2)
-				return 1;
-			n--;
-		} while (n > 0);
-	}
-	else
-	{
-		register U8 *b1 = (U8 *)s1;
-		register U8 *b2 = (U8 *)s2;
-		do
-		{
-			if (*b1 != *b2)
-				return 1;
-			n--;
-		} while (n > 0);
-	}
-	return 0;
-}
-
-
-extern inline U16 strlen (const char *s)
-{
-	U16 len = 0;
-	while (*s != '\0')
-	{
-		len++;
-		s++;
-	}
-	return (len);
-}
-
+/**
+ * These C library functions are declared as GCC builtins, so that
+ * GCC itself can replace the call with inline code if the amount
+ * of data is small enough.  Else, it will resolve to a library
+ * call.  For FreeWPC those C library functions are hand-coded in
+ * assembler for speed.
+ */
+#define memset __builtin_memset
+#define memcpy __builtin_memcpy
+#define memcmp __builtin_memcmp
 
 #endif /* _ASM_6809_H */

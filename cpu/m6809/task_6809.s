@@ -23,7 +23,7 @@
 ;;; Defines that are in .h files which can't be included directly.
 ;;; TODO: Put only the constants in .h without the C-structs and it
 ;;; it *can* be included.
-STACK_BASE         = 6133
+STACK_BASE         = 0x17F5
 WPC_ROM_BANK       = 0x3FFC
 
 STATE_OFF          = 0
@@ -111,11 +111,7 @@ stack_debug_done:
 	ble	2$
 	stb	_task_largest_stack
 2$:
-	tstb
 #endif /* CONFIG_DEBUG_STACK */
-
-	; Check for empty stack
-	beq	save_empty_stack
 
 	; Check for stack too large.  This is currently a hard stop.
 	cmpb  #TASK_SMALL_SIZE       ; 2 cycles
@@ -145,7 +141,6 @@ save_loop:
 	; x was killed in the core copy loop, need to restore it
 	ldx	*_task_current         ; 5 cycles
 
-save_empty_stack:
 	; Reinitialize the stack pointer for the next task
 	lds	#STACK_BASE            ; 4 cycles
 
@@ -201,7 +196,6 @@ _task_restore:
 	;;; The only thing that needs to be protected is resetting S
 	;;; to STACK_BASE and writing to the stack.
 	ldb	SAVED_STACK_SIZE,x
-	beq	restore_stack_not_required
 
 	; Round number of bytes up to the next multiple of 8.
 	tfr	b,a                    ; 6 cycles
@@ -260,11 +254,6 @@ restore_stack_done:
 	; stack so RTS works normally
 	rts
 
-restore_stack_not_required:
-	lds	#STACK_BASE
-	bra	restore_stack_done
-
-	
 	;-----------------------------------------------------
 	; task_create - low level routine to create and
 	; initialize a new task block.
@@ -285,7 +274,6 @@ _task_create:
 	tfr	x,u
 	jsr	_task_allocate
 	stu	PCREG_SAVE_OFF,x
-	puls	u
 	ldb	*_wpc_rom_bank
 	stb	ROMPAGE_SAVE_OFF,x
 
@@ -297,7 +285,7 @@ _task_create:
 	;;; stack space.  Stack space is more precious and therefore
 	;;; shouldn't be used where other means are possible.  So
 	;;; don't consider that anymore.
-	rts
+	puls	u,pc
 
 
 	;-----------------------------------------------------

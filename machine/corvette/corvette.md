@@ -323,28 +323,13 @@ Kickback Made:
 # For each device requiring a driver, it specifies the file that
 # contains the template code, and any parameters for the specific
 # device.
-Left Sling: driver(spsol),
-	sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING,
-	ontime=3, offtime=16
+Left Sling: driver(sling), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING
+Right Sling: driver(sling), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLING
+Left Jet: driver(jet), sw=SW_LEFT_JET, sol=SOL_LEFT_JET
+Upper Jet: driver(jet), sw=SW_UPPER_JET, sol=SOL_UPPER_JET
+Lower Jet: driver(jet), sw=SW_LOWER_JET, sol=SOL_LOWER_JET
 
-Right Sling: driver(spsol),
-	sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLING,
-	ontime=3, offtime=16
-
-Left Jet: driver(spsol),
-	sw=SW_LEFT_JET, sol=SOL_LEFT_JET,
-	ontime=3, offtime=16
-
-Upper Jet: driver(spsol),
-	sw=SW_UPPER_JET, sol=SOL_UPPER_JET,
-	ontime=3, offtime=16
-
-Lower Jet: driver(spsol),
-	sw=SW_LOWER_JET, sol=SOL_LOWER_JET,
-	ontime=3, offtime=16
-
-Spinner: driver(spinner),
-	sw_event=sw_spinner, sw_number=SW_SPINNER
+Spinner: driver(spinner), sw_event=sw_spinner, sw_number=SW_SPINNER
 
 Loop Gate: driver(duty),
 	sol=SOL_LOOP_GATE,

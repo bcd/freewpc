@@ -209,8 +209,9 @@ __noreturn__ void freewpc_init (void);
 #include <callset.h>
 #include <csum.h>
 #include <audio.h>
-#include <mode.h> /* deprecated */
 #include <timedmode.h>
+#include <serve.h>
+#include <mbmode.h>
 #include <generic.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */

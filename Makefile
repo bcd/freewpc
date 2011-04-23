@@ -269,8 +269,8 @@ CFLAGS += -Wall -Wstrict-prototypes
 #
 CFLAGS += -DBUILD_MONTH=$(BUILD_MONTH) -DBUILD_DAY=$(BUILD_DAY) -DBUILD_YEAR=$(BUILD_YEAR)
 
-SYSTEM_MAJOR ?= 0
-SYSTEM_MINOR ?= 99
+SYSTEM_MAJOR ?= 1
+SYSTEM_MINOR ?= 10
 SYSTEM_EXTRAVERSION ?= DEV
 MACHINE_MAJOR ?= 0
 MACHINE_MINOR ?= 00
@@ -287,7 +287,7 @@ endif
 CFLAGS += $(EXTRA_CFLAGS) $(AUTO_CFLAGS)
 
 SCHED_HEADERS := include/freewpc.h include/interrupt.h $(SCHED_HEADERS)
-SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS))) $(MACHINE_SCHED_FLAGS)
+SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS)))
 ifeq ($(CONFIG_DMD),y)
 SCHED_FLAGS += -D CONFIG_DMD
 endif
@@ -911,7 +911,7 @@ fonts clean-fonts:
 sched: $(SCHED_SRC) tools/sched/sched.make
 
 $(SCHED_SRC): $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(SCHED) $(SCHED_HEADERS) $(MAKE_DEPS)
-	$(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE)
+	$(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(MACHINE_SCHED_FLAGS)
 
 #######################################################################
 ###	Tracing
