@@ -608,10 +608,27 @@ CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 	zr1_float();
 }
 
+
+void zr1_shake_2sec_task (void)
+{
+	zr1_shake();
+	task_sleep_sec (2);
+	zr1_center();
+	task_exit ();
+}
+
 /**
  * Reset the engine to the center position at the start of each ball.
  */
 CALLSET_ENTRY (zr1, start_ball, end_ball)
+{
+	task_create_gid1 (GID_ZR1_SHAKE, zr1_shake_2sec_task);
+}
+
+/**
+ * Reset the engine to the center position at the end of each ball.
+ */
+CALLSET_ENTRY (zr1, end_ball)
 {
 	zr1_center();
 }
