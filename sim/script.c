@@ -346,7 +346,7 @@ void exec_script (char *cmd)
 	{
 		t = tnext ();
 		v = tsw ();
-		simlog (SLC_DEBUG, "Key '%c' = %d", *t, v);
+		simlog (SLC_DEBUG, "Key '%c' = %s", *t, names_of_switches[v]);
 		sim_key_install (*t, v);
 	}
 	/*********** push [value] ***************/
