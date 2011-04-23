@@ -90,6 +90,9 @@ CALLSET_ENTRY (@self, @sw_event)
 	{
 		task_setgid (GID_@self_MONITOR);
 
+		/* Notify handlers that the spinner was just started */
+		callset_invoke (@sw_event_start);
+
 		/* Throw as many spins as the fast handler has counted.
 		Note that the counter actually reflects transitions, which
 		is 2x the total number of spins.  So only process every
@@ -117,11 +120,11 @@ work_to_do:
 		 * zero, in case it flips again, to try to avoid the
 		 * overhead of redispatching.  This is not technically
 		 * necessary, just an optimization. */
-		@self_timer = TIME_133MS;
+		@self_timer = TIME_400MS;
 		while (@self_timer)
 		{
-			task_sleep (TIME_16MS);
-			@self_timer -= TIME_16MS;
+			task_sleep (TIME_33MS);
+			@self_timer -= TIME_33MS;
 			if (@self_counter)
 				goto work_to_do;
 		}
