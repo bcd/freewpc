@@ -68,7 +68,6 @@ void amode_sleep_sec (U8 secs)
 {
 	if (secs > 0)
 	{
-		amode_page_changed = 0;
 		while (secs > 0)
 		{
 			task_sleep (TIME_250MS);
@@ -93,7 +92,8 @@ void amode_sleep_sec (U8 secs)
 void amode_page_end (U8 secs)
 {
 	amode_sleep_sec (secs);
-	amode_page_change (1);
+	if (!amode_page_changed)
+		amode_page_change (1);
 }
 
 
@@ -124,7 +124,6 @@ void amode_logo_page (void)
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
-	dmd_sched_transition (&trans_bitfade_slow);
 	amode_page_end (3);
 }
 #endif
@@ -132,6 +131,7 @@ void amode_logo_page (void)
 void amode_credits_page (void)
 {
 	credits_draw ();
+	dmd_sched_transition (&trans_bitfade_slow);
 	dmd_show_low ();
 	amode_page_end (3);
 }
@@ -152,13 +152,18 @@ void amode_high_score_page (void)
 	{
 		high_score_draw_gc ();
 		amode_sleep_sec (3);
+		if (amode_page_changed)
+			return;
 		high_score_draw_12 ();
 		amode_sleep_sec (3);
+		if (amode_page_changed)
+			return;
 		high_score_draw_34 ();
 		amode_sleep_sec (3);
 	}
 	amode_page_end (0);
 }
+
 
 #ifdef CONFIG_RTC
 void amode_date_time_page (void)
@@ -263,8 +268,10 @@ __attribute__((noreturn)) void system_amode_deff (void)
 	amode_page = 0;
 	for (;;)
 	{
+		amode_page_changed = 0;
 		if (amode_page == 1)
 			callset_invoke (amode_page);
+		amode_page_changed = 0;
 		amode_page_table[amode_page] ();
 	}
 }
