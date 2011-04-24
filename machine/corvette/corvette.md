@@ -200,7 +200,7 @@ A4: Right Standup, flash, duty(SOL_DUTY_75), time(TIME_16MS)
 
 # F = J902 on Fliptronic II
 F5: Ramp Diverter, duty(SOL_DUTY_100), time(TIME_50MS)
-F6: Ramp Divertor Hold, duty(SOL_DUTY_100), time(TIME_100MS)
+F6: Ramp Diverter Hold, duty(SOL_DUTY_100), time(TIME_100MS)
 F7: U.L. Flip Power, duty(SOL_DUTY_100), time(TIME_50MS)
 F8: U.L. Flip Hold, duty(SOL_DUTY_100), time(TIME_100MS)
 
@@ -349,6 +349,10 @@ Spinner: driver(spinner),
 Loop Gate: driver(duty),
 	sol=SOL_LOOP_GATE,
 	ontime=TIME_300MS, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=60
+
+Diverter: driver(divhold),
+	power_sol=SOL_RAMP_DIVERTER,
+	hold_sol=SOL_RAMP_DIVERTER_HOLD
 
 ZR-1 Low Rev Gate: driver(duty),
 	sol=SOL_ZR_1_LOW_REV_GATE,
