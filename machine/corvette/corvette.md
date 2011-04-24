@@ -230,7 +230,7 @@ Build Up: PF:lamp_sort_bottom_to_top
 
 [containers]
 Trough: trough, Trough Release, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(4)
-ZR1 Popper: ZR-1 Lockup, ZR-1 Lock Ball 3, ZR-1 Lock Ball 2, ZR-1 Lock Ball 1
+ZR1 Popper: ZR-1 Lockup, ZR-1 Lock Ball 3, ZR-1 Lock Ball 2, ZR-1 Lock Ball 1, settle_delay(TIME_1500MS)
 Pitstop Popper: Pit Stop Popper, Pit Stop Popper
 Route 66 Popper: Route 66 Kickout, Route 66 Kickout
 
