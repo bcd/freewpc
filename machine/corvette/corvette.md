@@ -168,7 +168,7 @@ H3: Kickback, duty(SOL_DUTY_75), time(TIME_66MS)
 H4: Pit Stop Popper, duty(SOL_DUTY_75), time(TIME_66MS)
 H5: ZR-1 Up Rev Gate, duty(SOL_DUTY_50), time(TIME_66MS)
 H6: Not Used 1, nosearch
-H7: Knocker, knocker, time(TIME_16MS)
+H7: Knocker, knocker, duty(SOL_DUTY_75), time(TIME_50MS)
 H8: Route 66 Kickout, duty(SOL_DUTY_75), time(TIME_66MS)
 
 L1: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
