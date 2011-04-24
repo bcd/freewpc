@@ -226,10 +226,10 @@ define CONFIG_TZONE_IP y
 H1: Slot, duty(SOL_DUTY_100), time(TIME_200MS)
 H2: Rocket Kicker, duty(SOL_DUTY_75), time(TIME_200MS)
 H3: Autofire, nosearch, launch, duty(SOL_DUTY_100), time(TIME_200MS)
-H4: Popper
+H4: Popper, time(TIME_100MS)
 H5: Right Ramp Div, duty(SOL_DUTY_50), time(TIME_100MS)
 H6: Gumball Div, duty(SOL_DUTY_50), time(TIME_133MS)
-H7: Knocker, knocker
+H7: Knocker, knocker, time(TIME_16MS)
 H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
 L1: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_133MS)
