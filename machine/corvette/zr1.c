@@ -181,7 +181,7 @@ void zr1_enable_solenoids(void) {
 	}
 	writeb (ZR1_ENGINE_CONTROL, 1); // disable the DISABLE_A/DISABLE_B lines
 	if (!global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
-		sample_start (SND_STARTER_MOTOR, SL_500MS); // XXX - trigger sound when changing power
+		//sample_start (SND_STARTER_MOTOR, SL_500MS); // XXX - trigger sound when changing power
 		global_flag_on(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
 	}
 }
@@ -198,7 +198,7 @@ void zr1_disable_solenoids(void) {
 
 	writeb (ZR1_ENGINE_CONTROL, 0); // enable the DISABLE_A/DISABLE_B lines
 	if (global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
-		global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
+		//global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
 		sample_start (SND_SPARK_PLUG_01, SL_500MS); // XXX - trigger sound when changing power
 	}
 }
