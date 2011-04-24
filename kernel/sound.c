@@ -108,24 +108,6 @@ bool sound_version_render (void)
 	}
 }
 
-
-/** Initialize the sound write queue */
-static void sound_write_queue_init (void)
-{
-	disable_irq ();
-	queue_init (&sound_write_queue.header);
-	enable_irq ();
-}
-
-/** Initialize the sound read queue */
-static void sound_read_queue_init (void)
-{
-	disable_irq ();
-	queue_init (&sound_read_queue.header);
-	enable_irq ();
-}
-
-
 /** Queues a byte for transmit to the sound board */
 static __attribute__((noinline)) void sound_write_queue_insert (U8 val)
 {
@@ -301,8 +283,8 @@ device, this function is run in the background in a separate task. */
 void sound_init (void)
 {
 	/* Initialize the input/output queues to the sound board. */
-	sound_read_queue_init ();
-	sound_write_queue_init ();
+	queue_init (&sound_read_queue.header);
+	queue_init (&sound_write_queue.header);
 }
 
 
