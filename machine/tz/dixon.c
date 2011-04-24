@@ -25,7 +25,7 @@
  * Anti-cradling mechanism, as suggested by Philip Dixon
  * During multiball, if the player holds the ball on a flipper for longer than 5
  * seconds, the flipper is momentarily disabled, until the player releases the
- * button
+ * button.
  */
 
 bool flippers_dixoned;
@@ -36,11 +36,12 @@ static void dixon_the_flippers (void)
 	deff_start (DEFF_ANTI_CRADLE);
 	flippers_dixoned = TRUE;
 	flipper_disable ();
+	task_sleep (TIME_500MS);
 	task_exit ();
 }
 
 /* Monitor the flipper button for 5 seconds */
-static void anti_cradle_monitor (U8 flipper_button)
+static inline void anti_cradle_monitor (U8 flipper_button)
 {
 	U8 timer = 0;
 	while (switch_poll_logical (flipper_button)
@@ -55,8 +56,11 @@ static void anti_cradle_monitor (U8 flipper_button)
 		}
 		/* Warn the player 2 seconds before disabling*/
 		else if (timer == 6)
+		{
+			sound_send (SND_TILT_WARNING);
 			deff_start (DEFF_TILT_WARNING);
-		if (timer > 5)
+		}
+		else if (timer > 6)
 			sound_send (SND_TILT_WARNING);
 	}
 }
@@ -73,28 +77,45 @@ static bool anti_cradle_enabled (void)
 		return FALSE;
 }
 
-CALLSET_ENTRY (dixon, init, end_game, start_ball, end_ball)
+CALLSET_ENTRY (dixon, init, end_game, start_ball, end_ball, single_ball_play)
 {
+	task_kill_gid (GID_DIXON_THE_FLIPPERS);
+	task_kill_gid (GID_ANTI_CRADLE);
 	flippers_dixoned = FALSE;
 }
 
-static void check_flipper_button (U8 flipper_button)
+static bool check_for_dixoned_flippers (void)
 {
-	if (flippers_dixoned)
+	if (flippers_dixoned && !task_find_gid (GID_DIXON_THE_FLIPPERS))
 	{
 		flippers_dixoned = FALSE;
 		flipper_enable ();
+		return TRUE;
 	}
-	else if (anti_cradle_enabled ())
-		anti_cradle_monitor (flipper_button);
+	else
+		return FALSE;
+}
+
+static void anti_cradle_left_task (void)
+{
+	anti_cradle_monitor (SW_LEFT_BUTTON);
+	task_exit ();
+}
+
+static void anti_cradle_right_task (void)
+{
+	anti_cradle_monitor (SW_RIGHT_BUTTON);
+	task_exit ();
 }
 
 CALLSET_ENTRY (dixon, sw_left_button)
 {
-	check_flipper_button (SW_LEFT_BUTTON);
+	if (!check_for_dixoned_flippers ()&& anti_cradle_enabled ())
+		task_recreate_gid (GID_ANTI_CRADLE, anti_cradle_left_task);
 }
 
 CALLSET_ENTRY (dixon, sw_right_button)
 {
-	check_flipper_button (SW_RIGHT_BUTTON);
+	if (!check_for_dixoned_flippers ()&& anti_cradle_enabled ())
+		task_recreate_gid (GID_ANTI_CRADLE, anti_cradle_right_task);
 }
