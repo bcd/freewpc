@@ -24,6 +24,29 @@
 extern struct timed_mode_ops hitch_mode;
 extern U8 mute_and_pause_timeout;
 
+void match_loop_deff (void)
+{
+	U16 fno;
+	dmd_alloc_pair_clean ();
+	for (;;)
+	{
+		for (fno = IMG_MATCH_START; fno <= IMG_MATCH_END; fno += 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			font_render_string_right (&font_fixed6, 126, 1, "MATCH");
+			dmd_text_outline ();
+			
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_33MS);
+		}
+	}
+	deff_exit ();
+}
+
 void shoot_again_deff (void)
 {	
 	sound_send (SND_EXTRA_BALL_BALLOON);

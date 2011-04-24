@@ -384,3 +384,21 @@ machine/tz/animation/reelstrip/reelstrip_0015.pgm
 machine/tz/animation/reelstrip/reelstrip_0016.pgm
 machine/tz/animation/reelstrip/reelstrip_0017.pgm
 IMG_REELSTRIP_END: machine/tz/animation/reelstrip/reelstrip_0018.pgm
+
+IMG_MATCH_START: machine/tz/animation/match/match1-000001.pgm
+machine/tz/animation/match/match1-000002.pgm
+machine/tz/animation/match/match1-000003.pgm
+machine/tz/animation/match/match1-000004.pgm
+machine/tz/animation/match/match1-000005.pgm
+machine/tz/animation/match/match1-000006.pgm
+machine/tz/animation/match/match1-000007.pgm
+machine/tz/animation/match/match1-000008.pgm
+machine/tz/animation/match/match1-000009.pgm
+machine/tz/animation/match/match1-000010.pgm
+machine/tz/animation/match/match1-000011.pgm
+machine/tz/animation/match/match1-000012.pgm
+machine/tz/animation/match/match1-000013.pgm
+machine/tz/animation/match/match1-000014.pgm
+machine/tz/animation/match/match1-000015.pgm
+machine/tz/animation/match/match1-000016.pgm
+IMG_MATCH_END: machine/tz/animation/match/match1-000017.pgm
