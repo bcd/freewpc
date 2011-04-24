@@ -536,9 +536,28 @@ restart:
 }
 
 
-CALLSET_ENTRY (malloc, start_game, amode_start, minute_elapsed)
+CALLSET_ENTRY (malloc, start_game)
 {
 	task_create_anon (malloc_collect_task);
+}
+
+CALLSET_ENTRY (malloc, amode_start)
+{
+	task_create_anon (malloc_collect_task);
+}
+
+CALLSET_ENTRY (malloc, minute_elapsed)
+{
+	task_create_anon (malloc_collect_task);
+}
+
+
+/** An indication that a minimum of 'count' buffers, each of
+length 'size', is required by the caller.  This is used
+as an early indicator of memory requirements in order to
+speed up the allocations. */
+void prealloc (U8 size, U8 count)
+{
 }
 
 
@@ -602,10 +621,10 @@ void malloc_test_thread (void)
 CALLSET_ENTRY (malloc, init)
 {
 	/* Make sure malloc_chunk fits into a task_t */
+	dbprintf ("malloc chunk size: %ld\n", sizeof (malloc_chunk_t));
+	dbprintf ("task_t size: %ld\n", sizeof (task_t));
 	if (sizeof (malloc_chunk_t) > sizeof (task_t))
 	{
-		dbprintf ("malloc chunk size: %ld\n", sizeof (malloc_chunk_t));
-		dbprintf ("task_t size: %ld\n", sizeof (task_t));
 		fatal (ERR_MALLOC);
 	}
 
