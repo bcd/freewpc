@@ -218,7 +218,9 @@ CALLSET_ENTRY (fliptronic, ball_search)
 
 void flipper_init (void)
 {
-	flipper_disable ();
+	pinio_disable_flippers ();
+	flippers_enabled = FALSE;
+	flipper_outputs = 0;
 	fliptronic_powered_coil_outputs = 0;
 }
 
