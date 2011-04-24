@@ -668,6 +668,12 @@ bool verify_start_ok (void)
 	if (gumball_enable_from_trough)
 		return FALSE;
 #endif
+
+#ifdef CONFIG_MUTE_AND_PAUSE
+	/* Don't allow adding players when paused */
+	if (task_find_gid (GID_MUTE_AND_PAUSE))
+		return FALSE;
+#endif
 	return TRUE;
 }
 
