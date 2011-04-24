@@ -383,16 +383,25 @@ void high_score_award_credits (U8 *adjptr)
 }
 
 #ifdef CONFIG_ONE_HS_PER_PLAYER
-bool score_is_players_highest (U8 position)
+static bool score_is_players_highest (U8 position)
 {
 	struct high_score *hsp = &high_score_table_backup[position];
 	U8 hs;	
 	for (hs = 0; hs < position; hs++)
 	{
-		if (hsp->initials[hs] == initials_data)
+		if (memcmp (&hsp->initials[hs], initials_data, HIGH_SCORE_WIDTH))
 			return FALSE;
 	}
 	return TRUE;
+}
+
+/* Remove players previous entry */
+static void remove_smaller_scores (U8 position)
+{
+	U8 hs;
+	for (hs = position + 1; hs < HS_COUNT; hs++;)
+	{
+	}
 }
 
 void you_have_done_better_deff (void)
