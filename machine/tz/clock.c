@@ -40,6 +40,10 @@ enum mech_clock_mode
 	CLOCK_RUNNING_FORWARD,
 	/** The clock should run backward */
 	CLOCK_RUNNING_BACKWARD,
+	/** The clock should run forward after being unpaused */
+	CLOCK_PAUSED_FORWARD,
+	/** The clock should run backward after being unpaused */
+	CLOCK_PAUSED_BACKWARD,
 	/** The clock should be calibrated */
 	CLOCK_CALIBRATING,
 	/** The clock is trying to find a particular location,
@@ -89,6 +93,7 @@ task_gid_t clock_owner;
 /** The current clock hour, as an integer from 0-11 */
 U8 clock_hour;
 
+U8 mech_speed_stored;
 extern struct timed_mode_ops mpf_mode;
 
 /* rtc hour and minute */
@@ -288,46 +293,6 @@ void tz_clock_free (task_gid_t owner)
 		tz_clock_clear_owner ();
 }
 
-/** 
- * Pause the clock and restart again
- */
-static void clock_pause_monitor_task (void)
-{
-	U8 clock_mode_stored = clock_mode;
-	U8 mech_speed_stored = clock_mech_get_speed ();
-	for (;;)
-	{
-		if ((kickout_locks > 0 || timed_mode_running_p (&mpf_mode)) 
-			&& (clock_mode == CLOCK_RUNNING_FORWARD || clock_mode == CLOCK_RUNNING_BACKWARD))
-		{
-			clock_mode_stored = clock_mode;
-			mech_speed_stored = clock_mech_get_speed ();
-			tz_clock_stop ();
-			
-			while (kickout_locks > 0)
-				task_sleep (TIME_200MS);
-			
-			clock_mech_set_speed(mech_speed_stored);
-			if (clock_mode_stored == CLOCK_RUNNING_FORWARD)
-				clock_mech_start_forward ();
-			else
-				clock_mech_start_reverse ();
-		}
-		task_sleep (TIME_200MS);
-	}
-}
-
-static void start_clock_pause_monitor (void)
-{
-	if (!task_find_gid (GID_CLOCK_PAUSE))
-		task_create_gid (GID_CLOCK_PAUSE, clock_pause_monitor_task);
-}
-
-static void stop_clock_pause_monitor (void)
-{
-	task_kill_gid (GID_CLOCK_PAUSE);
-}
-
 void tz_clock_show_time (U8 hours, U8 minutes)
 {
 	if (hours > 12)
@@ -346,28 +311,97 @@ void tz_clock_show_time (U8 hours, U8 minutes)
 	else if (minutes >= 45)
 		clock_find_target = tz_clock_hour_to_opto[hours - 1] | CLK_SW_MIN45;
 	clock_mode = CLOCK_FIND;
+
 }
 
+/**
+* Pause the clock and restart again
+*/
+bool clock_moving (void)
+{
+	if (clock_mode == CLOCK_RUNNING_FORWARD || clock_mode == CLOCK_RUNNING_BACKWARD)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+bool clock_paused (void)
+{
+	if (clock_mode == CLOCK_PAUSED_FORWARD || clock_mode == CLOCK_PAUSED_BACKWARD)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+bool should_pause_clock (void)
+{
+	if (kickout_locks > 0 || timed_mode_running_p (&mpf_mode))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+CALLSET_ENTRY (clock, idle_every_second)
+{
+	if (!in_live_game)
+		return;
+	if (should_pause_clock () && clock_moving ())
+	{
+		mech_speed_stored = clock_mech_get_speed ();
+		if (clock_mode == CLOCK_RUNNING_FORWARD)
+		{
+			clock_mode = CLOCK_PAUSED_FORWARD;
+		}
+		else
+		{
+			clock_mode = CLOCK_PAUSED_BACKWARD;
+		}
+		clock_mech_stop ();
+	}
+	else if (clock_paused () && !should_pause_clock ())
+	{
+		clock_mech_set_speed (mech_speed_stored);
+		if (clock_mode == CLOCK_PAUSED_FORWARD)
+		{
+			tz_clock_start_forward ();
+		}
+		else
+		{
+			tz_clock_start_backward ();
+		}
+	}
+}
 void tz_clock_start_forward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 	{
 		global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
-		start_clock_pause_monitor ();
-		clock_mech_start_forward ();
 		clock_mode = CLOCK_RUNNING_FORWARD;
+		clock_mech_start_forward ();
 	}
 }
-
 
 void tz_clock_start_backward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 	{
 		global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
-		start_clock_pause_monitor ();
-		clock_mech_start_reverse ();
 		clock_mode = CLOCK_RUNNING_BACKWARD;
+		clock_mech_start_reverse ();
+	}
+}
+
+void tz_clock_reverse_direction (void)
+{
+	if (clock_mode == CLOCK_RUNNING_FORWARD)
+	{
+		clock_mode = CLOCK_RUNNING_BACKWARD;
+		clock_mech_start_reverse ();
+	}
+	else if (clock_mode == CLOCK_RUNNING_BACKWARD)
+	{
+		clock_mode = CLOCK_RUNNING_FORWARD;
+		clock_mech_start_forward ();
 	}
 }
 
@@ -398,7 +432,6 @@ void tz_clock_reset (void)
 	}
 	else
 	{
-		stop_clock_pause_monitor ();
 		dbprintf ("Clock resetting to home.\n");
 		/* See where the clock is and start it if it's not already home. */
 		clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
@@ -473,6 +506,7 @@ CALLSET_ENTRY (tz_clock, init)
 	clock_hour = 0;
 	global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 	clock_mech_set_speed (BIVAR_DUTY_100);
+	mech_speed_stored = BIVAR_DUTY_100;
 	tz_clock_clear_owner ();
 }
 
@@ -499,14 +533,6 @@ CALLSET_ENTRY (tz_clock, amode_start)
 		tz_clock_show_time (hour, minute);
 	else	
 		tz_clock_reset ();
-}
-
-void tz_clock_reverse_direction (void)
-{
-	if (clock_mode == CLOCK_RUNNING_FORWARD)
-			tz_clock_start_backward ();
-	else if (clock_mode == CLOCK_RUNNING_BACKWARD)
-			tz_clock_start_forward ();
 }
 
 void tz_clock_set_speed (U8 speed)
@@ -540,16 +566,13 @@ CALLSET_ENTRY (tz_clock, diagnostic_check)
 		diag_post_error ("CLOCK IS\nNOT WORKING\n", PAGE);
 }
 
-
 /**
  * Stop the clock when entering test mode
  */
 CALLSET_ENTRY (tz_clock, amode_stop, test_start)
 {
-	stop_clock_pause_monitor ();
 	tz_clock_stop ();
 }
-
 
 /**
  * Reset the clock to the home position at the start of
@@ -557,6 +580,6 @@ CALLSET_ENTRY (tz_clock, amode_stop, test_start)
  */
 CALLSET_ENTRY (tz_clock, start_ball, end_ball)
 {
-	stop_clock_pause_monitor ();
 	tz_clock_reset ();
 }
+
