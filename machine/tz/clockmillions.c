@@ -171,9 +171,6 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 	if (timed_mode_running_p (&clock_millions_mode))
 	{
 		leff_start (LEFF_CLOCK_TARGET);
-//		if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
-			//callset_invoke (tz_clock_reverse_direction);
-			tz_clock_reverse_direction ();
 		/* Award bonus if hit 6 times */
 		if (++clock_mode_hits > 5)
 		{
@@ -190,7 +187,9 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 			score_add (clock_mode_score, score_table[SC_5M]);	
 			deff_start (DEFF_CLOCK_MILLIONS_HIT);
 		}
-		tz_clock_set_speed (clock_mode_hits / 2);
+		if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
+			tz_clock_reverse_direction ();
+		tz_clock_set_speed (clock_mode_hits);
 	}
 	else if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 	{

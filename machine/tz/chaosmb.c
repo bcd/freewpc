@@ -209,6 +209,7 @@ static void chaosmb_score_jackpot (void)
 	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 	leff_start (LEFF_FLASH_GI2);
 	deff_start (DEFF_CHAOS_JACKPOT);
+	tz_clock_start_forward ();
 }
 
 CALLSET_ENTRY (chaosmb, chaosmb_start)
@@ -329,16 +330,11 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 			sound_send (SND_STOP_IT);
 			timer_restart_free (GID_STOP_IT_DEBOUNCE, TIME_5S);
 		}
-		else
+		else if (chaosmb_hits_to_relight != 0)
 		{
 			sound_send (SND_CLOCK_BELL);
-			if (!timer_find_gid (GID_STOP_IT_DEBOUNCE))
-				score (SC_250K);
-			else
-				score (SC_100K);
-			/* The clock will be stopped, don't try to move it */
-			if (chaosmb_hits_to_relight != 0)
-				callset_invoke (tz_clock_reverse_direction);
+			score (SC_250K);
+			tz_clock_reverse_direction ();
 		}
 		bounded_decrement (chaosmb_hits_to_relight, 0);
 	}
