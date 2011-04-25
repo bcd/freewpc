@@ -162,3 +162,8 @@ __machine3__ void snake_start (void);
 
 /* hurryup.c */
 __machine3__ bool hurryup_active (void);
+
+/* music.c */
+__machine2__ void slow_music_lin (U8 count, U8 delay);
+__machine2__ void slow_music_log (U8 count, U8 delay);
+__machine2__ void speed_up_music_lin (U8 count, U8 delay);

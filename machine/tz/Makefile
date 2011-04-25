@@ -81,6 +81,7 @@ GAME_PAGED_OBJS = leftramp.o rightramp.o skill.o \
 
 GAME2_OBJS = unlit.o spiralaward.o leffs.o star.o rocket.o tz_amode.o \
 	outhole.o camera.o deadend.o hitch.o birthday.o alarm.o dixon.o \
+	music.o
 
 GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
 	spiral.o tnf.o bttz.o factoids.o master.o snake.o \
