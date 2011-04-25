@@ -162,7 +162,6 @@ void pic_decode32 (U32 *reg, const U32 offset, const U16 divisor, const bool neg
 #else
 	/* TODO : this is done differently only because native
 	32-bit division on the 6809 does not work. */
-	pinio_watchdog_reset ();
 	udiv32 (*reg, divisor, reg, NULL);
 #endif
 	pic_debug ("reg.after_divide = %w\n", *reg);
@@ -185,6 +184,7 @@ void pic_strip_digits (U32 reg, struct pic_strip_info *info)
 			reg -= place_value[place];
 			digit++;
 		}
+		pinio_watchdog_reset ();
 
 		if (info->place[place] != -1)
 		{
@@ -231,22 +231,14 @@ void pic_compute_unlock_code (void)
 }
 
 
-/** Verify that the PIC game number is correct.
- * A normal WPC ROM would complain badly if this is not true; we only give
- * a warning. */
-void pic_verify (void)
+
+__attribute__((noinline))
+void pic_wait (void)
 {
-	U16 pic_game_number = pic_read_game_number ();
-	U16 expected_game_number = MACHINE_NUMBER;
-
-	if (pic_game_number != expected_game_number)
-	{
-		dbprintf ("Expected game #%ld, got #%ld\n",
-			expected_game_number, pic_game_number);
-	}
-
-	/* Mark the PIC data as valid. */
-	pic_invalid = FALSE;
+	pinio_watchdog_reset ();
+	null_function ();
+	null_function ();
+	null_function ();
 }
 
 
@@ -269,6 +261,7 @@ void pic_init (void)
 
 	/* Reset the PIC. */
 	wpc_write_pic (WPC_PIC_RESET);
+	pic_wait ();
 
 	/* Zero the serial number registers */
 	memset (&pic_serial_number, '0', sizeof (pic_serial_number));
@@ -289,11 +282,7 @@ void pic_init (void)
 		 * must be disabled to prevent other accesses to the
 		 * PIC device during this time (i.e. switch polling). */
 		wpc_write_pic (WPC_PIC_SERIAL (i));
-		null_function ();
-		null_function ();
-		null_function ();
-		null_function ();
-		null_function ();
+		pic_wait ();
 		val = wpc_read_pic ();
 		ereg = pic_serial_map[i];
 		if (ereg)
@@ -330,14 +319,20 @@ void pic_init (void)
 	
 	pic_decode32 (&pic_serial_encoded.reg4, 99999ULL, 1, TRUE);
 	pic_strip_digits (pic_serial_encoded.reg4, &pic_strip_info[3]);
+}
 
+
+CALLSET_ENTRY (pic, init_complete)
+{
 	/* Once the serial number is fully decoded, verify that
-	 * it matches the game number */
-	pic_verify ();
-
-	/* If OK, compute the switch matrix unlock code. */
-	if (!pic_invalid)
+	 * it matches the game number.  If it did not match, then
+	 * the switch matrix will not work. */
+	U16 pic_game_number = pic_read_game_number ();
+	if (pic_read_game_number () == MACHINE_NUMBER)
+	{
+		pic_invalid = FALSE;
 		pic_compute_unlock_code ();
+	}
 }
 
 

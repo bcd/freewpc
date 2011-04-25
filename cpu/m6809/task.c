@@ -754,7 +754,10 @@ void task_init (void)
 #endif
 
 	/* Clean the memory for all task blocks */
-	memset (task_buffer, 0, sizeof (task_buffer));
+	/* Note - removing this because the startup RAM test clears the memory
+	already, and this is taking a long time to finish which can cause the
+	hardware watchdog to expire. */
+	// memset (task_buffer, 0, sizeof (task_buffer));
 
 #ifdef TASK_CHAINING
 	/* Initialize the free list with all tasks */
