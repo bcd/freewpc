@@ -43,7 +43,7 @@ struct timed_mode_ops mball_restart_mode = {
 	.exit = mball_restart_mode_exit,
 	.gid = GID_MBALL_RESTART_MODE,
 	.music = MUS_FASTLOCK_COUNTDOWN,
-	.deff_running = DEFF_MBALL_RESTART,
+	.deff_running = NULL,
 	.prio = PRI_MULTIBALL,
 	.init_timer = 15,
 	.timer = &mball_restart_timer,
@@ -88,7 +88,7 @@ static void call_number (U8 number)
 			break;
 		case 1:
 			sound_send (SND_ONE);
-		break;
+			break;
 	}
 }
 
@@ -175,12 +175,10 @@ void mball_restart_mode_init (void)
 
 void mball_restart_mode_expire (void)
 {
-	task_kill_gid (GID_MBALL_RESTART_COUNTDOWN_TASK);
 }
 
 void mball_restart_mode_exit (void)
 {
-	task_kill_gid (GID_MBALL_RESTART_COUNTDOWN_TASK);
 }
 
 CALLSET_ENTRY (mball, display_update)
@@ -188,6 +186,8 @@ CALLSET_ENTRY (mball, display_update)
 	timed_mode_display_update (&mball_restart_mode);
 	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 		deff_start_bg (DEFF_MB_RUNNING, 0);
+	else if (timed_mode_running_p (&mball_restart_mode))
+		deff_start_bg (DEFF_MBALL_RESTART, 0);
 }
 
 CALLSET_ENTRY (mball, music_refresh)
