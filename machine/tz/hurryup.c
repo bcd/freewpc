@@ -22,6 +22,8 @@
 
 #include <freewpc.h>
 
+extern struct timed_mode_ops mball_restart_mode;
+
 U8 hurryup_mode_timer;
 score_t hurryup_score;
 
@@ -200,7 +202,7 @@ CALLSET_ENTRY (hurryup, start_hurryup)
 {
 	if (timed_mode_running_p (&hurryup_mode))
 		timed_mode_add (&hurryup_mode, 10);
-	else if (single_ball_play () && !mball_restart_active ())
+	else if (single_ball_play () && !timed_mode_running_p (&mball_restart_mode))
 		timed_mode_begin (&hurryup_mode);
 }
 
