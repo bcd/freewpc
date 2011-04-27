@@ -39,7 +39,7 @@ extern const struct area_csum audit_csum_info;
  * two maxed-out timestamps could be added without causing
  * further overflow.
  */
-#define MAX_TS_HOUR 10000
+#define MAX_TS_HOUR 1000
 #define MAX_TS_MIN  60
 #define MAX_TS_SEC  60
 #define MAX_SECS_PER_HOUR 3600UL

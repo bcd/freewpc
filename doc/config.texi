@@ -232,7 +232,6 @@ mode program that did not use ncurses.)
 Says that version 4.0 or higher of the GCC 6809 toolchain is being
 used.  This is used to work around some limitations of the 3.x toolchain.
 
-@item	HAVE_LIBC
 @item	HAVE_LOCAL_SECTION
 @item	HAVE_NVRAM
 @item	HAVE_NVRAM_SECTION

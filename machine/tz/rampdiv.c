@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -27,11 +27,20 @@ void ramp_divert (void)
 	task_yield ();
 }
 
-
 void ramp_divert_to_autoplunger (void)
 {
 	ramp_divert ();
 	autofire_catch ();
 }
 
+/* Close the ramp again when successful */
+CALLSET_ENTRY (rampdiv, sw_shooter)
+{
+	ramp_div_stop ();
+}
+
+CALLSET_ENTRY (rampdiv, sw_autofire2)
+{
+	ramp_div_stop ();
+}
 

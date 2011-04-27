@@ -84,7 +84,7 @@ Credits: page(COMMON_PAGE), PRI_CREDITS
 Tilt Warning: page(COMMON_PAGE), PRI_TILT_WARNING
 Tilt: runner, page(COMMON_PAGE), PRI_TILT
 Game Over: page(EFFECT_PAGE), PRI_GAME_OVER
-Volume Change: page(EFFECT_PAGE), runner, PRI_VOLUME_CHANGE_DISPLAY
+Volume Change: page(EFFECT_PAGE), runner, PRI_VOLUME_CHANGE_DISPLAY, D_PAUSE
 Slam Tilt: page(COMMON_PAGE), runner, PRI_SLAMTILT
 Status Report: page(COMMON_PAGE), runner, PRI_STATUS
 Nonfatal Error: page(EFFECT_PAGE), PRI_DEBUGGER
@@ -101,6 +101,7 @@ Plunge Ball: page(EFFECT_PAGE), PRI_SCORE_GOAL
 Coin Door Power: page(COMMON_PAGE), PRI_JACKPOT
 Ball Save: page(EFFECT_PAGE), c_decl(ball_save_deff), PRI_BALLSAVE
 Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
+Enter PIN: page(COMMON_PAGE), PRI_PIN_ENTRY
 
 [leffs]
 NULL: PRI_NULL

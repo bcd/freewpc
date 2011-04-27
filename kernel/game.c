@@ -89,6 +89,10 @@ U8 timed_game_timer;
 
 U8 timed_game_suspend_count;
 
+#ifdef MACHINE_TZ
+extern void loop_master_check (void);
+extern void combo_master_check (void);
+#endif
 void start_ball (void);
 
 
@@ -99,7 +103,9 @@ void amode_start (void)
 #ifdef MACHINE_CUSTOM_AMODE
 	leff_start (LEFF_AMODE);
 #endif
-	triac_enable (TRIAC_GI_MASK);
+#ifdef CONFIG_GI
+	triac_enable (PINIO_GI_STRINGS);
+#endif
 	far_task_recreate_gid (GID_DEVICE_PROBE, device_probe, COMMON_PAGE);
 	task_yield ();
 	callset_invoke (amode_start);
@@ -155,6 +161,11 @@ void end_game (void)
 		{
 			deff_start_sync (DEFF_SCORES_IMPORTANT);
 			high_score_check ();
+//TODO Could do with something modular/per machine here
+#ifdef MACHINE_TZ
+//			loop_master_check ();
+//			combo_master_check ();
+#endif
 			match_start ();
 			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);
 			callset_invoke (end_game);
@@ -259,7 +270,7 @@ void end_ball (void)
 	if (decrement_extra_balls ())
 	{
 #ifdef DEFF_SHOOT_AGAIN
-		deff_start (DEFF_SHOOT_AGAIN);
+		deff_start_sync (DEFF_SHOOT_AGAIN);
 #endif
 #ifdef LEFF_SHOOT_AGAIN
 		leff_start (LEFF_SHOOT_AGAIN);
@@ -274,12 +285,14 @@ void end_ball (void)
 	 * save away the per-player audits. */
 	if ((ball_up == system_config.balls_per_game) || config_timed_game)
 	{
+#ifdef CONFIG_BUYIN
 		if (system_config.buy_extra_ball == YES)
 		{
 			SECTION_VOIDCALL (__common__, buyin_offer);
 			/* TODO - if buyin is bought, then need to stay on this
 			player, avoid end_player etc. */
 		}
+#endif
 
 		/* Do other end player tasks */
 		callset_invoke (end_player);
@@ -448,13 +461,10 @@ void start_ball (void)
 
 	callset_invoke (start_ball);
 
-	/* Enable the game scores on the display.  The first deff started
-	 * is low in priority and is shown whenever there is nothing else
-	 * going on.  The second deff runs briefly at high priority, to
-	 * ensure that the scores are shown at least briefly at the start of
-	 * ball (e.g., in case a skill shot deff gets started).
+	/* Ensure that the scores are shown briefly at the start of
+	 * ball, via a high priority display effect.
 	 *
-	 * If this is the final ball for the player, then
+	 * If this is the final ball for the player, then also
 	 * display the 'goal', i.e. replay or extra ball target score;
 	 * or the next high score level.
 	 */
@@ -489,7 +499,9 @@ void start_ball (void)
 #endif
 
 	flipper_enable ();
-	triac_enable (TRIAC_GI_MASK);
+#ifdef CONFIG_GI
+	triac_enable (PINIO_GI_STRINGS);
+#endif
 	ball_search_timeout_set (12);
 	ball_search_monitor_start ();
 
@@ -626,7 +638,13 @@ bool verify_start_ok (void)
 	/* check ball devices stable */
 	if (!in_game && !device_check_start_ok ())
 		return FALSE;
-
+#ifdef MACHINE_TZ
+	/* Don't allow the game to start if we are still
+	 * loading balls into the gumball */
+	extern bool gumball_enable_from_trough;
+	if (gumball_enable_from_trough)
+		return FALSE;
+#endif
 	return TRUE;
 }
 

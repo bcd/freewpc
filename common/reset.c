@@ -76,7 +76,6 @@ void factory_reset (void)
 	/* TODO - how to clean the permanent area in native mode? */
 #endif
 	callset_invoke (factory_reset);
-	/* TODO - should do warm reboot here */
 }
 
 
@@ -95,7 +94,8 @@ void factory_reset_if_required (void)
 		font_render_string_center (&font_mono5, 64, 20, "RESTORED");
 		dmd_show_low ();
 		factory_reset ();
-		task_sleep_sec (2);
+		task_sleep_sec (4);
+		warm_reboot ();
 	}
 }
 
@@ -145,6 +145,7 @@ void system_accept_freewpc (void)
 	pinio_nvram_lock ();
 
 	factory_reset ();
+	warm_reboot ();
 }
 
 
@@ -155,7 +156,7 @@ void system_reset_deff (void)
 	aren't large enough to do this. */
 #if (MACHINE_DMD == 1)
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 3, "FREEWPC (C) COPYRIGHT 2010");
+	font_render_string_center (&font_var5, 64, 3, "FREEWPC (C) COPYRIGHT 2011");
 	font_render_string_center (&font_var5, 64, 11, "THIS SOFTWARE IS NOT");
 	font_render_string_center (&font_var5, 64, 17, "SUPPORTED BY BALLY/WILLIAMS");
 	font_render_string_center (&font_var5, 64, 25, "WWW.ODDCHANGE.COM/FREEWPC");

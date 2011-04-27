@@ -186,12 +186,15 @@ void timed_mode_reset (struct timed_mode_ops *ops, U8 time)
  * Add to the mode timer.
  * The same dilemma for grace periods applies as with timed_mode_reset(), thus
  * this routine is just a frontend to that one.
+ *
+ * This API does not check for timer overflow; i.e. it will increment the
+ * mode timer regardless of its current value.  If you want to bound the
+ * timer, or need to check for overflow, you should do this yourself
+ * and call timed_mode_reset() directly with the new timer value.
  */
 void timed_mode_add (struct timed_mode_ops *ops, U8 time)
 {
 	time += timed_mode_get_timer (ops);
-	/* TODO - may need a maxval to prevent overflow.  Default should
-	be the original mode time. */
 	timed_mode_reset (ops, time);
 }
 

@@ -32,9 +32,9 @@
 void dmd_overlay (void)
 {
 	dmd_pagepair_t dst = wpc_dmd_get_mapped ();
-	wpc_dmd_set_high_page (DMD_OVERLAY_PAGE);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE);
 	dmd_or_page ();
-	wpc_dmd_set_high_page (dst.u.second);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, dst.u.second);
 }
 
 
@@ -44,15 +44,15 @@ void dmd_overlay (void)
 void dmd_overlay_color (void)
 {
 	dmd_pagepair_t dst = wpc_dmd_get_mapped ();
-	wpc_dmd_set_low_page (dst.u.second);
-	wpc_dmd_set_high_page (DMD_OVERLAY_PAGE+1);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dst.u.second);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE+1);
 	dmd_or_page ();
 
-	wpc_dmd_set_low_page (dst.u.first);
-	wpc_dmd_set_high_page (DMD_OVERLAY_PAGE);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dst.u.first);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE);
 	dmd_or_page ();
 
-	wpc_dmd_set_high_page (dst.u.second);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, dst.u.second);
 }
 
 
@@ -62,14 +62,14 @@ void dmd_overlay_color (void)
 void dmd_overlay_onto_color (void)
 {
 	dmd_pagepair_t dst = wpc_dmd_get_mapped ();
-	wpc_dmd_set_high_page (DMD_OVERLAY_PAGE);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE);
 
-	wpc_dmd_set_low_page (dst.u.second);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dst.u.second);
 	dmd_or_page ();
 
-	wpc_dmd_set_low_page (dst.u.first);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dst.u.first);
 	dmd_or_page ();
 
-	wpc_dmd_set_high_page (dst.u.second);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, dst.u.second);
 }
 

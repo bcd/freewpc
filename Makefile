@@ -91,12 +91,16 @@ CONFIG_FLIPTRONIC := $(call md_config,Fliptronic)
 CONFIG_DCS := $(call md_config,DCS)
 CONFIG_WPC95 := $(call md_config,WPC95)
 
-
 # PLATFORM says which hardware platform is targeted.  Valid values
 # are 'wpc' and 'whitestar'.  The MACHINE Makefile should have
 # defined this.
 $(eval $(call require,PLATFORM))
 PLATFORM_DIR = platform/$(PLATFORM)
+
+# Replaced the NATIVE keyword with CONFIG_SIM.
+ifdef NATIVE
+$(eval $(call have,CONFIG_SIM))
+endif
 
 #######################################################################
 ###	Set Default Target
@@ -112,18 +116,15 @@ check_prereqs : clean_err
 KERNEL_OBJS :=
 COMMON_BASIC_OBJS :=
 
-ifdef NATIVE
-include platform/native/Makefile
+# TODO : include the real, non-sim Makefile after the simulation
+# Makefile too.
+ifeq ($(CONFIG_SIM), y)
+include sim/Makefile
 else
 PMAKEFILE := platform/$(PLATFORM)/Makefile
 -include $(PMAKEFILE)
 endif
 
-# Set this to the name of the CPU.  In simulation this is always
-# 'native'; otherwise it is already set by the platform.
-ifdef NATIVE
-CPU := native
-endif
 
 # Build date (now)
 BUILD_MONTH := $(shell date +%-m)
@@ -132,7 +133,7 @@ BUILD_YEAR := $(shell date +%Y)
 
 
 .PHONY : platform_target
-ifdef NATIVE
+ifeq ($(CONFIG_SIM), y)
 platform_target : native
 else
 ifdef TARGET_ROMPATH
@@ -180,16 +181,25 @@ TMPFILES += $(ERR)
 # Path to the compiler and linker
 ifeq ($(CPU),m6809)
 GCC_ROOT ?= /usr/local/bin
-CC := $(CCACHE) $(GCC_ROOT)/m6809-unknown-none-gcc-$(GCC_VERSION)
+CC := $(GCC_ROOT)/m6809-unknown-none-gcc-$(GCC_VERSION)
 AS = $(CC) -xassembler-with-cpp
 LD = $(GCC_ROOT)/m6809-unknown-none-ld
-REQUIRED += $(CC:$(CCACHE)=) $(LD)
+REQUIRED += $(CC) $(LD)
 else
 GCC_VERSION = NATIVE
 endif
 
-HOSTCC := $(CCACHE) gcc
+HOSTCC := gcc
 
+###
+###	List host tools which are required in order to build.
+###	These are always compiled using your native C compiler
+###	and run locally on the build machine, even when cross-
+###	compiling for a different architecture.
+###
+###	Each host tool declares its build rules in a <tool>.make
+###	file in the tools/<tool> subdirectory.
+###
 TOOLS :=
 HOST_OBJS :=
 
@@ -198,15 +208,20 @@ D := tools/$1
 include tools/$1/$1.make
 endef
 
-$(eval $(call include-tool,srec2bin))
-$(eval $(call include-tool,csum))
-$(eval $(call include-tool,wpcdebug))
-$(eval $(call include-tool,sched))
-$(eval $(call include-tool,softscope))
-$(eval $(call include-tool,scope))
-$(eval $(call include-tool,bin2c))
-$(eval $(call include-tool,imgld))
+$(eval $(call include-tool,sched))       # Realtime scheduler
+$(eval $(call include-tool,imgld))       # Image linker
 
+ifeq ($(CPU),m6809)
+$(eval $(call include-tool,srec2bin))    # SREC to binary converter
+$(eval $(call include-tool,csum))        # Checksum update utility
+$(eval $(call include-tool,wpcdebug))    # Emulated debug console
+endif
+
+ifdef CONFIG_OLD_HOST_TOOLS
+$(eval $(call include-tool,softscope))   # Signal scope #1
+$(eval $(call include-tool,scope))       # Signal scope #2
+$(eval $(call include-tool,bin2c))       # Binary-to-C converter.
+endif
 
 # Name of the blanker to use
 BLANKER = dd
@@ -231,7 +246,7 @@ include common/Makefile
 ifeq ($(CONFIG_FONT),y)
 include fonts/Makefile
 endif
-ifdef CONFIG_WPC
+ifdef CONFIG_PLATFORM_WPC
 include test/Makefile
 endif
 # FUTURE : include effect/Makefile
@@ -414,6 +429,8 @@ MACHINE_TEST_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_TEST_OBJS))
 MACHINE_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_PAGED_OBJS))
 MACHINE2_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME2_OBJS))
 MACHINE3_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME3_OBJS))
+MACHINE4_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME4_OBJS))
+MACHINE5_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME5_OBJS))
 SYSTEM_HEADER_OBJS =
 SYSTEM_OBJS := $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_SYS_OBJS) $(SCHED_OBJ)
 
@@ -453,6 +470,8 @@ ifeq ($(CONFIG_DMD),y)
 $(eval $(call PAGE_ALLOC, 52, MACHINE3))
 $(eval $(call PAGE_ALLOC, 53, MACHINE2))
 $(eval $(call PAGE_ALLOC, 54, MACHINE))
+$(eval $(call PAGE_ALLOC, 55, MACHINE4))
+$(eval $(call PAGE_ALLOC, 59, MACHINE5))
 else
 $(eval $(call PAGE_ALLOC, 55, MACHINE2))
 $(eval $(call PAGE_ALLOC, 59, MACHINE))
@@ -483,7 +502,8 @@ AS_OBJS := $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 C_OBJS := $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 	$(TRANS_OBJS) $(TEST_OBJS) $(TEST2_OBJS) \
 	$(MACHINE_SYS_OBJS) $(MACHINE_OBJS) $(MACHINE_TEST_OBJS) \
-	$(MACHINE2_OBJS) $(MACHINE3_OBJS) $(FONT_OBJS) $(EFFECT_OBJS) \
+	$(MACHINE2_OBJS) $(MACHINE3_OBJS) $(MACHINE4_OBJS) $(MACHINE5_OBJS) \
+	$(FONT_OBJS) $(EFFECT_OBJS) \
 	$(INIT_OBJS) $(DEFF_OBJS) $(LEFF_OBJS) $(SCHED_OBJ)
 
 ifeq ($(PLATFORM),wpc)
@@ -856,7 +876,7 @@ ifdef IMAGE_MAP
 IMAGE_AREA_SIZE ?= $(BLANK_SIZE)
 $(IMAGE_ROM) $(IMAGE_HEADER): $(IMAGE_MAP) $(IMGLD)
 	$(IMGLD) -o $(IMAGE_ROM) -i $(IMAGE_HEADER) -p $(FIRST_BANK) \
-		-s $(IMAGE_AREA_SIZE) $(IMAGE_MAP)
+		-s $(IMAGE_AREA_SIZE) $(IMAGE_MAP) && sleep 0.5
 else
 $(IMAGE_HEADER):
 	touch $(IMAGE_HEADER)
@@ -1041,7 +1061,7 @@ callset.in :
 #
 .PHONY : clean
 clean: clean_derived clean_build clean_gendefines clean_tools
-	$(Q)for dir in `echo . kernel common effect fonts images test $(MACHINE_DIR) $(PLATFORM_DIR) platform/native cpu/$(CPU)`;\
+	$(Q)for dir in `echo . kernel common effect fonts images test $(MACHINE_DIR) $(PLATFORM_DIR) sim cpu/$(CPU)`;\
 		do echo "Cleaning in '$$dir' ..." && \
 		pushd $$dir >/dev/null && rm -f $(TMPFILES) && \
 		popd >/dev/null ; done

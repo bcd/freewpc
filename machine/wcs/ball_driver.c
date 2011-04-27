@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include "soccer_ball.h"
 
 enum ball_state {
 	STOPPED, FORWARD, REVERSE

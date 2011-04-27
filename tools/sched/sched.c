@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -275,6 +275,10 @@ void write_tick_driver (FILE *f)
 		fprintf (f, "static " ATTR_INTERRUPT " void %s_%d (void)\n", prefix, n);
 		c_block_begin (indent, f);
 
+		cfprintf (indent, f, "#ifdef CONFIG_PERIODIC_FIRQ\n");
+		cfprintf (indent, f, "   m6809_firq_save_regs ();\n");
+		cfprintf (indent, f, "#endif\n");
+
 		for (div = 1; div <= max_divider; div *= 2)
 		{
 			unsigned int used = 0;
@@ -340,6 +344,10 @@ void write_tick_driver (FILE *f)
 
 		if (tick->len >= 1.0)
 			fprintf (stderr, "warning: tick %d takes too long\n", n);
+
+		cfprintf (indent, f, "#ifdef CONFIG_PERIODIC_FIRQ\n");
+		cfprintf (indent, f, "   m6809_firq_restore_regs ();\n");
+		cfprintf (indent, f, "#endif\n");
 
 		c_block_end (indent, f);
 		fprintf (f, "\n");

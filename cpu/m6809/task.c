@@ -264,7 +264,9 @@ task_t *block_allocate (void)
 		{
 success:
 			tp->state = BLOCK_USED;
+#ifdef CONFIG_EXPAND_STACK
 			tp->aux_stack_block = t;
+#endif
 			return tp;
 		}
 	}
@@ -341,7 +343,9 @@ task_t *task_allocate (void)
 	{
 		tp->state |= BLOCK_TASK;
 		tp->stack_size = 0;
+#ifdef CONFIG_EXPAND_STACK
 		tp->aux_stack_block = -1;
+#endif
 		tp->duration = TASK_DURATION_BALL;
 		return tp;
 	}
@@ -365,6 +369,7 @@ task_t *task_allocate (void)
 }
 
 
+#ifdef CONFIG_EXPAND_STACK
 /** Expand the stack space for a given task. */ 
 task_t *task_expand_stack (task_t *tp)
 {
@@ -386,15 +391,18 @@ task_t *task_expand_stack (task_t *tp)
 	sp->aux_stack_block = -1;
 	return sp;
 }
+#endif
 
 
 /** Free a task block for a task that no longer exists. */
 static __attribute__((noinline))
 void task_free (task_t *tp)
 {
+#ifdef CONFIG_EXPAND_STACK
 	/* Free the auxiliary stack block first if it exists */
 	if (tp->aux_stack_block != -1)
 		block_free (&task_buffer[tp->aux_stack_block]);
+#endif
 
 	/* Free the task block */
 	block_free (tp);
@@ -481,14 +489,18 @@ void task_sleep (task_ticks_t ticks)
 }
 
 
-/** Suspend the current task for a number of seconds.  This works
-around the limitation that the 'delay' field is 8-bit and cannot
-store large timeouts. */
-void task_sleep_sec (I8 secs)
+/** Suspend the current task for a number of seconds.
+	This function is not normally called directly; use task_sleep_sec()
+instead.  If the number of seconds is small enough, it will call
+task_sleep() instead, which is more efficient. */
+void task_sleep_sec1 (U8 secs)
 {
-	do {
-		task_sleep (TIME_1S);
-	} while (--secs > 0);
+	register task_t *tp = task_current;
+	if (tp == 0)
+		fatal (ERR_IDLE_CANNOT_SLEEP);
+	tp->wakeup = get_sys_time () + ((U16)secs * TIME_1S);
+	tp->state |= TASK_BLOCKED;
+	task_save (tp);
 }
 
 

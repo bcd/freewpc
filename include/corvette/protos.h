@@ -18,24 +18,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* corvette/config.c */
-void corvette_init(void);
-void unused_init(void);
-void unused_start_game(void);
-void unused_end_game(void);
-void unused_start_ball(void);
-void corvette_start_game(void);
-void corvette_end_game(void);
-void corvette_start_ball(void);
-bool corvette_end_ball(void);
-void corvette_add_player(void);
-void corvette_any_pf_switch(void);
-void corvette_bonus(void);
-void corvette_tilt(void);
-void corvette_tilt_warning(void);
-void corvette_start_without_credits(void);
-void corvette_coin_added(void);
-
 /* deffs.c */
 __machine__ void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
 __machine__ void printf_millions(U8 n);

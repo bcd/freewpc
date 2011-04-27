@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -23,14 +23,14 @@
 #include <m6809/math.h>
 #endif
 
+U8 balls_served;
+
+bool faster_quote_given;
+
 /** Filename: mach/config.c
  *
  * Machine-specific miscellaneous functions.
  */
-
-U8 faster_quote_given;
-
-/* TODO - bonus music hook was deleted, needs re-doing */
 
 static inline U8 decimal_to_bcd_byte (U8 decimal)
 {
@@ -75,7 +75,6 @@ CALLSET_ENTRY (tz, bonus)
 	leff_stop (LEFF_BONUS);
 }
 
-
 CALLSET_ENTRY (tz, tilt)
 {
 	sound_send (SND_TILT);
@@ -83,18 +82,19 @@ CALLSET_ENTRY (tz, tilt)
 	sound_send (SND_OH_NO);
 }
 
-
 CALLSET_ENTRY (tz, tilt_warning)
 {
 	sound_send (SND_TILT_WARNING);
 }
 
-
 CALLSET_ENTRY (tz, start_without_credits)
 {
-	sound_send (SND_GREEEED);
+	if (!timer_find_gid (GID_START_NO_CREDITS_DEBOUNCE))
+	{
+		timer_restart_free (GID_START_NO_CREDITS_DEBOUNCE, TIME_5S);
+		sound_send (SND_GREEEED);
+	}
 }
-
 
 CALLSET_ENTRY (tz, timed_game_tick)
 {
@@ -116,3 +116,20 @@ CALLSET_ENTRY (tz, timed_game_tick)
 	}
 }
 
+/* Hack to disable ballsave after first ball_serve */
+CALLSET_ENTRY (config, start_ball)
+{
+	balls_served = 0;
+}
+
+/* Reset the count so we can have a ballsave */
+CALLSET_ENTRY (config, mball_start)
+{
+	balls_served = 1;
+}
+
+
+CALLSET_ENTRY (config, serve_ball)
+{
+	balls_served++;	
+}

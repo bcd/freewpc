@@ -37,9 +37,10 @@ void burnin_sound_thread (void)
 	}
 }
 
+#ifdef CONFIG_GI
 void burnin_gi_thread (void)
 {
-	gi_leff_allocate (TRIAC_GI_MASK);
+	gi_leff_allocate (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		U8 gi;
@@ -51,6 +52,7 @@ void burnin_gi_thread (void)
 		}
 	}
 }
+#endif
 
 void burnin_flasher_thread (void)
 {
@@ -122,7 +124,9 @@ void burnin_thread (void)
 	{
 		task_create_peer (burnin_lamp_thread);
 		task_create_peer (burnin_sound_thread);
+#ifdef CONFIG_GI
 		task_create_peer (burnin_gi_thread);
+#endif
 		task_create_peer (burnin_flasher_thread);
 		//task_create_peer (burnin_sol_thread);
 		task_create_peer (burnin_timestamp_thread);
@@ -146,7 +150,9 @@ void burnin_exit (void)
 	timestamp_add (&burnin_total_duration, &burnin_duration);
 	lamp_all_off ();
 	sound_reset ();
-	gi_leff_free (TRIAC_GI_MASK);
+#ifdef CONFIG_GI
+	gi_leff_free (PINIO_GI_STRINGS);
+#endif
 	flipper_disable ();
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -73,7 +73,6 @@ typedef enum _priority {
 	PRI_SUPER_JACKPOT,
 	PRI_LEFF1, PRI_LEFF2, PRI_LEFF3, PRI_LEFF4, 
 	PRI_LEFF5, PRI_LEFF6, PRI_LEFF7, PRI_LEFF8,
-	PRI_STATUS,
 	PRI_SCORE_GOAL,
 	PRI_SCORES_IMPORTANT,
 	PRI_REPLAY,
@@ -81,11 +80,13 @@ typedef enum _priority {
 	PRI_BALL_SEARCH,
 	PRI_VOLUME_CHANGE_DISPLAY,
 	PRI_TILT_WARNING,
+	PRI_STATUS,
 	PRI_BONUS,
 	PRI_TILT,
 	PRI_GAME_OVER,
 	PRI_EB_BUYIN,	
 	PRI_HSENTRY,
+	PRI_PIN_ENTRY,
 	PRI_MATCH,
 	PRI_1COIN_BUYIN,
 	PRI_SLAMTILT,

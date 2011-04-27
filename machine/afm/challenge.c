@@ -133,9 +133,10 @@ void chal_running_deff (void)
 	for (;;)
 	{
 		dmd_alloc_low ();
-		wpc_dmd_set_high_page (DMD_OVERLAY_PAGE);
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE);
 		dmd_copy_page (dmd_low_buffer, dmd_high_buffer);
-		wpc_dmd_set_high_page (wpc_dmd_get_low_page ());	
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_1,
+			pinio_dmd_window_get (PINIO_DMD_WINDOW_0));
 
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 80, 16, sprintf_buffer);
@@ -224,7 +225,7 @@ void martian_kill_deff (void)
 void gi_strobe_leff (void)
 {
 	U8 i;
-	gi_leff_disable (TRIAC_GI_MASK);
+	gi_leff_disable (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		for (i=0; i < 3; i++)
@@ -240,9 +241,9 @@ void gi_flash_leff (void)
 {
 	for (;;)
 	{
-		gi_leff_enable (TRIAC_GI_MASK);
+		gi_leff_enable (PINIO_GI_STRINGS);
 		task_sleep (TIME_500MS);
-		gi_leff_disable (TRIAC_GI_MASK);
+		gi_leff_disable (PINIO_GI_STRINGS);
 		task_sleep (TIME_500MS);
 	}
 }

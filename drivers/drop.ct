@@ -53,6 +53,10 @@ extern inline bool @self_down_p (void)
 	return switch_poll_logical (@sw);
 }
 
+void @self_init (void);
+void @self_reset (void);
+void @self_down (void);
+
 
 @@
 @@file @self.c

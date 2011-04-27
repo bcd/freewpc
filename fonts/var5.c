@@ -57,6 +57,7 @@ static char font_var5x5_sep[][7] = {
 	/* equal */ { 3, 5, 0, 7, 0, 7, 0 },
 	/* lparen */ { 2, 5, 2, 1, 1, 1, 2 },
 	/* rparen */ { 2, 5, 1, 2, 2, 2, 1 },
+	/* apostrophe */ { 2, 5, 2, 1, 0, 0, 0 },
 };
 
 #define BASECHAR ' '
@@ -107,6 +108,7 @@ static char *var5_glyphs[] = {
 	['=' - BASECHAR] = font_var5x5_sep[6],
 	['(' - BASECHAR] = font_var5x5_sep[7],
 	[')' - BASECHAR] = font_var5x5_sep[8],
+	['\'' - BASECHAR] = font_var5x5_sep[9],
 };
 
 const font_t font_var5 = {

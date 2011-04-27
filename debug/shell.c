@@ -79,7 +79,7 @@ void debug_shell (void)
 		}
 		else
 		{
-			switch_idle ();
+			switch_periodic ();
 			task_runs_long ();
 		}
 	}

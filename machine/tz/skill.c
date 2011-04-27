@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -25,7 +25,8 @@ bool skill_shot_enabled;
 U8 skill_switch_reached;
 
 __local__ U8 skill_min_value;
-
+/* Store skill_min for deff */
+U8 skill_min_stored;
 
 extern inline void flash_deff_begin_static (void)
 {
@@ -49,7 +50,6 @@ extern inline __noreturn__ void flash_deff_run (void)
 		dmd_show_other ();
 	}
 }
-
 
 void skill_shot_ready_deff (void)
 {
@@ -89,6 +89,7 @@ void disable_skill_shot (void)
 {
 	skill_shot_enabled = FALSE;
 	deff_stop (DEFF_SKILL_SHOT_READY);
+	task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
 }
 
 void skill_shot_made_deff (void)
@@ -99,60 +100,72 @@ void skill_shot_made_deff (void)
 	switch (skill_switch_reached)
 	{
 		case 1:
-			sprintf ("%d,000,000", skill_min_value);
+			sprintf ("%d,000,000", skill_min_stored);
 			break;
 		case 2:
-			sprintf ("%d,000,000", skill_min_value+1);
+			sprintf ("%d,000,000", skill_min_stored+1);
 			break;
 		case 3:
-			sprintf ("%d,000,000", skill_min_value+3);
+			sprintf ("%d,000,000", skill_min_stored+3);
 			break;
 	}
 	font_render_string_center (&font_times8, 64, 23, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
-	dmd_sched_transition (&trans_scroll_down);
+	dmd_sched_transition (&trans_scroll_down_fast);
 	deff_exit ();
 }
 
-
-static void award_skill_shot (void)
+/* Called from slot.c */
+CALLSET_ENTRY (skill, skill_missed)
 {
 	set_valid_playfield ();
-	deff_start (DEFF_SKILL_SHOT_MADE);
-	task_sleep (TIME_66MS);
+	disable_skill_shot ();
+}
+
+void award_skill_shot (void)
+{
+	set_valid_playfield ();
+	disable_skill_shot ();
 	leff_restart (LEFF_FLASHER_HAPPY);
 	sound_send (SND_SKILL_SHOT_CRASH_1);
-	disable_skill_shot ();
 	switch (skill_switch_reached)
 	{
 		case 1:
+		/* Inform sssmb.c that we hit a skill switch */
 			callset_invoke (skill_red);
 			score_1M (skill_min_value);
+			skill_min_stored = skill_min_value;
 			break;
 		case 2: 
 			callset_invoke (skill_orange);
 			score_1M (skill_min_value+1);
+			skill_min_stored = skill_min_value;
 			skill_min_value++;
 			timed_game_extend (5);
 			break;
 		case 3: 
 			callset_invoke (skill_yellow);
 			score_1M (skill_min_value+3);
+			skill_min_stored = skill_min_value;
 			skill_min_value += 2;
 			timed_game_extend (10);
 			break;
 	}
 	if (skill_min_value > 7)
 		skill_min_value = 7;
+	deff_start (DEFF_SKILL_SHOT_MADE);
 }
 
+/* Task that monitors the ball as it travels up and down the 
+ * skill switch lane */
 static void skill_switch_monitor (void)
 {
 	if (skill_switch_reached < 3)
 		task_sleep_sec (1);
 	else
-		task_sleep_sec (3);
+	/* Wait longer so the ball can reach the slot switch */
+		task_sleep_sec (2);
 	award_skill_shot ();
 	task_exit ();
 }
@@ -160,20 +173,20 @@ static void skill_switch_monitor (void)
 
 static void award_skill_switch (U8 sw)
 {
-	callset_invoke (any_skill_switch);
-	event_can_follow (any_skill_switch, slot, TIME_3S);
-	if (!skill_shot_enabled && !flag_test (FLAG_SSSMB_RUNNING))
+	/* Only trigger if skillshot or sssmb is enabled */
+	if (!skill_shot_enabled && !task_find_gid (GID_SSSMB_JACKPOT_READY))
 		return;
-
+	event_can_follow (skill_shot, slot, TIME_4S);
+	callset_invoke (any_skill_switch);
 	if (skill_switch_reached < sw)
 	{
 		skill_switch_reached = sw;
 		task_recreate_gid (GID_SKILL_SWITCH_TRIGGER, skill_switch_monitor);
 		sound_send (skill_switch_reached + SND_SKILL_SHOT_RED);
 	}
-	else
+	else if (task_kill_gid (GID_SKILL_SWITCH_TRIGGER))
 	{
-		task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
+		/* Ball is now rolling back down */
 		award_skill_shot ();
 	}
 }
@@ -182,15 +195,18 @@ static void award_skill_switch (U8 sw)
 CALLSET_ENTRY (skill, display_update)
 {
 	if (skill_shot_enabled)
-		deff_start_bg (DEFF_SKILL_SHOT_READY, 0);
+		deff_start_bg (DEFF_SKILL_SHOT_READY, PRI_NULL);
 }
-
 
 CALLSET_ENTRY (skill, sw_skill_bottom)
 {
 	award_skill_switch (1);
 }
 
+CALLSET_ENTRY (skill, sw_rocket_kicker)
+{
+	award_skill_switch (1);
+}
 
 CALLSET_ENTRY (skill, sw_skill_center)
 {
@@ -206,6 +222,9 @@ CALLSET_ENTRY (skill, sw_skill_top)
 
 CALLSET_ENTRY (skill, start_player)
 {
+	/* This will also make sure that if the ball slips
+	 * past the first skill switch, it will always count it properly
+	 */
 	skill_min_value = 1;
 }
 
@@ -214,13 +233,6 @@ CALLSET_ENTRY (skill, start_ball)
 {
 	enable_skill_shot ();
 }
-
-
-CALLSET_ENTRY (skill, valid_playfield)
-{
-	disable_skill_shot ();
-}
-
 
 CALLSET_ENTRY (skill, end_game)
 {
@@ -232,6 +244,9 @@ CALLSET_ENTRY (skill, sw_shooter)
 	/* Because the shooter switch is declared as an 'edge' switch,
 	an event is generated on both transitions.  Check the current
 	state of the switch to see which transition occurred. */
+	if (!in_live_game)
+		return;
+
 	if (!switch_poll_logical (SW_SHOOTER))
 	{
 		if (skill_shot_enabled

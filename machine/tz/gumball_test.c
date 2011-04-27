@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -17,6 +17,7 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+//TODO Service trough kicker and gumball_enable_from_trough sticks on
 
 #include <freewpc.h>
 #include <window.h>
@@ -78,6 +79,7 @@ void switch_monitor_draw (const switch_monitor_t *monitor, U8 count)
 void tz_gumball_test_init (void)
 {
 	gumball_op = 0;
+	magnet_disable_catch (MAG_RIGHT);
 }
 
 
@@ -156,4 +158,3 @@ struct menu tz_gumball_test_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &tz_gumball_test_window, NULL } },
 };
-

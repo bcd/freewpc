@@ -972,7 +972,7 @@ void font_test_change (void)
 			font_test_char_width = 8;
 			break;
 		default:
-			font_test_char_width = 7;
+			font_test_char_width = 6;
 			break;
 	}
 }
@@ -986,7 +986,7 @@ void font_test_draw (void)
 	font_render_string_left (&font_mono5, 0, 1, sprintf_buffer);
 	sprintf_far_string (names_of_fonts + menu_selection);
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
-	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 8);
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 7);
 
 	font = font_test_lookup ();
 	font_test_change ();
@@ -1004,7 +1004,7 @@ void font_test_draw (void)
 	else
 	{
 		sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
-		font_render_string_center (font, 64, 21, sprintf_buffer);
+		font_render_string_center (font, 64, 18, sprintf_buffer);
 	}
 	dmd_show_low ();
 }
@@ -1559,6 +1559,7 @@ dmd_transition_t *transition_table[] = {
 	&trans_scroll_up_avg,
 	&trans_scroll_up_slow,
 	&trans_scroll_down,
+	&trans_scroll_down_fast,
 	&trans_scroll_left,
 	&trans_scroll_right,
 	&trans_sequential_boxfade,
@@ -1608,11 +1609,18 @@ void dev_trans_test_task (void)
 #endif
 #if (MACHINE_DMD == 1)
 	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 10, "OLD DISPLAY");
+	font_render_string_center (&font_fixed6, 64, 21, "PAGE TEXT");
+	dmd_show_low ();
+	task_sleep (TIME_300MS);
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 10, "AFTER TRANSITION");
+	font_render_string_center (&font_fixed6, 64, 21, "IS COMPLETED");
 	dmd_sched_transition (transition_table[menu_selection]);
-	font_render_string_center (&font_fixed10, 64, 16, "TRANSITION");
 	dmd_show_low ();
 #endif
 	task_sleep_sec (1);
+	window_redraw ();
 	task_exit ();
 }
 
@@ -3212,6 +3220,8 @@ struct menu flasher_test_item = {
 
 /****************** GI Test **************************/
 
+#ifdef CONFIG_GI
+
 U8 gi_test_brightness;
 
 U8 gi_test_values[] = {
@@ -3221,7 +3231,7 @@ U8 gi_test_values[] = {
 	TRIAC_GI_STRING(2),
 	TRIAC_GI_STRING(3),
 	TRIAC_GI_STRING(4),
-	TRIAC_GI_MASK,
+	PINIO_GI_STRINGS,
 };
 
 
@@ -3230,12 +3240,12 @@ void gi_test_init (void)
 	browser_init ();
 	browser_max = NUM_GI_TRIACS+1;
 	gi_test_brightness = 8;
-	gi_leff_allocate (TRIAC_GI_MASK);
+	gi_leff_allocate (PINIO_GI_STRINGS);
 }
 
 void gi_test_exit (void)
 {
-	gi_leff_free (TRIAC_GI_MASK);
+	gi_leff_free (PINIO_GI_STRINGS);
 }
 
 void gi_test_draw (void)
@@ -3255,8 +3265,12 @@ void gi_test_draw (void)
 	sprintf ("BRIGHTNESS %d", gi_test_brightness);
 	print_row_center (&font_mono5, 29);
 
-	gi_leff_disable (TRIAC_GI_MASK);
+	gi_leff_disable (PINIO_GI_STRINGS);
+#ifdef CONFIG_TRIAC
 	gi_leff_dim (gi_test_values[menu_selection], gi_test_brightness);
+#else
+	gi_leff_enable (gi_test_values[menu_selection]);
+#endif
 }
 
 void gi_test_right (void)
@@ -3289,6 +3303,7 @@ struct menu gi_test_item = {
 	.var = { .subwindow = { &gi_test_window, NULL } },
 };
 
+#endif /* CONFIG_GI */
 
 /****************** Lamp Test **************************/
 
@@ -3300,7 +3315,7 @@ void lamp_test_item_number (U8 val)
 void lamp_test_init (void)
 {
 	browser_init ();
-	browser_max = NUM_LAMPS-1;
+	browser_max = PINIO_NUM_LAMPS-1;
 	browser_item_number = lamp_test_item_number;
 }
 
@@ -3640,7 +3655,7 @@ void display_test_draw (void)
 {
 	if (menu_selection < 16)
 	{
-		wpc_dmd_set_low_page (menu_selection);
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_0, menu_selection);
 		dmd_clean_page_low ();
 		dmd_draw_border (dmd_low_buffer);
 		sprintf ("PAGE %d", menu_selection);
@@ -3685,7 +3700,9 @@ struct menu *test_menu_items[] = {
 	 * Everything can be accessed in solenoid test. */
 	&flasher_test_item,
 #endif
+#ifdef CONFIG_GI
 	&gi_test_item,
+#endif
 	&sound_test_item,
 	&lamp_test_item,
 	&all_lamp_test_item,

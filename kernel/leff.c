@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -51,7 +51,7 @@
 #define L_NOGI			0
 
 /** Indicates in a leff definition that it allocates all GI */
-#define L_ALL_GI		TRIAC_GI_MASK
+#define L_ALL_GI		PINIO_GI_STRINGS
 
 /* Declare externs for all of the deff functions */
 #define DECL_LEFF(num, flags, pri, b1, b2, fn, fnpage) \
@@ -186,13 +186,14 @@ task_pid_t leff_create_handler (const leff_t *leff)
 		tp = task_create_gid (GID_SHARED_LEFF, leff->fn);
 	else
 	{
+#ifdef CONFIG_GI
 		/* Free any existing GI allocations. */
-		gi_leff_free (TRIAC_GI_MASK);
+		gi_leff_free (PINIO_GI_STRINGS);
 
 		/* Allocate general illumination needed by the lamp effect */
 		if (leff->gi != L_NOGI)
 			gi_leff_allocate (leff->gi);
-
+#endif
 		/* Start the task */
 		tp = task_recreate_gid (GID_LEFF, leff->fn);
 	}
@@ -288,8 +289,10 @@ void leff_stop (leffnum_t dn)
 	{
 		lamp_leff1_erase (); /* TODO : these two functions go together */
 		lamp_leff1_free_all ();
+#ifdef CONFIG_GI
 		if (leff->gi != L_NOGI)
 			gi_leff_free (leff->gi);
+#endif
 		leff_start_highest_priority ();
 	}
 }
@@ -349,9 +352,10 @@ __noreturn__ void leff_exit (void)
 		/* Note: global leffs can do leff_exit with peer
 		tasks still running ... they will eventually be
 		stopped, too */
+#ifdef CONFIG_GI
 		if (leff->gi != L_NOGI)
 			gi_leff_free (leff->gi);
-
+#endif
 		/* Change the GID so that we are no longer
 		 * considered a leff. */
 		task_setgid (GID_LEFF_EXITING);
@@ -377,7 +381,9 @@ void leff_stop_all (void)
 {
 	task_kill_gid (GID_LEFF);
 	task_kill_gid (GID_SHARED_LEFF);
-	gi_leff_free (TRIAC_GI_MASK);
+#ifdef CONFIG_GI
+	gi_leff_free (PINIO_GI_STRINGS);
+#endif
 	lamp_leff1_free_all ();
 	lamp_leff1_erase ();
 	lamp_leff2_free_all ();

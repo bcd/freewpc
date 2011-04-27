@@ -76,11 +76,21 @@ void increment_extra_balls (void)
 	{
 		if (config_timed_game)
 		{
-			timed_game_extend (15); /* TODO - make adjustable */
+			/* Awarding extra ball in a timed game can't be done as usual,
+			since the game is 1 ball by rule.  Change the award to bonus
+			time.  Default is 15 seconds, but let the game override it. */
+#ifndef CONFIG_EB_TIME
+#define CONFIG_EB_TIME 15
+#endif
+			timed_game_extend (CONFIG_EB_TIME);
 		}
 		else if (system_config.max_ebs == 0)
 		{
-			/* TODO - award points when extra balls are disabled */
+			/* Award points when extra balls are disabled.  The game must
+			have been defined what the proper points are. */
+#ifdef CONFIG_EB_POINTS
+			score (CONFIG_EB_POINTS);
+#endif
 		}
 		else
 		{

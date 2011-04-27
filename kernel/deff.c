@@ -331,6 +331,7 @@ void deff_stop (deffnum_t dn)
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_STOP, dn);
 	if (dn == deff_running)
 	{
+		task_kill_gid (GID_DEFF);
 		deff_stop_task ();
 		deff_running = 0;
 		deff_queue_service ();

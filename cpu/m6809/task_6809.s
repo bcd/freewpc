@@ -18,7 +18,7 @@
 ;;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;;
 
-#include "sys/errno.h"
+#include "system/errno.h"
 
 ;;; Defines that are in .h files which can't be included directly.
 ;;; TODO: Put only the constants in .h without the C-structs and it

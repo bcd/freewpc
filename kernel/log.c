@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -92,6 +92,7 @@ char *log_get_format (U16 module_event)
 
 
 /** Add an entry to the event log. */
+#ifdef CONFIG_LOG
 void log_event1 (U16 module_event, U8 arg)
 {
 	struct log_event *ev;
@@ -129,6 +130,7 @@ void log_event1 (U16 module_event, U8 arg)
 		log_get_format (module_event), arg);
 #endif
 }
+#endif /* CONFIG_LOG */
 
 
 /** Initialize the event log. */

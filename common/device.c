@@ -788,8 +788,16 @@ void device_remove_virtual (device_t *dev)
 {
 	if (dev->virtual_count > 0)
 	{
+		/* Update counts.  We avoid calling device_sw_handler here
+		because there is no possibility for any error or need for retry.
+		The change is instantaneous.  The device state remains idle. */
 		dev->virtual_count--;
-		device_sw_handler (dev->devno);
+		dev->actual_count--;
+		dev->previous_count--;
+
+		/* Throw the usual events on releases */
+		device_update_globals ();
+		device_call_op (dev, kick_success);
 	}
 	else
 	{

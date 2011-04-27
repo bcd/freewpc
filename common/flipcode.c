@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -45,14 +45,19 @@ in the .md file:
 
 #ifndef FLIPCODE_LIST
 #define FLIPCODE_LIST { { 3, 1, 2, 3 }, { 3, 1, 1, 1 } }
+#endif
+
+#ifndef FLIPCODE_HANDLERS
 #define FLIPCODE_HANDLERS { flipcode_default_1, flipcode_default_2 }
 
 void flipcode_default_1 (void)
 {
+	callset_invoke (flipcode_1);
 }
 
 void flipcode_default_2 (void)
 {
+	callset_invoke (flipcode_2);
 }
 
 #endif

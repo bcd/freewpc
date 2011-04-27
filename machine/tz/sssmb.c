@@ -1,11 +1,43 @@
+/*
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <freewpc.h>
 
-/* Super Skill Shot multiball rules */
+extern void maybe_ramp_divert (void);
+extern U8 autofire_request_count;
+extern bool mball_jackpot_uncollected;
+extern U8 unlit_shot_count;
 
 U8 sssmb_initial_ramps_to_divert;
 U8 sssmb_ramps_to_divert;
 U8 sssmb_jackpot_value;
+
+bool sssmb_can_divert_to_plunger (void)
+{
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
+		&& sssmb_ramps_to_divert == 0
+		&& !switch_poll_logical (SW_SHOOTER))
+		return TRUE;
+	else
+		return FALSE;
+}
 
 void sssmb_running_deff (void)
 {
@@ -81,19 +113,20 @@ void sssmb_jackpot_collected_deff (void)
 	deff_exit ();
 }
 
-
-void sssmb_relight_all_jackpots (void)
+static void sssmb_relight_all_jackpots (void)
 {
-	flag_on (FLAG_SSSMB_RED_JACKPOT);
-	flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
-	flag_on (FLAG_SSSMB_YELLOW_JACKPOT);
-	sssmb_initial_ramps_to_divert++;
+	global_flag_on (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
+	global_flag_on (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
+	global_flag_on (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
 }
 
 
-void sssmb_award_jackpot (void)
+static void sssmb_award_jackpot (void)
 {
+	mball_jackpot_uncollected = FALSE;
+	sssmb_initial_ramps_to_divert++;
 	score_1M (sssmb_jackpot_value);
+	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_SSSMB_JACKPOT_COLLECTED);
 	sound_send (SND_EXPLOSION_1);
 
@@ -103,16 +136,15 @@ void sssmb_award_jackpot (void)
 		sssmb_jackpot_value += 10;
 	sssmb_ramps_to_divert = sssmb_initial_ramps_to_divert;
 
-	if (!flag_test (FLAG_SSSMB_RED_JACKPOT)
-		&& !flag_test (FLAG_SSSMB_ORANGE_JACKPOT)
-		&& !flag_test (FLAG_SSSMB_YELLOW_JACKPOT))
+	if (!global_flag_test (GLOBAL_FLAG_SSSMB_RED_JACKPOT)
+		&& !global_flag_test (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT)
+		&& !global_flag_test (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT))
 	{
 		sssmb_relight_all_jackpots ();
 	}
 }
 
-
-void sssmb_jackpot_ready_task (void)
+static void sssmb_jackpot_ready_task (void)
 {
 	deff_start (DEFF_SSSMB_JACKPOT_LIT);
 	sound_send (SND_HEEHEE);
@@ -133,56 +165,70 @@ void sssmb_jackpot_ready_task (void)
 	task_exit ();
 }
 
-
-void sssmb_start (void)
+CALLSET_ENTRY (sssmb, sssmb_start)
 {
-	if (!flag_test (FLAG_SSSMB_RUNNING))
+	if (!global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 	{
+		magnet_reset ();
+		callset_invoke (mball_restart_stop);
+		mball_jackpot_uncollected = TRUE;
+		unlit_shot_count = 0;
 		effect_update_request ();
-		flag_on (FLAG_SSSMB_RUNNING);
-		flag_on (FLAG_SSSMB_RED_JACKPOT);
-		flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
-		flag_on (FLAG_SSSMB_YELLOW_JACKPOT);
+		global_flag_on (GLOBAL_FLAG_SSSMB_RUNNING);
+		global_flag_on (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
+		global_flag_on (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
+		global_flag_on (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
 		sssmb_initial_ramps_to_divert = 1;
 		sssmb_ramps_to_divert = 0;
 		sssmb_jackpot_value = 20;
-		device_multiball_set (2);
-		ballsave_add_time (15);
+		if (!global_flag_test (GLOBAL_FLAG_SUPER_MB_RUNNING))
+		{	
+			callset_invoke (mball_start_3_ball);
+		}
 	}
 }
 
-
 void sssmb_stop (void)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING))
-	{
-		flag_off (FLAG_SSSMB_RUNNING);
-		flag_off (FLAG_SSSMB_RED_JACKPOT);
-		flag_off (FLAG_SSSMB_ORANGE_JACKPOT);
-		flag_off (FLAG_SSSMB_YELLOW_JACKPOT);
-		timer_kill_gid (GID_SSSMB_DIVERT_DEBOUNCE);
-		task_kill_gid (GID_SSSMB_JACKPOT_READY);
-		deff_stop (DEFF_SSSMB_RUNNING);
-		music_refresh ();
-	}
+	if (!global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
+		return;	
+	if (mball_jackpot_uncollected == TRUE)
+		sound_send (SND_NOOOOOOOO);
+
+	global_flag_off (GLOBAL_FLAG_SSSMB_RUNNING);
+	global_flag_off (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
+	global_flag_off (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
+	global_flag_off (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
+	timer_kill_gid (GID_SSSMB_DIVERT_DEBOUNCE);
+	task_kill_gid (GID_SSSMB_JACKPOT_READY);
+	deff_stop (DEFF_SSSMB_RUNNING);
+	lamp_tristate_off (LM_SUPER_SKILL);
+	effect_update_request ();
+}
+
+CALLSET_ENTRY (sssmb, lamp_update)
+{
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert > 0)
+		lamp_tristate_on (LM_SUPER_SKILL);
+	else if (sssmb_can_divert_to_plunger ())
+		lamp_tristate_flash (LM_SUPER_SKILL);
 }
 
 CALLSET_ENTRY (sssmb, display_update)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 		deff_start_bg (DEFF_SSSMB_RUNNING, 0);
 }
 
 CALLSET_ENTRY (sssmb, music_refresh)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING))
-		music_request (MUS_SPIRAL_ROUND, PRI_GAME_MODE1 + 9);
-};
-
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
+		music_request (MUS_SPIRAL_MODE, PRI_GAME_MODE1 + 9);
+}
 
 CALLSET_ENTRY (sssmb, door_start_super_skill)
 {
-	sssmb_start ();
+	callset_invoke (sssmb_start);
 }
 
 
@@ -191,51 +237,56 @@ CALLSET_ENTRY (sssmb, single_ball_play)
 	sssmb_stop ();
 }
 
+CALLSET_ENTRY (sssmb, end_ball)
+{
+	sssmb_stop ();
+}
+
 CALLSET_ENTRY (sssmb, skill_red)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING)
-		&& flag_test (FLAG_SSSMB_RED_JACKPOT))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
+		&& global_flag_test (GLOBAL_FLAG_SSSMB_RED_JACKPOT))
 	{
-		flag_off (FLAG_SSSMB_RED_JACKPOT);
+		global_flag_off (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
 		sssmb_award_jackpot ();
 	}
 }
 
 CALLSET_ENTRY (sssmb, skill_orange)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING)
-		&& flag_test (FLAG_SSSMB_ORANGE_JACKPOT))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
+		&& global_flag_test (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT))
 	{
-		flag_off (FLAG_SSSMB_ORANGE_JACKPOT);
+		global_flag_off (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
 		sssmb_award_jackpot ();
 	}
 }
 
 CALLSET_ENTRY (sssmb, skill_yellow)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING)
-		&& flag_test (FLAG_SSSMB_YELLOW_JACKPOT))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
+		&& global_flag_test (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT))
 	{
-		flag_off (FLAG_SSSMB_YELLOW_JACKPOT);
+		global_flag_off (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
 		sssmb_award_jackpot ();
 	}
 }
 
-CALLSET_ENTRY (sssmb, sw_left_ramp_exit)
+/* Called from leftramp.c */
+void sssmb_left_ramp_exit (void)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 	{
 		if (sssmb_ramps_to_divert == 0)
 		{
 			if (!timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 			{
 				timer_start_free (GID_SSSMB_DIVERT_DEBOUNCE, TIME_6S);
-				ramp_divert ();
 			}
 		}
 		else
 		{
-			sssmb_ramps_to_divert--;
+			bounded_decrement (sssmb_ramps_to_divert, 0);
 		}
 		score_update_required ();
 	}
@@ -243,35 +294,19 @@ CALLSET_ENTRY (sssmb, sw_left_ramp_exit)
 
 CALLSET_ENTRY (sssmb, sw_shooter)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING)
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
 		&& timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 	{
 		extern U8 skill_switch_reached;
-		skill_switch_reached = 0;
+		/* It will always reach at least the fist switch */
+		skill_switch_reached = 1;
 		/* TODO: handle case where red jackpot switch is tripped but
 		ball falls back to plunger lane */
 		task_create_gid1 (GID_SSSMB_JACKPOT_READY, sssmb_jackpot_ready_task);
 	}
 }
 
-CALLSET_ENTRY (sssmb, any_skill_switch)
-{
-	dbprintf ("Jackpot ready cancelled\n");
-	task_kill_gid (GID_SSSMB_JACKPOT_READY);
-	deff_stop (DEFF_SSSMB_JACKPOT_LIT);
-}
-
-CALLSET_ENTRY (sssmb, start_game)
+CALLSET_ENTRY (sssmb, start_ball)
 {
 	sssmb_stop ();
 }
-
-
-CALLSET_ENTRY (sssmb, sw_buyin_button)
-{
-#if 0
-	if (in_live_game)
-		sssmb_start ();
-#endif
-}
-

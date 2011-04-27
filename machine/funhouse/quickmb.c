@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -68,7 +68,7 @@ void quickmb_start (void)
 	{
 		flag_on (FLAG_QUICK_MB_RUNNING);
 		deff_start (DEFF_QUICKMB_STARTED);
-		device_multiball_set (2);
+		set_ball_count (2);
 	}
 }
 

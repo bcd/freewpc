@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,31 +18,119 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (camera, __machine2__) */
+
 #include <freewpc.h>
+#include <status.h>
+
+extern void award_unlit_shot (U8 unlit_called_from);
+extern void mball_start_3_ball (void);
+extern U8 unlit_shot_count;
+extern U8 jackpot_level;
+extern U8 mball_locks_lit;
+extern U8 gumball_enable_count;
+extern U8 chaosmb_level;
+extern U8 chaosmb_hits_to_relight;
+
 
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
+	CAMERA_AWARD_10_MILLION,
 	CAMERA_AWARD_DOOR_PANEL,
-	CAMERA_AWARD_20_SECS,
 	CAMERA_AWARD_QUICK_MB,
-	CAMERA_AWARD_250K,
+	CAMERA_AWARD_20_MILLION,
 	MAX_CAMERA_AWARDS,
 } camera_award_t;
 
 __local__ U8 cameras_lit;
 
 __local__ camera_award_t camera_award_count;
+/* Needed to store award for deff */
+camera_award_t camera_award_count_stored;
+extern U8 mball_locks_lit;
+extern struct timed_mode_ops hitch_mode;
+extern U8 left_ramps;
 
-__local__ U8 camera_default_count;
+void left_ramp_lights_camera_deff (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_right);	
+	if (timed_mode_running_p (&hitch_mode))
+	{
+		font_render_string_center (&font_fixed6, 64, 6, "TRY A");
+		font_render_string_center (&font_fixed6, 64, 22, "BIT LOWER");
+	
+	}
+	else if (left_ramps < 3)
+	{
+		font_render_string_center (&font_fixed6, 64, 6, "LEFT RAMP");
+		font_render_string_center (&font_fixed6, 64, 22, "LIGHTS CAMERA");
+	}
+	else
+	{
+		font_render_string_center (&font_fixed6, 64, 6, "4 ROLLOVERS");
+		font_render_string_center (&font_fixed6, 64, 22, "LIGHTS CAMERA");
+	}
+	dmd_show_low ();
+	task_sleep_sec (1);
+	deff_exit ();
+}
 
 
 void camera_award_deff (void)
 {
-	kickout_lock (KLOCK_DEFF);
+	U16 fno;
+	for (fno = IMG_CAMERA_START; fno <= IMG_CAMERA_END; fno += 2)
+	{
+		/* Play the sound effect here
+		 * so it's in sync */
+		if (fno == IMG_CAMERA_START)
+			sound_send (SND_CAMERA_PICTURE_EJECT_1);
+		if (fno == IMG_CAMERA_START + 6)
+			sound_send (SND_CAMERA_PICTURE_EJECT_2);
+		dmd_alloc_pair_clean ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	task_sleep (TIME_500MS);
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
-	sprintf ("CAMERA AWARD %d", camera_award_count+1);
+	/* camera_award_count_stored starts from 0 */
+	sprintf ("CAMERA AWARD %d", camera_award_count_stored + 1);
 	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
+	switch (camera_award_count_stored)
+	{
+		case CAMERA_AWARD_LIGHT_LOCK:
+			sprintf ("LIGHT LOCK");
+			break;
+		case CAMERA_AWARD_10_MILLION:
+			sprintf ("10 MILLION");
+			break;
+		case CAMERA_AWARD_DOOR_PANEL:
+			sprintf ("SPOT DOOR PANEL");
+			break;
+		case CAMERA_AWARD_QUICK_MB:
+			sprintf ("QUICK MULTIBALL");
+			break;
+		case CAMERA_AWARD_20_MILLION:
+			sprintf ("20 MILLION");
+			break;
+		default:
+			break;
+	}
+	font_render_string_center (&font_fixed6, 64, 23, sprintf_buffer);
+	dmd_sched_transition (&trans_scroll_down_fast);
+	dmd_show_low ();
+	sound_send (SND_GUMBALL_LOADED);
+	task_sleep_sec (1);
+	deff_exit ();
+}
+
+CALLSET_ENTRY (camera, status_report)
+{
+	status_page_init ();
+	font_render_string_center (&font_mono5, 64, 6, "NEXT CAMERA AWARD");
 	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
@@ -51,121 +139,169 @@ void camera_award_deff (void)
 		case CAMERA_AWARD_DOOR_PANEL:
 			sprintf ("SPOT DOOR PANEL");
 			break;
-		case CAMERA_AWARD_20_SECS:
-			sprintf ("20 SECONDS");
+		case CAMERA_AWARD_10_MILLION:
+			sprintf ("10 MILLION");
 			break;
 		case CAMERA_AWARD_QUICK_MB:
 			sprintf ("QUICK MULTIBALL");
 			break;
-		case CAMERA_AWARD_250K:
-			sprintf ("250,000");
+		case CAMERA_AWARD_20_MILLION:
+			sprintf ("20 MILLION");
 			break;
 		default:
 			break;
 	}
 	font_render_string_center (&font_fixed6, 64, 23, sprintf_buffer);
-	dmd_sched_transition (&trans_scroll_up_avg);
-	dmd_show_low ();
-	sound_send (SND_GUMBALL_LOADED);
-	task_sleep_sec (3);
-	deff_exit ();
+	status_page_complete ();
 }
 
+void mball_start_2ball_task (void)
+{
+	callset_invoke (mball_start_2_ball);
+	callset_invoke (mball_start);
+	task_exit ();
+}
+
+void camera_award_door_panel_task (void)
+{
+	callset_invoke (award_door_panel);
+	task_exit ();
+}
 
 static void do_camera_award (void)
 {
+	magnet_disable_catch (MAG_RIGHT);
+	unlit_shot_count = 0;
+	camera_award_count_stored = camera_award_count;
+	/* Don't light the lock if already lit */
+	if (mball_locks_lit == 2 && camera_award_count == CAMERA_AWARD_LIGHT_LOCK)
+		camera_award_count = CAMERA_AWARD_DOOR_PANEL;
 	deff_start (DEFF_CAMERA_AWARD);
-	task_sleep_sec (2);
-
 	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
 			/* Light Lock */
-			mball_light_lock ();
+			bounded_increment (mball_locks_lit, 2);
+			break;
+		case CAMERA_AWARD_10_MILLION:
+			sound_send (SND_TEN_MILLION_POINTS);
+			score (SC_10M);	
+			/* Spot door panel if not lit */
+			lamp_on (LM_PANEL_10M);
 			break;
 		case CAMERA_AWARD_DOOR_PANEL:
 			/* Spot Door Panel */
-			door_award_if_possible ();
+			task_create_anon (camera_award_door_panel_task);
 			break;
-		case CAMERA_AWARD_20_SECS:
-			/* Extra Time: 20 seconds */
-			if (config_timed_game)
-			{
-				camera_award_count++;
-				/* FALLTHRU */
-			}
-			else
-			{
-				timed_game_extend (20);
-				break;
-			}
 		case CAMERA_AWARD_QUICK_MB:
 			/* Quick Multiball */
+			task_create_anon (mball_start_2ball_task);
 			break;
-		case CAMERA_AWARD_250K:
-			/* Big Points: 250K */
+		case CAMERA_AWARD_20_MILLION:
+			score (SC_20M);
 			break;
 		default:
 			break;
 	}
+	bounded_decrement (cameras_lit, 0);
 	camera_award_count++;
+	/* Wraparound, but don't light the lock this time */
 	if (camera_award_count >= MAX_CAMERA_AWARDS)
-		camera_award_count = 0;
+		camera_award_count = 1;
 	task_exit ();
 }
 
+inline bool can_award_camera (void)
+{
+	if (cameras_lit != 0 && !multi_ball_play ())
+		return TRUE;
+	else
+		return FALSE;
+}
+
+/* Spawned as a seperate task to avoid the deadly overflow */
+void mpf_collected_task (void)
+{
+	callset_invoke (mpf_collected);
+	task_exit ();	
+}
 
 CALLSET_ENTRY (camera, sw_camera)
 {
-	device_switch_can_follow (camera, slot, TIME_5S);
-	if (event_did_follow (mpf_top, camera))
+	device_switch_can_follow (camera, slot, TIME_3S);
+	
+	if (event_did_follow (gumball_exit, camera) 
+		|| event_did_follow (dead_end, camera))
 	{
-		callset_invoke (mpf_top_exit);
+		/* Do nothing */
 	}
-	else if (event_did_follow (gumball_exit, camera))
+	else if (event_did_follow (mpf_top, camera))
 	{
+		task_create_anon (mpf_collected_task);
 	}
-	else if (event_did_follow (dead_end, camera))
+	else if (can_award_camera ())
 	{
+		do_camera_award ();
+		score (SC_500K);
+		sound_send (SND_CAMERA_AWARD_SHOWN);
+	}
+	/* Add another 10M to the jackpot if collected during MB with the jackpot lit */
+	else if (multi_ball_play ()&& global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
+	{
+		if (jackpot_level < 4)
+		{
+			jackpot_level++;
+			deff_start (DEFF_MB_TEN_MILLION_ADDED);
+		}
 	}
 	else
 	{
-		if (cameras_lit)
+		if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
+			&& !global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING)
+			&& !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 		{
-			cameras_lit--;
-			score (SC_10M);
-			sound_send (SND_CAMERA_AWARD_SHOWN);
-			task_create_anon (do_camera_award);
+			deff_start (DEFF_LEFT_RAMP_LIGHTS_CAMERA);
 		}
-		else
-		{
-			score (SC_250K);
-			sound_send (SND_JET_BUMPER_ADDED);
-		}
+		award_unlit_shot (SW_CAMERA);	
+		score (SC_250K);
+		sound_send (SND_JET_BUMPER_ADDED);
 	}
 }
 
+/* Right magnet grab camera helpers */
+CALLSET_ENTRY (camera, right_ball_grabbed)
+{
+	if (!multi_ball_play () && can_award_camera ())
+	{
+		deff_start (DEFF_SHOOT_CAMERA);
+	}
+}
 
 CALLSET_ENTRY (camera, lamp_update)
 {
-	if (cameras_lit > 0)
+	if (can_award_camera ())
 		lamp_tristate_flash (LM_CAMERA);
+	else if (multi_ball_play () && global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
+		lamp_tristate_flash (LM_CAMERA);
+	else if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING) 
+		&& chaosmb_level == 3
+		&& chaosmb_hits_to_relight == 0)
+	{
+		lamp_tristate_flash (LM_CAMERA);
+	}
 	else
+	{
 		lamp_tristate_off (LM_CAMERA);
+	}
 }
-
 
 CALLSET_ENTRY (camera, start_player)
 {
-	cameras_lit = 0;
+	cameras_lit = 1;
 	camera_award_count = 0;
-	camera_default_count = 0;
 }
-
 
 CALLSET_ENTRY (camera, door_start_camera)
 {
-	cameras_lit++;
+	bounded_increment (cameras_lit, 99);
 }
-
-

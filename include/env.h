@@ -106,6 +106,7 @@
 #define __effect__
 #define __init__
 #define __machine2__
+#define __machine3__
 #define __deff__
 #define __leff__
 #endif
@@ -189,35 +190,35 @@ do { \
  * environments where a direct memory map is not present.
  ***************************************************************/
 
-#ifdef CONFIG_NATIVE
-void writeb (U16 addr, U8 val);
-#else
-extern inline void writeb (U16 addr, U8 val)
+#ifdef CONFIG_MMIO
+extern inline void writeb (IOPTR addr, U8 val)
 {
 	*(volatile U8 *)addr = val;
 	barrier ();
 }
+#else
+void writeb (IOPTR addr, U8 val);
 #endif
 
-extern inline void writew (U16 addr, U16 val)
+extern inline void writew (IOPTR addr, U16 val)
 {
-#ifdef CONFIG_NATIVE
-	writeb (addr, val >> 8);
-	writeb (addr+1, val & 0xFF);
-#else
+#ifdef CONFIG_MMIO
 	*(volatile U16 *)addr = val;
 	barrier ();
+#else
+	writeb (addr, val >> 8);
+	writeb (addr+1, val & 0xFF);
 #endif
 }
 
 
-#ifdef CONFIG_NATIVE
-U8 readb (U16 addr);
-#else
-extern inline U8 readb (U16 addr)
+#ifdef CONFIG_MMIO
+extern inline U8 readb (IOPTR addr)
 {
 	return *(volatile U8 *)addr;
 }
+#else
+U8 readb (IOPTR addr);
 #endif
 
 
@@ -229,28 +230,6 @@ extern inline void io_toggle_bits (U16 addr, U8 val)
 	writeb (addr, val);
 #else
 	*(volatile U8 *)addr ^= val;
-#endif
-}
-
-extern inline void io_set_bits (U16 addr, U8 val)
-{
-#ifdef CONFIG_NATIVE
-	U8 reg = readb (addr);
-	reg |= val;
-	writeb (addr, val);
-#else
-	*(volatile U8 *)addr |= val;
-#endif
-}
-
-extern inline void io_clear_bits (U16 addr, U8 val)
-{
-#ifdef CONFIG_NATIVE
-	U8 reg = readb (addr);
-	reg &= ~val;
-	writeb (addr, val);
-#else
-	*(volatile U8 *)addr &= ~val;
 #endif
 }
 

@@ -7,6 +7,7 @@ P := platform/wpc
 
 # Common 6809 configuration
 CPU := m6809
+$(eval $(call have,CONFIG_PERIODIC_IRQ))
 CONFIG_TASK := y
 CONFIG_MALLOC := y
 include cpu/$(CPU)/Makefile
@@ -14,11 +15,16 @@ include cpu/$(CPU)/Makefile
 # Subplatform support
 # Eventually, this section will contain conditionals for building on the
 # different WPC variations.  For now, all of these are mandatory though.
-CONFIG_WPC ?= y
+$(eval $(call have,CONFIG_PLATFORM_WPC))
+$(eval $(call have,CONFIG_MMIO))
 CONFIG_FONT ?= $(CONFIG_DMD)
-CONFIG_AC ?= y
+$(eval $(call have,CONFIG_AC))
+$(eval $(call have,CONFIG_GI))
+$(eval $(call have,CONFIG_TRIAC))
 $(eval $(call have,CONFIG_RTC))
+$(eval $(call have,CONFIG_BUYIN))
 CONFIG_ANIMATION ?= $(CONFIG_DMD)
+CONFIG_SCORE_RANK := y
 
 # The default CFLAGS required on the WPC platform
 # A few notes:
@@ -31,8 +37,8 @@ CONFIG_ANIMATION ?= $(CONFIG_DMD)
 #
 INT_CFLAGS = -mint8
 # TODO : Don't hardcode code/data sections here like this!
-CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
-EXTRA_ASFLAGS += -D__int8__ -DCONFIG_PLATFORM_WPC
+CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -mwpc -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format -Werror=implicit-function-declaration
+EXTRA_ASFLAGS += -D__int8__
 
 # Say which source files need to be compiled in for the WPC platform only.
 # Use KERNEL_HW_OBJS for C sources, and KERNEL_ASM_OBJS for assembler files.

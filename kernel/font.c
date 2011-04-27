@@ -222,6 +222,9 @@ static void fontargs_render_string (void)
 
 	dmd_base = ((U8 *)dmd_low_buffer) + args->coord.y * DMD_BYTE_WIDTH;
 	s = sprintf_buffer;
+#ifdef CONFIG_UI_CONSOLE
+	ui_console_render_string (s);
+#endif
 
 	/* Font data is stored in a separate page of ROM; switch
 	 * there to be able to read the font data */

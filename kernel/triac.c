@@ -74,6 +74,13 @@ U8 triac_output;
 /** The last value written to the triac latch */
 U8 triac_io_cache;
 
+/** Which triac outputs are allocated by lamp effects */
+U8 gi_leff_alloc;
+
+/** The states of the GI strings currently allocated */
+U8 gi_leff_output;
+
+#ifdef CONFIG_TRIAC
 /** Says which triacs need to be turned on at specific times
  * during the AC phase.  Each entry is a triac bitset.
  * If entry X is enabled, then X ms after the last zerocross,
@@ -83,32 +90,32 @@ U8 triac_io_cache;
  */
 U8 gi_dimming[ZC_MAX_PERIOD];
 
-/** Which triac outputs are allocated by lamp effects */
-U8 gi_leff_alloc;
-
-/** The states of the GI strings currently allocated */
-U8 gi_leff_output;
-
 /** Like gi_dimming, but for lamp effects */
 U8 gi_leff_dimming[ZC_MAX_PERIOD];
+#endif
 
 
 void triac_dump (void)
 {
 	dbprintf ("Normal:    %02X\n", triac_output);
+#ifdef CONFIG_TRIAC
 	dbprintf ("Dim:       %02X %02X %02X %02X %02X\n",
 		gi_dimming[0], gi_dimming[1], gi_dimming[2], gi_dimming[3], gi_dimming[4]);
+#endif
 	dbprintf ("Alloc:     %02X\n", gi_leff_alloc);
 	if (gi_leff_alloc)
 	{
 		dbprintf ("Leff GI:   %02X\n", gi_leff_output);
+#ifdef CONFIG_TRIAC
 		dbprintf ("Leff dim:  %02X %02X %02X %02X %02X\n",
 			gi_leff_dimming[0], gi_leff_dimming[1], gi_leff_dimming[2],
 			gi_leff_dimming[3], gi_leff_dimming[4]);
+#endif
 	}
 }
 
 
+#ifdef CONFIG_TRIAC
 /**
  * Update the triacs at interrupt time, when GI dimming is in effect
  * DIM_BITS says which triac strings need to be turned on briefly
@@ -145,9 +152,11 @@ void triac_rtt (void)
 		triac_rtt_1 (dim_bits);
 	}
 }
+#endif /* CONFIG_TRIAC */
 
 
 /** Clear the dimming feature on a set of triacs. */
+#ifdef CONFIG_TRIAC
 void gi_clear_dimming (U8 triac, U8 *dimming)
 {
 	U8 i;
@@ -156,6 +165,10 @@ void gi_clear_dimming (U8 triac, U8 *dimming)
 		dimming[i] &= ~triac;
 	}
 }
+#else
+#define gi_clear_dimming(triac,dimming)
+#endif
+
 
 void triac_update (void)
 {
@@ -166,7 +179,7 @@ void triac_update (void)
 	latch = triac_output;
 	latch &= ~gi_leff_alloc;
 	latch |= gi_leff_output;
-	pinio_write_triac (latch);
+	pinio_write_gi (latch);
 }
 
 
@@ -190,6 +203,7 @@ void triac_disable (U8 triac)
 }
 
 
+#ifdef CONFIG_TRIAC
 /** Enable dimming for a GI string. */
 void gi_dim (U8 triac, U8 intensity)
 {
@@ -198,7 +212,7 @@ void gi_dim (U8 triac, U8 intensity)
 	gi_dimming[intensity] |= triac;
 	triac_update ();
 }
-
+#endif
 
 
 /** Allocates one or more triacs for a lamp effect.
@@ -217,7 +231,7 @@ void gi_leff_allocate (U8 triac)
 
 	/* TODO - return actually allocated strings to the caller
 	 * so that only those will be freed up on leff exit. */
-	 triac_update ();
+	triac_update ();
 }
 
 
@@ -250,6 +264,7 @@ void gi_leff_disable (U8 triac)
 }
 
 
+#ifdef CONFIG_TRIAC
 /** Sets the intensity (brightness) of a single GI triac */
 void gi_leff_dim (U8 triac, U8 brightness)
 {
@@ -281,16 +296,19 @@ void gi_leff_dim (U8 triac, U8 brightness)
 
 	triac_update ();
 }
+#endif
 
 
 /** Initialize the triac module */
-void triac_init (void)
+void gi_init (void)
 {
 	gi_leff_alloc = 0;
-	triac_output = 0;
 	gi_leff_output = 0;
+	triac_output = 0;
+#ifdef CONFIG_TRIAC
 	memset (gi_dimming, 0, ZC_MAX_PERIOD);
 	memset (gi_leff_dimming, 0, ZC_MAX_PERIOD);
+#endif
 	triac_update ();
 }
 

@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Syntax: tools/hm <filename> [<branch> ...]
+#
+# This script require the 'meld' tool for merging.
+#
+# You specify a filename and a list of branches.  It will fire up the
+# meld merge tool with the locally checked out copy, plus a read-only
+# version from each of the named branches.  It allows you to do
+# comparisions across several branches fairly easily.
+#
+TMPDIR=/tmp/meld
+difftool=meld
+
+if [ "$1" = "-vi" ]; then
+difftool=vimdiff
+shift
+fi
+
+file=$1; shift
+for branch in $@; do
+	dir=$TMPDIR/$branch/`dirname $file`
+	mkdir -p $dir || exit 1
+	git show $branch:$file > $TMPDIR/$branch/$file
+	if [ "$all" != "" ];
+	then
+		difftool=vimdiff
+	fi
+	all="$all $TMPDIR/$branch/$file"
+done
+all="$file $all"
+$difftool $all

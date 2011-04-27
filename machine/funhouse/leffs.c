@@ -16,7 +16,7 @@ void amode_leff1 (void)
 
 void amode_leff (void)
 {
-	gi_leff_enable (TRIAC_GI_MASK);
+	gi_leff_enable (PINIO_GI_STRINGS);
 
 	for (lamplist = LAMPLIST_GANGWAYS; lamplist <= LAMPLIST_LOWER_LANES; lamplist++)
 	{

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,7 +21,11 @@
 #ifndef _GAME_H
 #define _GAME_H
 
+#ifdef MACHINE_TZ
+#define MAX_PLAYERS 3
+#else
 #define MAX_PLAYERS 4
+#endif
 
 extern __fastram__ U8 in_game;
 extern __fastram__ U8 in_bonus;

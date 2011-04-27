@@ -24,7 +24,6 @@
  */
 
 #include <freewpc.h>
-#include <sys/irq.h>
 #include <diag.h>
 #include <search.h>
 
@@ -706,7 +705,7 @@ static void switch_update_stable (const U8 sw)
 /** Periodic switch processing.  This function is called frequently
  * to scan pending switches and spawn new tasks to handle them.
  */
-CALLSET_ENTRY (switch, idle)
+void switch_periodic (void)
 {
 	register U16 col = 0;
 	extern U8 sys_init_complete;

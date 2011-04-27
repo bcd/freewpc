@@ -68,8 +68,9 @@ __fastram__ U8 clock_find_target;
 __fastram__ U8 clock_last_sw;
 
 
-/** How long the current operation has until it will timeout, causing an error */
-U8 clock_timeout_timer;
+/** How long calibration will be allowed to continue, before
+ * giving up. */
+U8 clock_calibration_time;
 
 /** The clock time "decoded" as the number of 15-minute intervals
 past 12:00, ranging from 0 to 47. */
@@ -84,6 +85,7 @@ task_gid_t clock_owner;
 /** The current clock hour, as an integer from 0-11 */
 U8 clock_hour;
 
+static void check_tz_clock (void);
 
 void tz_dump_clock (void)
 {
@@ -131,10 +133,6 @@ U8 tz_clock_opto_to_hour[] =
 #define SOL_SWITCH_STROBE 47
 #define CLK_DRV_SWITCH_STROBE		(1 << (SOL_SWITCH_STROBE % 8))
 
-
-/**
- * Enable clock switch polling.
- */
 extern inline void clock_switch_enable (void)
 {
 	U8 *in = sol_get_read_reg (SOL_SWITCH_STROBE);
@@ -142,31 +140,11 @@ extern inline void clock_switch_enable (void)
 	writeb (out, *in | sol_get_bit (SOL_SWITCH_STROBE));
 }
 
-
-/**
- * Disable clock switch polling.
- */
 extern inline void clock_switch_disable (void)
 {
 	U8 *in = sol_get_read_reg (SOL_SWITCH_STROBE);
 	IOPTR out = sol_get_write_reg (SOL_SWITCH_STROBE);
 	writeb (out, *in & ~sol_get_bit (SOL_SWITCH_STROBE));
-}
-
-
-/**
- * Set the number of seconds for the current clock operation to
- * complete before it times out.  If setting to zero, this
- * disables the timer.
- * Any operation that may fail due to bad hardware should write a
- * nonzero value here when beginning, and then write a zero when
- * it completes.  The periodic function will decrement this timer
- * and if it goes from nonzero->zero, the clock will be deemed in
- * error.
- */
-static inline void tz_clock_set_timeout (U8 secs)
-{
-	clock_timeout_timer = secs * 10;
 }
 
 
@@ -260,6 +238,7 @@ void tz_clock_switch_rtt (void)
 			clock_sw_seen_active |= clock_sw;
 			clock_sw_seen_inactive |= ~clock_sw;
 		}
+		check_tz_clock ();
 	}
 }
 
@@ -320,9 +299,7 @@ void tz_clock_stop (void)
 {
 	clock_mode = CLOCK_STOPPED;
 	clock_mech_stop ();
-	tz_clock_set_timeout (0);
 }
-
 
 void tz_clock_error (void)
 {
@@ -356,7 +333,6 @@ void tz_clock_reset (void)
 			else
 				clock_mech_start_forward ();
 			clock_mode = CLOCK_FIND;
-			tz_clock_set_timeout (8);
 		}
 	}
 }
@@ -366,21 +342,25 @@ void tz_clock_reset (void)
  * A periodic, lower priority function that updates the
  * state machine depending on what has been seen recently.
  */
-CALLSET_ENTRY (tz_clock, idle_every_100ms)
+static void check_tz_clock (void)
 {
 	/* When calibrating, once all switches have been active and inactive
 	 * at least once, claim victory and go back to the home position. */
-	if (unlikely (clock_mode == CLOCK_CALIBRATING) &&
-			(clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
+	if (unlikely (clock_mode == CLOCK_CALIBRATING))
 	{
-		/* CALIBRATING -> FIND */
-		dbprintf ("Calibration complete.\n");
-		tz_clock_reset ();
-	}
-	else if (clock_timeout_timer && --clock_timeout_timer == 0)
-	{
-		dbprintf ("Operation timed out.\n");
-		tz_clock_error ();
+		if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
+		{
+			/* CALIBRATING -> FIND */
+			dbprintf ("Calibration complete.\n");
+			tz_clock_reset ();
+		}
+		/* If calibration doesn't succeed within a certain number
+		 * of iterations, give up. */
+		else if (--clock_calibration_time == 0)
+		{
+			dbprintf ("Calibration aborted.\n");
+			tz_clock_error ();
+		}
 	}
 }
 
@@ -413,7 +393,7 @@ CALLSET_ENTRY (tz_clock, amode_start)
 	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
 	{
 		dbprintf ("Clock calibration started.\n");
-		tz_clock_set_timeout (8);
+		clock_calibration_time = 11; /* 10 seconds ~ 1 rotations */
 		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 		clock_mech_set_speed (BIVAR_DUTY_100);
 		clock_mode = CLOCK_CALIBRATING;
@@ -429,11 +409,11 @@ CALLSET_ENTRY (tz_clock, amode_start)
 CALLSET_ENTRY (tz_clock, diagnostic_check)
 {
 	if (feature_config.disable_clock)
-		diag_post_error ("CLOCK DISABLED\nBY ADJUSTMENT\n", PAGE);
+		diag_post_error ("CLOCK DISABLED\nBY ADJUSTMENT\n", MACHINE_PAGE);
 	while (unlikely (clock_mode == CLOCK_CALIBRATING))
 		task_sleep (TIME_100MS);
 	if (!global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
-		diag_post_error ("CLOCK IS\nNOT WORKING\n", PAGE);
+		diag_post_error ("CLOCK IS\nNOT WORKING\n", MACHINE_PAGE);
 }
 
 

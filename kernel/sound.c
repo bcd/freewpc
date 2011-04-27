@@ -99,7 +99,7 @@ bool sound_version_render (void)
 	}
 	else
 	{
-#ifdef MACHINE_DCS
+#if (MACHINE_DCS == 1)
 		sprintf ("%d.%d", sound_version_major, sound_version_minor);
 #else
 		sprintf ("L-%d", sound_version_major);
@@ -200,7 +200,6 @@ U8 sound_board_read (U8 retries)
  * command is sent again. */
 U8 sound_board_command (sound_cmd_t cmd, U8 retries)
 {
-	/* TODO : for DCS, cmd could be 16-bit!!! */
 #ifndef CONFIG_NATIVE
 	do {
 #if (MACHINE_DCS == 1)

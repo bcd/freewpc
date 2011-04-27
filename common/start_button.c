@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,6 +21,7 @@
 #include <freewpc.h>
 
 extern U8 initials_enter_timer;
+extern U8 pin_enter_timer;
 
 extern U8 switch_stress_enable;
 
@@ -40,10 +41,12 @@ CALLSET_ENTRY (start_button, sw_start_button)
 	else */ if (deff_get_active () == DEFF_SYSTEM_RESET)
 	{
 	}
+#ifdef CONFIG_BUYIN
 	else if (deff_get_active () == DEFF_BUYIN_OFFER)
 	{
 		SECTION_VOIDCALL (__common__, buyin_start_button_handler);
 	}
+#endif
 	else if (switch_stress_enable && in_live_game && valid_playfield)
 	{
 		switch_stress_drain ();
@@ -51,6 +54,10 @@ CALLSET_ENTRY (start_button, sw_start_button)
 	else if (initials_enter_timer)
 	{
 		SECTION_VOIDCALL (__common__, initials_start_button_handler);
+	}
+	else if (pin_enter_timer)
+	{
+		SECTION_VOIDCALL (__common__, pin_start_button_handler);
 	}
 	else if (in_test)
 	{

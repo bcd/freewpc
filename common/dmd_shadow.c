@@ -87,16 +87,16 @@ void dmd_text_blur (void)
 void dmd_overlay_outline (void)
 {
 	dmd_pagepair_t dst = wpc_dmd_get_mapped ();
-	wpc_dmd_set_high_page (DMD_OVERLAY_PAGE+1);
-	wpc_dmd_set_low_page (dst.u.first);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE+1);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dst.u.first);
 	dmd_and_page ();
-	wpc_dmd_set_low_page (dst.u.second);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dst.u.second);
 	dmd_and_page ();
 
-	wpc_dmd_set_high_page (DMD_OVERLAY_PAGE);
-	wpc_dmd_set_low_page (dst.u.first);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dst.u.first);
 	dmd_or_page ();
-	wpc_dmd_set_low_page (dst.u.second);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dst.u.second);
 	dmd_or_page ();
 
 	wpc_dmd_set_mapped (dst);
@@ -121,11 +121,11 @@ void dmd_dup_mapped (void)
 	dmd_alloc_pair ();
 	new = wpc_dmd_get_mapped ();
 
-	wpc_dmd_set_low_page (old.u.second);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, old.u.second);
 	dmd_copy_low_to_high ();
 
-	wpc_dmd_set_low_page (old.u.first);
-	wpc_dmd_set_high_page (new.u.first);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, old.u.first);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, new.u.first);
 	dmd_copy_low_to_high ();
 
 	wpc_dmd_set_mapped (new);
