@@ -14,7 +14,7 @@ Pinmame-ROM: corv_2_1.bin
 Lamp-Matrix-Width: 51
 Lamp-Matrix-Height: 18
 
-define MACHINE_NUMBER 570
+define MACHINE_NUMBER 536
 define MACHINE_GRAND_CHAMPION_INITIALS { 'D', 'P', 'C' }
 define MACHINE_GRAND_CHAMPION_SCORE { 0x00, 0x20, 0x00, 0x00, 0x00 }
 define MACHINE_HIGH_SCORE_INITIALS { 'F', 'R', 'E' }, { 'W', 'P', 'C' }, { 'F', 'R', 'E' }, { 'W', 'P', 'C' }
