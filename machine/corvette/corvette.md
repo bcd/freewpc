@@ -349,4 +349,4 @@ ZR-1 Up Rev Gate: driver(duty),
 
 Kickback Driver: driver(spsol),
 	sw=SW_KICKBACK, sol=SOL_KICKBACK,
-	ontime=12, offtime=18
+	ontime=12, offtime=18, auto=1
