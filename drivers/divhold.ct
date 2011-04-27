@@ -41,6 +41,15 @@
 /* The solenoid that is used for hold power */
 @@parameter hold_sol
 
+
+@@
+@@file @self.sched
+@@
+
+# note, the template is hard coded to use a frequency value of 8, the value below must match
+# See @self_DIVERTER_SCHED
+!@self_service 8 40c
+
 @@
 @@file @self.h
 @@
@@ -49,18 +58,18 @@
 
 // TODO probably can make this less frequent as we don't care about any switches.
 /* Schedule this driver every 8ms. */
-#define DIVERTER_SCHED 8
+#define @self_DIVERTER_SCHED 8
 
 /* Length of time for the initial power pulse */
-#define POWER_PULSE 40
-#define POWER_TICKS (POWER_PULSE / DIVERTER_SCHED)
+#define @self_POWER_PULSE 40
+#define @self_POWER_TICKS (@self_POWER_PULSE / @self_DIVERTER_SCHED)
 
 extern __fastram__ U8 @self_timer;
 
 void @self_start (void);
 void @self_stop (void);
 
-extern inline void @self_driver (void)
+extern inline void @self_service (void)
 {
 	if (@self_timer == 0) {
 		sol_disable (@power_sol | @hold_sol);
@@ -110,7 +119,7 @@ void @self_start (void) {
 	/* Start the high power pulse */
 	sol_enable (@power_sol | @hold_sol);
 	sample_start (SND_GUITAR_01, SL_100MS); // XXX
-	@self_timer = POWER_TICKS;
+	@self_timer = @self_POWER_TICKS;
 	
 	enable_interrupts ();
 }
