@@ -132,6 +132,9 @@ typedef struct device_properties
 	 * the first switch that would close when a ball enters the device,
 	 * switch MAX-1 is the last switch to open when a ball leaves it.  */
 	switchnum_t sw[MAX_SWITCHES_PER_DEVICE];
+
+	/** The time to wait for a device to settle before evaluating switches */
+	U8 settle_delay; // See TIME_* defines
 } device_properties_t;
 
 

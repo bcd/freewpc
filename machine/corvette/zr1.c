@@ -181,7 +181,7 @@ void zr1_enable_solenoids(void) {
 	}
 	writeb (ZR1_ENGINE_CONTROL, 1); // disable the DISABLE_A/DISABLE_B lines
 	if (!global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
-		sample_start (SND_STARTER_MOTOR, SL_500MS); // XXX - trigger sound when changing power
+		//sample_start (SND_STARTER_MOTOR, SL_500MS); // XXX - trigger sound when changing power
 		global_flag_on(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
 	}
 }
@@ -198,8 +198,8 @@ void zr1_disable_solenoids(void) {
 
 	writeb (ZR1_ENGINE_CONTROL, 0); // enable the DISABLE_A/DISABLE_B lines
 	if (global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
+		//sample_start (SND_SPARK_PLUG_01, SL_500MS); // XXX - trigger sound when changing power
 		global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
-		sample_start (SND_SPARK_PLUG_01, SL_500MS); // XXX - trigger sound when changing power
 	}
 }
 
@@ -222,7 +222,7 @@ void zr1_state_center_run(void) {
 
 void zr1_state_calibrate_exit(void) {
 	zr1_calibration_attempted = TRUE;
-	zr1_state = ZR1_IDLE;
+	zr1_state = ZR1_FLOAT;
 }
 
 void zr1_calibration_failed(enum mech_zr1_calibration_codes code) {
@@ -360,12 +360,12 @@ void zr1_state_calibrate_run(void) {
 	}
 }
 
-void zr1_state_idle_enter(void) {
+void zr1_state_float_enter(void) {
 	zr1_set_position_to_center();
 	zr1_center_ticks_remaining = ZR1_CENTER_TICKS;
 }
 
-void zr1_state_idle_run(void) {
+void zr1_state_float_run(void) {
 	if (zr1_center_ticks_remaining > 0) {
 		zr1_center_ticks_remaining--;
 		return;
@@ -455,11 +455,11 @@ void corvette_zr1_engine_rtt (void) {
 			}
 		break;
 
-		case ZR1_IDLE:
+		case ZR1_FLOAT:
 			if (zr1_previous_state != zr1_state) {
-				zr1_state_idle_enter();
+				zr1_state_float_enter();
 			} else {
-				zr1_state_idle_run();
+				zr1_state_float_run();
 			}
 		break;
 
@@ -498,8 +498,8 @@ void zr1_reset(void) {
 	zr1_calibrated = FALSE;
 	zr1_calibration_attempted = FALSE;
 	zr1_last_calibration_result_code = CC_NOT_CALIBRATED;
-	zr1_state = ZR1_IDLE;
-	zr1_previous_state = ZR1_INITIALIZE; // Note: this state must be used so that zr1_state_idle_enter is called, without this first state zr1_state_idle_enter would not be called.
+	zr1_state = ZR1_FLOAT;
+	zr1_previous_state = ZR1_INITIALIZE; // Note: this state must be used so that zr1_state_float_enter is called, without this first state zr1_state_float_enter would not be called.
 
 	zr1_shake_speed = ZR1_SHAKE_SPEED_DEFAULT;
 	zr1_shake_range = ZR1_SHAKE_RANGE_DEFAULT;
@@ -532,8 +532,8 @@ void zr1_enter_state(enum mech_zr1_state new_state) {
 	}
 }
 
-void zr1_idle(void) {
-	zr1_enter_state(ZR1_IDLE);
+void zr1_float(void) {
+	zr1_enter_state(ZR1_FLOAT);
 }
 
 void zr1_calibrate(void) {
@@ -605,7 +605,16 @@ CALLSET_ENTRY (zr1, init)
 CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 {
 	dbprintf ("zr1: amode_stop, test_start, stop_game entry\n");
-	zr1_enter_state(ZR1_IDLE);
+	zr1_float();
+}
+
+
+void zr1_shake_2sec_task (void)
+{
+	zr1_shake();
+	task_sleep_sec (2);
+	zr1_center();
+	task_exit ();
 }
 
 /**
@@ -613,7 +622,15 @@ CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
  */
 CALLSET_ENTRY (zr1, start_ball, end_ball)
 {
-	zr1_idle();
+	task_create_gid1 (GID_ZR1_SHAKE, zr1_shake_2sec_task);
+}
+
+/**
+ * Reset the engine to the center position at the end of each ball.
+ */
+CALLSET_ENTRY (zr1, end_ball)
+{
+	zr1_center();
 }
 
 
@@ -658,7 +675,7 @@ CALLSET_ENTRY (zr1, ball_search_end) {
 	if (in_live_game) {
 		zr1_center();
 	} else {
-		zr1_idle();
+		zr1_float();
 	}
 }
 
@@ -667,5 +684,5 @@ CALLSET_ENTRY (zr1, start_game) {
 }
 
 CALLSET_ENTRY (zr1, end_game) {
-	zr1_idle();
+	zr1_float();
 }

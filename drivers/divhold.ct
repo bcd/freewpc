@@ -1,0 +1,140 @@
+/*
+ * Copyright 2010-2011 by Dominic Clifton <me@dominicclifton.name>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/*
+ * Diverter with separate hold power driver
+ *
+ * This is an implementation of a diverter which has separate electrical circuits
+ * for pulse and hold power.
+ *
+ * Examples can be found on Corvette, AFM and WCS (TODO confirm latter two)
+ *
+ * On Corvette the fliptonic II's spare Upper Right Flipper circuits are used to
+ * driver a diverter.  The solenoid, unlike the flippers on the game, does NOT have
+ * an End-Of-Stroke (EOS) switch. 
+ *
+ * The code to control a diverter flipper depends on two parameters, which are simply
+ * the solenoid numbers for the power and holding coils
+ */
+
+@@class divhold
+
+/* The solenoid that is used for full power*/
+@@parameter power_sol
+/* The solenoid that is used for hold power */
+@@parameter hold_sol
+
+@@
+@@file @self.h
+@@
+
+#include <freewpc.h>
+
+// TODO probably can make this less frequent as we don't care about any switches.
+/* Schedule this driver every 8ms. */
+#define DIVERTER_SCHED 8
+
+/* Length of time for the initial power pulse */
+#define POWER_PULSE 40
+#define POWER_TICKS (POWER_PULSE / DIVERTER_SCHED)
+
+extern __fastram__ U8 @self_timer;
+
+void @self_start (void);
+void @self_stop (void);
+
+extern inline void @self_driver (void)
+{
+	if (@self_timer == 0) {
+		sol_disable (@power_sol | @hold_sol);
+		return;
+	}
+	
+	if (@self_timer > 0) {
+		/* Allow the high power pulse to keep running */
+		if (--@self_timer == 0)
+		{
+			/* The high power pulse has expired.  Switch to hold power */			
+			sol_disable (@power_sol);
+			@self_timer = -1;
+		}
+		return;
+	}
+	
+	/*
+	if (@self_timer < 0) {
+		// nothing to do, but hold_sol is on. 
+		// TODO add a timeout so we don't stay on too long?
+	}
+	*/	
+}
+
+@@
+@@file @self.c
+@@
+
+#include <freewpc.h>
+#include "@self.h"
+
+/** Each diverter has it's own timer variable.
+ *
+ * < 0 - use hold power only
+ * > 0 - full power to both hold and power circuits
+ *   0 - no power
+ */
+__fastram__ U8 @self_timer;
+
+/**
+ * The user API to start a diverter.
+ */
+void @self_start (void) {
+	disable_interrupts ();
+	
+	/* Start the high power pulse */
+	sol_enable (@power_sol | @hold_sol);
+	sample_start (SND_GUITAR_01, SL_100MS); // XXX
+	@self_timer = POWER_TICKS;
+	
+	enable_interrupts ();
+}
+
+/**
+ * The user API to stop a diverter.
+ */
+void @self_stop (void) {
+	disable_interrupts ();
+	
+	@self_timer = 0;
+	sol_disable (@power_sol | @hold_sol);
+	sample_start (SND_GUITAR_03, SL_100MS); // XXX
+	enable_interrupts ();
+}
+
+CALLSET_ENTRY (@self, init)
+{
+	@self_timer = 0;
+}
+
+CALLSET_ENTRY (@self, tilt, stop_game)
+{
+	@self_stop ();
+}
+
+/* vim: set filetype=c: */

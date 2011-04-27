@@ -38,7 +38,7 @@ enum {
 	CALIBRATE = FIRST_TEST,
 	SHAKE,
 	CENTER,
-	IDLE,
+	FLOAT,
 	BALL_SEARCH,
 	LAST_TEST = BALL_SEARCH
 } zr1_test_command;
@@ -47,7 +47,7 @@ char *short_names[] = {
 	"CALIBRATE",
 	"SHAKE",
 	"CENTER",
-	"IDLE",
+	"FLOAT",
 	"BALL_SEARCH"
 };
 
@@ -233,7 +233,7 @@ void zr1_test_escape (void) {
 
 	// allow calibrate to continue, but stop everything else
 	if (zr1_state != ZR1_CALIBRATE) {
-		zr1_idle();
+		zr1_float();
 	}
 
 	window_pop();
@@ -251,8 +251,8 @@ void zr1_test_enter (void)
 
   		case SHAKE:
   			if (zr1_state == ZR1_SHAKE) {
- 				dbprintf ("zr1_test_enter: engine already shaking, starting 'idle' instead\n");
-  				zr1_idle();
+ 				dbprintf ("zr1_test_enter: engine already shaking, starting 'float' instead\n");
+  				zr1_float();
   				break;
   			}
  			dbprintf ("zr1_test_enter: starting 'shake'\n");
@@ -264,18 +264,18 @@ void zr1_test_enter (void)
   			zr1_center();
   		break;
 
-  		case IDLE:
- 			dbprintf ("zr1_test_enter: starting 'idle'\n");
-  			zr1_idle();
+  		case FLOAT:
+ 			dbprintf ("zr1_test_enter: starting 'float'\n");
+  			zr1_float();
   		break;
 
   		case BALL_SEARCH:
-  			if (zr1_state == ZR1_SHAKE) {
- 				dbprintf ("zr1_test_enter: engine already shaking, starting 'idle' instead\n");
-  				zr1_idle();
+  			if (zr1_state == ZR1_BALL_SEARCH) {
+ 				dbprintf ("zr1_test_enter: engine already shaking, starting 'float' instead\n");
+  				zr1_float();
   				break;
   			}
- 			dbprintf ("zr1_test_enter: starting 'idle'\n");
+ 			dbprintf ("zr1_test_enter: starting 'float'\n");
   			zr1_start_ball_search();
   		break;
 

@@ -14,7 +14,7 @@ Pinmame-ROM: corv_2_1.bin
 Lamp-Matrix-Width: 51
 Lamp-Matrix-Height: 18
 
-define MACHINE_NUMBER 570
+define MACHINE_NUMBER 536
 define MACHINE_GRAND_CHAMPION_INITIALS { 'D', 'P', 'C' }
 define MACHINE_GRAND_CHAMPION_SCORE { 0x00, 0x20, 0x00, 0x00, 0x00 }
 define MACHINE_HIGH_SCORE_INITIALS { 'F', 'R', 'E' }, { 'W', 'P', 'C' }, { 'F', 'R', 'E' }, { 'W', 'P', 'C' }
@@ -168,7 +168,7 @@ H3: Kickback, duty(SOL_DUTY_75), time(TIME_66MS)
 H4: Pit Stop Popper, duty(SOL_DUTY_75), time(TIME_66MS)
 H5: ZR-1 Up Rev Gate, duty(SOL_DUTY_50), time(TIME_66MS)
 H6: Not Used 1, nosearch
-H7: Knocker, knocker, time(TIME_16MS)
+H7: Knocker, knocker, duty(SOL_DUTY_75), time(TIME_50MS)
 H8: Route 66 Kickout, duty(SOL_DUTY_75), time(TIME_66MS)
 
 L1: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
@@ -200,7 +200,7 @@ A4: Right Standup, flash, duty(SOL_DUTY_75), time(TIME_16MS)
 
 # F = J902 on Fliptronic II
 F5: Ramp Diverter, duty(SOL_DUTY_100), time(TIME_50MS)
-F6: Ramp Divertor Hold, duty(SOL_DUTY_100), time(TIME_100MS)
+F6: Ramp Diverter Hold, duty(SOL_DUTY_100), time(TIME_100MS)
 F7: U.L. Flip Power, duty(SOL_DUTY_100), time(TIME_50MS)
 F8: U.L. Flip Hold, duty(SOL_DUTY_100), time(TIME_100MS)
 
@@ -230,7 +230,7 @@ Build Up: PF:lamp_sort_bottom_to_top
 
 [containers]
 Trough: trough, Trough Release, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(4)
-ZR1 Popper: ZR-1 Lockup, ZR-1 Lock Ball 3, ZR-1 Lock Ball 2, ZR-1 Lock Ball 1
+ZR1 Popper: ZR-1 Lockup, ZR-1 Lock Ball 3, ZR-1 Lock Ball 2, ZR-1 Lock Ball 1, settle_delay(TIME_1500MS)
 Pitstop Popper: Pit Stop Popper, Pit Stop Popper
 Route 66 Popper: Route 66 Kickout, Route 66 Kickout
 
@@ -334,6 +334,10 @@ Spinner: driver(spinner), sw_event=sw_spinner, sw_number=SW_SPINNER
 Loop Gate: driver(duty),
 	sol=SOL_LOOP_GATE,
 	ontime=TIME_300MS, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=60
+
+Diverter: driver(divhold),
+	power_sol=SOL_RAMP_DIVERTER,
+	hold_sol=SOL_RAMP_DIVERTER_HOLD
 
 ZR-1 Low Rev Gate: driver(duty),
 	sol=SOL_ZR_1_LOW_REV_GATE,

@@ -76,6 +76,7 @@ void udiv32 (U32 reg, U16 divisor, U32 *quotientp, U32 *remainderp)
 	while (reg >= divisor)
 	{
 		S16 guess = 31 - __builtin_clzl (reg) - y0;
+		pinio_watchdog_reset ();
 		if ((guess > 0) && (guess < 32))
 		{
 			quotient += powers_of_two_table[guess];
@@ -86,6 +87,7 @@ void udiv32 (U32 reg, U16 divisor, U32 *quotientp, U32 *remainderp)
 			quotient++;
 			reg -= divisor;
 		}
+		pinio_watchdog_reset ();
 	}
 
 	if (*remainderp)

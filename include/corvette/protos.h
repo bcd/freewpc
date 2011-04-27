@@ -55,7 +55,7 @@ __machine__ void dmd_flash (task_ticks_t delay);
 
 __machine__ void zr1_shake(void);
 __machine__ void zr1_center(void);
-__machine__ void zr1_idle(void);
+__machine__ void zr1_float(void);
 __machine__ void zr1_calibrate(void);
 __machine__ void zr1_start_ball_search(void);
 __machine__ void zr1_set_shake_speed(U8 new_shake_speed);

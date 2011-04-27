@@ -948,12 +948,17 @@ sub machine_write_container_decls {
 		my $sw_count = $def->{'size'};
 		my $sws = $def->{'switches'};
 		my $init_max_count = $def->{'init_max_count'};
+		my $settle_delay = $def->{'settle_delay'};
 		print "[" . $def->{'c_ident'} . "] = {\n";
 		print "   .ops = \&${name}_ops,\n";
 		print "   .name = " . $def->{'c_string'} . ",\n";
 		print "   .sol = $coilname,\n";
 		print "   .sw_count = $sw_count,\n";
 		print "   .init_max_count = $init_max_count,\n";
+		if (!defined $settle_delay) {
+			$settle_delay = "TIME_700MS";
+		}
+		print "   .settle_delay = $settle_delay,\n";
 		print "   .sw = { ";
 		for $swname (@$sws) {
 			my $sw = ($m->{'switches'})->{$swname};

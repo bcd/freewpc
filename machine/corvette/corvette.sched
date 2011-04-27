@@ -19,5 +19,30 @@
 # 
 
 
+# Special solenoid drivers
+!left_sling_service       8     40c
+!right_sling_service      8     40c
+!left_jet_service         8     40c
+!upper_jet_service        8     40c
+!lower_jet_service        8     40c
+!kickback_driver_service  8     40c
+
+# Spinner drivers
+!spinner_service          8     40c
+
+# Duty drivers
+!loop_gate_service             16    40c
+!zr_1_up_rev_gate_service      16    40c
+!zr_1_low_rev_gate_service     16    40c
+
+# Drivers for diverter with hold power)
+# note, the template is hard coded to use a frequence value of 8, the value below must match
+# See DIVERTER_SCHED
+!diverter_driver           8     40c
+
 # Game specific drivers
+# note, the zr1 rtt code is hard coded to use a frequence value of 16, the value below must match
+# See ZR1_*_TICKS defines
 corvette_zr1_engine_rtt   16    1c
+
+# EOF
