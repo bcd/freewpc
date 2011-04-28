@@ -91,7 +91,7 @@ static void left_ramp_deff_subtask (void)
 		else	
 			sprintf ("10 MILLION");
 	}
-	else if (left_ramps > 10)
+	else if ((left_ramps > 10) && (left_ramps < 20))
 		sprintf ("20 MILLION AT 20");
 	else if (left_ramps == 20)
 	{
