@@ -449,10 +449,10 @@ void io_wpc_init (void)
 	io_add_dmd_mapping_reg (WPC_DMD_LOW_PAGE, 0);
 	io_add_dmd_mapping_reg (WPC_DMD_HIGH_PAGE, 1);
 #if (MACHINE_WPC95 == 1)
-	io_add_dmd_mapping_reg (WPC_DMD_3000_PAGE, 2);
-	io_add_dmd_mapping_reg (WPC_DMD_3200_PAGE, 3);
-	io_add_dmd_mapping_reg (WPC_DMD_3400_PAGE, 4);
-	io_add_dmd_mapping_reg (WPC_DMD_3600_PAGE, 5);
+	io_add_dmd_mapping_reg (WPC95_DMD_3000_PAGE, 2);
+	io_add_dmd_mapping_reg (WPC95_DMD_3200_PAGE, 3);
+	io_add_dmd_mapping_reg (WPC95_DMD_3400_PAGE, 4);
+	io_add_dmd_mapping_reg (WPC95_DMD_3600_PAGE, 5);
 #endif
 	/* WPC_DMD_FIRQ_ROW_VALUE is not handled in simulation */
 #endif

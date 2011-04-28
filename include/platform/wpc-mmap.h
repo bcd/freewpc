@@ -52,10 +52,15 @@
 #endif
 
 #if (MACHINE_WPC95 == 1)
-#define WPC_DMD_3200_PAGE           0x3FB8
-#define WPC_DMD_3000_PAGE           0x3FB9
-#define WPC_DMD_3600_PAGE           0x3FBA
-#define WPC_DMD_3400_PAGE           0x3FBB
+#define WPC95_PRINTER_DATA          0x3FB0
+#define WPC95_PRINTER_BAUD          0x3FB1
+#define WPC95_PRINTER_ADDR          0x3FB3
+#define WPC95_PRINTER_STATUS        0x3FB5
+#define WPC95_PRINTER_PRESENCE      0x3FB7
+#define WPC95_DMD_3200_PAGE         0x3FB8
+#define WPC95_DMD_3000_PAGE         0x3FB9
+#define WPC95_DMD_3600_PAGE         0x3FBA
+#define WPC95_DMD_3400_PAGE         0x3FBB
 #endif
 #define WPC_DMD_HIGH_PAGE           0x3FBC
 #define WPC_DMD_FIRQ_ROW_VALUE      0x3FBD
