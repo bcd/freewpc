@@ -21,6 +21,8 @@
 /* CALLSET_SECTION (music , __machine2__) */
 #include <freewpc.h>
 
+U8 old_mode_timer;
+
 void slow_music_lin (U8 count, U8 delay)
 {
 	U8 i;
@@ -66,6 +68,17 @@ void speed_up_music_task (void)
 	task_exit ();
 }
 
+void music_check_mode_timer (U8 mode_timer)
+{
+	if (old_mode_timer == mode_timer)
+		return;
+	old_mode_timer = mode_timer;
+	if (mode_timer <= 10 && mode_timer > 5)
+	{
+		sound_send (SND_MUSIC_FASTER);
+	}
+}
+
 CALLSET_ENTRY (music, idle_every_second)
 {
 	extern U8 mpf_timer;
@@ -76,24 +89,46 @@ CALLSET_ENTRY (music, idle_every_second)
 	extern U8 hitch_mode_timer;
 	extern U8 sslot_mode_timer;
 	extern U8 spiral_mode_timer;
-	extern music_code_t current_music;
+	extern sound_code_t music_active;
 
 	if (!in_live_game || task_find_gid (GID_MUSIC_SPEED))
 		return;
-	if ((mpf_timer < 10 && current_music == MUS_POWERFIELD)
-			|| (hurryup_mode_timer < 10 && hurryup_mode_timer > 1 && current_music == MUS_FASTLOCK_COUNTDOWN)
-			|| (greed_mode_timer < 10 && greed_mode_timer > 1 && current_music == MUS_GREED_MODE)
-			|| (tsm_mode_timer < 10 && tsm_mode_timer > 1 && current_music == MUS_TOWN_SQUARE_MADNESS)
-			|| (fastlock_mode_timer < 10 && fastlock_mode_timer > 1 && current_music == MUS_FASTLOCK_ADDAMS_FAMILY)
-			|| (hitch_mode_timer < 10 && hitch_mode_timer > 1 && current_music == MUS_FASTLOCK_ADDAMS_FAMILY)
-			|| (sslot_mode_timer < 10 && sslot_mode_timer > 1 && current_music == MUS_SUPER_SLOT)
-			|| (spiral_mode_timer < 10 && spiral_mode_timer > 1 && current_music == MUS_SPIRAL_MODE))
-		sound_send (SND_MUSIC_FASTER);
+	switch (music_active)
+	{
+		case MUS_POWERFIELD:
+			music_check_mode_timer (mpf_timer);
+			break;
+		case MUS_FASTLOCK_COUNTDOWN:
+			music_check_mode_timer (hurryup_mode_timer);
+			break;
+		case MUS_GREED_MODE:
+			music_check_mode_timer (greed_mode_timer);
+			break;
+		case MUS_TOWN_SQUARE_MADNESS:
+			music_check_mode_timer (tsm_mode_timer);
+			break;
+		case MUS_FASTLOCK_ADDAMS_FAMILY:
+			music_check_mode_timer (fastlock_mode_timer);
+			music_check_mode_timer (hitch_mode_timer);
+			break;
+		case MUS_SUPER_SLOT:
+			music_check_mode_timer (sslot_mode_timer);
+			break;
+		case MUS_SPIRAL_MODE:
+			music_check_mode_timer (spiral_mode_timer);
+			break;
+	}
+}
+
+CALLSET_ENTRY (music, init)
+{
+	old_mode_timer = 0;
 }
 
 CALLSET_ENTRY (music, bonus, stop_game, start_game)
 {
 	task_kill_gid (GID_MUSIC_SPEED);
+	old_mode_timer = 0;
 }
 
 CALLSET_ENTRY (music, speed_up_music)
