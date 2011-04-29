@@ -459,9 +459,10 @@ CALLSET_ENTRY(door, sw_piano)
 		{
 			flag_on (FLAG_PIANO_DOOR_LIT);
 		}
-		award_unlit_shot (SW_PIANO);
 		score (SC_5130);
 		sound_send (SND_ODD_CHANGE_BEGIN);
+		callset_invoke (oddchange_collected);
+		award_unlit_shot (SW_PIANO);
 	}
 }
 
@@ -483,8 +484,9 @@ CALLSET_ENTRY (door, shot_slot_machine)
 			flag_on (FLAG_SLOT_DOOR_LIT);
 			sound_send (SND_FEEL_LUCKY);
 		}
-		award_unlit_shot (SW_SLOT);
 		score (SC_5130);
+		callset_invoke (oddchange_collected);
+		award_unlit_shot (SW_SLOT);
 	}
 }
 
