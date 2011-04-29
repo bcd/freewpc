@@ -142,6 +142,7 @@ void hurryup_mode_exit (void)
 {
 	lamp_tristate_off (LM_POWER_PAYOFF);
 	task_kill_gid (GID_HURRYUP_SCORE_COUNTDOWN);
+	task_kill_gid (GID_MUSIC_SPEED);
 }
 
 static inline void award_hurryup (void)

@@ -106,6 +106,13 @@ void award_unlit_shot (U8 unlit_called_from)
 	}
 }
 
+CALLSET_ENTRY (unlit, serve_ball)
+{
+	unlit_shot_count = 0;
+	unlit_called_from_stored = 0;
+
+}
+
 CALLSET_ENTRY (unlit, start_ball)
 {
 	unlit_shot_count = 0;

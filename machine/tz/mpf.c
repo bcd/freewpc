@@ -167,6 +167,7 @@ void mpf_mode_exit (void)
 	task_kill_gid (GID_MPF_COUNTDOWN_SCORE_TASK);
 	task_kill_gid (GID_MPF_BALLSEARCH);
 	task_kill_gid (GID_MPF_BUTTON_MASHER);
+	task_kill_gid (GID_MUSIC_SPEED);
 	mpf_active = FALSE;
 	leff_stop (LEFF_MPF_ACTIVE);
 }

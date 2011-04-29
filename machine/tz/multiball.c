@@ -388,7 +388,7 @@ CALLSET_ENTRY (mball, lamp_update)
 		/* Flash the Piano Jackpot lamp when MB Jackpot is lit */
 		if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 			lamp_tristate_flash (LM_PIANO_JACKPOT);
-		else
+		else if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 			lamp_tristate_off (LM_PIANO_JACKPOT);
 	}
 	/* Turn on and flash door lock lamps during game situations */

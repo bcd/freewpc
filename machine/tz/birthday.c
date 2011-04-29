@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 by Ewan Meadows <sonny_jim@hotmail.com>
+ * Copyright 2011 by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *

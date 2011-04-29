@@ -80,12 +80,9 @@ CALLSET_ENTRY (spiral, award_spiral_loop)
 {
 	if (!timed_mode_running_p (&spiral_mode))
 		return;
-	if (spiral_loops > 2)
-		spiral_loops = 1;
-	else
-		spiral_loops++;
+	bounded_increment (spiral_loops, 50);
 	/* Score it */
-	if (spiral_loops < 2)
+	if (spiral_loops < 3)
 	{
 		sound_send (SND_SPIRAL_AWARDED);
 		score (SC_10M);
