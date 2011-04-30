@@ -48,6 +48,10 @@ NATIVE_OBJS += $(D)/io.o
 NATIVE_OBJS += $(D)/keyboard.o
 NATIVE_OBJS += $(if $(CONFIG_PLATFORM_WPC), $(D)/io_wpc.o)
 NATIVE_OBJS += $(if $(CONFIG_PIC), $(D)/wpc-pic.o)
+ifeq ($(MACHINE),tz)
+$(eval $(call have,CONFIG_MACHINE_SIM))
+NATIVE_OBJS += $(D)/tz_sim.o
+endif
 
 # For ASCII DMD
 NATIVE_OBJS += $(if $(CONFIG_DMD), $(D)/asciidmd.o, $(D)/segment.o)

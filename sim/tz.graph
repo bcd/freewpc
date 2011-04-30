@@ -1,0 +1,6 @@
+# A graph file defines the various playfield positions and how
+# they are interconnected.
+
+SW_PIANO, 1500, SW_SLOT_PROXIMITY
+SW_SLOT_PROXIMITY, 1000, DEVNO_SLOT
+SW_SHOOTER?10, 500

@@ -23,11 +23,14 @@
 #include <hwsim/io.h>
 
 /* A table of I/O addresses.  Every valid IO addr has an entry here that says
-	how to read and write from that address.
+	how to simulate reading and writing from that address.
 
 	Use one of the io_add variants to populate this table.  You can provide
 	your own custom functions (of type io_reader and io_writer), or use some
-	of the defaults in this file that provide common functionality. */
+	of the defaults in this file that provide common functionality.
+
+	When you populate an I/O address handler, you can register an arbitrary
+	void pointer that will be passed back to the handler at access time. */
 struct io_region io_region_table[NUM_IO_ADDRS];
 
 

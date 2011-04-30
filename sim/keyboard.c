@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -34,46 +34,78 @@ extern const switch_info_t switch_table[];
 /** The file descriptor to read from for input */
 int sim_input_fd = 0;
 
-/** A mapping from keyboard command to switch */
-static switchnum_t keymaps[256] = {
-#ifdef MACHINE_START_SWITCH
-	['1'] = MACHINE_START_SWITCH,
-#endif
-#ifdef MACHINE_BUYIN_SWITCH
-	['2'] = MACHINE_BUYIN_SWITCH,
-#endif
-	/* '3': SW_LEFT_COIN is omitted on purpose... see below */
-	['4'] = SW_CENTER_COIN,
-	['5'] = SW_RIGHT_COIN,
-	['6'] = SW_FOURTH_COIN,
-	['7'] = SW_ESCAPE,
-	['8'] = SW_DOWN,
-	['9'] = SW_UP,
-	['0'] = SW_ENTER,
-	[','] = SW_LEFT_BUTTON,
-	['.'] = SW_RIGHT_BUTTON,
-	['-'] = SW_COIN_DOOR_CLOSED,
-#ifdef MACHINE_TILT_SWITCH
-	['T'] = MACHINE_TILT_SWITCH,
-#endif
-#ifdef MACHINE_SLAM_TILT_SWITCH
-	['!'] = MACHINE_SLAM_TILT_SWITCH,
-#endif
-#ifdef MACHINE_LAUNCH_SWITCH
-	[' '] = MACHINE_LAUNCH_SWITCH,
-#endif
+#define KEY_SW 0x1
+#define KEY_NODE 0x2
+#define KEY_TOGGLE 0x4
+#define KEY_ACTION 0x8
+#define KEY_SHOOTER 0x10
+#define KEY_NODE_FROM 0x10
+#define KEY_SHOT 0x20
+
+/* Describes how a keystroke is converted into a playfield event */
+struct key_binding
+{
+	/* One or more KEY_xxx defines (see above).
+	A few flags with specific meanings:
+	KEY_SHOT says that this action is a feasible shot from a flipper.
+	It can be used to simulate game play by automatically triggering
+	actions rather than requiring lots of keystrokes. */
+	unsigned int flags;
+
+	/* When KEY_NODE is set, says that the key causes a ball
+	movement to/from this node.  By default, the movement is from
+	the playfield TO the node.  If KEY_NODE_FROM is also set,
+	the movement is to the playfield FROM this node. */
+	struct ball_node *node;
+
+	/* When KEY_SW is set, says that the key causes a simple switch
+	activation event on this switch.  KEY_NODE is preferable as it
+	simulates much better, but this was the older method used. */
+	switchnum_t sw;
+
+	/* When KEY_ACTION is set, causes a user-defined handler to be
+	invoked instead of the KEY_NODE or KEY_SW builtin actions. */
+	void (*action) (struct key_binding *);
 };
 
-/** A dummy function intended to be used for debugging under GDB. */
+static struct key_binding keymaps[128] = {};
+
+/** A dummy function intended to be used for debugging under GDB.
+ * When you want to break at a future time, but not necessarily at a
+ * particular place, set a breakpoint here.  Then press the 'C' key
+ * to halt the system.
+ */
 void gdb_break (void)
 {
 	barrier ();
 }
 
-
+/** Attach a keystroke to a switch. */
 void sim_key_install (char key, unsigned int swno)
 {
-	keymaps[(int)key] = swno;
+	struct key_binding *kb = &keymaps[(int)key];
+	kb->sw = swno;
+	kb->flags |= KEY_SW;
+	if (switch_table[kb->sw].flags & SW_PLAYFIELD)
+	{
+		kb->node = switch_nodes + swno;
+		kb->flags |= KEY_NODE;
+	}
+}
+
+void sim_key_install_node (char key, struct ball_node *node)
+{
+	struct key_binding *kb = &keymaps[(int)key];
+	kb->node = node;
+	kb->flags |= KEY_NODE;
+}
+
+
+void sim_key_install_shooter (char key)
+{
+	struct key_binding *kb = &keymaps[(int)key];
+	kb->flags &= ~(KEY_SW | KEY_NODE);
+	kb->flags |= KEY_SHOOTER;
 }
 
 
@@ -112,7 +144,7 @@ static void keybuffering (int flag)
 static void sim_interface_thread (void)
 {
 	char inbuf[2];
-	switchnum_t sw;
+	struct key_binding *kb;
 	int simulator_keys = 1;
 	int toggle_mode = 1;
 
@@ -135,7 +167,9 @@ static void sim_interface_thread (void)
 		*inbuf = sim_getchar ();
 
 		/* If switch simulation is turned off, then keystrokes
-		are fed directly into the runtime debugger. */
+		are fed into the simulated serial port... meaning it is interpreted
+		by the game program itself, and not the simulator.  Use the
+		tilde to toggle between the two modes. */
 		if (simulator_keys == 0)
 		{
 			/* Except tilde turns it off as usual. */
@@ -153,6 +187,8 @@ static void sim_interface_thread (void)
 
 		switch (*inbuf)
 		{
+			/* Carriage returns and line feeds are ignored so that you can
+			put these commands into a script file. */
 			case '\r':
 			case '\n':
 				break;
@@ -206,33 +242,6 @@ static void sim_interface_thread (void)
 				node_kick (&open_node);
 				break;
 
-#if MAX_DEVICES > 1
-			case 'w':
-				node_move (&device_nodes[1], &open_node);
-				break;
-#endif
-#if MAX_DEVICES > 2
-			case 'e':
-				node_move (&device_nodes[2], &open_node);
-				break;
-#endif
-#if MAX_DEVICES > 3
-			case 'r':
-				node_move (&device_nodes[3], &open_node);
-				break;
-#endif
-#if MAX_DEVICES > 4
-			case 't':
-				node_move (&device_nodes[3], &open_node);
-				break;
-#endif
-
-#ifndef MACHINE_LAUNCH_SWITCH
-			case ' ':
-				node_move (&open_node, &shooter_node);
-				break;
-#endif
-
 			case '`':
 				/* The tilde toggles between keystrokes being treated as switches,
 				and as input into the runtime debugger. */
@@ -246,29 +255,6 @@ static void sim_interface_thread (void)
 
 			case 'T':
 				task_dump ();
-				break;
-
-			case 'S':
-				*inbuf = sim_getchar ();
-				task_sleep_sec (*inbuf - '0');
-				break;
-
-			case '+':
-				inbuf[0] = sim_getchar ();
-				inbuf[1] = sim_getchar ();
-
-				if (inbuf[0] == 'D')
-					sw = inbuf[1] - '1';
-				else if (inbuf[0] == 'F')
-					sw = (inbuf[1] - '1')
-						+ NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES;
-				else
-					sw = (inbuf[0] - '1') * 8 + (inbuf[1] - '1');
-				sim_switch_depress (sw);
-				break;
-
-			case '3':
-				sim_switch_depress (SW_LEFT_COIN);
 				break;
 
 			case '#':
@@ -287,24 +273,35 @@ static void sim_interface_thread (void)
 			default:
 				/* For all other keystrokes, use the keymap table
 				to turn the keystroke into a switch trigger. */
-				sw = keymaps[(int)*inbuf];
-				if (sw)
+				kb = &keymaps[(int)*inbuf];
+#ifdef MACHINE_SHOOTER_SWITCH
+				if (kb->flags & KEY_SHOOTER)
 				{
-					if ((switch_table[sw].flags & SW_EDGE) || !toggle_mode)
+					node_kick (&shooter_node);
+				}
+				else
+#endif
+				if (kb->flags & KEY_NODE)
+				{
+					node_move (kb->node, &open_node);
+				}
+				else if (kb->flags & KEY_SW)
+				{
+					if ((switch_table[kb->sw].flags & SW_EDGE) || !toggle_mode)
 					{
-						simlog (SLC_DEBUG, "switch %d toggled",  sw);
-						sim_switch_toggle (sw);
+						simlog (SLC_DEBUG, "switch %d toggled", kb->sw);
+						sim_switch_toggle (kb->sw);
 						toggle_mode = 1;
 					}
 #if (MACHINE_FLIPTRONIC == 1)
-					else if (sw >= 72)
+					else if (kb->sw >= 72)
 					{
-						flipper_button_depress (sw);
+						flipper_button_depress (kb->sw);
 					}
 #endif
 					else
 					{
-						sim_switch_depress (sw);
+						sim_switch_depress (kb->sw);
 					}
 				}
 				else
@@ -326,6 +323,50 @@ void keyboard_init (void)
 {
 	task_create_gid_while (GID_LINUX_INTERFACE, sim_interface_thread,
 		TASK_DURATION_INF);
-}
 
+	/* Install platform-specific key bindings */
+#ifdef MACHINE_START_SWITCH
+	sim_key_install ('1', MACHINE_START_SWITCH);
+#endif
+#ifdef MACHINE_BUYIN_SWITCH
+	sim_key_install ('2', MACHINE_BUYIN_SWITCH);
+#endif
+	sim_key_install ('3', SW_LEFT_COIN);
+	sim_key_install ('4', SW_CENTER_COIN);
+	sim_key_install ('5', SW_RIGHT_COIN);
+	sim_key_install ('6', SW_FOURTH_COIN);
+	sim_key_install ('7', SW_ESCAPE);
+	sim_key_install ('8', SW_DOWN);
+	sim_key_install ('9', SW_UP);
+	sim_key_install ('0', SW_ENTER);
+	sim_key_install (',', SW_LEFT_BUTTON);
+	sim_key_install ('.', SW_RIGHT_BUTTON);
+#ifdef SW_COIN_DOOR_CLOSED
+	sim_key_install ('-', SW_COIN_DOOR_CLOSED);
+#endif
+#ifdef MACHINE_TILT_SWITCH
+	sim_key_install ('T', MACHINE_TILT_SWITCH);
+#endif
+#ifdef MACHINE_SLAM_TILT_SWITCH
+	sim_key_install ('!', MACHINE_SLAM_TILT_SWITCH);
+#endif
+#ifdef MACHINE_LAUNCH_SWITCH
+	sim_key_install (' ', MACHINE_LAUNCH_SWITCH);
+#else
+	sim_key_install_shooter (' ');
+#endif
+#if MAX_DEVICES > 1
+	sim_key_install_node ('w', &device_nodes[1]);
+#endif
+#if MAX_DEVICES > 2
+	sim_key_install_node ('e', &device_nodes[2]);
+#endif
+#if MAX_DEVICES > 3
+	sim_key_install_node ('r', &device_nodes[3]);
+#endif
+#if MAX_DEVICES > 4
+	sim_key_install_node ('t', &device_nodes[4]);
+#endif
+
+}
 

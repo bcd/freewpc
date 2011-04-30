@@ -76,6 +76,10 @@ struct ball_node
 	/* A type-dependent value */
 	unsigned int index;
 
+	/* For multiplexers only - a list of the downstream nodes.  This
+	is used instead of 'next' */
+	struct ball_node *mux_next[4];
+
 	/* The time delay before a ball transitions to the next node.
 	When a kick occurs, the ball is removed from the node immediately,
 	but does not appear in the next node until this delay completes. */
@@ -96,21 +100,38 @@ struct ball
 {
 	struct ball_node *node;
 	unsigned int pos;
+	int timer;
 	unsigned int flags;
 	unsigned int index;
 	char name[32];
 };
 
-/* Some common nodes present on most machines */
 extern struct ball_node open_node;
 extern struct ball_node device_nodes[];
-extern struct ball_node shooter_node;
-extern struct ball_node outhole_node;
+extern struct ball_node switch_nodes[];
+
+/* Aliases for nodes present on most machines */
+#define shooter_node switch_nodes[MACHINE_SHOOTER_SWITCH]
+#define outhole_node switch_nodes[MACHINE_OUTHOLE_SWITCH]
 #define trough_node device_nodes[DEVNO_TROUGH]
 
-void device_node_kick (unsigned int devno);
+#ifdef MACHINE_OUTHOLE_SWITCH
+#define drain_node outhole_node
+#elif defined(DEVNO_TROUGH)
+#define drain_node trough_node
+#endif
+
+extern struct ball_node_type switch_type_node;
+extern struct ball_node_type mux_type_node;
+extern struct ball_node_type open_type_node;
+
+void node_insert (struct ball_node *node, struct ball *ball);
 void node_kick (struct ball_node *node);
 void node_move (struct ball_node *dst, struct ball_node *src);
+void node_join (struct ball_node *source, struct ball_node *sink, unsigned int delay);
 void node_init (void);
+void node_insert_delay (struct ball_node *dst, struct ball *ball, unsigned int delay);
+
+void mux_type_insert (struct ball_node *node, struct ball *ball);
 
 #endif /* _HWSIM_BALL_H */

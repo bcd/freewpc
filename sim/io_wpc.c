@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+
+/* This file describes the mapping of WPC I/O addresses to the logic
+ * that simulates them. */
+
 #include <freewpc.h>
 #include <simulation.h>
 #include <hwsim/io.h>

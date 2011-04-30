@@ -112,6 +112,9 @@ void simlog (enum sim_log_class class, const char *format, ...)
 	{
 		if (class != SLC_DEBUG_PORT)
 			fprintf (ofp, "[SIM] ");
+#ifdef CONFIG_SIM_TIMESTAMP
+		fprintf (ofp, "(%08ld) ", realtime_read ());
+#endif
 		fprintf (ofp, "%s", buf);
 		fputc ('\n', ofp);
 		fflush (ofp);

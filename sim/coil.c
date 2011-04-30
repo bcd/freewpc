@@ -75,10 +75,6 @@ struct sim_coil_state
 	in progress. */
 	unsigned int scheduled;
 
-	/* The ball device associated with this coil, if it is of type
-	device_type_coil. */
-	unsigned int devno;
-
 	/* This smoothes out the values for 'on'; it is 1 when
 	the coil is logically on, and 0 when logically off. */
 	unsigned int at_max;
@@ -95,24 +91,41 @@ struct sim_coil_state
 
 	/* Nonzero if this I/O line is disabled for simulation */
 	int disabled;
+
+	/* For divertor coils only, this is the multiplexer node that
+		switches between the two possible destinations.
+		For ball device coils, this is the device node which holds
+		the balls. */
+	struct ball_node *node;
+
+	/* Next coil in the chain */
+	struct sim_coil_state *chain;
 };
 
 
 /**
  * The global array of coil states
  */
-struct sim_coil_state coil_states[PINIO_NUM_SOLS];
+struct sim_coil_state coil_states[PINIO_NUM_SOLS+4];
+
+void coil_clone (unsigned int parent_id, unsigned int child_id)
+{
+	struct sim_coil_state *parent = coil_states + parent_id;
+	struct sim_coil_state *child = coil_states + child_id;
+	parent->chain = child;
+	memset (child, 0, sizeof (struct sim_coil_state));
+}
 
 
 void device_coil_at_max (struct sim_coil_state *c)
 {
-	device_node_kick (c->devno);
+	node_kick (c->node);
 }
 
 
 struct sim_coil_type device_type_coil = {
-	.max_pos = 40,
-	.on_step = 4,
+	.max_pos = 120,
+	.on_step = 50,
 	.off_step = -1,
 	.at_max = device_coil_at_max,
 };
@@ -135,12 +148,12 @@ void generic_coil_at_max (struct sim_coil_state *c)
 
 #ifdef SOL_OUTHOLE
 	if (solno == SOL_OUTHOLE)
-		node_kick (&outhole_node);
+		node_kick (&switch_nodes[MACHINE_OUTHOLE_SWITCH]);
 #endif
 
 #ifdef MACHINE_LAUNCH_SOLENOID
 	if (solno == MACHINE_LAUNCH_SOLENOID)
-		node_kick (&shooter_node);
+		node_kick (&switch_nodes[MACHINE_SHOOTER_SWITCH]);
 #endif
 
 #ifdef MACHINE_KNOCKER_SOLENOID
@@ -174,6 +187,41 @@ struct sim_coil_type outhole_type_coil = {
 	.on_step = 4,
 	.off_step = -1,
 };
+
+void diverter_coil_0 (struct sim_coil_state *c)
+{
+	c->node->index = 0;
+	c->node->next = c->node->mux_next[0];
+}
+
+void diverter_coil_1 (struct sim_coil_state *c)
+{
+	c->node->index = 1;
+	c->node->next = c->node->mux_next[1];
+}
+
+struct sim_coil_type diverter_type_coil = {
+	.at_rest = diverter_coil_0,
+	.at_max = diverter_coil_1,
+	.max_pos = 40,
+	.on_step = 4,
+	.off_step = -1,
+};
+
+void diverter_coil_init (unsigned int id, struct ball_node *node)
+{
+	struct sim_coil_state *c = coil_states + id;
+	c->node = node;
+	c->type = &diverter_type_coil;
+}
+
+void device_coil_init (unsigned int id, struct ball_node *node)
+{
+	struct sim_coil_state *c = coil_states + id;
+	c->node = node;
+	c->type = &device_type_coil;
+}
+
 
 void motor_coil_at_rest (struct sim_coil_state *c)
 {
@@ -231,6 +279,7 @@ static void sim_coil_update (struct sim_coil_state *c)
 		{
 			m->pos = m->type->max_pos;
 			m->at_max = 1;
+			simlog (SLC_DEBUG, "Coil %d on", m - coil_states);
 			if (m->type->at_max)
 				m->type->at_max (c);
 		}
@@ -244,10 +293,14 @@ static void sim_coil_update (struct sim_coil_state *c)
 		{
 			m->pos = 0;
 			m->at_max = 0;
+			simlog (SLC_DEBUG, "Coil %d off", m - coil_states);
 			if (m->type->at_rest)
 				m->type->at_rest (c);
 		}
 	}
+
+	if (c->chain)
+		sim_coil_update (c->chain);
 
 #if 0
 	simlog (SLC_DEBUG, "Coil %d on=%d pos=%d of %d", m - coil_states,
@@ -261,6 +314,13 @@ static void sim_coil_update (struct sim_coil_state *c)
 	{
 		c->scheduled = 0;
 	}
+}
+
+
+bool sim_coil_is_active (unsigned int coil)
+{
+	struct sim_coil_state *c = coil_states + coil;
+	return (c->at_max != 0);
 }
 
 
@@ -288,7 +348,7 @@ void sim_coil_change (unsigned int coil, unsigned int on)
 
 
 #ifdef MACHINE_TZ
-static void tz_sim_init (void)
+static void mach_coil_init (void)
 {
 	coil_states[SOL_GUMBALL_RELEASE].type = &motor_type_coil;
 
@@ -339,9 +399,7 @@ void sim_coil_init (void)
 	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
 		const device_properties_t *props = &device_properties_table[devno];
-		struct sim_coil_state *c = coil_states + props->sol;
-		c->type = &device_type_coil;
-		c->devno = devno;
+		device_coil_init (props->sol, &device_nodes[devno]);
 	}
 
 	/* Initialize Fliptronic coils */
@@ -356,7 +414,8 @@ void sim_coil_init (void)
 #endif
 #endif
 
-#ifdef MACHINE_TZ
-	tz_sim_init ();
+	/* Initialize machine specific coils */
+#ifdef CONFIG_MACHINE_SIM
+	mach_coil_init ();
 #endif
 }
