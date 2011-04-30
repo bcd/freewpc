@@ -33,20 +33,21 @@
  * flasher that controls it.  This allows multiple flashers to run in
  * parallel.  For the solenoids (the first 16 on WPC), there is a single
  * update function, with the solenoid number as a parameter, so only one
- * of these can run at a time.
+ * of these can be pulsed at a time.  (If you need to control an output
+ * that might need to run concurrently with other things, like a long-lived
+ * divertor, then these are not the right functions to use; you want to
+ * use a driver in the 'drivers' directory.)
  *
- * A request specifies both a time (in 4ms increments) and a duty cycle
+ * A pulse request specifies both a time (in 4ms increments) and a duty cycle
  * (as low as 1/8, up to full 100% on).  The timer allows a maximum
  * duration of about 1 second.  The default time and duty cycle for the
  * shared solenoid driver comes from a table that is built from the
- * parameters in the [drives] section of the machine description.
+ * parameters in the [drives] section of the machine description.  When you
+ * call sol_request(), these are the settings that are used.
  *
- * When using the shared driver, if a request is made while the driver
+ * When using the shared driver, if another request is made while the driver
  * is already pulsing another solenoid, that request can be queued up
  * so the caller does not have to wait for it.
- *
- * If more customized control is needed, a device driver should be
- * employed instead and these APIs should be skipped altogether.
  */
 
 
@@ -224,15 +225,14 @@ void sol_request_async (U8 sol)
 
 /**
  * Allocate a slot in the pulse driver for SOL.
- * This is an internal API only, and is called whenever a
+ * This is an internal function only, and is called only when a
  * synchronous pulse request is made.  It waits if a
  * previous request is being serviced, then acquires a
- * lock so that the slot is reserved for the caller, who can
- * then make other calls into the driver to initiate the
- * actual pulses.
+ * lock so that future sync requests will be blocked.
  *
  * The caller MUST invoke sol_free() at some point later when the
- * pulse is done.
+ * pulse is done.  Thiis is done automatically if you use sol_request();
+ * or must be done by your custom pulse shaper if you write your own.
  */
 static void sol_alloc (U8 sol)
 {
@@ -248,12 +248,18 @@ static void sol_alloc (U8 sol)
 }
 
 
+/**
+ * Change the duty cycle of a pulse in progress.
+ */
 void sol_modify_duty (U8 duty)
 {
 	sol_pulse_duty = duty;
 }
 
 
+/**
+ * Change the timeout of a pulse in progress.
+ */
 void sol_modify_timeout (U8 timeout)
 {
 	sol_pulse_timer = timeout / 4;
@@ -261,8 +267,8 @@ void sol_modify_timeout (U8 timeout)
 
 
 /**
- * Free the lock on a particular solenoid.  This first waits for any
- * outstanding pulse to finish.
+ * Free the lock on a particular solenoid.  This waits for the
+ * pulse to finish, then releases the driver for others.
  */
 void sol_free (U8 sol)
 {

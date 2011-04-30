@@ -69,17 +69,20 @@ typedef enum
  */
 enum signal_operator
 {
+	/* Leaf expressions */
 	SIG_SIGNO,
 	SIG_TIME,
 	SIG_TIMEDIFF,
 	SIG_CONST,
 
+	/* Expressions with two child nodes */
 	SIG_BINARY,
 	SIG_EQ,
 	SIG_AND,
 	SIG_OR,
 	SIG_LAST_BINARY,
 
+	/* Expressions with one child node */
 	SIG_UNARY,
 	SIG_NOT,
 	SIG_LAST_UNARY,

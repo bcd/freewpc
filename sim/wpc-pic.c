@@ -102,6 +102,7 @@ U8 simulation_pic_access (int writep, U8 write_val)
 	static U32 unlock_code;
 	const U32 expected_unlock_code = 0;
 
+	/* TODO : Break this into two different functions; use I/O module. */
 	if (writep)
 	{
 		/* Handles writes to the PIC */

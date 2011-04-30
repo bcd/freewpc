@@ -41,6 +41,8 @@
  * When a signal is traced for a long period of time, and the
  * array of readings becomes full, then another one of these
  * objects is created and they are all chained together.
+ * Thus, MAX_READINGS is not a true maximum, but simply a way
+ * of not overallocating memory for short captures.
  */
 typedef struct signal_readings
 {
@@ -55,6 +57,7 @@ typedef struct signal_readings
 /**
  * An array of physical readings, indexed by signal number.
  * Each entry is a linked list of 256-reading chunks;
+ * TBD - should auto signals not be represented here?
  */
 signal_readings_t *signal_readings[MAX_SIGNALS] = { NULL, };
 
@@ -96,7 +99,8 @@ double signal_sol_voltage_value (uint32_t offset)
 
 
 /**
- * The table of auto signal types.
+ * The table of auto signal types.  Each type of auto-signal allows
+ * for 256 instances of it.
  */
 const value_signal signal_value_table[] = {
 	/* SIGNO_SOL_VOLTAGE+n gives the current voltage level of solenoid N,
@@ -226,6 +230,11 @@ bool signal_expr_eval (unsigned int sig_changed, struct signal_expression *ex)
 		case SIG_OR:
 			if (signal_expr_eval (sig_changed, ex->u.binary.left)
 				|| signal_expr_eval (sig_changed, ex->u.binary.right))
+				return TRUE;
+			break;
+
+		case SIG_NOT:
+			if (!signal_expr_eval (sig_changed, ex->u.unary))
 				return TRUE;
 			break;
 	}

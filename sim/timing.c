@@ -60,7 +60,7 @@ static void ring_free (struct time_handler *elem)
 }
 
 
-/** Register a function to be called after N_TICKS have elapsed.
+/** Register a function to be called after N_TICKS have elapsed from now.
  * PERIOIDIC_P is nonzero if the timer function should be called repeatedly,
  * every time that much time has elapsed.
  * FN is the function to be called and DATA can be anything at all, passed to

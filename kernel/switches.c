@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -28,15 +28,17 @@
 #include <search.h>
 
 /*
- * A pending switch is one which has transitioned and is eligible
- * for servicing, but is undergoing additional debounce logic.
+ * A pending switch is one which has changed levels for 2
+ * consecutive readings at interrupt time, but needs to
+ * be debounced further.
+ *
  * This struct tracks the switch number, its state, and the
  * debounce timer.
  *
- * There are a finite number of these objects; when the hardware
- * detects a transition, it will either allocate a new slot or
+ * There are a finite number of these objects.  When a change
+ * is detected, we will either allocate a new slot or
  * re-use an existing slot for the same switch that did not
- * complete its debounce cycle.
+ * complete its previous debounce cycle.
  */
 typedef struct
 {
@@ -54,7 +56,7 @@ typedef struct
  * these values. */
 __fastram__ switch_bits_t sw_raw;
 
-/** Nonzero for each switch whose last reading differs from the
+/** Nonzero for each switch whose last raw reading differs from the
 most recent logical (debounced) reading */
 __fastram__ switch_bits_t sw_edge;
 
@@ -64,22 +66,27 @@ __fastram__ switch_bits_t sw_edge;
 __fastram__ switch_bits_t sw_stable;
 
 /** Nonzero for each stable switch (according to sw_stable)
- * that transitioned back to its previous reading.  This means
- * the switch did not remain stable long enough for periodic
+ * that went back to its previous reading.  This means
+ * the switch did not remain stable long enough for non-interrupt
  * switch scanning to recognize it. */
 __fastram__ switch_bits_t sw_unstable;
 
 /** The current logical (i.e. debounced) readings for each
  * switch.  These are still based on voltage levels and do not
- * consider inverting necessary for processing optos. */
+ * consider inverting necessary for processing optos.  These
+ * are the levels which should be read outside of interrupts to
+ * see what the current state of a switch is. */
 __fastram__ switch_bits_t sw_logical;
 
 /** Nonzero for each switch that is in the switch queue.
  * This is not strictly needed, but it provides a fast way to
- * see if a switch is already in the debounce queue. */
+ * see if a switch is already in the queue without having to
+ * can the entire array. */
 switch_bits_t sw_queued;
 
-/* A list of pending switches which have not fully debounced yet */
+/* An array of pending switches which have not fully debounced yet.
+ * The array is kept compact, meaning that if there are N entries
+ * used, they will always be in slots [0] to [N-1]. */
 pending_switch_t switch_queue[MAX_QUEUED_SWITCHES];
 
 /* A pointer to the first free entry in the switch queue.
@@ -91,7 +98,8 @@ __fastram__ pending_switch_t *switch_queue_top;
  * to determine by how much to decrement debounce timers. */
 U16 switch_last_service_time;
 
-/** The switch number of the last switch to be scheduled. */
+/** The switch number of the last switch to be scheduled.
+ * Provided as a convenience for test mode. */
 U8 sw_last_scheduled;
 
 /** Nonzero if a switch short was detected and switches need to be
@@ -401,7 +409,7 @@ void switch_sched_task (void)
 
 	log_event (SEV_INFO, MOD_SWITCH, EV_SW_SCHEDULE, sw);
 
-	/* Don't service switches marked SW_IN_GAME at all, if we're
+	/* Don't service switches marked SW_IN_GAME if we're
 	 * not presently in a game */
 	if ((swinfo->flags & SW_IN_GAME) && !in_game)
 		goto cleanup;
@@ -440,23 +448,24 @@ void switch_sched_task (void)
 	}
 #endif
 
-	/* Call the processing function.  All functions are in the EVENT_PAGE. */
-	callset_pointer_invoke (swinfo->fn);
+	/* If the switch declares a processing function, call it. */
+	if (swinfo->fn)
+		callset_pointer_invoke (swinfo->fn);
 
 	/* If a switch is marked SW_PLAYFIELD and we're in a game,
-	 * then call the global playfield switch handler and mark
-	 * the ball 'in play'.  Don't do the last bit if the switch
-	 * specifically doesn't want this to happen.  Also, kick
-	 * the ball search timer so that it doesn't expire.
+	 * then call the global playfield switch handler and check for
+	 * valid playfield.  Also, reset the ball search timer so that
+	 * it doesn't expire.
 	 */
 	if ((swinfo->flags & SW_PLAYFIELD) && in_game)
 	{
 		callset_invoke (any_pf_switch);
 
-		/* If valid playfield not asserted yet, then see if this
-		 * switch validates it.  Most switches do this right
-		 * away; for other switches, like special solenoids,
-		 * queue the transition and maybe validate if some number
+		/* If valid playfield was not asserted yet, then see if this
+		 * switch validates it.  Most playfield switches do this right
+		 * away, but for some switches, like special solenoids (jets
+		 * or slings), which could repeatedly trigger if misaligned,
+		 * count the activations and validate only when some number
 		 * of different switches have triggered.  Device counting
 		 * switches are ignored here, but an 'enter' event will
 		 * set it. */
@@ -475,7 +484,8 @@ void switch_sched_task (void)
 
 cleanup:
 	/* If the switch is part of a device, then let the device
-	 * subsystem process the event */
+	 * subsystem process the event.  Note this will always occur
+	 * regardless of any of the above conditions checked. */
 	if (SW_HAS_DEVICE (swinfo))
 		device_sw_handler (SW_GET_DEVICE (swinfo));
 
@@ -530,7 +540,7 @@ void switch_transitioned (const U8 sw)
 		/* Start a task to process the switch event.
 		This task may sleep if necessary, but it should be as fast as possible
 		and push long-lived operations into separate background tasks.
-		It is possible for more than instance of a task to exist for the same
+		It is possible for more than one instance of a task to exist for the same
 		switch, if valid debounced transitions occur quickly. */
 		task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
 		task_set_arg (tp, sw);
