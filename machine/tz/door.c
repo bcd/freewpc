@@ -460,7 +460,6 @@ CALLSET_ENTRY(door, sw_piano)
 			flag_on (FLAG_PIANO_DOOR_LIT);
 		}
 		score (SC_5130);
-		sound_send (SND_ODD_CHANGE_BEGIN);
 		callset_invoke (oddchange_collected);
 		award_unlit_shot (SW_PIANO);
 	}

@@ -28,13 +28,13 @@ void oddchange_collected_deff (void)
 	U16 fno;
 	dmd_alloc_pair_clean ();
 	sound_send (SND_ODD_CHANGE_BEGIN);
+	U8 y = 30;
 	for (fno = IMG_ODDCHANGE_START; fno < IMG_ODDCHANGE_END; fno += 2)
 	{
+		y--;
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_var5, 64, 20, "ODDCHANGE COLLECTED");
-		sprintf_score (oddchange_score);
-		font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, y, "ODDCHANGE COLLECTED");
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
@@ -43,7 +43,7 @@ void oddchange_collected_deff (void)
 		task_sleep (TIME_16MS);
 	}
 	dmd_alloc_pair_clean ();	
-	font_render_string_center (&font_var5, 64, 20, "ODDCHANGE COLLECTED");
+	font_render_string_center (&font_var5, 64, y, "ODDCHANGE COLLECTED");
 	sprintf_score (oddchange_score);
 	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	dmd_show_low ();
@@ -52,19 +52,18 @@ void oddchange_collected_deff (void)
 	deff_exit ();
 }
 
-void oddchange_pot_deff (void)
+void oddchange_grows_deff (void)
 {
 	U16 fno;
 	dmd_alloc_pair_clean ();
-	for (fno = IMG_ODDCHANGE_START; fno < IMG_ODDCHANGE_END; fno += 2)
+	U8 y = 10;
+	for (fno = IMG_ODDCHANGE_END; fno > IMG_ODDCHANGE_START; fno -= 4)
 	{
-		U8 x = random_scaled (4);
-		U8 y = random_scaled (4);
+		y++;
+		y++;
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
-		sprintf_score (oddchange_score);
-		font_render_string_center (&font_fixed6, 62 + x, 7 + y, sprintf_buffer);
-		font_render_string_center (&font_mono5, 64, 20, "ODDCHANGE POT");
+		font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
@@ -76,8 +75,9 @@ void oddchange_pot_deff (void)
 	dmd_clean_page_low ();
 	sprintf_score (oddchange_score);
 	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
 	dmd_show_low ();
-	task_sleep (TIME_500MS);
+	task_sleep (TIME_600MS);
 	deff_exit ();
 
 }
@@ -88,10 +88,10 @@ CALLSET_ENTRY (oddchange, oddchange_collected)
 		return;
 	score_add (current_score, oddchange_score);
 	deff_start_sync (DEFF_ODDCHANGE_COLLECTED);
-	callset_invoke (reset_oddchange_pot);
+	callset_invoke (reset_oddchange_score);
 }
 
-CALLSET_ENTRY (oddchange, start_ball, reset_oddchange_pot)
+CALLSET_ENTRY (oddchange, start_ball, reset_oddchange_score)
 {
 	score_zero (oddchange_score);
 	score_add (oddchange_score, score_table[SC_50K]);
@@ -99,13 +99,13 @@ CALLSET_ENTRY (oddchange, start_ball, reset_oddchange_pot)
 
 CALLSET_ENTRY (oddchange, sw_standup_1, sw_standup_2, sw_standup_3, sw_standup_4, sw_standup_5, sw_standup_6, sw_standup_7)
 {
-	if (!in_live_game || multi_ball_play ())
+	if (!in_live_game)
 		return;
 	if (score_compare (score_table[SC_10M], oddchange_score)  == 1
 			&& !timed_mode_running_p (&greed_mode))
 	{
-		score_add (oddchange_score, score_table[SC_150K]);
-		deff_start (DEFF_ODDCHANGE_POT);
+		score_add (oddchange_score, score_table[SC_5130]);
+		deff_restart (DEFF_ODDCHANGE_GROWS);
 	}
 
 }
