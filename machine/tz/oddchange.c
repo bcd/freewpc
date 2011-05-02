@@ -25,11 +25,27 @@ score_t oddchange_score;
 
 void oddchange_collected_deff (void)
 {
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	font_render_string_center (&font_var5, 64, 8, "ODDCHANGE COLLECTED");
+	U16 fno;
+	dmd_alloc_pair_clean ();
+	sound_send (SND_ODD_CHANGE_BEGIN);
+	for (fno = IMG_ODDCHANGE_START; fno < IMG_ODDCHANGE_END; fno += 2)
+	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_var5, 64, 20, "ODDCHANGE COLLECTED");
+		sprintf_score (oddchange_score);
+		font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_16MS);
+	}
+	dmd_alloc_pair_clean ();	
+	font_render_string_center (&font_var5, 64, 20, "ODDCHANGE COLLECTED");
 	sprintf_score (oddchange_score);
-	font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	dmd_show_low ();
 	sound_send (SND_KACHING);
 	task_sleep_sec (2);
@@ -39,27 +55,8 @@ void oddchange_collected_deff (void)
 void oddchange_pot_deff (void)
 {
 	U16 fno;
-	U16 img_start;
-	U16 img_end;
-	switch (random_scaled (3))
-	{
-		case 0:
-			img_start = IMG_FLASH_START;
-			img_end = IMG_FLASH_END;
-			break;
-		default:
-		case 1:
-			img_start = IMG_FLASHCENTRE_START;
-			img_end = IMG_FLASHCENTRE_END;
-			break;
-		case 2:
-			img_start = IMG_FLASHLEFT_START;
-			img_end = IMG_FLASHLEFT_END;
-			break;
-	}
-
 	dmd_alloc_pair_clean ();
-	for (fno = img_start; fno < img_end; fno += 2)
+	for (fno = IMG_ODDCHANGE_START; fno < IMG_ODDCHANGE_END; fno += 2)
 	{
 		U8 x = random_scaled (4);
 		U8 y = random_scaled (4);
@@ -73,7 +70,7 @@ void oddchange_pot_deff (void)
 		frame_draw (fno);
 		dmd_overlay_outline ();
 		dmd_show2 ();
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_16MS);
 	}
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
@@ -87,6 +84,8 @@ void oddchange_pot_deff (void)
 
 CALLSET_ENTRY (oddchange, oddchange_collected)
 {
+	if (!in_live_game || multi_ball_play ())
+		return;
 	score_add (current_score, oddchange_score);
 	deff_start_sync (DEFF_ODDCHANGE_COLLECTED);
 	callset_invoke (reset_oddchange_pot);
@@ -100,11 +99,10 @@ CALLSET_ENTRY (oddchange, start_ball, reset_oddchange_pot)
 
 CALLSET_ENTRY (oddchange, sw_standup_1, sw_standup_2, sw_standup_3, sw_standup_4, sw_standup_5, sw_standup_6, sw_standup_7)
 {
-	if (!in_live_game)
+	if (!in_live_game || multi_ball_play ())
 		return;
 	if (score_compare (score_table[SC_10M], oddchange_score)  == 1
-			&& !timed_mode_running_p (&greed_mode)
-			&& single_ball_play ())
+			&& !timed_mode_running_p (&greed_mode))
 	{
 		score_add (oddchange_score, score_table[SC_150K]);
 		deff_start (DEFF_ODDCHANGE_POT);

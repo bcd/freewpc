@@ -62,18 +62,18 @@ machine/tz/animation/eball/eball17.pgm
 IMG_EBALL_END: machine/tz/animation/eball/eball19.pgm
 
 IMG_HITCHHIKER_START: machine/tz/animation/hitchhiker/hitchhiker01.pgm
-IMG_HITCHHIKER_2: machine/tz/animation/hitchhiker/hitchhiker02.pgm
-IMG_HITCHHIKER_3: machine/tz/animation/hitchhiker/hitchhiker03.pgm
-IMG_HITCHHIKER_4: machine/tz/animation/hitchhiker/hitchhiker04.pgm
-IMG_HITCHHIKER_5: machine/tz/animation/hitchhiker/hitchhiker05.pgm
-IMG_HITCHHIKER_6: machine/tz/animation/hitchhiker/hitchhiker06.pgm
-IMG_HITCHHIKER_7: machine/tz/animation/hitchhiker/hitchhiker07.pgm
-IMG_HITCHHIKER_8: machine/tz/animation/hitchhiker/hitchhiker08.pgm
-IMG_HITCHHIKER_9: machine/tz/animation/hitchhiker/hitchhiker09.pgm
-IMG_HITCHHIKER_10: machine/tz/animation/hitchhiker/hitchhiker10.pgm
-IMG_HITCHHIKER_11: machine/tz/animation/hitchhiker/hitchhiker11.pgm
-IMG_HITCHHIKER_12: machine/tz/animation/hitchhiker/hitchhiker12.pgm
-IMG_HITCHHIKER_13: machine/tz/animation/hitchhiker/hitchhiker13.pgm
+machine/tz/animation/hitchhiker/hitchhiker02.pgm
+machine/tz/animation/hitchhiker/hitchhiker03.pgm
+machine/tz/animation/hitchhiker/hitchhiker04.pgm
+machine/tz/animation/hitchhiker/hitchhiker05.pgm
+machine/tz/animation/hitchhiker/hitchhiker06.pgm
+machine/tz/animation/hitchhiker/hitchhiker07.pgm
+machine/tz/animation/hitchhiker/hitchhiker08.pgm
+machine/tz/animation/hitchhiker/hitchhiker09.pgm
+machine/tz/animation/hitchhiker/hitchhiker10.pgm
+machine/tz/animation/hitchhiker/hitchhiker11.pgm
+machine/tz/animation/hitchhiker/hitchhiker12.pgm
+machine/tz/animation/hitchhiker/hitchhiker13.pgm
 IMG_HITCHHIKER_END: machine/tz/animation/hitchhiker/hitchhiker14.pgm
 
 IMG_DRIVER_START: machine/tz/animation/driver/driver01.pgm
@@ -402,3 +402,16 @@ machine/tz/animation/match/match1-000014.pgm
 machine/tz/animation/match/match1-000015.pgm
 machine/tz/animation/match/match1-000016.pgm
 IMG_MATCH_END: machine/tz/animation/match/match1-000017.pgm
+
+IMG_ODDCHANGE_START: machine/tz/animation/oddchange/frame_0001.pgm
+machine/tz/animation/oddchange/frame_0002.pgm
+machine/tz/animation/oddchange/frame_0003.pgm
+machine/tz/animation/oddchange/frame_0004.pgm
+machine/tz/animation/oddchange/frame_0005.pgm
+machine/tz/animation/oddchange/frame_0006.pgm
+machine/tz/animation/oddchange/frame_0007.pgm
+machine/tz/animation/oddchange/frame_0008.pgm
+machine/tz/animation/oddchange/frame_0009.pgm
+IMG_ODDCHANGE_END: machine/tz/animation/oddchange/frame_0010.pgm
+
+
