@@ -29,7 +29,6 @@ void amode_lamp_toggle_task(void);
 void amode_leff(void);
 void amode_show_design_credits(void);
 void amode_deff(void);
-__machine2__ void show_driver_animation(void);
 __machine2__ void show_text_on_stars(void);
 
 /* stars.c */

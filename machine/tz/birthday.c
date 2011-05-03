@@ -23,10 +23,9 @@
 /* Show messages during attract mode on certain dates */
 
 #include <freewpc.h>
+#include <amode.h>
 
 #define NUM_BIRTHDAYS 8
-
-extern void amode_sleep_sec (U8 secs);
 
 const struct {
 	const U8 day;
@@ -83,7 +82,7 @@ void check_birthdays (void)
 	if (year == 0)
 		return;
 	U8 i;
-	for (i = 0; i < NUM_BIRTHDAYS - 1; i++)
+	for (i = 0; i < NUM_BIRTHDAYS; i++)
 	{
 		if (month == birthday_msgs[i].month && day == birthday_msgs[i].day)
 		{

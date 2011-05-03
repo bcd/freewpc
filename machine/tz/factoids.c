@@ -21,9 +21,9 @@
 /* CALLSET_SECTION (factoids, __machine3__) */
 
 #include <freewpc.h>
-#define NUM_FACTOIDS 22
+#include <amode.h>
 
-extern void amode_sleep_sec (U8 secs);
+#define NUM_FACTOIDS 22
 
 const struct {
 	const char *line1;
@@ -72,7 +72,7 @@ void show_random_factoid (void)
 	show_text_on_stars ();
 	
 	dmd_alloc_pair_clean ();
-	factoid_msg(random_scaled(NUM_FACTOIDS - 1));
+	factoid_msg(random_scaled(NUM_FACTOIDS));
 	dmd_show_low ();
 	amode_sleep_sec (6);
 }

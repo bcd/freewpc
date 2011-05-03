@@ -26,7 +26,7 @@
 /* 1440 minutes in a day, park timer at 1441 to disable */
 #define ALARM_DISABLED 1441
 
-/* alarm_time is stored as minutes from midnight */
+/* alarm_time is stored as minutes since midnight */
 __permanent__ U16 alarm_time;
 
 extern U8 mute_and_pause_timeout;
@@ -159,8 +159,6 @@ CALLSET_ENTRY (alarm, amode_page)
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 		render_minutes_to_alarm ();
-		sprintf ("ALARM IN %d MINUTES", sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
 		show_text_on_stars ();
 	}
 }
@@ -185,7 +183,7 @@ static inline void decrease_alarm_time (void)
 		&& alarm_time < ALARM_DISABLED)
 		alarm_time--;
 
-	if (alarm_time == rtc_minutes_from_midnight ())
+	if (alarm_time <= rtc_minutes_from_midnight ())
 		alarm_time = ALARM_DISABLED;
 }
 

@@ -1,5 +1,7 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ *
+ * Additional code by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,8 +22,8 @@
 
 /* CALLSET_SECTION (tz_amode, __machine2__) */
 #include <freewpc.h>
+#include <amode.h>
 
-extern void amode_sleep_sec (U8 secs);
 extern U8 amode_page_changed;
 
 void amode_lamp_toggle_task (void)
@@ -69,7 +71,7 @@ void amode_leff (void)
 	}
 }
 
-void show_driver_animation (void)
+static inline void show_driver_animation (void)
 {
 	/* Show driver animation */	
 	U16 fno;
@@ -88,8 +90,8 @@ void show_driver_animation (void)
 				return;
 		}
 	}
-	/* Clean both pages */
-	dmd_alloc_pair_clean ();
+//	/* Clean both pages */
+//	dmd_alloc_pair_clean ();
 }
 
 void show_text_on_stars (void)
@@ -102,12 +104,12 @@ void show_text_on_stars (void)
 		dmd_overlay_onto_color ();
 		star_draw ();
 		dmd_show2 ();
-		task_sleep (TIME_100MS);
-		dmd_map_overlay ();
 		if (amode_page_changed)
 			return;
+		task_sleep (TIME_100MS);
+		dmd_map_overlay ();
 	}
-	dmd_alloc_pair_clean ();
+	//dmd_alloc_pair_clean ();
 }
 
 static void map_and_clean (void)
@@ -135,7 +137,7 @@ static inline void draw_bttzwave (void)
 		}
 	}
 }
-
+	
 static inline void draw_bttzmelt (void)
 {
 	U16 fno;
@@ -145,20 +147,19 @@ static inline void draw_bttzmelt (void)
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
-		task_sleep (TIME_100MS);
 		if (amode_page_changed)
 			return;
+		task_sleep (TIME_100MS);
 	}
 	amode_sleep_sec (2);
-	amode_page_changed = 0;
 	for (fno = IMG_BTTZMELT_MIDDLE; fno <= IMG_BTTZMELT_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
-		task_sleep (TIME_100MS);
 		if (amode_page_changed)
 			return;
+		task_sleep (TIME_100MS);
 	}
 }
 
@@ -264,6 +265,7 @@ CALLSET_ENTRY (tz_amode10, amode_page)
 
 CALLSET_ENTRY (tz_amode11, amode_page)
 {
+	amode_page_changed = 0;
 	dmd_sched_transition (&trans_bitfade_slow);
 	/* Clean the low screen for the transition scroll*/
 	dmd_alloc_low_clean ();
@@ -275,16 +277,22 @@ CALLSET_ENTRY (tz_amode11, amode_page)
 	font_render_string_center (&font_var5, 64, 12, "BY BRIAN DOMINY AND IS");
 	font_render_string_center (&font_var5, 64, 19, "RELEASED UNDER THE GNU");
 	font_render_string_center (&font_var5, 64, 26, "GENERAL PUBLIC LICENSE.");
+	if (amode_page_changed)
+		return;
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_var5, 64, 5, "VISIT WWW.ODDCHANGE.COM");
 	font_render_string_center (&font_var5, 64, 12, "FOR MORE INFORMATION.");
+	if (amode_page_changed)
+		return;
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
 
 	dmd_alloc_low_clean ();
+	if (amode_page_changed)
+		return;
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
 }
