@@ -24,7 +24,7 @@
 
 #include <freewpc.h>
 
-#define NUM_BIRTHDAYS 4
+#define NUM_BIRTHDAYS 7
 
 const struct {
 	const U8 day;
@@ -49,7 +49,6 @@ static void draw_birthday_msg (U8 birthday_msg)
 {
 	if (birthday_msg > NUM_BIRTHDAYS)
 		birthday_msg = NUM_BIRTHDAYS;
-	dmd_alloc_pair_clean ();
 	dmd_sched_transition (&trans_bitfade_fast);
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
@@ -81,7 +80,7 @@ void check_birthdays (void)
 	if (year == 0)
 		return;
 	U8 i;
-	for (i = 0; i < NUM_BIRTHDAYS; i++)
+	for (i = 0; i < NUM_BIRTHDAYS - 1; i++)
 	{
 		if (month == birthday_msgs[i].month && day == birthday_msgs[i].day)
 		{
@@ -92,7 +91,7 @@ void check_birthdays (void)
 	}
 }
 
-CALLSET_ENTRY (birthday, amode_page, start_game)
+CALLSET_ENTRY (birthday, amode_page)
 {
 	check_birthdays ();
 }
