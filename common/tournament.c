@@ -61,7 +61,8 @@ void tournament_player_detect (void)
 
 	while (hold > 0)
 	{
-		if (!switch_poll_logical (SW_LEFT_BUTTON))
+		if (!switch_poll_logical (SW_LEFT_BUTTON)
+			|| switch_poll_logical (SW_RIGHT_BUTTON))
 		{
 			task_exit ();
 		}
