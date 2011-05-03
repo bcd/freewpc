@@ -20,6 +20,11 @@
 
 /* CALLSET_SECTION (oddchange , __machine2__) */
 #include <freewpc.h>
+#include <status.h>
+
+#define MAX_ODDCHANGE_VALUE SC_500K
+#define MAX_ODDCHANGE_SCORE SC_50M
+
 extern struct timed_mode_ops greed_mode;
 score_t oddchange_score;
 
@@ -42,12 +47,25 @@ void oddchange_collected_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_16MS);
 	}
-	dmd_alloc_pair_clean ();	
-	font_render_string_center (&font_var5, 64, y, "ODDCHANGE COLLECTED");
-	sprintf_score (oddchange_score);
-	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
-	dmd_show_low ();
+	dmd_clean_page_low ();
+	dmd_clean_page_high ();
+	dmd_alloc_pair ();
+
 	sound_send (SND_KACHING);
+	for (fno = IMG_FLASHCENTRE_START; fno < IMG_FLASHCENTRE_END; fno += 2)
+	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_var5, 64, y, "ODDCHANGE COLLECTED");
+		sprintf_score (oddchange_score);
+		font_render_string_center (&font_fixed6, 64, 12, sprintf_buffer);
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_16MS);
+	}
 	task_sleep_sec (2);
 	deff_exit ();
 }
@@ -99,13 +117,20 @@ CALLSET_ENTRY (oddchange, start_ball, reset_oddchange_score)
 
 CALLSET_ENTRY (oddchange, sw_standup_1, sw_standup_2, sw_standup_3, sw_standup_4, sw_standup_5, sw_standup_6, sw_standup_7)
 {
-	if (!in_live_game)
-		return;
-	if (score_compare (score_table[SC_10M], oddchange_score)  == 1
-			&& !timed_mode_running_p (&greed_mode))
+	if (in_live_game && !timed_mode_running_p (&greed_mode)
+		&& (score_compare (score_table[MAX_ODDCHANGE_SCORE], oddchange_score)  == 1))
 	{
-		score_add (oddchange_score, score_table[SC_5130]);
+		score_add (oddchange_score, score_table[random_scaled(MAX_ODDCHANGE_VALUE + 1)]);
 		deff_restart (DEFF_ODDCHANGE_GROWS);
 	}
 
+}
+
+CALLSET_ENTRY (oddchange, status_report)
+{
+	status_page_init ();
+	font_render_string_center (&font_mono5, 64, 10, "ODDCHANGE POT");
+	sprintf_score (oddchange_score);
+	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
+	status_page_complete ();
 }
