@@ -109,6 +109,7 @@ void show_text_on_stars (void)
 		task_sleep (TIME_100MS);
 		dmd_map_overlay ();
 	}
+	amode_page_end (0);
 	//dmd_alloc_pair_clean ();
 }
 
@@ -245,22 +246,35 @@ CALLSET_ENTRY (tz_amode7, amode_page)
 	font_render_string_center (&font_var5, 64, 7, "PRESS BUYIN BUTTON");
 	font_render_string_center (&font_var5, 64, 20, "TO DISPLAY RULES");
 	show_text_on_stars ();
+
+	map_and_clean ();
+	font_render_string_center (&font_var5, 64, 7, "HOLD LEFT FLIPPER TO");
+	font_render_string_center (&font_var5, 64, 20, "START TOURNAMENT");
+	show_text_on_stars ();
+	
+	map_and_clean ();
+	font_render_string_center (&font_var5, 64, 7, "HOLD RIGHT FLIPPER TO");
+	font_render_string_center (&font_var5, 64, 20, "SHOW LAST SCORES");
+	show_text_on_stars ();
 }
 
 CALLSET_ENTRY (tz_amode8, amode_page)
 {
 	show_random_factoid ();
+	amode_page_end (0);
 }
 
 CALLSET_ENTRY (tz_amode9, amode_page)
 {
 	draw_bttzwave ();
+	amode_page_end (0);
 }
 
 CALLSET_ENTRY (tz_amode10, amode_page)
 {
 	dmd_sched_transition (&trans_scroll_left);
 	show_driver_animation ();
+	amode_page_end (0);
 }
 
 CALLSET_ENTRY (tz_amode11, amode_page)
@@ -295,11 +309,13 @@ CALLSET_ENTRY (tz_amode11, amode_page)
 		return;
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
+	amode_page_end (0);
 }
 
 CALLSET_ENTRY (tz_amode12, amode_page)
 {
 	draw_bttzmelt ();
+	amode_page_end (0);
 }
 
 static void lock_and_outhole_monitor (void)
