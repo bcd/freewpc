@@ -311,19 +311,19 @@ IMG_JACKPOT_END: machine/tz/animation/jackpot/jackpot15.pgm
 
 IMG_BTTZMELT_START: !machine/tz/animation/bttzmelt/bttzmelt_001.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_002.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_003.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_003.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_004.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_005.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_005.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_006.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_007.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_007.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_008.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_009.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_009.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_010.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_011.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_011.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_012.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_013.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_013.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_014.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_015.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_015.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_016.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_017.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_018.pgm
@@ -338,15 +338,15 @@ IMG_BTTZMELT_MIDDLE: !machine/tz/animation/bttzmelt/bttzmelt_020.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_027.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_028.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_029.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_030.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_030.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_031.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_032.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_032.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_033.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_034.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_034.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_035.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_036.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_036.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_037.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_038.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_038.pgm
 !machine/tz/animation/bttzmelt/bttzmelt_039.pgm
 IMG_BTTZMELT_END: !machine/tz/animation/bttzmelt/bttzmelt_040.pgm
 
