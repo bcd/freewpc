@@ -98,14 +98,13 @@ void amode_page_end (U8 secs)
 
 void amode_score_page (void)
 {
-	extern U8 tournament_mode_enabled;
 	dmd_alloc_low_clean ();
 	scores_draw ();
 	dmd_show_low ();
 
 	/* Hold the scores up for a while longer than usual
 	 * in tournament mode. */
-	if (system_config.tournament_mode == YES || tournament_mode_enabled)
+	if (system_config.tournament_mode == YES)
 		amode_page_end (120);
 	else
 		amode_page_end (5);
