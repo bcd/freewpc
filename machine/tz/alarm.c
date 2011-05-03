@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 by Ewan Meadows <sonny_jim@hotmail.com>
+ * Copyright 2011 by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,12 +22,12 @@
 
 /* Turns a pinball table into an Egg Timer */
 #include <freewpc.h>
-/* 1440 minutes in a day */
+
+/* 1440 minutes in a day, park timer at 1441 to disable */
 #define ALARM_DISABLED 1441
 
 /* alarm_time is stored as minutes from midnight */
 __permanent__ U16 alarm_time;
-__permanent__ bool alarm_persistant;
 
 extern U8 mute_and_pause_timeout;
 extern U8 hour;
@@ -155,7 +155,9 @@ CALLSET_ENTRY (alarm, amode_page)
 {
 	if (alarm_time < ALARM_DISABLED)
 	{
-		dmd_alloc_pair_clean ();
+		dmd_sched_transition (&trans_vstripe_right2left);
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
 		render_minutes_to_alarm ();
 		sprintf ("ALARM IN %d MINUTES", sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
