@@ -24,7 +24,7 @@
 
 #include <freewpc.h>
 
-#define NUM_BIRTHDAYS 7
+#define NUM_BIRTHDAYS 8
 
 const struct {
 	const U8 day;
@@ -36,9 +36,10 @@ const struct {
 	{ 3, 7, "HAPPY BIRTHDAY", "BCD", IMG_BIRTHDAY },
 	{ 10, 10, "HAPPY BIRTHDAY", "FEK", IMG_BIRTHDAY },
 	{ 25, 12, "HAPPY BIRTHDAY", "JESUS", IMG_BIRTHDAY },
+	{ 5, 10, "HAPPY BIRTHDAY", "MALC", IMG_BIRTHDAY },
 	{ 30, 10, "HAPPY", "HALLOWEEN", NULL },
 	{ 4, 6, "HAPPY", "INDEPENDENCE DAY", NULL },
-	{ 4, 11, "HAPPY BIRTHDAY", "JIM", NULL },
+	{ 4, 11, "HAPPY BIRTHDAY", "JIM", IMG_BIRTHDAY },
 	{ 1, 1, "HAPPY", "NEW YEAR", NULL },
 };
 
@@ -70,7 +71,7 @@ static void draw_birthday_msg (U8 birthday_msg)
 	{
 		dmd_show_low ();
 	}
-		task_sleep_sec (6);
+		amode_sleep_sec (6);
 }
 
 void check_birthdays (void)

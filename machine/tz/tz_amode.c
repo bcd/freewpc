@@ -20,7 +20,9 @@
 
 /* CALLSET_SECTION (tz_amode, __machine2__) */
 #include <freewpc.h>
-//TODO if sys date == blah, say "FOR MALC" 
+
+extern void amode_sleep_sec (U8 secs);
+extern U8 amode_page_changed;
 
 void amode_lamp_toggle_task (void)
 {
@@ -72,6 +74,7 @@ void show_driver_animation (void)
 	/* Show driver animation */	
 	U16 fno;
 	U8 i;
+	amode_page_changed = 0;
 	for (i = 0; i < 5; i++)
 	{
 		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
@@ -81,6 +84,8 @@ void show_driver_animation (void)
 			frame_draw (fno);
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
+			if (amode_page_changed)
+				return;
 		}
 	}
 	/* Clean both pages */
@@ -90,6 +95,7 @@ void show_driver_animation (void)
 void show_text_on_stars (void)
 {
 	U8 n;
+	amode_page_changed = 0;
 	for (n = 0; n < 40; n++)
 	{
 		dmd_dup_mapped ();
@@ -98,6 +104,8 @@ void show_text_on_stars (void)
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
 		dmd_map_overlay ();
+		if (amode_page_changed)
+			return;
 	}
 	dmd_alloc_pair_clean ();
 }
@@ -108,86 +116,87 @@ static void map_and_clean (void)
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 }
+
 static inline void draw_bttzwave (void)
 {
 	U16 fno;
-	for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
+	U8 i;
+	amode_page_changed = 0;
+	for (i = 0; i < 5; i++)
 	{
-		dmd_alloc_pair ();
-		frame_draw (fno);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
+		for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
+		{
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_show2 ();
+			task_sleep (TIME_100MS);
+			if (amode_page_changed)
+				return;
+		}
 	}
-
-	for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
-	{
-		dmd_alloc_pair ();
-		frame_draw (fno);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	}
-	
-	for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
-	{
-		dmd_alloc_pair ();
-		frame_draw (fno);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	}
-	
-	for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
-	{
-		dmd_alloc_pair ();
-		frame_draw (fno);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	}
-
 }
 
 static inline void draw_bttzmelt (void)
 {
 	U16 fno;
+	amode_page_changed = 0;
 	for (fno = IMG_BTTZMELT_START; fno <= IMG_BTTZMELT_MIDDLE; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
+		if (amode_page_changed)
+			return;
 	}
-	task_sleep_sec (2);
+	amode_sleep_sec (2);
+	amode_page_changed = 0;
 	for (fno = IMG_BTTZMELT_MIDDLE; fno <= IMG_BTTZMELT_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
+		if (amode_page_changed)
+			return;
 	}
 }
 
-CALLSET_ENTRY (tz_amode, amode_page)
+CALLSET_ENTRY (tz_amode1, amode_page)
 {
 	map_and_clean ();
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
 	dmd_text_blur ();
 	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
 	show_text_on_stars ();
-	
+}
+
+CALLSET_ENTRY (tz_amode2, amode_page)
+{
 	map_and_clean ();
 	font_render_string_center (&font_steel, 64, 7, "SOFTWARE BY");
 	font_render_string_center (&font_steel, 64, 21, "BCD");
 	show_text_on_stars ();
-	
+}
+
+CALLSET_ENTRY (tz_amode3, amode_page)
+{
 	map_and_clean ();
 	font_render_string_center (&font_steel, 64, 7, "AND");
 	font_render_string_center (&font_steel, 64, 20, "SONNY JIM");
 	show_text_on_stars ();
-	
+}	
+
+CALLSET_ENTRY (tz_amode4, amode_page)
+{
 	map_and_clean ();
 	font_render_string_center (&font_var5, 64, 7, "ARTWORK AND");
 	font_render_string_center (&font_var5, 64, 20, "ANIMATIONS BY");
 	show_text_on_stars ();
-	
+}
+
+CALLSET_ENTRY (tz_amode5, amode_page)
+{
 	map_and_clean ();
 	font_render_string_center (&font_steel, 64, 16, "HIGHRISE");
 	show_text_on_stars ();
@@ -200,7 +209,10 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	font_render_string_center (&font_steel, 64, 7, "AND");
 	font_render_string_center (&font_steel, 64,20, "POW STUDIOS");
 	show_text_on_stars ();
-	
+}
+
+CALLSET_ENTRY (tz_amode6, amode_page)
+{
 	map_and_clean ();
 	font_render_string_center (&font_var5, 64, 16, "THANKS GO TO");
 	show_text_on_stars ();
@@ -224,18 +236,34 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	font_render_string_center (&font_var5, 64, 7, "AND EVERYBODY IN");
 	font_render_string_center (&font_var5, 64, 20, "EFNET #PINBALL");
 	show_text_on_stars ();
-	
+}
+
+CALLSET_ENTRY (tz_amode7, amode_page)
+{
 	map_and_clean ();
 	font_render_string_center (&font_var5, 64, 7, "PRESS BUYIN BUTTON");
 	font_render_string_center (&font_var5, 64, 20, "TO DISPLAY RULES");
 	show_text_on_stars ();
+}
 
+CALLSET_ENTRY (tz_amode8, amode_page)
+{
 	show_random_factoid ();
+}
+
+CALLSET_ENTRY (tz_amode9, amode_page)
+{
 	draw_bttzwave ();
-	
+}
+
+CALLSET_ENTRY (tz_amode10, amode_page)
+{
 	dmd_sched_transition (&trans_scroll_left);
 	show_driver_animation ();
-	
+}
+
+CALLSET_ENTRY (tz_amode11, amode_page)
+{
 	dmd_sched_transition (&trans_bitfade_slow);
 	/* Clean the low screen for the transition scroll*/
 	dmd_alloc_low_clean ();
@@ -259,12 +287,17 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	dmd_alloc_low_clean ();
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
-	
+}
+
+CALLSET_ENTRY (tz_amode12, amode_page)
+{
 	draw_bttzmelt ();
 }
 
 static void lock_and_outhole_monitor (void)
 {
+	/* Wait for balls to settle/amode to start before emptying
+	 * locks/outhole */
 	task_sleep_sec (3);
 	while (!in_live_game)
 	{
@@ -281,6 +314,7 @@ static void lock_and_outhole_monitor (void)
 		{
 			callset_invoke (clear_autofire);	
 		}
+		/* Wait for the balls to be cleared before starting again */
 		task_sleep_sec (3);
 	}
 	task_exit ();

@@ -23,6 +23,8 @@
 #include <freewpc.h>
 #define NUM_FACTOIDS 22
 
+extern void amode_sleep_sec (U8 secs);
+
 const struct {
 	const char *line1;
 	const char *line2;
@@ -70,7 +72,7 @@ void show_random_factoid (void)
 	show_text_on_stars ();
 	
 	dmd_alloc_pair_clean ();
-	factoid_msg(random_scaled(NUM_FACTOIDS));
+	factoid_msg(random_scaled(NUM_FACTOIDS - 1));
 	dmd_show_low ();
-	task_sleep_sec (6);
+	amode_sleep_sec (6);
 }
