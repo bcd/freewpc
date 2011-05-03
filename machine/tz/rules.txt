@@ -120,6 +120,13 @@ Hit either when lit to award a Door panel.  If either are unlit when hit and
 you currently have less than 8 panels, both Slot and Piano will be lit.
 (phew, that nearly made sense)
 
+Oddchange
+=========
+Hitting any of the yellow standups adds a random amount to the oddchange pot,
+capped to 10M and reset at the start of each ball.
+
+Shoot either the unlit slot or piano to collect.
+
 Door Panels
 ===========
 Door panels are awarded by:

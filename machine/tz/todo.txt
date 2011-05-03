@@ -1,3 +1,10 @@
+Wavy demo style text
+
+BUGS
+Show scores during amode, seems to just go boom
+Autofire ballsave multiball drain bug
+
+Make TZ challenge
 Grand champion gets to enter a PIN which is stored in the machine.  This means
 they can enter in their GC flipcode
 
@@ -33,11 +40,6 @@ Magnet multiball:
 Grab a ball on the magnet, but hold it v. weakly.  Enough to hold it but not
 enough to stop another ball getting grabbed.  Then just wait for the opto to
 change when the ball hits it.
-
-Alarm clock:
-
-Allow the player to set a time for the alarm to go off,
-either a specific time, or 10, 20 minutes etc.
 
 Sharpe Shooter Mode:
 Alternative to BTTZ, Shooter pot starts with 50M, player must hit 2 lit shots,
