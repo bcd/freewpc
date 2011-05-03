@@ -71,15 +71,6 @@ struct timed_mode_ops mball_restart_mode = {
 	.pause = system_timer_pause,
 };
 
-void mball_restart_mode_init (void)
-{
-	callset_invoke (stop_hurryup);
-}
-
-void mball_restart_mode_exit (void)
-{
-}
-
 static void call_number (U8 number)
 {
 	switch (number)
@@ -106,9 +97,9 @@ static void call_number (U8 number)
 void mball_restart_countdown_task (void)
 {
 	U8 last_number_called = 6;
-	while (mball_restart_timer != 0)
+	while (mball_restart_timer >= 1)
 	{
-		if (last_number_called != mball_restart_timer)
+		if (last_number_called > mball_restart_timer)
 		{
 			last_number_called = mball_restart_timer;
 			call_number (last_number_called);	
@@ -116,6 +107,18 @@ void mball_restart_countdown_task (void)
 		task_sleep (TIME_800MS);
 	}
 	task_exit ();
+}
+
+
+void mball_restart_mode_init (void)
+{
+	callset_invoke (stop_hurryup);
+	task_create_gid (GID_MBALL_RESTART_COUNTDOWN, mball_restart_countdown_task);
+}
+
+void mball_restart_mode_exit (void)
+{
+	task_kill_gid (GID_MBALL_RESTART_COUNTDOWN);
 }
 
 void mball_restart_deff (void)
@@ -149,12 +152,6 @@ void mball_restart_deff (void)
 	}
 }
 
-CALLSET_ENTRY (mball_restart, idle_every_second)
-{
-	if (timed_mode_running_p (&mball_restart_mode)
-			&& mball_restart_timer == 5)
-		task_create_gid (GID_MBALL_RESTART_MODE, mball_restart_countdown_task);
-}
 
 CALLSET_ENTRY (mball_restart, mball_restart_stop)
 {
