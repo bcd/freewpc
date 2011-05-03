@@ -26,6 +26,8 @@
 
 #define NUM_BIRTHDAYS 8
 
+extern void amode_sleep_sec (U8 secs);
+
 const struct {
 	const U8 day;
 	const U8 month;
