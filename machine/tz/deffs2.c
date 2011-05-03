@@ -126,7 +126,8 @@ void shoot_power_payoff_deff (void)
 CALLSET_ENTRY (deffs2, amode_page)
 {
 	extern U8 hour;
-	dmd_alloc_pair ();
+	dmd_map_overlay ();
+	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 	if (hour < 12)
 		sprintf ("GOOD MORNING");
