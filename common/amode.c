@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -29,9 +29,14 @@
  * This file implements a basic attract mode that can be used by any game.
  */
 
+/* Which page is to be shown */
 U8 amode_page;
 
+/* non-zero when the page has been requested to chang */
 U8 amode_page_changed;
+
+/* Used to show the scores for 2 mins after a right flipper hold */
+bool amode_show_scores_long;
 
 void amode_page_change (S8 delta);
 
@@ -103,9 +108,12 @@ void amode_score_page (void)
 	dmd_show_low ();
 
 	/* Hold the scores up for a while longer than usual
-	 * in tournament mode. */
-	if (system_config.tournament_mode == YES)
+	 * in tournament mode or when triggered by a right button hold */
+	if (system_config.tournament_mode == YES || amode_show_scores_long)
+	{
+		amode_show_scores_long = FALSE;
 		amode_page_end (120);
+	}
 	else
 		amode_page_end (5);
 }
@@ -128,6 +136,7 @@ void amode_logo_page (void)
 }
 #endif
 
+
 void amode_credits_page (void)
 {
 	credits_draw ();
@@ -135,7 +144,8 @@ void amode_credits_page (void)
 	amode_page_end (3);
 }
 
-void amode_freeplay_page (void)
+
+void amode_replay_page (void)
 {
 	if (system_config.replay_award != FREE_AWARD_OFF)
 	{
@@ -144,6 +154,7 @@ void amode_freeplay_page (void)
 	}
 	amode_page_end (0);
 }
+
 
 void amode_high_score_page (void)
 {
@@ -159,6 +170,7 @@ void amode_high_score_page (void)
 	amode_page_end (0);
 }
 
+
 #ifdef CONFIG_RTC
 void amode_date_time_page (void)
 {
@@ -170,12 +182,12 @@ void amode_date_time_page (void)
 }
 #endif
 
+
 void amode_kill_music (void)
 {
 	music_set (MUS_OFF);
 	amode_page_end (0);
 }
-
 
 
 void (*amode_page_table[]) (void) = {
@@ -184,7 +196,7 @@ void (*amode_page_table[]) (void) = {
 	amode_logo_page,
 #endif
 	amode_credits_page,
-	amode_freeplay_page,
+	amode_replay_page,
 	amode_high_score_page,
 #ifdef CONFIG_RTC
 	amode_date_time_page,
@@ -198,25 +210,20 @@ void (*amode_page_table[]) (void) = {
 
 __attribute__((noinline)) void amode_page_change (S8 delta)
 {
-	for (;;)
+	amode_page += delta;
+	
+	/* Check for boundary cases */
+	if (amode_page >= 0xF0)
 	{
-		amode_page += delta;
-
-		/* Check for boundary cases */
-		if (amode_page >= 0xF0)
-		{
-			amode_page = (sizeof (amode_page_table) / sizeof (void *)) - 1;
-		}
-		else if (amode_page >= sizeof (amode_page_table) / sizeof (void *))
-		{
-			amode_page = 0;
-		}
-
-		/* Check for pages that should be skipped */
-
-		/* All done */
-		break;
+		amode_page = (sizeof (amode_page_table) / sizeof (void *)) - 1;
 	}
+	else if (amode_page >= sizeof (amode_page_table) / sizeof (void *)
+			|| amode_show_scores_long)
+	{
+		amode_page = 0;
+	}
+
+	/* TODO Check for pages that should be skipped? */
 	amode_page_changed = 1;
 }
 
@@ -232,6 +239,25 @@ CALLSET_ENTRY (amode, sw_left_button)
 }
 
 
+void amode_right_button_detect (void)
+{
+	U8 hold = TIME_5S / TIME_100MS;
+	while (hold > 0)
+	{
+		if (!switch_poll_logical (SW_RIGHT_BUTTON)
+				|| switch_poll_logical (SW_LEFT_BUTTON))
+		{
+			task_exit ();
+		}
+		task_sleep (TIME_100MS);
+		hold--;
+	}
+	/* Switch to the scores page */
+	amode_show_scores_long = TRUE;
+	amode_page_change (0);
+}
+
+
 CALLSET_ENTRY (amode, sw_right_button)
 {
 	if (deff_get_active () == DEFF_AMODE)
@@ -239,7 +265,14 @@ CALLSET_ENTRY (amode, sw_right_button)
 		amode_flipper_sound ();
 		if (amode_page_changed == 0)
 			amode_page_change (1);
+		amode_right_button_detect ();
 	}
+}
+
+
+CALLSET_ENTRY (amode, amode_start)
+{
+	amode_show_scores_long = FALSE;
 }
 
 
