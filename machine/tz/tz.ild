@@ -414,4 +414,17 @@ machine/tz/animation/oddchange/frame_0008.pgm
 machine/tz/animation/oddchange/frame_0009.pgm
 IMG_ODDCHANGE_END: machine/tz/animation/oddchange/frame_0010.pgm
 
-
+IMG_FASTLOCK_START: !machine/tz/animation/dance/frame_0001.pgm
+!machine/tz/animation/dance/frame_0002.pgm
+!machine/tz/animation/dance/frame_0003.pgm
+!machine/tz/animation/dance/frame_0004.pgm
+!machine/tz/animation/dance/frame_0005.pgm
+!machine/tz/animation/dance/frame_0006.pgm
+!machine/tz/animation/dance/frame_0007.pgm
+!machine/tz/animation/dance/frame_0008.pgm
+!machine/tz/animation/dance/frame_0009.pgm
+!machine/tz/animation/dance/frame_0010.pgm
+!machine/tz/animation/dance/frame_0011.pgm
+!machine/tz/animation/dance/frame_0012.pgm
+!machine/tz/animation/dance/frame_0013.pgm
+IMG_FASTLOCK_END: !machine/tz/animation/dance/frame_0014.pgm

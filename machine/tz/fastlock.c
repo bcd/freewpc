@@ -46,6 +46,8 @@ struct timed_mode_ops fastlock_mode = {
 	.pause = system_timer_pause,
 };
 
+/* Fudge loop time in ms into
+ * something semi-meaningful to display */
 static inline void calc_display_loop_time (void)
 {
 	display_loop_time = 100;
@@ -57,16 +59,14 @@ static inline void calc_display_loop_time (void)
 
 void fastlock_mode_deff (void)
 {
-	/* Fudge loop time in ms into
-	 * something semi-meaningful to display */
-	//U16 fno;
+	U16 fno;
 
 	for (;;)
 	{
-		//for (fno = IMG_NIGHTDRIVER_START; fno <= IMG_NIGHTDRIVER_END; fno += 2)
-		//{
+		for (fno = IMG_FASTLOCK_START; fno <= IMG_FASTLOCK_END; fno += 2)
+		{
 			dmd_alloc_pair_clean ();
-	//		dmd_map_overlay ();
+			dmd_map_overlay ();
 			dmd_clean_page_low ();
 			font_render_string_center (&font_var5, 64, 5, "FASTLOOPS BUILD JACKPOT");
 			if (timer_find_gid (GID_FASTLOCK_LOOP_AWARDED))
@@ -82,19 +82,17 @@ void fastlock_mode_deff (void)
 				font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 				font_render_string_center (&font_var5, 64, 27, "SHOOT LOCK TO COLLECT");
 			}
-	//		sprintf ("LAST LOOP WAS %dMPH", display_loop_time);
 			sprintf ("%d", fastlock_mode_timer);
 			font_render_string (&font_var5, 2, 16, sprintf_buffer);
 			font_render_string_right (&font_var5, 126, 16, sprintf_buffer);
-	//		dmd_text_outline ();
+			dmd_text_outline ();
 			
-	//		dmd_alloc_pair ();
-		//	frame_draw (fno);
-	//		dmd_overlay_outline ();
-			//dmd_show2 ();
-			dmd_show_low ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
 			task_sleep (TIME_66MS);
-			//}
+		}
 	}
 }
 
