@@ -63,8 +63,12 @@ can use this function to avoid lighting an extra ball if it will
 be impossible to collect it. */
 bool can_award_extra_ball (void)
 {
-	return ((extra_balls_earned < system_config.max_ebs)
-		&& (extra_balls_earned_this_bip < system_config.max_ebs_per_bip));
+	extern U8 tournament_mode_enabled;
+	if (system_config.tournament_mode || tournament_mode_enabled)
+		return FALSE;
+	else
+		return ((extra_balls_earned < system_config.max_ebs)
+			&& (extra_balls_earned_this_bip < system_config.max_ebs_per_bip));
 }
 
 
