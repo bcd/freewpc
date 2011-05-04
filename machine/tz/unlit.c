@@ -113,7 +113,7 @@ CALLSET_ENTRY (unlit, serve_ball)
 
 }
 
-CALLSET_ENTRY (unlit, start_ball)
+CALLSET_ENTRY (unlit, start_game)
 {
 	unlit_shot_count = 0;
 	unlit_called_from_stored = 0;
