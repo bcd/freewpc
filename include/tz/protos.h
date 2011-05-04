@@ -18,17 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* amode.c */
-bool amode_page_delay(U8 secs);
-void amode_flipper_sound_debounce_timer(void);
-void amode_flipper_sound(void);
-void amode_scroll(void);
-void amode_left_flipper(void);
-void amode_right_flipper(void);
-void amode_lamp_toggle_task(void);
-void amode_leff(void);
-void amode_show_design_credits(void);
-void amode_deff(void);
+/* tz_amode.c */
 __machine2__ void show_text_on_stars(void);
 
 /* stars.c */

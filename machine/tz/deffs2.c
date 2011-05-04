@@ -23,6 +23,7 @@
 
 extern struct timed_mode_ops hitch_mode;
 extern U8 mute_and_pause_timeout;
+extern bool amode_show_scores_long;
 
 void match_loop_deff (void)
 {
@@ -125,6 +126,8 @@ void shoot_power_payoff_deff (void)
 
 CALLSET_ENTRY (deffs2, amode_page)
 {
+	if (amode_show_scores_long)
+		return;
 	extern U8 hour;
 	dmd_map_overlay ();
 	dmd_clean_page_high ();

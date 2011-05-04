@@ -25,5 +25,6 @@ void amode_start (void);
 void amode_stop (void);
 
 __common__ void amode_sleep_sec (U8 secs);
-__common__ void amode_page_end (U8 secs);
+//__common__ void amode_page_end (U8 secs);
+__common__ void amode_page_start (void);
 #endif /* _AMODE_H */

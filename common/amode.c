@@ -32,7 +32,7 @@
 /* Which page is to be shown */
 U8 amode_page;
 
-/* non-zero when the page has been requested to chang */
+/* non-zero when the page has been requested to change */
 U8 amode_page_changed;
 
 /* Used to show the scores for 2 mins after a right flipper hold */
@@ -92,7 +92,10 @@ void amode_sleep_sec (U8 secs)
 	}
 }
 
-
+void amode_page_start (void)
+{
+	amode_page_changed = 0;
+}
 
 void amode_page_end (U8 secs)
 {
@@ -111,6 +114,8 @@ void amode_score_page (void)
 	 * in tournament mode or when triggered by a right button hold */
 	if (system_config.tournament_mode == YES || amode_show_scores_long)
 	{
+		/* Don't allow the player to skip past the scores for 10 seconds */
+		timer_restart_free (GID_AMODE_BUTTON_DEBOUNCE, TIME_10S);
 		amode_show_scores_long = FALSE;
 		amode_page_end (120);
 	}
@@ -131,8 +136,16 @@ void amode_logo_page (void)
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
+	amode_sleep_sec (3);
+	for (fno = IMG_FREEWPC; fno >= IMG_FREEWPC_SMALL; fno -= 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
 	dmd_sched_transition (&trans_bitfade_slow);
-	amode_page_end (3);
+	amode_page_end (0);
 }
 #endif
 
@@ -189,9 +202,11 @@ void amode_kill_music (void)
 	amode_page_end (0);
 }
 
-
 void (*amode_page_table[]) (void) = {
 	amode_score_page,
+#ifdef MACHINE_AMODE_EFFECTS
+	NULL,
+#endif
 #if (MACHINE_DMD == 1)
 	amode_logo_page,
 #endif
@@ -202,23 +217,22 @@ void (*amode_page_table[]) (void) = {
 	amode_date_time_page,
 #endif
 	amode_kill_music,
-#ifdef MACHINE_AMODE_EFFECTS
-	MACHINE_AMODE_EFFECTS
-#endif
 };
 
 
 __attribute__((noinline)) void amode_page_change (S8 delta)
 {
 	amode_page += delta;
-	
 	/* Check for boundary cases */
-	if (amode_page >= 0xF0)
+	if (amode_show_scores_long)
+	{
+		amode_page = 0;
+	}
+	else if (amode_page >= 0xF0)
 	{
 		amode_page = (sizeof (amode_page_table) / sizeof (void *)) - 1;
 	}
-	else if (amode_page >= sizeof (amode_page_table) / sizeof (void *)
-			|| amode_show_scores_long)
+	else if (amode_page >= sizeof (amode_page_table) / sizeof (void *))
 	{
 		amode_page = 0;
 	}
@@ -228,19 +242,10 @@ __attribute__((noinline)) void amode_page_change (S8 delta)
 }
 
 
-CALLSET_ENTRY (amode, sw_left_button)
-{
-	if (deff_get_active () == DEFF_AMODE)
-	{
-		amode_flipper_sound ();
-		if (amode_page_changed == 0)
-			amode_page_change (-1);
-	}
-}
-
-
 void amode_right_button_detect (void)
 {
+	/* Exit early if the player releases the button or presses the other
+	 * button at the same time */
 	U8 hold = TIME_5S / TIME_100MS;
 	while (hold > 0)
 	{
@@ -252,15 +257,40 @@ void amode_right_button_detect (void)
 		task_sleep (TIME_100MS);
 		hold--;
 	}
-	/* Switch to the scores page */
+
+#ifdef MACHINE_AMODE_FLIPPER_SOUND_CODE
+	sound_send (MACHINE_AMODE_FLIPPER_SOUND_CODE);
+#endif
+	/* Switch to the scores page on the next page change */
 	amode_show_scores_long = TRUE;
-	amode_page_change (0);
 }
+
+
+bool amode_check_flipper_button (void)
+{
+	if (deff_get_active () == DEFF_AMODE
+		&& !timer_find_gid (GID_AMODE_BUTTON_DEBOUNCE))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+
+CALLSET_ENTRY (amode, sw_left_button)
+{
+	if (amode_check_flipper_button ())
+	{
+		amode_flipper_sound ();
+		if (amode_page_changed == 0)
+			amode_page_change (-1);
+	}
+}
+
 
 
 CALLSET_ENTRY (amode, sw_right_button)
 {
-	if (deff_get_active () == DEFF_AMODE)
+	if (amode_check_flipper_button ())
 	{
 		amode_flipper_sound ();
 		if (amode_page_changed == 0)
@@ -270,7 +300,7 @@ CALLSET_ENTRY (amode, sw_right_button)
 }
 
 
-CALLSET_ENTRY (amode, amode_start)
+CALLSET_ENTRY (amode, init, start_game)
 {
 	amode_show_scores_long = FALSE;
 }
@@ -287,8 +317,13 @@ __attribute__((noreturn)) void system_amode_deff (void)
 	amode_page = 0;
 	for (;;)
 	{
+#ifdef MACHINE_AMODE_EFFECTS
 		if (amode_page == 1)
+		{
 			callset_invoke (amode_page);
+			amode_page++;
+		}
+#endif
 		amode_page_table[amode_page] ();
 	}
 }

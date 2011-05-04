@@ -46,6 +46,7 @@ const struct {
 
 extern U8 month;
 extern U8 day;
+extern bool amode_show_scores_long;
 
 static void draw_birthday_msg (U8 birthday_msg)
 {
@@ -95,5 +96,7 @@ void check_birthdays (void)
 
 CALLSET_ENTRY (birthday, amode_page)
 {
+	if (amode_show_scores_long)
+		return;
 	check_birthdays ();
 }

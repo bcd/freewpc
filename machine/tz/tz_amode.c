@@ -25,6 +25,7 @@
 #include <amode.h>
 
 extern U8 amode_page_changed;
+extern bool amode_show_scores_long;
 
 void amode_lamp_toggle_task (void)
 {
@@ -73,10 +74,10 @@ void amode_leff (void)
 
 static inline void show_driver_animation (void)
 {
+	amode_page_start ();
 	/* Show driver animation */	
 	U16 fno;
 	U8 i;
-	amode_page_changed = 0;
 	for (i = 0; i < 5; i++)
 	{
 		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
@@ -87,17 +88,15 @@ static inline void show_driver_animation (void)
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
 			if (amode_page_changed)
-				return;
+				break;
 		}
 	}
-//	/* Clean both pages */
-//	dmd_alloc_pair_clean ();
 }
 
 void show_text_on_stars (void)
 {
+	amode_page_start ();
 	U8 n;
-	amode_page_changed = 0;
 	for (n = 0; n < 40; n++)
 	{
 		dmd_dup_mapped ();
@@ -105,12 +104,10 @@ void show_text_on_stars (void)
 		star_draw ();
 		dmd_show2 ();
 		if (amode_page_changed)
-			return;
+			break;
 		task_sleep (TIME_100MS);
 		dmd_map_overlay ();
 	}
-	amode_page_end (0);
-	//dmd_alloc_pair_clean ();
 }
 
 static void map_and_clean (void)
@@ -122,9 +119,9 @@ static void map_and_clean (void)
 
 static inline void draw_bttzwave (void)
 {
+	amode_page_start ();
 	U16 fno;
 	U8 i;
-	amode_page_changed = 0;
 	for (i = 0; i < 5; i++)
 	{
 		for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
@@ -134,15 +131,15 @@ static inline void draw_bttzwave (void)
 			dmd_show2 ();
 			task_sleep (TIME_100MS);
 			if (amode_page_changed)
-				return;
+				break;
 		}
 	}
 }
 	
 static inline void draw_bttzmelt (void)
 {
+	amode_page_start ();
 	U16 fno;
-	amode_page_changed = 0;
 	for (fno = IMG_BTTZMELT_START; fno <= IMG_BTTZMELT_MIDDLE; fno += 2)
 	{
 		dmd_alloc_pair ();
@@ -159,163 +156,176 @@ static inline void draw_bttzmelt (void)
 		frame_draw (fno);
 		dmd_show2 ();
 		if (amode_page_changed)
-			return;
+			break;
 		task_sleep (TIME_100MS);
 	}
 }
 
-CALLSET_ENTRY (tz_amode1, amode_page)
+static inline void scroll_text (void)
 {
-	map_and_clean ();
-	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
-	dmd_text_blur ();
-	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
-	show_text_on_stars ();
-}
-
-CALLSET_ENTRY (tz_amode2, amode_page)
-{
-	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 7, "SOFTWARE BY");
-	font_render_string_center (&font_steel, 64, 21, "BCD");
-	show_text_on_stars ();
-}
-
-CALLSET_ENTRY (tz_amode3, amode_page)
-{
-	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 7, "AND");
-	font_render_string_center (&font_steel, 64, 20, "SONNY JIM");
-	show_text_on_stars ();
-}	
-
-CALLSET_ENTRY (tz_amode4, amode_page)
-{
-	map_and_clean ();
-	font_render_string_center (&font_var5, 64, 7, "ARTWORK AND");
-	font_render_string_center (&font_var5, 64, 20, "ANIMATIONS BY");
-	show_text_on_stars ();
-}
-
-CALLSET_ENTRY (tz_amode5, amode_page)
-{
-	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 16, "HIGHRISE");
-	show_text_on_stars ();
-	
-	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 16, "OPEN GAME ART");
-	show_text_on_stars ();
-	
-	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 7, "AND");
-	font_render_string_center (&font_steel, 64,20, "POW STUDIOS");
-	show_text_on_stars ();
-}
-
-CALLSET_ENTRY (tz_amode6, amode_page)
-{
-	map_and_clean ();
-	font_render_string_center (&font_var5, 64, 16, "THANKS GO TO");
-	show_text_on_stars ();
-	
-	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 10, "HYDRA");
-	font_render_string_center (&font_var5, 64, 23, "FREEWPC CORVETTE");
-	show_text_on_stars ();
-	
-	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 10, "METALLIK");
-	font_render_string_center (&font_var5, 64, 23, "HARDWARE TESTING");
-	show_text_on_stars ();
-	
-	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 10, "LITZ");
-	font_render_string_center (&font_var5, 64, 23, "RULES AND IDEAS");
-	show_text_on_stars ();
-	
-	map_and_clean ();
-	font_render_string_center (&font_var5, 64, 7, "AND EVERYBODY IN");
-	font_render_string_center (&font_var5, 64, 20, "EFNET #PINBALL");
-	show_text_on_stars ();
-}
-
-CALLSET_ENTRY (tz_amode7, amode_page)
-{
-	map_and_clean ();
-	font_render_string_center (&font_var5, 64, 7, "PRESS BUYIN BUTTON");
-	font_render_string_center (&font_var5, 64, 20, "TO DISPLAY RULES");
-	show_text_on_stars ();
-
-	map_and_clean ();
-	font_render_string_center (&font_var5, 64, 7, "HOLD LEFT FLIPPER TO");
-	font_render_string_center (&font_var5, 64, 20, "START TOURNAMENT");
-	show_text_on_stars ();
-	
-	map_and_clean ();
-	font_render_string_center (&font_var5, 64, 7, "HOLD RIGHT FLIPPER TO");
-	font_render_string_center (&font_var5, 64, 20, "SHOW LAST SCORES");
-	show_text_on_stars ();
-}
-
-CALLSET_ENTRY (tz_amode8, amode_page)
-{
-	show_random_factoid ();
-	amode_page_end (0);
-}
-
-CALLSET_ENTRY (tz_amode9, amode_page)
-{
-	draw_bttzwave ();
-	amode_page_end (0);
-}
-
-CALLSET_ENTRY (tz_amode10, amode_page)
-{
-	dmd_sched_transition (&trans_scroll_left);
-	show_driver_animation ();
-	amode_page_end (0);
-}
-
-CALLSET_ENTRY (tz_amode11, amode_page)
-{
-	amode_page_changed = 0;
+	amode_page_start ();
 	dmd_sched_transition (&trans_bitfade_slow);
 	/* Clean the low screen for the transition scroll*/
 	dmd_alloc_low_clean ();
+	if (amode_show_scores_long || amode_page_changed)
+		return;
 	dmd_show_low ();
 
-	
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_var5, 64, 5, "FREEWPC WAS DESIGNED");
 	font_render_string_center (&font_var5, 64, 12, "BY BRIAN DOMINY AND IS");
 	font_render_string_center (&font_var5, 64, 19, "RELEASED UNDER THE GNU");
 	font_render_string_center (&font_var5, 64, 26, "GENERAL PUBLIC LICENSE.");
-	if (amode_page_changed)
-		return;
+	
 	dmd_sched_transition (&trans_scroll_up_slow);
+	if (amode_show_scores_long || amode_page_changed)
+		return;
 	dmd_show_low ();
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_var5, 64, 5, "VISIT WWW.ODDCHANGE.COM");
 	font_render_string_center (&font_var5, 64, 12, "FOR MORE INFORMATION.");
-	if (amode_page_changed)
-		return;
+	
 	dmd_sched_transition (&trans_scroll_up_slow);
+	if (amode_show_scores_long || amode_page_changed)
+		return;
 	dmd_show_low ();
 
 	dmd_alloc_low_clean ();
-	if (amode_page_changed)
-		return;
+	
 	dmd_sched_transition (&trans_scroll_up_slow);
+	if (amode_show_scores_long || amode_page_changed)
+		return;
 	dmd_show_low ();
-	amode_page_end (0);
 }
 
-CALLSET_ENTRY (tz_amode12, amode_page)
+CALLSET_ENTRY (tz_amode, amode_page)
 {
+	if (amode_show_scores_long)
+		return;
+	map_and_clean ();
+	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
+	dmd_text_blur ();
+	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 7, "SOFTWARE BY");
+	font_render_string_center (&font_steel, 64, 21, "BCD");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 7, "AND");
+	font_render_string_center (&font_steel, 64, 20, "SONNY JIM");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_var5, 64, 7, "ARTWORK AND");
+	font_render_string_center (&font_var5, 64, 20, "ANIMATIONS BY");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 16, "HIGHRISE");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 16, "OPEN GAME ART");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 7, "AND");
+	font_render_string_center (&font_steel, 64,20, "POW STUDIOS");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_var5, 64, 16, "THANKS GO TO");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 10, "HYDRA");
+	font_render_string_center (&font_var5, 64, 23, "FREEWPC CORVETTE");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 10, "METALLIK");
+	font_render_string_center (&font_var5, 64, 23, "HARDWARE TESTING");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 10, "LITZ");
+	font_render_string_center (&font_var5, 64, 23, "RULES AND IDEAS");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_var5, 64, 7, "AND EVERYBODY IN");
+	font_render_string_center (&font_var5, 64, 20, "EFNET #PINBALL");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_var5, 64, 7, "PRESS BUYIN BUTTON");
+	font_render_string_center (&font_var5, 64, 20, "TO DISPLAY RULES");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+
+	map_and_clean ();
+	font_render_string_center (&font_var5, 64, 7, "HOLD LEFT FLIPPER TO");
+	font_render_string_center (&font_var5, 64, 20, "START TOURNAMENT");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	map_and_clean ();
+	font_render_string_center (&font_var5, 64, 7, "HOLD RIGHT FLIPPER TO");
+	font_render_string_center (&font_var5, 64, 20, "SHOW LAST SCORES");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+	
+	show_random_factoid ();
+	if (amode_show_scores_long)
+		return;
+	
+	draw_bttzwave ();
+	if (amode_show_scores_long)
+		return;
+	
+	dmd_sched_transition (&trans_scroll_left);
+	show_driver_animation ();
+	if (amode_show_scores_long)
+		return;
+	
+	scroll_text ();
+	if (amode_show_scores_long)
+		return;
+
 	draw_bttzmelt ();
-	amode_page_end (0);
+	if (amode_show_scores_long)
+		return;
 }
 
 static void lock_and_outhole_monitor (void)

@@ -35,6 +35,7 @@ extern U8 loops;
 extern U8 combos;
 extern U8 lucky_bounces;
 extern char initials_data[3];
+extern bool amode_show_scores_long;
 
 void loop_master_entry_deff (void)
 {
@@ -129,6 +130,8 @@ CALLSET_ENTRY (master, factory_reset)
 
 CALLSET_ENTRY (master, amode_page)
 {
+	if (amode_show_scores_long)
+		return;
 	dmd_sched_transition (&trans_vstripe_left2right);
 	dmd_map_overlay ();
 	dmd_clean_page_high ();
