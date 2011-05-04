@@ -156,3 +156,6 @@ __machine3__ bool hurryup_active (void);
 __machine2__ void slow_music_lin (U8 count, U8 delay);
 __machine2__ void slow_music_log (U8 count, U8 delay);
 __machine2__ void speed_up_music_lin (U8 count, U8 delay);
+
+/* oddchange.c */
+__machine2__ void oddchange_collected (void);

@@ -564,6 +564,7 @@ SUPER_MB_RUNNING:
 BTTZ_RUNNING:
 Clock Working:
 Clock Home:
+Sharpe running:
 
 ##########################################################################
 # Display effects
@@ -706,7 +707,7 @@ Hurryup awarded: page(MACHINE3_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Match loop: page(MACHINE3_PAGE), PRI_MATCH, D_PAUSE+D_QUEUED
 
 Oddchange grows: page(MACHINE2_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE
-Oddchange collected: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT
+Oddchange collected: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT+D_SCORE
 
 
 ##########################################################################

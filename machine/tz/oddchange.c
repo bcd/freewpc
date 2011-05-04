@@ -30,6 +30,7 @@ score_t oddchange_score;
 
 void oddchange_collected_deff (void)
 {
+	sprintf_score (score_deff_get ());
 	U16 fno;
 	dmd_alloc_pair_clean ();
 	sound_send (SND_ODD_CHANGE_BEGIN);
@@ -57,7 +58,7 @@ void oddchange_collected_deff (void)
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_var5, 64, y, "ODDCHANGE COLLECTED");
-		sprintf_score (oddchange_score);
+	//	sprintf_score (oddchange_score);
 		font_render_string_center (&font_fixed6, 64, 12, sprintf_buffer);
 		dmd_text_outline ();
 		dmd_alloc_pair ();
@@ -95,24 +96,30 @@ void oddchange_grows_deff (void)
 	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
 	dmd_show_low ();
-	task_sleep (TIME_600MS);
+	task_sleep_sec (2);
 	deff_exit ();
 
 }
 
-CALLSET_ENTRY (oddchange, oddchange_collected)
-{
-	if (!in_live_game || multi_ball_play ())
-		return;
-	score_add (current_score, oddchange_score);
-	deff_start_sync (DEFF_ODDCHANGE_COLLECTED);
-	callset_invoke (reset_oddchange_score);
-}
-
-CALLSET_ENTRY (oddchange, start_ball, reset_oddchange_score)
+void reset_oddchange_score (void)
 {
 	score_zero (oddchange_score);
 	score_add (oddchange_score, score_table[SC_50K]);
+}
+
+void oddchange_collected (void)
+{
+	if (in_live_game && single_ball_play ())
+	{
+		score_add (current_score, oddchange_score);
+		deff_start (DEFF_ODDCHANGE_COLLECTED);
+		reset_oddchange_score ();
+	}
+}
+
+CALLSET_ENTRY (oddchange, start_ball)
+{
+	reset_oddchange_score ();
 }
 
 CALLSET_ENTRY (oddchange, sw_standup_1, sw_standup_2, sw_standup_3, sw_standup_4, sw_standup_5, sw_standup_6, sw_standup_7)
