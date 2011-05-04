@@ -204,9 +204,6 @@ void amode_kill_music (void)
 
 void (*amode_page_table[]) (void) = {
 	amode_score_page,
-#ifdef MACHINE_AMODE_EFFECTS
-	NULL,
-#endif
 #if (MACHINE_DMD == 1)
 	amode_logo_page,
 #endif
@@ -317,11 +314,10 @@ __attribute__((noreturn)) void system_amode_deff (void)
 	amode_page = 0;
 	for (;;)
 	{
-#ifdef MACHINE_AMODE_EFFECTS
+#ifdef MACHINE_CUSTOM_AMODE
 		if (amode_page == 1)
 		{
 			callset_invoke (amode_page);
-			amode_page++;
 		}
 #endif
 		amode_page_table[amode_page] ();
