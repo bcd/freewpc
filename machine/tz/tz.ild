@@ -11,6 +11,7 @@ IMG_MBORDER: machine/tz/images/mborder.pgm
 IMG_CAR: !machine/tz/images/car3.pgm
 IMG_NEWCAR: !machine/tz/images/newcar.pgm
 IMG_BIRTHDAY: machine/tz/images/birthday.pgm
+IMG_SHARPE: machine/tz/images/sharpe.pgm
 
 IMG_VOID_START: machine/tz/animation/void/void01.pgm
 #machine/tz/animation/void/void02.pgm
