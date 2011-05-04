@@ -503,7 +503,8 @@ CALLSET_ENTRY(door, start_player)
 	flag_on (FLAG_PIANO_DOOR_LIT);
 	flag_on (FLAG_SLOT_DOOR_LIT);
 
-	if (system_config.max_ebs == 0)
+	/* Light the eb door panel if eb's are disabled */
+	if (!can_award_extra_ball ())
 	{
 		lamp_on (LM_PANEL_EB);
 		door_panels_started++;
