@@ -186,18 +186,26 @@ void mpf_countdown_sound_task (void)
 	task_exit ();
 }
 
+/* Whether we should allow going into the mpf */
 bool mpf_ready_p (void)
 {
-	return (mpf_enable_count > 0)
+	if (mpf_enable_count > 0
 		/* Don't allow if PB might be on playfield */
 		&& !global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY)
 		&& !(pb_location & PB_MAYBE_IN_PLAY)
+		/* Or during normal multiballs */
 		&& !global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING)
 		&& !global_flag_test (GLOBAL_FLAG_QUICK_MB_RUNNING)
-		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING)
 		&& !global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
 		&& !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
-		&& !hurryup_active ();
+		/*  To make it easier to hit the hurryup the ball will be
+		 *  dropped back to the upper left flipper */
+		&& !hurryup_active ()
+		/* TODO Probably want to remove this later on */
+		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING))
+		return TRUE;
+	else
+		return FALSE;
 
 }
 
@@ -232,29 +240,18 @@ CALLSET_ENTRY (mpf, door_start_battle_power)
 	mpf_enable_count++;
 }
 
-/* Closing this switch does not imply that the
- * mpf award was collected, but we can tell camera.c
- * to expect a ball coming from the mpf */
-CALLSET_ENTRY (mpf, sw_mpf_top)
+/* Called from shots.c */
+CALLSET_ENTRY (mpf, mpf_top_triggered)
 {
 	if (mpf_timer > 5)
 		bounded_increment (mpf_timer, 10);
-	event_should_follow (mpf_top, camera, TIME_4S);
+
 	leff_restart (LEFF_MPF_HIT);
 	sound_send (SND_EXPLOSION_3);
 	score (SC_500K);
 }
 
-/* Stop the score countdown if switch is tripped,
- * it can take a while before mpf_collected gets 
- * triggered
- */
-CALLSET_ENTRY (mpf, sw_gumball_exit)
-{
-	task_kill_gid (GID_MPF_COUNTDOWN_SCORE_TASK);
-}
-
-/* Called from camera.c */
+/* Called from shots.c */
 CALLSET_ENTRY (mpf, mpf_collected)
 {
 	/* Inform combo.c that the mpf was collected */
@@ -274,46 +271,48 @@ CALLSET_ENTRY (mpf, mpf_collected)
 	deff_start (DEFF_MPF_AWARD);
 }
 
-CALLSET_ENTRY (mpf, sw_mpf_enter)
+/* Called from shots.c */
+CALLSET_ENTRY (mpf, mpf_entered)
 {
 	/* If tripped immediately after the right ramp opto, then a ball
 	has truly entered the mini-playfield.  Note this may trip later
 	on when a ball is already in play. */
-	if (event_did_follow (right_ramp, mpf_enter))
-	{
-		masher_buttons_pressed = 0;
-		mpf_active = TRUE;
-		unlit_shot_count = 0;
-		mpf_award = 10;
-		bounded_increment (mpf_ball_count, feature_config.installed_balls);
-		task_recreate_gid (GID_MPF_COUNTDOWN_SCORE_TASK, mpf_countdown_score_task);
-		/* Add on 10 seconds for each extra ball */
-//		if (mpf_ball_count > 1)
-//			mpf_timer += 10;
-		bounded_increment (mpf_level, 10);
-		bounded_decrement (mpf_enable_count, 0);
-		if ((mpf_ball_count = 1))
-		{	
-			timed_mode_begin (&mpf_mode);
-			if (!multi_ball_play ())
-			{
-				/* Turn off GI and start lamp effect */
-				task_create_gid (GID_MPF_LAMP_TASK, mpf_lamp_task);
-				flipper_disable ();
-				bridge_open_stop ();
-			}
+	masher_buttons_pressed = 0;
+	mpf_active = TRUE;
+	unlit_shot_count = 0;
+	mpf_award = 10;
+	/* Increment the amount of balls in the mpf */
+	bounded_increment (mpf_ball_count, feature_config.installed_balls);
+	task_recreate_gid (GID_MPF_COUNTDOWN_SCORE_TASK, mpf_countdown_score_task);
+	/* Add on 10 seconds for each extra ball */
+//	if (mpf_ball_count > 1)
+//		mpf_timer += 10;
+	bounded_increment (mpf_level, 10);
+	bounded_decrement (mpf_enable_count, 0);
+	
+	if ((mpf_ball_count = 1))
+	{	
+		timed_mode_begin (&mpf_mode);
+		if (!multi_ball_play ())
+		{
+			/* Turn off GI and start lamp effect */
+			task_create_gid (GID_MPF_LAMP_TASK, mpf_lamp_task);
+			flipper_disable ();
 		}
-	}
-	/* A ball sneaked in during multiball */
-	else if (multi_ball_play ())
-	{
-		sound_send (SND_WITH_THE_DEVIL);
-		score (SC_5M);
-		task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);	
 	}
 }
 
-CALLSET_ENTRY (mpf, sw_mpf_exit)
+/* Called from shots.c */
+CALLSET_ENTRY (mpf, mpf_unexpected_ball)
+{
+	/* A ball sneaked in during multiball */
+	sound_send (SND_WITH_THE_DEVIL);
+	score (SC_5M);
+	task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);	
+}
+
+/* Called from shots.c */
+CALLSET_ENTRY (mpf, mpf_exited)
 {
 	/* Stop the ball search timer */
 	task_kill_gid (GID_MPF_BALLSEARCH);
@@ -336,6 +335,7 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	flipper_enable ();
 }
 
+/* Button handlers */
 CALLSET_ENTRY (mpf, sw_mpf_left)
 {
 	if (mpf_ball_count > 0)
@@ -358,16 +358,6 @@ CALLSET_ENTRY (mpf, sw_mpf_right)
 	}
 }
 
-
-CALLSET_ENTRY (mpf, sw_right_ramp)
-{
-	/* If the mini-playfield is enabled, open the ramp
-	divertor fully.  The ordinary catch and drop is bypassed.
-	We should only allow the follow event if the mpf is ready
-	otherwise the powerball can slip through and start the mpf */
-	if (mpf_ready_p ())
-		event_should_follow (right_ramp, mpf_enter, TIME_3S);
-}
 
 CALLSET_ENTRY (mpf, start_player)
 {

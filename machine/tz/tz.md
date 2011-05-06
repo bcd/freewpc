@@ -756,3 +756,9 @@ Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 [fonts]
 times10:
 steel:
+
+[timers]
+Rocket Flipper:
+R Ramp to MPF:
+MPF Top to Camera:
+

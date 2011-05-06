@@ -108,6 +108,7 @@ CALLSET_ENTRY (bttz, door_start_bttz)
 	//task_create_anon (bttz_start_task);
 	deff_start (DEFF_TBC);
 	score (SC_100M);
+	callset_invoke (reset_door);
 }
 
 /* Once the ballsave has run out, start holding balls in the autofire */

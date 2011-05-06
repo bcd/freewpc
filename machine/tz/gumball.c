@@ -185,10 +185,11 @@ CALLSET_ENTRY (gumball, sw_gumball_exit)
 {
 //	if (!global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 //		sound_send (SND_GUMBALL_LOADED);
-	if (event_did_follow (gumball_geneva, gumball_exit) 
+	if (task_kill_gid (GID_GENEVA_TRIPPED) 
 		|| event_did_follow (gumball_release, gumball_exit))
 	{
-		device_switch_can_follow (gumball_exit, camera, TIME_4S);
+		/* Start a timer to tell the slot where the ball came from */
+		timer_restart_free (GID_GUMBALL_TO_SLOT, TIME_5S);
 		/* Signal the release motor to stop */
 		gumball_exit_tripped = TRUE;
 		/* A ball successfully came out of the gumball machine.*/
@@ -208,7 +209,7 @@ CALLSET_ENTRY (gumball, sw_gumball_geneva)
 	/* Don't trigger too early */
 	if (timeout < 10)
 		gumball_geneva_tripped = TRUE;
-	event_should_follow (gumball_geneva, gumball_exit, TIME_4S);
+	timer_restart_free (GID_GENEVA_TRIPPED, TIME_4S);
 }
 
 CALLSET_ENTRY (gumball, sw_gumball_enter)

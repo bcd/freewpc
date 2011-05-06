@@ -453,7 +453,7 @@ static bool check_relight_slot_or_piano (void)
 		return FALSE;
 }
 
-CALLSET_ENTRY(door, sw_piano)
+CALLSET_ENTRY(door, piano_shot)
 {
 	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
 	{

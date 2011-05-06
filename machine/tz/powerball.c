@@ -447,7 +447,14 @@ CALLSET_ENTRY (pb_detect, sw_piano)
 CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 {
 	pb_detect_event (PF_STEEL_DETECTED);
-	event_did_follow (camera_or_piano, slot_prox);
+
+	/* TODO If I could find out which GID was triggered more recently, I
+	 * could kill one and not the other, strengthing detection during
+	 * multiball.
+	 */
+	task_kill_gid (GID_CAMERA_TO_SLOT_PROX_DETECT);
+	task_kill_gid (GID_PIANO_TO_SLOT_PROX_DETECT);
+	//event_did_follow (camera_or_piano, slot_prox);
 	/* TODO : if this switch triggers and we did not expect
 	 * a ball in the undertrough....??? */
 }
@@ -464,7 +471,8 @@ CALLSET_ENTRY (pb_detect, check_magnet_grab)
 
 CALLSET_ENTRY (pb_detect, dev_slot_enter)
 {
-	if (event_did_follow (camera_or_piano, slot_prox))
+	if (task_find_or_kill_gid (GID_CAMERA_SLOT_PROX_DETECT)
+		 || task_find_or_kill_gid (GID_PIANO_SLOT_PROX_DETECT))
 	{
 		/* Proximity sensor did not trip ; must be the powerball */
 		pb_detect_event (PF_PB_DETECTED);

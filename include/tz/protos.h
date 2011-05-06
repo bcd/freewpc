@@ -79,6 +79,7 @@ __machine__ bool can_lock_ball (void);
 __machine__ bool mball_restart_active (void);
 /* mpf.c */
 __machine__ void mpf_enable (void);
+__machine__ bool mpf_ready_p (void);
 
 /* rampdiv.c */
 void ramp_divert (void);
@@ -159,3 +160,6 @@ __machine2__ void speed_up_music_lin (U8 count, U8 delay);
 
 /* oddchange.c */
 __machine2__ void oddchange_collected (void);
+
+/* shots.c */
+__machine2__ bool task_find_or_kill_gid (free_timer_id_t gid);

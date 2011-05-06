@@ -430,7 +430,7 @@ void ball_explode_deff (void)
 	U16 fno;
 	extern bool powerball_death;
 	
-	dmd_alloc_pair ();
+
 	/* Do a vstripe wipe if ball went down the outlanes
 	 * otherwise scroll down, so it looks like the ball
 	 * falls then explodes */
@@ -438,9 +438,11 @@ void ball_explode_deff (void)
 		dmd_sched_transition (&trans_bitfade_fast);
 	else
 		dmd_sched_transition (&trans_scroll_down_fast);
-		
+	dmd_alloc_pair ();
 	frame_draw (IMG_BALLEXPLODE_START);
 	dmd_show2 ();
+	task_sleep (TIME_200MS);
+		
 	if (powerball_death == FALSE)	
 		sound_send (SND_EXPLOSION_3);
 	for (fno = IMG_BALLEXPLODE_START; fno <= IMG_BALLEXPLODE_END; fno += 2)

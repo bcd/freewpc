@@ -91,7 +91,7 @@ CALLSET_ENTRY (music, idle_every_second)
 	extern U8 spiral_mode_timer;
 	extern sound_code_t music_active;
 
-	if (!in_live_game || task_find_gid (GID_MUSIC_SPEED))
+	if (!in_live_game || task_find_gid (GID_MUSIC_SPEED) || live_balls != 1)
 		return;
 	switch (music_active)
 	{

@@ -26,6 +26,7 @@ U8 sslot_award_index;
 U8 sslot_award_index_stored;
 extern U8 gumball_enable_count;
 extern U8 mpf_enable_count;
+extern U8 door_panels_started;
 extern U8 cameras_lit;
 extern bool skill_shot_enabled;
 
@@ -59,14 +60,11 @@ const char *sslot_award_names[] = {
 
 void sslot_award_rotate (void)
 {
-	for (;;)
+	while  (in_live_game)
 	{
-		if (in_live_game)
-		{
 		sslot_award_index++;
-			if (sslot_award_index >= NUM_SSLOT_AWARDS - 1)
-				sslot_award_index = 0;
-		}
+		if (sslot_award_index >= NUM_SSLOT_AWARDS - 1)
+			sslot_award_index = 0;
 		task_sleep (TIME_400MS);
 	}
 
@@ -173,7 +171,11 @@ void sslot_award (void)
 		case 4:
 			sound_send (SND_TEN_MILLION_POINTS);
 			score (SC_10M);
-			lamp_on (LM_PANEL_10M);
+			if (!lamp_test (LM_PANEL_10M))
+			{
+				lamp_on (LM_PANEL_10M);
+				door_panels_started++;
+			}
 			break;
 		case 5:
 			sound_send (SND_SEE_WHAT_GREED);
@@ -194,26 +196,9 @@ static void shot_slot_task (void)
 	task_exit ();
 }
 
-CALLSET_ENTRY (slot, dev_slot_enter)
+CALLSET_ENTRY (slot, slot_shot)
 {
-	if (event_did_follow (dead_end, slot)
-	 	|| event_did_follow (gumball_exit, slot)
-		|| event_did_follow (piano, slot)
-		|| event_did_follow (camera, slot))
-	{
-		/* dead end was recently hit, so ignore slot */
-		/* piano was recently hit, so ignore slot */
-		/* camera was recently hit, so ignore slot */
-		return;
-	}
-	if (event_did_follow (skill_shot, slot)
-		|| skill_shot_enabled == TRUE)
-	{
-		/* skill shot has been missed or ball landed in plunger lane*/
-		callset_invoke (skill_missed);
-		return;
-	}
-	else if (timed_mode_running_p (&sslot_mode))
+	if (timed_mode_running_p (&sslot_mode))
 	{
 		//TODO If shot from lite slot lane, allow player to choose award
 		sslot_award ();
@@ -224,11 +209,37 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	{
 		score (SC_50K);
 		/* Tell door.c that the slot machine was hit */
-		//callset_invoke (shot_slot_machine);
-		task_create_anon (shot_slot_task);
-		//Sleep for kickout?
+		callset_invoke (shot_slot_machine);
+		//task_create_anon (shot_slot_task);
+		/* Sleep so the deff can get a chance to start and stop the
+		 * kickout*/
 		task_sleep (TIME_500MS);
 	}
+
+}
+
+CALLSET_ENTRY (slot, dev_slot_enter)
+{
+	if (!in_live_game)
+		return;
+
+	if (task_find_or_kill_gid (GID_DEADEND_TO_SLOT)
+	 	|| task_find_or_kill_gid (GID_GUMBALL_TO_SLOT)
+		|| task_find_or_kill_gid (GID_PIANO_TO_SLOT)
+		|| task_find_or_kill_gid (GID_CAMERA_TO_SLOT))
+	{
+		/* dead end was recently hit, so ignore slot */
+		/* piano was recently hit, so ignore slot */
+		/* camera was recently hit, so ignore slot */
+	}
+	else if (event_did_follow (skill_shot, slot)
+		|| skill_shot_enabled == TRUE)
+	{
+		/* skill shot has been missed or ball landed in plunger lane*/
+		callset_invoke (skill_missed);
+	}
+	else
+		callset_invoke (slot_shot);
 }
 
 CALLSET_ENTRY (slot, dev_slot_kick_attempt)

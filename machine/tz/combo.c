@@ -49,13 +49,13 @@ static void lucky_bounce (void)
 CALLSET_ENTRY (combo, sw_left_ramp_exit)
 {
 	event_can_follow (left_ramp, right_ramp, TIME_5S);
-	event_can_follow (left_ramp, lock, TIME_5S);
+	timer_restart_free (GID_L_RAMP_TO_LOCK, TIME_5S);
 }
 
 CALLSET_ENTRY (combo, dev_lock_enter)
 {
-	if (event_did_follow (left_ramp, lock))
-		event_can_follow (leftramplock, camera, TIME_4S);
+	if (task_find_or_kill_gid (GID_L_RAMP_TO_LOCK))
+		timer_restart_free (GID_L_RAMP_TO_LOCK_TO_CAMERA, TIME_4S);
 }
 
 CALLSET_ENTRY (combo, sw_right_ramp)

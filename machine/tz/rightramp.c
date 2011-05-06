@@ -22,7 +22,6 @@
 #include <freewpc.h>
 #include <bridge_open.h>
 
-extern __machine__ bool mpf_ready_p (void);
 extern void award_unlit_shot (U8 unlit_called_from);
 
 U8 right_ramps_entered;
@@ -64,7 +63,9 @@ void sw_right_ramp_enter_task (void)
 			unlit_right_ramps = 0;
 			bridge_open_start ();
 			task_sleep_sec (3);
-			bridge_open_stop ();
+			/* Don't close if another ball is on it's way */
+			if (right_ramps_entered == 1)
+				bridge_open_stop ();
 		}
 		else
 		{
@@ -100,7 +101,17 @@ void sw_right_ramp_enter_task (void)
 			bridge_open_stop ();
 		}
 	} while (--right_ramps_entered > 0);
+	/* Failsafe */
+	bridge_open_stop ();
 	task_exit ();
+}
+
+CALLSET_ENTRY (right_ramp, mpf_entered)
+{
+	/* Only stop the divertor during single all, otherwise we might knock
+	 * another ball off on it's way in */
+	if (right_ramps_entered == 1)
+		bridge_open_stop ();
 }
 
 CALLSET_ENTRY (right_ramp, sw_right_ramp)

@@ -42,7 +42,7 @@ CALLSET_ENTRY (outhole, mball_start)
 	multidrain_count = 0;
 }
 
-static inline void multidrain_check (void)
+static void multidrain_check (void)
 {
 		/* Start a timer to check if 3 balls drain quickly */
 		if (!timer_find_gid (GID_MULTIDRAIN) 
@@ -64,11 +64,7 @@ CALLSET_ENTRY (outhole, sw_outhole)
 		timer_start_free (GID_OUTHOLE_DEBOUNCE, TIME_500MS);
 		/* Whoops, lost the powerball before getting it in the gumball */
 		if (!multi_ball_play () && global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
-		{
-			sound_send (SND_NOOOOOOOO);
 			powerball_death = TRUE;
-			task_sleep (TIME_500MS);
-		}
 		deff_start (DEFF_BALL_EXPLODE);
 		leff_start (LEFF_STROBE_UP);
 	}

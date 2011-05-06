@@ -58,7 +58,7 @@ void oddchange_collected_deff (void)
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_var5, 64, y, "ODDCHANGE COLLECTED");
-	//	sprintf_score (oddchange_score);
+		sprintf_score (oddchange_score);
 		font_render_string_center (&font_fixed6, 64, 12, sprintf_buffer);
 		dmd_text_outline ();
 		dmd_alloc_pair ();

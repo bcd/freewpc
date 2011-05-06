@@ -246,7 +246,9 @@ void jets_level_up_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	dmd_alloc_pair_clean ();
+	dmd_clean_page_low ();
+	dmd_clean_page_high ();
+	dmd_alloc_low ();
 	sprintf ("TOWN SQUARE LEVEL %d", jets_bonus_level);
 	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
 	/* We don't use scoreget as it's likely another score

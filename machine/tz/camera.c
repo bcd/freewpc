@@ -227,13 +227,6 @@ inline bool can_award_camera (void)
 		return FALSE;
 }
 
-/* Spawned as a seperate task to avoid the deadly overflow */
-void mpf_collected_task (void)
-{
-	callset_invoke (mpf_collected);
-	task_exit ();	
-}
-
 /* Add another 10M to the jackpot if collected during MB with the jackpot lit 
  * otherwise it takes 3 hits to relight the first time, 6 the second time and so
  * on */
@@ -257,8 +250,9 @@ static void award_multiball_camera (void)
 			camera_hits_to_relight_jackpot = 3 * jackpot_level;
 		}
 		else
+			// TODO use a better deff name, as that deff displays
+			// other things as well
 			deff_start (DEFF_LEFT_RAMP_LIGHTS_CAMERA);
-			// TODO use a better deff name
 	}
 }
 
@@ -267,19 +261,9 @@ CALLSET_ENTRY (camera, mball_start)
 	camera_hits_to_relight_jackpot = 3;
 }
 
-CALLSET_ENTRY (camera, sw_camera)
+CALLSET_ENTRY (camera, camera_shot)
 {
-	device_switch_can_follow (camera, slot, TIME_3S);
-	if (event_did_follow (mpf_top, camera))
-	{
-		task_create_anon (mpf_collected_task);
-	}
-	else if (event_did_follow (gumball_exit, camera) 
-		|| event_did_follow (dead_end, camera))
-	{
-		/* Do nothing */
-	}
-	else if (event_did_follow (leftramplock, camera))
+	if (task_find_or_kill_gid (GID_L_RAMP_TO_LOCK_TO_CAMERA))
 	{
 		sound_send (SND_THREE_WAY_COMBO);
 		score (SC_20M);
