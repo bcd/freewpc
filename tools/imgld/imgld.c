@@ -562,7 +562,7 @@ void write_output (const char *filename)
 
 	/* Check that the offset has not advanced past the file size limit */
 	if (offset > max_rom_size)
-		error ("output is too large: %05X > %05X\n", offset, max_rom_size);
+		error ("output is too large: 0x%05lX > 0x%05lX\n", offset, max_rom_size);
 }
 
 

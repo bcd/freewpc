@@ -112,7 +112,7 @@ void simlog (enum sim_log_class class, const char *format, ...)
 	{
 		if (class != SLC_DEBUG_PORT)
 			fprintf (ofp, "[SIM] ");
-		fprintf (ofp, buf);
+		fprintf (ofp, "%s", buf);
 		fputc ('\n', ofp);
 		fflush (ofp);
 	}

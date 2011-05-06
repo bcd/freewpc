@@ -427,7 +427,7 @@ struct buffer *buffer_joinbits (struct buffer *buf)
  */
 struct buffer *buffer_splitbits (struct buffer *buf)
 {
-	unsigned int off, bit;
+	unsigned int off;
 	struct buffer *res = buffer_alloc (buf->len * 8);
 	unsigned char *src;
 	unsigned char *dst;

@@ -328,7 +328,7 @@ CALLSET_ENTRY (pic, init_complete)
 	 * it matches the game number.  If it did not match, then
 	 * the switch matrix will not work. */
 	U16 pic_game_number = pic_read_game_number ();
-	if (pic_read_game_number () == MACHINE_NUMBER)
+	if (pic_game_number == MACHINE_NUMBER)
 	{
 		pic_invalid = FALSE;
 		pic_compute_unlock_code ();
