@@ -72,6 +72,37 @@ void amode_leff (void)
 	}
 }
 
+static void show_silverball (void)
+{
+	amode_page_start ();
+	U16 fno;
+	for (fno = IMG_SILVERBALL_START; fno <= IMG_SILVERBALL_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+		if (amode_page_changed)
+			break;
+	}
+	amode_sleep_sec (1);
+	for (fno = 0; fno < 5; fno++)
+	{
+		dmd_alloc_pair_clean ();
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_steel, 64, 12, "PINBALL");
+		if (fno > 2)
+			font_render_string_center (&font_var5, 64, 24, "HAVE YOU GOT THE BALLS");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (IMG_SILVERBALL_END);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		amode_sleep_sec (1);
+	}
+}
+
 static inline void show_bcd (void)
 {
 	amode_page_start ();
@@ -294,7 +325,7 @@ CALLSET_ENTRY (tz_amode, amode_page)
 {
 	if (amode_show_scores_long)
 		return;
-	
+	show_silverball ();	
 	show_bcd ();
 	show_sonny_jim ();
 	if (amode_show_scores_long)

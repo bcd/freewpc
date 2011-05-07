@@ -430,3 +430,36 @@ IMG_FASTLOCK_START: !machine/tz/animation/dance/frame_0001.pgm
 !machine/tz/animation/dance/frame_0012.pgm
 !machine/tz/animation/dance/frame_0013.pgm
 IMG_FASTLOCK_END: !machine/tz/animation/dance/frame_0014.pgm
+
+IMG_SILVERBALL_START: machine/tz/animation/silverball/frame_0001.pgm
+machine/tz/animation/silverball/frame_0002.pgm
+machine/tz/animation/silverball/frame_0003.pgm
+machine/tz/animation/silverball/frame_0004.pgm
+machine/tz/animation/silverball/frame_0005.pgm
+machine/tz/animation/silverball/frame_0006.pgm
+machine/tz/animation/silverball/frame_0007.pgm
+machine/tz/animation/silverball/frame_0008.pgm
+machine/tz/animation/silverball/frame_0009.pgm
+machine/tz/animation/silverball/frame_0010.pgm
+machine/tz/animation/silverball/frame_0011.pgm
+machine/tz/animation/silverball/frame_0012.pgm
+machine/tz/animation/silverball/frame_0013.pgm
+machine/tz/animation/silverball/frame_0014.pgm
+machine/tz/animation/silverball/frame_0015.pgm
+machine/tz/animation/silverball/frame_0016.pgm
+machine/tz/animation/silverball/frame_0017.pgm
+machine/tz/animation/silverball/frame_0018.pgm
+machine/tz/animation/silverball/frame_0019.pgm
+machine/tz/animation/silverball/frame_0020.pgm
+machine/tz/animation/silverball/frame_0021.pgm
+machine/tz/animation/silverball/frame_0022.pgm
+machine/tz/animation/silverball/frame_0023.pgm
+machine/tz/animation/silverball/frame_0024.pgm
+machine/tz/animation/silverball/frame_0025.pgm
+machine/tz/animation/silverball/frame_0026.pgm
+machine/tz/animation/silverball/frame_0027.pgm
+machine/tz/animation/silverball/frame_0028.pgm
+machine/tz/animation/silverball/frame_0029.pgm
+machine/tz/animation/silverball/frame_0030.pgm
+machine/tz/animation/silverball/frame_0031.pgm
+IMG_SILVERBALL_END: machine/tz/animation/silverball/frame_0032.pgm
