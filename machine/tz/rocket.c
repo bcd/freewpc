@@ -62,11 +62,6 @@ void rocket_deff (void)
 
 static void rocket_kick_sound (void)
 {
-	/* The event_can_follow is in the sound task as the rocket_deff may get
-	 * delayed and the player can use it for notification without having to
-	 * look away from the playfield.
-	 */
-	timer_restart_free (GID_ROCKET_FLIPPER, TIME_100MS);
 	sound_send (SND_ROCKET_KICK_DONE);
 	flasher_pulse (FLASH_UR_FLIPPER);
 	task_exit ();
@@ -74,13 +69,14 @@ static void rocket_kick_sound (void)
 
 
 /* Give the player 1M if he hits the right flipper on
- * the rocket launch, within 66ms before or 100ms after */
+ * the rocket launch, within 33ms before or 66ms after */
 CALLSET_ENTRY (rocket, sw_right_button)
 {
-	if (task_kill_gid (GID_ROCKET_FLIPPER))
+	if (task_kill_gid (GID_ROCKET_FLIPPER) && !task_find_gid (GID_ROCKET_FLIPPER_DEBOUNCE))
 	{
 		sound_send (SND_CUCKOO);
 		score (SC_1M);
+		timer_restart_free (GID_ROCKET_FLIPPER_DEBOUNCE, TIME_1S);
 	}
 }
 
@@ -104,9 +100,9 @@ CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 			leff_start (LEFF_ROCKET);
 		sound_send (SND_ROCKET_KICK_REVVING);
 		deff_start (DEFF_ROCKET);
-		task_sleep (TIME_400MS);
-		timer_restart_free (GID_ROCKET_FLIPPER, TIME_66MS);
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_400MS + TIME_33MS);
+		timer_restart_free (GID_ROCKET_FLIPPER, TIME_100MS);
+		task_sleep (TIME_33MS);
 		task_create_gid (0, rocket_kick_sound);
 	}
 }
