@@ -72,7 +72,7 @@ void amode_leff (void)
 	}
 }
 
-static void show_silverball (void)
+static void show_silverball (const char *line1, const char *line2)
 {
 	amode_page_start ();
 	U16 fno;
@@ -91,9 +91,9 @@ static void show_silverball (void)
 		dmd_alloc_pair_clean ();
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_steel, 64, 12, "PINBALL");
+		font_render_string_center (&font_steel, 64, 12, line1);
 		if (fno > 2)
-			font_render_string_center (&font_var5, 64, 24, "HAVE YOU GOT THE BALLS");
+			font_render_string_center (&font_var5, 64, 24, line2);
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (IMG_SILVERBALL_END);
@@ -325,9 +325,15 @@ CALLSET_ENTRY (tz_amode, amode_page)
 {
 	if (amode_show_scores_long)
 		return;
-	show_silverball ();	
-	show_bcd ();
-	show_sonny_jim ();
+	if (random_scaled (4) == 1)
+		show_silverball ("PINBALL", "HAVE YOU GOT THE BALLS?");
+	else
+		show_silverball ("FREEWPC", "MAKING OLD NEW AGAIN");
+	if (random_scaled (10) == 1)
+	{
+		show_bcd ();
+		show_sonny_jim ();
+	}
 	if (amode_show_scores_long)
 		return;
 
