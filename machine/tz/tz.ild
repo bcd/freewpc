@@ -4,7 +4,8 @@ IMG_COINSTACK: machine/tz/images/coinstack.pgm
 IMG_HITCHER: !machine/tz/images/hitcher.pgm
 IMG_PYRAMID: !machine/tz/images/pyramid.pgm
 IMG_CITY: machine/tz/images/city.pgm
-IMG_BRIANHEAD: !machine/tz/images/brianhead.pgm
+IMG_BCD: images/bcd.pgm
+IMG_SONNY_JIM: images/sonny_jim.pgm
 IMG_SPIRAL: !machine/tz/images/spiral.pgm
 IMG_COW: machine/tz/images/cow.pgm
 IMG_MBORDER: machine/tz/images/mborder.pgm
@@ -14,52 +15,52 @@ IMG_BIRTHDAY: machine/tz/images/birthday.pgm
 IMG_SHARPE: machine/tz/images/sharpe.pgm
 
 IMG_VOID_START: machine/tz/animation/void/void01.pgm
-#machine/tz/animation/void/void02.pgm
+machine/tz/animation/void/void02.pgm
 machine/tz/animation/void/void03.pgm
-#machine/tz/animation/void/void04.pgm
+machine/tz/animation/void/void04.pgm
 machine/tz/animation/void/void05.pgm
-#machine/tz/animation/void/void06.pgm
+machine/tz/animation/void/void06.pgm
 machine/tz/animation/void/void07.pgm
-#machine/tz/animation/void/void08.pgm
+machine/tz/animation/void/void08.pgm
 machine/tz/animation/void/void09.pgm
-#machine/tz/animation/void/void10.pgm
+machine/tz/animation/void/void10.pgm
 machine/tz/animation/void/void11.pgm
-#machine/tz/animation/void/void12.pgm
+machine/tz/animation/void/void12.pgm
 machine/tz/animation/void/void13.pgm
-#machine/tz/animation/void/void14.pgm
+machine/tz/animation/void/void14.pgm
 machine/tz/animation/void/void15.pgm
-#machine/tz/animation/void/void16.pgm
+machine/tz/animation/void/void16.pgm
 machine/tz/animation/void/void17.pgm
-#machine/tz/animation/void/void18.pgm
+machine/tz/animation/void/void18.pgm
 machine/tz/animation/void/void19.pgm
-#machine/tz/animation/void/void20.pgm
+machine/tz/animation/void/void20.pgm
 machine/tz/animation/void/void21.pgm
-#machine/tz/animation/void/void22.pgm
+machine/tz/animation/void/void22.pgm
 machine/tz/animation/void/void23.pgm
-#machine/tz/animation/void/void24.pgm
+machine/tz/animation/void/void24.pgm
 machine/tz/animation/void/void25.pgm
-#machine/tz/animation/void/void26.pgm
+machine/tz/animation/void/void26.pgm
 machine/tz/animation/void/void27.pgm
 IMG_VOID_END: machine/tz/animation/void/void28.pgm
 
 IMG_EBALL_START: machine/tz/animation/eball/eball01.pgm
-#machine/tz/animation/eball/eball02.pgm
+machine/tz/animation/eball/eball02.pgm
 machine/tz/animation/eball/eball03.pgm
-#machine/tz/animation/eball/eball04.pgm
+machine/tz/animation/eball/eball04.pgm
 machine/tz/animation/eball/eball05.pgm
-#machine/tz/animation/eball/eball06.pgm
+machine/tz/animation/eball/eball06.pgm
 machine/tz/animation/eball/eball07.pgm
-#machine/tz/animation/eball/eball08.pgm
+machine/tz/animation/eball/eball08.pgm
 machine/tz/animation/eball/eball09.pgm
-#machine/tz/animation/eball/eball10.pgm
+machine/tz/animation/eball/eball10.pgm
 machine/tz/animation/eball/eball11.pgm
-#machine/tz/animation/eball/eball12.pgm
+machine/tz/animation/eball/eball12.pgm
 machine/tz/animation/eball/eball13.pgm
-#machine/tz/animation/eball/eball14.pgm
+machine/tz/animation/eball/eball14.pgm
 machine/tz/animation/eball/eball15.pgm
-#machine/tz/animation/eball/eball16.pgm
+machine/tz/animation/eball/eball16.pgm
 machine/tz/animation/eball/eball17.pgm
-#machine/tz/animation/eball/eball18.pgm
+machine/tz/animation/eball/eball18.pgm
 IMG_EBALL_END: machine/tz/animation/eball/eball19.pgm
 
 IMG_HITCHHIKER_START: machine/tz/animation/hitchhiker/hitchhiker01.pgm

@@ -72,6 +72,98 @@ void amode_leff (void)
 	}
 }
 
+static inline void show_bcd (void)
+{
+	amode_page_start ();
+	dmd_sched_transition (&trans_random_boxfade);
+	dmd_alloc_pair_clean ();
+	/* Draw a 'white' background for the transition */
+	dmd_invert_page (dmd_low_buffer);
+	dmd_invert_page (dmd_high_buffer);
+	dmd_show2 ();
+	/* bcd should emerge from the right */
+	dmd_sched_transition (&trans_scroll_left);
+	dmd_alloc_pair ();
+	frame_draw (IMG_BCD);
+	/* Start the transition */
+	dmd_show2 ();
+	/* Paint the text on */
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_var5, 38, 10, "HEY ITS ONLY");
+	font_render_string_center (&font_steel, 38, 20, "PINBALL");
+	dmd_text_outline ();
+	dmd_alloc_pair ();
+	frame_draw (IMG_BCD);
+	dmd_overlay_outline ();
+	dmd_show2 ();
+	sound_send (SND_HEY_ITS_ONLY_PINBALL);
+	amode_sleep_sec (3);
+	/* Now just draw bcd again */
+	dmd_alloc_pair ();
+	frame_draw (IMG_BCD);
+	dmd_show2 ();
+	/* Exit stage right */
+	dmd_sched_transition (&trans_scroll_right);
+#if 0
+	/* Draw a 'white' background for the transition again */
+	dmd_alloc_pair_clean ();
+	dmd_invert_page (dmd_low_buffer);
+	dmd_invert_page (dmd_high_buffer);
+	dmd_show2 ();
+#endif
+}
+
+static void amode_talking_task (void)
+{
+	sound_send (SND_NOT_AN_ORDINARY_DAY);
+	task_sleep_sec (2);
+	sound_send (SND_OR_AN_ORDINARY_PLAYER);
+	task_exit ();
+}
+
+static inline void show_sonny_jim (void)
+{
+	amode_page_start ();
+	dmd_alloc_pair_clean ();
+	/* Draw a 'white' background for the transition */
+	dmd_invert_page (dmd_low_buffer);
+	dmd_invert_page (dmd_high_buffer);
+	dmd_show2 ();
+	/* sonny_jim should emerge from the bottom */
+	dmd_sched_transition (&trans_scroll_up);
+	dmd_alloc_pair ();
+	frame_draw (IMG_SONNY_JIM);
+	/* Start the transition */
+	dmd_show2 ();
+	/* Paint the text on */
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+	font_render_string_right (&font_var5, 126, 7, "NOT AN ORDINARY DAY OR");
+	font_render_string_right (&font_var5, 122, 18, "AN ORDINARY PLAYER");
+	dmd_text_outline ();
+	dmd_alloc_pair ();
+	frame_draw (IMG_SONNY_JIM);
+	dmd_overlay_outline ();
+	dmd_show2 ();
+	task_create_anon (amode_talking_task);
+	amode_sleep_sec (4);
+	/* Now just draw sonny_jim again */
+	dmd_alloc_pair ();
+	frame_draw (IMG_SONNY_JIM);
+	dmd_show2 ();
+	/* Exit stage right */
+	dmd_sched_transition (&trans_scroll_down);
+	/* Draw a 'white' background for the transition again */
+	dmd_alloc_pair_clean ();
+	dmd_invert_page (dmd_low_buffer);
+	dmd_invert_page (dmd_high_buffer);
+	dmd_show2 ();
+	
+	dmd_sched_transition (&trans_bitfade_slow);
+}
+
+
 static inline void show_driver_animation (void)
 {
 	amode_page_start ();
@@ -82,7 +174,6 @@ static inline void show_driver_animation (void)
 	{
 		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
 		{
-			/* We are drawing a full frame, so a clean isn't needed */
 			dmd_alloc_pair ();
 			frame_draw (fno);
 			dmd_show2 ();
@@ -203,6 +294,12 @@ CALLSET_ENTRY (tz_amode, amode_page)
 {
 	if (amode_show_scores_long)
 		return;
+	
+	show_bcd ();
+	show_sonny_jim ();
+	if (amode_show_scores_long)
+		return;
+
 	map_and_clean ();
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
 	dmd_text_blur ();

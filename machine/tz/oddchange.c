@@ -25,7 +25,7 @@
 #define MAX_ODDCHANGE_VALUE SC_500K
 #define MAX_ODDCHANGE_SCORE SC_50M
 
-extern struct timed_mode_ops greed_mode;
+extern U8 greed_mode_timer;
 score_t oddchange_score;
 
 void oddchange_collected_deff (void)
@@ -122,15 +122,20 @@ CALLSET_ENTRY (oddchange, start_ball)
 	reset_oddchange_score ();
 }
 
-CALLSET_ENTRY (oddchange, sw_standup_1, sw_standup_2, sw_standup_3, sw_standup_4, sw_standup_5, sw_standup_6, sw_standup_7)
+CALLSET_ENTRY (oddchange, grow_oddchange)
 {
-	if (in_live_game && !timed_mode_running_p (&greed_mode)
-		&& (score_compare (score_table[MAX_ODDCHANGE_SCORE], oddchange_score)  == 1))
+	if (score_compare (score_table[MAX_ODDCHANGE_SCORE], oddchange_score)  == 1)
 	{
 		score_add (oddchange_score, score_table[random_scaled(MAX_ODDCHANGE_VALUE + 1)]);
-		deff_restart (DEFF_ODDCHANGE_GROWS);
+		if (greed_mode_timer == 0)
+			deff_restart (DEFF_ODDCHANGE_GROWS);
 	}
+}
 
+CALLSET_ENTRY (oddchange, sw_standup_1, sw_standup_2, sw_standup_3, sw_standup_4, sw_standup_5, sw_standup_6, sw_standup_7)
+{
+	if (in_live_game)
+		callset_invoke (grow_oddchange);
 }
 
 CALLSET_ENTRY (oddchange, status_report)
