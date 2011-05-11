@@ -70,7 +70,7 @@ GAME_OBJS = jets.o autofire.o gumball.o \
 	config.o loop.o rampdiv.o magnet.o \
 	maghelper.o clock.o
 
-GAME_TEST_OBJS = gumball_test.o powerball_test.o clocktest.o magtest.o
+GAME_TEST_OBJS = gumball_test.o powerball_test.o clocktest.o magtest.o ac_detect.o
 
 GAME_INCLUDES =
 

@@ -49,6 +49,7 @@ typedef enum {
 
 
 extern __fastram__ U8 zc_timer;
+extern __fastram__ U8 zc_timer_stored;
 
 extern inline U8 zc_get_timer (void)
 {

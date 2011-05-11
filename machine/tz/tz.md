@@ -352,6 +352,7 @@ tz_clock:
 tz_gumball:
 tz_magnet:
 tz_powerball:
+ac_detect:
 
 ##########################################################################
 # Lampsets
@@ -452,8 +453,11 @@ Mag Throw:yes_no, YES
 # Dont allow cradling during multiball
 Dixon anti cradle:yes_no, NO
 
-# Only allow one high score entry per player
+# Only allow one high score entry per player (Not working)
 One HS entry:yes_no, YES
+
+# Set the highest oddchange random award, 20 = 500K
+Oddchange Level:integer, 10
 
 ##########################################################################
 # Items for the Feature Audits menu.
@@ -755,6 +759,7 @@ Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 ##########################################################################
 [fonts]
 times10:
+twizone:
 steel:
 
 [timers]
