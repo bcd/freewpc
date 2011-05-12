@@ -69,6 +69,7 @@ struct timed_mode_ops greed_mode = {
 	.pause = system_timer_pause,
 };
 
+/* Note:  The oddchange_deff handles the hits during greed mode */
 void greed_mode_deff (void)
 {
 	dmd_alloc_pair_clean ();
@@ -173,6 +174,10 @@ CALLSET_ENTRY (standup, lamp_update)
 /** target is given as a bitmask */
 void common_greed_handler (U8 target)
 {
+	/* Increase the odcchange pot, which also shows the deff */
+	if (in_live_game)
+		callset_invoke (grow_oddchange);
+
 	const U8 sw = task_get_arg ();
 	const U8 lamp = switch_lookup_lamp (sw);
 

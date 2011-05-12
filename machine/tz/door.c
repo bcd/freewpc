@@ -108,7 +108,7 @@ extern inline U8 door_get_flashing_lamp (void)
 	return door_get_lamp (door_index);
 }
 
-static inline bool can_award_door_panel (void)
+inline bool can_award_door_panel (void)
 {
 	/* Panels not awarded during any multiball */
 	if (multi_ball_play () || global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING))
@@ -443,51 +443,14 @@ CALLSET_ENTRY (door, chaosmb_stop, sssmb_stop)
 }
 
 /* Relight the piano if it was unlit when hit */
-static bool check_relight_slot_or_piano (void)
+bool check_relight_slot_or_piano (void)
 {
-	if ( feature_config.easy_light_door_panels == YES
+	if ( feature_config.easy_lite_door == YES
 			&& door_panels_started < 8
 			&& single_ball_play ())
 		return TRUE;
 	else
 		return FALSE;
-}
-
-CALLSET_ENTRY(door, piano_shot)
-{
-	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
-	{
-		flag_off (FLAG_PIANO_DOOR_LIT);
-		flag_on (FLAG_SLOT_DOOR_LIT);
-		callset_invoke (award_door_panel);
-		return;
-	}
-	else if (check_relight_slot_or_piano ())
-	{
-		flag_on (FLAG_PIANO_DOOR_LIT);
-	}
-	score (SC_5130);
-	oddchange_collected ();
-	award_unlit_shot (SW_PIANO);
-}
-
-CALLSET_ENTRY (door, shot_slot_machine)
-{
-	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT))
-	{
-		flag_off (FLAG_SLOT_DOOR_LIT);
-		flag_on (FLAG_PIANO_DOOR_LIT);
-		callset_invoke (award_door_panel);
-		return;
-	}
-	else if (check_relight_slot_or_piano ())
-	{
-			flag_on (FLAG_SLOT_DOOR_LIT);
-			sound_send (SND_FEEL_LUCKY);
-	}
-	score (SC_5130);
-	oddchange_collected ();
-	award_unlit_shot (SW_SLOT);
 }
 
 CALLSET_ENTRY (door, door_start_eb)

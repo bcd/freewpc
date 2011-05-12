@@ -198,32 +198,22 @@ static void shot_slot_task (void)
 
 CALLSET_ENTRY (slot, slot_shot)
 {
-	if (timed_mode_running_p (&sslot_mode))
-	{
-		//TODO If shot from lite slot lane, allow player to choose award
-		sslot_award ();
-		score (SC_10M);
-		timed_mode_end (&sslot_mode);
-	}
-	else
-	{
-		score (SC_50K);
-		/* Tell door.c that the slot machine was hit */
-		callset_invoke (shot_slot_machine);
-		//task_create_anon (shot_slot_task);
-		/* Sleep so the deff can get a chance to start and stop the
-		 * kickout*/
-		task_sleep (TIME_500MS);
-	}
-
+	
 }
 
 CALLSET_ENTRY (slot, dev_slot_enter)
 {
+	if (task_kill_gid (GID_CAMERA_SLOT_PROX_DETECT)
+		 || task_kill_gid (GID_PIANO_SLOT_PROX_DETECT))
+	{
+		/* Proximity sensor did not trip ; must be the powerball */
+		pb_detect_event (PF_PB_DETECTED);
+		pb_announce ();
+	}
+
 	if (!in_live_game)
 		return;
-
-	if (task_find_or_kill_gid (GID_DEADEND_TO_SLOT)
+	else if (task_find_or_kill_gid (GID_DEADEND_TO_SLOT)
 	 	|| task_find_or_kill_gid (GID_GUMBALL_TO_SLOT)
 		|| task_find_or_kill_gid (GID_PIANO_TO_SLOT)
 		|| task_find_or_kill_gid (GID_CAMERA_TO_SLOT))
@@ -235,19 +225,42 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	else if (event_did_follow (skill_shot, slot)
 		|| skill_shot_enabled == TRUE)
 	{
+		/* TODO, this may be buggy during sssmb */
 		/* skill shot has been missed or ball landed in plunger lane*/
 		callset_invoke (skill_missed);
 	}
-	else
-		callset_invoke (slot_shot);
+	else if (timed_mode_running_p (&sslot_mode))
+	{
+		//TODO If shot from lite slot lane, allow player to choose award
+		sslot_award ();
+		score (SC_10M);
+		timed_mode_end (&sslot_mode);
+	}
+	else if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT))
+	{
+		flag_off (FLAG_SLOT_DOOR_LIT);
+		flag_on (FLAG_PIANO_DOOR_LIT);
+		callset_invoke (award_door_panel);
+	}
+	else 
+	{
+		score (SC_5130);
+		if (check_relight_slot_or_piano ())
+		{
+			flag_on (FLAG_SLOT_DOOR_LIT);
+			sound_send (SND_FEEL_LUCKY);
+		}
+		award_unlit_shot (SW_SLOT);
+		callset_invoke (oddchange_collected);
+	}
+	/* Sleep so the deffs can get a chance to start and stop it
+	 * kicking out too early */
+	task_sleep (TIME_400MS);
+	
 }
 
 CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 {
-	/* TODO Hack to hold ball due to the way shot_slot_task works */
-	while (deff_get_active () == DEFF_DOOR_AWARD)
-		task_sleep (TIME_500MS);
-
 	while (kickout_locks != 0)
 		task_sleep (TIME_500MS);
 	

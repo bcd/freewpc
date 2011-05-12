@@ -116,7 +116,7 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 //	device_switch_can_follow (dead_end, slot, TIME_2S + TIME_500MS);
 //	event_can_follow (dead_end, camera, TIME_2S);
 	timer_restart_free (GID_DEADEND_TO_SLOT, TIME_4S);
-	event_can_follow (camera_or_piano, slot_prox, TIME_5S);
+	//event_can_follow (camera_or_piano, slot_prox, TIME_5S);
 
 	if (lamp_test (LM_DEAD_END))
 	{

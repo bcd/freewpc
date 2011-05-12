@@ -344,7 +344,7 @@ void one_ball_score_task (void)
 	score_sub (points_this_ball, start_ball_score);
 	
 	/* Don't show if on first ball, you can just look at the scoreboard */
-	if (ball_up != 1 && feature_config.advanced_bonus_info == YES)
+	if (ball_up != 1 && feature_config.adv_bonus_info == YES)
 	{	
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
@@ -372,7 +372,7 @@ void one_ball_score_task (void)
 	}
 		
 	/* If it's the last player of a multi player game ... */
-	if (num_players > 1 && player_up == num_players && ball_up != 1 && extra_balls == 0 && feature_config.advanced_bonus_info == YES)
+	if (num_players > 1 && player_up == num_players && ball_up != 1 && extra_balls == 0 && feature_config.adv_bonus_info == YES)
 	{
 	 	/* show highest 1 ball score so far*/
 		dmd_alloc_low_clean ();
@@ -655,7 +655,7 @@ void bonus_deff (void)
 
 
 	if (check_if_last_ball_of_multiplayer_game ()
-		&& feature_config.advanced_bonus_info == YES)
+		&& feature_config.adv_bonus_info == YES)
 
 	{
 		task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
@@ -702,7 +702,7 @@ void bonus_deff (void)
 CALLSET_ENTRY (bonus, serve_ball)
 {
 	if (check_if_last_ball_of_multiplayer_game ()
-		&& feature_config.advanced_bonus_info == YES)
+		&& feature_config.adv_bonus_info == YES)
 		deff_start_sync (DEFF_SCORE_TO_BEAT);
 }
 

@@ -138,5 +138,10 @@ CALLSET_ENTRY (music, speed_up_music)
 
 CALLSET_ENTRY (music, end_game)
 {
+	callset_invoke (slow_down_music);
+}
+
+CALLSET_ENTRY (music, slow_down_music)
+{
 	task_create_gid (GID_MUSIC_SPEED, slow_down_music_task);
 }

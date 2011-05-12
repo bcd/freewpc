@@ -25,9 +25,10 @@
 #define MAX_ODDCHANGE_VALUE SC_500K
 #define MAX_ODDCHANGE_SCORE SC_50M
 
-extern U8 greed_mode_timer;
+//extern U8 greed_mode_timer;
 score_t oddchange_score;
-
+extern score_t greed_mode_total;
+extern struct timed_mode_ops greed_mode;
 void oddchange_collected_deff (void)
 {
 	sprintf_score (score_deff_get ());
@@ -71,18 +72,33 @@ void oddchange_collected_deff (void)
 	deff_exit ();
 }
 
+const char *greed_text [] = { 
+	"GREEEEEEEED",
+	"GREEEEEEED",
+	"GEEEEEEED",
+	"GEEEEEED",
+	"GEEEEED",
+	"GREEED",
+};
+
 void oddchange_grows_deff (void)
 {
 	U16 fno;
 	dmd_alloc_pair_clean ();
 	U8 y = 10;
-	for (fno = IMG_ODDCHANGE_END; fno > IMG_ODDCHANGE_START; fno -= 4)
+	U8 i = 0;
+	for (fno = IMG_ODDCHANGE_END; fno > IMG_ODDCHANGE_START; fno -= 3)
 	{
-		y++;
-		y++;
+		y += 2;
+		i++;
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
+		if (timed_mode_running_p (&greed_mode))
+		{
+			font_render_string_center (&font_mono5, 64, y, greed_text[i]);
+		}
+		else
+			font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
@@ -92,11 +108,28 @@ void oddchange_grows_deff (void)
 	}
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
-	sprintf_score (oddchange_score);
+	if (timed_mode_running_p (&greed_mode))
+	{
+		sound_send (SND_KACHING);
+		font_render_string_center (&font_mono5, 64, y, "GREED");
+		sprintf_score (greed_mode_total);
+	}
+	else
+	{
+		font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
+		sprintf_score (oddchange_score);
+	}
 	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
-	font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
 	dmd_show_low ();
-	task_sleep_sec (2);
+	if (timed_mode_running_p (&greed_mode))
+	{
+		dmd_copy_low_to_high ();
+		dmd_invert_page (dmd_low_buffer);
+		deff_swap_low_high (50, TIME_33MS);
+		task_sleep_sec (1);
+	}
+	else
+		task_sleep_sec (2);
 	deff_exit ();
 
 }
@@ -107,14 +140,21 @@ void reset_oddchange_score (void)
 	score_add (oddchange_score, score_table[SC_50K]);
 }
 
-void oddchange_collected (void)
+CALLSET_ENTRY (oddchange, oddchange_collected)
 {
 	if (in_live_game && single_ball_play ())
 	{
 		score_add (current_score, oddchange_score);
-		deff_start (DEFF_ODDCHANGE_COLLECTED);
+		deff_start_sync (DEFF_ODDCHANGE_COLLECTED);
 		reset_oddchange_score ();
 	}
+}
+
+CALLSET_ENTRY (oddchange, minute_elapsed)
+{
+	//TODO Change SC_5M after playtesting
+	if (in_live_game && score_compare (oddchange_score, score_table[SC_5M]) == 1)
+		sound_send (SND_THE_STAKES_ARE_HIGHER);
 }
 
 CALLSET_ENTRY (oddchange, start_ball)
@@ -126,16 +166,18 @@ CALLSET_ENTRY (oddchange, grow_oddchange)
 {
 	if (score_compare (score_table[MAX_ODDCHANGE_SCORE], oddchange_score)  == 1)
 	{
-		score_add (oddchange_score, score_table[random_scaled(MAX_ODDCHANGE_VALUE + 1)]);
-		if (greed_mode_timer == 0)
-			deff_restart (DEFF_ODDCHANGE_GROWS);
+		U8 random_number;
+		/* Award up to 5M during greed */
+		if (timed_mode_running_p (&greed_mode))
+			random_number = SC_4M;
+		if (feature_config.oddchange_level > MAX_ODDCHANGE_VALUE)
+			random_number = random_scaled(MAX_ODDCHANGE_VALUE);
+		else
+			random_number = random_scaled(feature_config.oddchange_level);
+		/* Always remembering that random_scaled returns from 0 to N-1 */
+		score_add (oddchange_score, score_table[random_number + 1]);
+		deff_restart (DEFF_ODDCHANGE_GROWS);
 	}
-}
-
-CALLSET_ENTRY (oddchange, sw_standup_1, sw_standup_2, sw_standup_3, sw_standup_4, sw_standup_5, sw_standup_6, sw_standup_7)
-{
-	if (in_live_game)
-		callset_invoke (grow_oddchange);
 }
 
 CALLSET_ENTRY (oddchange, status_report)

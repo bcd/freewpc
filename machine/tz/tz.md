@@ -428,20 +428,21 @@ TZ Flipcodes: yes_no, YES
 TZ Mag Helpers: yes_no, YES
 Snake Wrap:yes_no, YES
 
-# No lock needed to relight Gumball
-Easy Light Gumball: yes_no, YES
 
 # Hit Slot/Piano to relight if < 8 door_panels
-Easy Light Door panels: yes_no, YES
+Easy lite door: yes_no, YES
 
 # Used by the autofire, turn on if autofire opto fails 
-Fire when detected empty: yes_no, NO
+Fire empty: yes_no, NO
+
+# No lock needed to relight Gumball
+Easy Lite Gumball: yes_no, YES
 
 # Do not grab the ball on the right magnet if gumball is lit
-Gumball over Camera: yes_no, NO
+No grab gumball: yes_no, NO
 
 # Show advanced info during bonus
-Advanced bonus info:yes_no, YES
+Adv bonus info:yes_no, YES
 
 # Tweak the drop time for the throw automatically
 # Doesnt currenly work
@@ -454,7 +455,7 @@ Mag Throw:yes_no, YES
 Dixon anti cradle:yes_no, NO
 
 # Only allow one high score entry per player (Not working)
-One HS entry:yes_no, YES
+One HS entry:yes_no, NO
 
 # Set the highest oddchange random award, 20 = 500K
 Oddchange Level:integer, 10

@@ -43,14 +43,6 @@
 
 
 
-typedef enum {
-	PF_STEEL_DETECTED = 1,
-	PF_PB_DETECTED,
-	TROUGH_STEEL_DETECTED,
-	TROUGH_PB_DETECTED,
-	GUMBALL_PB_DETECTED,
-} pb_event_t;
-
 /** The general location of the powerball */
 U8 pb_location;
 
@@ -237,7 +229,7 @@ void pb_clear_location (U8 location)
  * Because proximity sensors trigger only when steel balls move over them
  * (assuming they are working correctly), we can trust an assertion of
  * steel ball a little more than one about the Powerball. */
-static void pb_detect_event (pb_event_t event)
+void pb_detect_event (pb_event_t event)
 {
 	last_pb_event = event;
 	switch (event)
@@ -434,26 +426,16 @@ CALLSET_ENTRY (pb_detect, music_refresh)
 }
 
 /* Powerball slot proximity */
-CALLSET_ENTRY (pb_detect, sw_camera)
-{
-	event_can_follow (camera_or_piano, slot_prox, TIME_5S);
-}
-
-CALLSET_ENTRY (pb_detect, sw_piano)
-{
-	event_can_follow (camera_or_piano, slot_prox, TIME_4S);
-}
-
 CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 {
-	pb_detect_event (PF_STEEL_DETECTED);
 
 	/* TODO If I could find out which GID was triggered more recently, I
 	 * could kill one and not the other, strengthing detection during
 	 * multiball.
 	 */
-	task_kill_gid (GID_CAMERA_TO_SLOT_PROX_DETECT);
-	task_kill_gid (GID_PIANO_TO_SLOT_PROX_DETECT);
+	task_kill_gid (GID_CAMERA_SLOT_PROX_DETECT);
+	task_kill_gid (GID_PIANO_SLOT_PROX_DETECT);
+	pb_detect_event (PF_STEEL_DETECTED);
 	//event_did_follow (camera_or_piano, slot_prox);
 	/* TODO : if this switch triggers and we did not expect
 	 * a ball in the undertrough....??? */
@@ -467,17 +449,6 @@ CALLSET_ENTRY (pb_detect, powerball_in_gumball)
 CALLSET_ENTRY (pb_detect, check_magnet_grab)
 {
 	task_recreate_gid (GID_POWERBALL_MAG_DETECT, powerball_magnet_detect_task);
-}
-
-CALLSET_ENTRY (pb_detect, dev_slot_enter)
-{
-	if (task_find_or_kill_gid (GID_CAMERA_SLOT_PROX_DETECT)
-		 || task_find_or_kill_gid (GID_PIANO_SLOT_PROX_DETECT))
-	{
-		/* Proximity sensor did not trip ; must be the powerball */
-		pb_detect_event (PF_PB_DETECTED);
-	}
-	pb_announce ();
 }
 
 CALLSET_ENTRY (pb_detect, dev_trough_enter)

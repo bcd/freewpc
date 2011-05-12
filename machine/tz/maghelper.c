@@ -177,7 +177,7 @@ void magnet_enable_monitor_task (void)
 			|| timed_mode_running_p (&spiral_mode) 
 			|| timed_mode_running_p (&fastlock_mode)
 			/* Don't grab the ball if the gumball is lit and configured to do so */
-			|| (feature_config.gumball_over_camera == YES && gumball_enable_count))
+			|| (feature_config.no_grab_gumball == YES && gumball_enable_count))
 			/* Don't turn off the magnet if it's busy doing something else */
 			&& (!magnet_busy (MAG_RIGHT) && !task_find_gid (GID_RIGHT_BALL_GRABBED)))
 		{	

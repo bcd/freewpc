@@ -113,7 +113,7 @@ CALLSET_ENTRY (shots, sw_camera)
 {
 	timer_restart_free (GID_CAMERA_TO_SLOT, TIME_4S);
 	/* Start a timer for the eddy sensor between the camera and slot */
-	timer_restart_free (GID_CAMERA_TO_SLOT_PROX_DETECT, TIME_4S);
+	timer_restart_free (GID_CAMERA_SLOT_PROX_DETECT, TIME_4S);
 	if (!in_live_game)
 		return;
 	if (free_timer_test (TIM_MPF_TOP_TO_CAMERA))
@@ -134,7 +134,21 @@ CALLSET_ENTRY (shots, sw_piano)
 {
 	timer_restart_free (GID_PIANO_TO_SLOT, TIME_4S);
 	/* Start a timer for the eddy sensor between the piano and slot */
-	timer_restart_free (GID_PIANO_TO_SLOT_PROX_DETECT, TIME_4S);
-	if (in_live_game)
-		callset_invoke (piano_shot);
+	timer_restart_free (GID_PIANO_SLOT_PROX_DETECT, TIME_4S);
+	if (!in_live_game)
+		return;
+	else if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
+	{
+		flag_off (FLAG_PIANO_DOOR_LIT);
+		flag_on (FLAG_SLOT_DOOR_LIT);
+		callset_invoke (award_door_panel);
+	}
+	else 
+	{
+		score (SC_5130);
+		if (check_relight_slot_or_piano () && !flag_test (FLAG_PIANO_DOOR_LIT))
+			flag_on (FLAG_PIANO_DOOR_LIT);
+		award_unlit_shot (SW_PIANO);
+		callset_invoke (oddchange_collected);
+	}
 }

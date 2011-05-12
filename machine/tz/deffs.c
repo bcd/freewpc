@@ -24,7 +24,7 @@
 void cow_deff (void)
 {
 	dmd_alloc_pair_clean ();
-	frame_draw (IMG_COW);
+//	frame_draw (IMG_COW);
 	font_render_string_center (&font_var5, 40, 11, "THE POWER");
 	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
 	dmd_show2 ();
@@ -32,7 +32,7 @@ void cow_deff (void)
 	
 	sound_send (SND_POWER_GRUNT_1);
 	dmd_alloc_pair_clean ();
-	frame_draw (IMG_COW);
+//	frame_draw (IMG_COW);
 	font_render_string_center (&font_fixed6, 40, 11, "MOO");
 	dmd_show2 ();
 	task_sleep_sec (4);
@@ -71,7 +71,7 @@ void extra_ball_deff (void)
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 	}
 	task_sleep_sec (2);
 	deff_exit ();
@@ -420,7 +420,7 @@ void ball_drain_outlane_deff (void)
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 	}
 	deff_exit ();
 }
@@ -445,13 +445,17 @@ void ball_explode_deff (void)
 		
 	if (powerball_death == FALSE)	
 		sound_send (SND_EXPLOSION_3);
-	for (fno = IMG_BALLEXPLODE_START; fno <= IMG_BALLEXPLODE_END; fno += 2)
+	for (fno = IMG_BALLEXPLODE_START; fno < IMG_BALLEXPLODE_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_66MS);
 	}
+	/* Show a blank frame */
+	dmd_alloc_pair_clean ();
+	dmd_show2 ();
+	task_sleep (TIME_100MS);
 	/* Play in reverse if ballsave is active */
 	if (ballsave_test_active ())
 	{
@@ -461,19 +465,19 @@ void ball_explode_deff (void)
 			dmd_alloc_pair ();
 			frame_draw (fno);
 			dmd_show2 ();
-			task_sleep (TIME_100MS);
+			task_sleep (TIME_66MS);
 		}
-		sprintf ("TRY HARDER");
+		if (random_scaled (3) == 1)
+			sprintf ("TRY HARDER"); 
+		else
+			sprintf ("WHOOPSY DAISY");
 		flash_small_deff (15, TIME_66MS);
 		
 	}
-	else
-	{
-		/* This should stop the scores from showing just before the bonus screen */
-		dmd_alloc_pair_clean ();
-		dmd_show_low ();
-		task_sleep_sec (1);
-	}
+	/* This should stop the scores from showing just before the bonus screen */
+	dmd_alloc_pair_clean ();
+	dmd_show2 ();
+	task_sleep_sec (1);
 	deff_exit ();
 }
 

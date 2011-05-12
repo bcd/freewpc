@@ -194,7 +194,7 @@ CALLSET_ENTRY (gumball, sw_gumball_exit)
 		gumball_exit_tripped = TRUE;
 		/* A ball successfully came out of the gumball machine.*/
 		bounded_decrement (gumball_count, 0);
-		if (feature_config.easy_light_gumball == YES)
+		if (feature_config.easy_lite_gumball == YES)
 		{
 			lamp_off (LM_GUM);
 			lamp_off (LM_BALL);

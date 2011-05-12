@@ -31,33 +31,55 @@ U8 tnf_timer;
 /* Total amount scored from doink mode */
 __local__ score_t tnf_score;
 
+const U8 progress_bar_slice_bitmap[] = {
+	1,5,1,1,1,1,1,
+};
+
+const U8 progress_bar_chunk_bitmap[] = {
+	5,5,15,15,15,15,15,
+};
+
+static void tnf_draw_progress_bar (void)
+{
+	U8 i;
+	/* Where the next slice needs to be put */
+	/* 128 - Size of bar (80 pixels) / 2 */
+	U8 x = 24;
+
+	for (i = masher_buttons_pressed; i > 0; i--)
+	{
+		if (x > 128)
+			break;
+		else if (i < 5)
+			bitmap_blit (progress_bar_slice_bitmap, x, 20);
+		else
+		{
+			/* Draw the 5x5 chunks */
+			bitmap_blit (progress_bar_chunk_bitmap, x, 20);
+			x += 4;
+			i -= 4;
+		}
+		x++;
+	}
+}
+
 void tnf_deff (void)
 {
-	music_disable ();
-	tnf_timer = 60;
+	/* tnf_timer is used to blink the text */
+	tnf_timer = 250;
 	tnf_x = 0;
 	tnf_y = 0;
-	sound_send (SND_PIANO_ENTRY_TUNE);
 	while (tnf_timer > 1)
 	{
-		U16 fno;
-		dmd_alloc_pair_clean ();
-		for (fno = IMG_PINWHEEL_END; fno >= IMG_PINWHEEL_START; fno -= 2)
-		{
-			dmd_map_overlay ();
-			dmd_clean_page_low ();
+			dmd_alloc_low_clean ();
 			if (tnf_timer % 2 != 0)
 				font_render_string_center (&font_mono5, 64, 4, "HIT FLIPPER BUTTONS");
+			tnf_draw_progress_bar ();
 			psprintf ("%d DOINK", "%d DOINKS", masher_buttons_pressed);
-			font_render_string_center (&font_term6, 64 + tnf_x, 16 + tnf_y, sprintf_buffer);
-			dmd_text_outline ();
-			dmd_alloc_pair ();
-			frame_draw (fno);
-			dmd_overlay_outline ();
-			dmd_show2 ();
-			task_sleep (TIME_16MS);
+			font_render_string_center (&font_term6, 64 + tnf_x, 12 + tnf_y, sprintf_buffer);
+			dmd_show_low ();
+			task_sleep (TIME_33MS);
 			bounded_decrement (tnf_timer, 0);
-		}
 	}
 	deff_exit ();
 }
@@ -106,7 +128,7 @@ CALLSET_ENTRY (tnf, sw_left_button, sw_right_button)
 		bounded_increment (masher_buttons_pressed, 255);
 		score_add (tnf_score, score_table[SC_250K]);
 		tnf_x = random_scaled(10);
-		tnf_y = random_scaled(8);
+		tnf_y = random_scaled(3);
 		task_recreate_gid (GID_TNF_SOUND, tnf_sound_task);
 	}
 }
@@ -122,6 +144,7 @@ CALLSET_ENTRY (tnf, tnf_start)
 	masher_buttons_pressed = 1;
 	score_zero (tnf_score);
 	leff_start (LEFF_BONUS);
+	music_request (MUS_POWERFIELD, PRI_GAME_VMODE);
 	deff_start_sync (DEFF_TNF);
 	task_sleep_sec (1);
 	while (deff_get_active () == DEFF_TNF)

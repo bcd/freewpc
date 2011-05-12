@@ -1,18 +1,20 @@
-IMG_OLDCAR: machine/tz/images/oldcar.pgm
-IMG_ROBOT: !machine/tz/images/robot.pgm
-IMG_COINSTACK: machine/tz/images/coinstack.pgm
-IMG_HITCHER: !machine/tz/images/hitcher.pgm
-IMG_PYRAMID: !machine/tz/images/pyramid.pgm
 IMG_CITY: machine/tz/images/city.pgm
 IMG_BCD: images/bcd.pgm
 IMG_SONNY_JIM: images/sonny_jim.pgm
-IMG_SPIRAL: !machine/tz/images/spiral.pgm
-IMG_COW: machine/tz/images/cow.pgm
-IMG_MBORDER: machine/tz/images/mborder.pgm
-IMG_CAR: !machine/tz/images/car3.pgm
 IMG_NEWCAR: !machine/tz/images/newcar.pgm
 IMG_BIRTHDAY: machine/tz/images/birthday.pgm
 IMG_SHARPE: machine/tz/images/sharpe.pgm
+
+IMG_BALLEXPLODE_START: machine/tz/animation/ballexplode/ballexplode03.pgm
+machine/tz/animation/ballexplode/ballexplode04.pgm
+machine/tz/animation/ballexplode/ballexplode05.pgm
+machine/tz/animation/ballexplode/ballexplode06.pgm
+machine/tz/animation/ballexplode/ballexplode07.pgm
+machine/tz/animation/ballexplode/ballexplode08.pgm
+machine/tz/animation/ballexplode/ballexplode09.pgm
+machine/tz/animation/ballexplode/ballexplode10.pgm
+machine/tz/animation/ballexplode/ballexplode11.pgm
+IMG_BALLEXPLODE_END: machine/tz/animation/ballexplode/ballexplode12.pgm
 
 IMG_VOID_START: machine/tz/animation/void/void01.pgm
 machine/tz/animation/void/void02.pgm
@@ -79,43 +81,43 @@ machine/tz/animation/hitchhiker/hitchhiker13.pgm
 IMG_HITCHHIKER_END: machine/tz/animation/hitchhiker/hitchhiker14.pgm
 
 IMG_DRIVER_START: machine/tz/animation/driver/driver01.pgm
-IMG_DRIVER_2: machine/tz/animation/driver/driver02.pgm
-IMG_DRIVER_3: machine/tz/animation/driver/driver03.pgm
-IMG_DRIVER_4: machine/tz/animation/driver/driver04.pgm
-IMG_DRIVER_5: machine/tz/animation/driver/driver05.pgm
-IMG_DRIVER_6: machine/tz/animation/driver/driver06.pgm
-IMG_DRIVER_7: machine/tz/animation/driver/driver07.pgm
-IMG_DRIVER_8: machine/tz/animation/driver/driver08.pgm
-IMG_DRIVER_9: machine/tz/animation/driver/driver09.pgm
-IMG_DRIVER_10: machine/tz/animation/driver/driver10.pgm
-IMG_DRIVER_11: machine/tz/animation/driver/driver11.pgm
-IMG_DRIVER_12: machine/tz/animation/driver/driver12.pgm
-IMG_DRIVER_13: machine/tz/animation/driver/driver13.pgm
+machine/tz/animation/driver/driver02.pgm
+machine/tz/animation/driver/driver03.pgm
+machine/tz/animation/driver/driver04.pgm
+machine/tz/animation/driver/driver05.pgm
+machine/tz/animation/driver/driver06.pgm
+machine/tz/animation/driver/driver07.pgm
+machine/tz/animation/driver/driver08.pgm
+machine/tz/animation/driver/driver09.pgm
+machine/tz/animation/driver/driver10.pgm
+machine/tz/animation/driver/driver11.pgm
+machine/tz/animation/driver/driver12.pgm
+machine/tz/animation/driver/driver13.pgm
 IMG_DRIVER_END: machine/tz/animation/driver/driver14.pgm
 
 IMG_GUMBALL_START: machine/tz/animation/gumball/gumball01.pgm
-IMG_GUMBALL_2: machine/tz/animation/gumball/gumball02.pgm
-IMG_GUMBALL_3: machine/tz/animation/gumball/gumball03.pgm
-IMG_GUMBALL_4: machine/tz/animation/gumball/gumball04.pgm
-IMG_GUMBALL_5: machine/tz/animation/gumball/gumball05.pgm
-IMG_GUMBALL_6: machine/tz/animation/gumball/gumball06.pgm
-IMG_GUMBALL_7: machine/tz/animation/gumball/gumball07.pgm
-IMG_GUMBALL_8: machine/tz/animation/gumball/gumball08.pgm
-IMG_GUMBALL_9: machine/tz/animation/gumball/gumball09.pgm
-IMG_GUMBALL_10: machine/tz/animation/gumball/gumball10.pgm
-IMG_GUMBALL_11: machine/tz/animation/gumball/gumball11.pgm
-IMG_GUMBALL_12: machine/tz/animation/gumball/gumball12.pgm
-IMG_GUMBALL_13: machine/tz/animation/gumball/gumball13.pgm
-IMG_GUMBALL_14: machine/tz/animation/gumball/gumball14.pgm
-IMG_GUMBALL_15: machine/tz/animation/gumball/gumball15.pgm
-IMG_GUMBALL_16: machine/tz/animation/gumball/gumball16.pgm
-IMG_GUMBALL_17: machine/tz/animation/gumball/gumball17.pgm
-IMG_GUMBALL_18: machine/tz/animation/gumball/gumball18.pgm
+machine/tz/animation/gumball/gumball02.pgm
+machine/tz/animation/gumball/gumball03.pgm
+machine/tz/animation/gumball/gumball04.pgm
+machine/tz/animation/gumball/gumball05.pgm
+machine/tz/animation/gumball/gumball06.pgm
+machine/tz/animation/gumball/gumball07.pgm
+machine/tz/animation/gumball/gumball08.pgm
+machine/tz/animation/gumball/gumball09.pgm
+machine/tz/animation/gumball/gumball10.pgm
+machine/tz/animation/gumball/gumball11.pgm
+machine/tz/animation/gumball/gumball12.pgm
+machine/tz/animation/gumball/gumball13.pgm
+machine/tz/animation/gumball/gumball14.pgm
+machine/tz/animation/gumball/gumball15.pgm
+machine/tz/animation/gumball/gumball16.pgm
+machine/tz/animation/gumball/gumball17.pgm
+machine/tz/animation/gumball/gumball18.pgm
 IMG_GUMBALL_END: machine/tz/animation/gumball/gumball19.pgm
 
 IMG_POWERBALL_START: machine/tz/animation/powerball/powerball01.pgm
-IMG_POWERBALL_2: machine/tz/animation/powerball/powerball02.pgm
-IMG_POWERBALL_3: machine/tz/animation/powerball/powerball03.pgm
+machine/tz/animation/powerball/powerball02.pgm
+machine/tz/animation/powerball/powerball03.pgm
 IMG_POWERBALL_END: machine/tz/animation/powerball/powerball04.pgm
 
 IMG_DOOR_START: machine/tz/animation/door/door01.pgm
@@ -126,19 +128,6 @@ machine/tz/animation/door/door05.pgm
 machine/tz/animation/door/door06.pgm
 machine/tz/animation/door/door07.pgm
 IMG_DOOR_END: machine/tz/animation/door/door08.pgm
-
-IMG_BALLEXPLODE_START: machine/tz/animation/ballexplode/ballexplode01.pgm
-#IMG_BALLEXPLODE_2: machine/tz/animation/ballexplode/ballexplode02.pgm
-IMG_BALLEXPLODE_3: machine/tz/animation/ballexplode/ballexplode03.pgm
-#IMG_BALLEXPLODE_4: machine/tz/animation/ballexplode/ballexplode04.pgm
-IMG_BALLEXPLODE_5: machine/tz/animation/ballexplode/ballexplode05.pgm
-#IMG_BALLEXPLODE_6: machine/tz/animation/ballexplode/ballexplode06.pgm
-IMG_BALLEXPLODE_7: machine/tz/animation/ballexplode/ballexplode07.pgm
-#IMG_BALLEXPLODE_8: machine/tz/animation/ballexplode/ballexplode08.pgm
-IMG_BALLEXPLODE_9: machine/tz/animation/ballexplode/ballexplode09.pgm
-#IMG_BALLEXPLODE_10: machine/tz/animation/ballexplode/ballexplode10.pgm
-IMG_BALLEXPLODE_11: machine/tz/animation/ballexplode/ballexplode11.pgm
-IMG_BALLEXPLODE_END: machine/tz/animation/ballexplode/ballexplode12.pgm
 
 IMG_CAMERA_START: machine/tz/animation/camera/camera01.pgm
 IMG_CAMERA_2: machine/tz/animation/camera/camera02.pgm
@@ -187,74 +176,67 @@ machine/tz/animation/flashleft/frame_0005.pgm
 IMG_FLASHLEFT_END: machine/tz/animation/flashleft/frame_0006.pgm
 
 IMG_LOOP_START: machine/tz/animation/loop/frame_0001.pgm
-IMG_LOOP_2: machine/tz/animation/loop/frame_0002.pgm
-IMG_LOOP_3: machine/tz/animation/loop/frame_0003.pgm
-IMG_LOOP_4: machine/tz/animation/loop/frame_0004.pgm
+machine/tz/animation/loop/frame_0002.pgm
+machine/tz/animation/loop/frame_0003.pgm
+machine/tz/animation/loop/frame_0004.pgm
 IMG_LOOP_END: machine/tz/animation/loop/frame_0005.pgm
 
 IMG_PYRAMIDSPIN_START: machine/tz/animation/pyramidspin/frame_0001.pgm
-IMG_PYRAMIDSPIN_2: machine/tz/animation/pyramidspin/frame_0002.pgm
-IMG_PYRAMIDSPIN_3: machine/tz/animation/pyramidspin/frame_0003.pgm
-IMG_PYRAMIDSPIN_4: machine/tz/animation/pyramidspin/frame_0004.pgm
-IMG_PYRAMIDSPIN_5: machine/tz/animation/pyramidspin/frame_0005.pgm
-IMG_PYRAMIDSPIN_6: machine/tz/animation/pyramidspin/frame_0006.pgm
-IMG_PYRAMIDSPIN_7: machine/tz/animation/pyramidspin/frame_0007.pgm
-IMG_PYRAMIDSPIN_8: machine/tz/animation/pyramidspin/frame_0008.pgm
-IMG_PYRAMIDSPIN_9: machine/tz/animation/pyramidspin/frame_0009.pgm
+machine/tz/animation/pyramidspin/frame_0002.pgm
+machine/tz/animation/pyramidspin/frame_0003.pgm
+machine/tz/animation/pyramidspin/frame_0004.pgm
+machine/tz/animation/pyramidspin/frame_0005.pgm
+machine/tz/animation/pyramidspin/frame_0006.pgm
+machine/tz/animation/pyramidspin/frame_0007.pgm
+machine/tz/animation/pyramidspin/frame_0008.pgm
+machine/tz/animation/pyramidspin/frame_0009.pgm
 IMG_PYRAMIDSPIN_END: machine/tz/animation/pyramidspin/frame_0010.pgm
 
 IMG_EXPLODE_START: machine/tz/animation/explode/frame_0001.pgm
-#IMG_EXPLODE_2: machine/tz/animation/explode/frame_0002.pgm
-IMG_EXPLODE_3: machine/tz/animation/explode/frame_0003.pgm
-#IMG_EXPLODE_4: machine/tz/animation/explode/frame_0004.pgm
-IMG_EXPLODE_5: machine/tz/animation/explode/frame_0005.pgm
-#IMG_EXPLODE_6: machine/tz/animation/explode/frame_0006.pgm
-IMG_EXPLODE_7: machine/tz/animation/explode/frame_0007.pgm
-#IMG_EXPLODE_8: machine/tz/animation/explode/frame_0008.pgm
-IMG_EXPLODE_9: machine/tz/animation/explode/frame_0009.pgm
-#IMG_EXPLODE_10: machine/tz/animation/explode/frame_0010.pgm
-IMG_EXPLODE_12: machine/tz/animation/explode/frame_0012.pgm
-#IMG_EXPLODE_13: machine/tz/animation/explode/frame_0013.pgm
-IMG_EXPLODE_14: machine/tz/animation/explode/frame_0014.pgm
-#IMG_EXPLODE_15: machine/tz/animation/explode/frame_0015.pgm
-IMG_EXPLODE_16: machine/tz/animation/explode/frame_0016.pgm
-#IMG_EXPLODE_17: machine/tz/animation/explode/frame_0017.pgm
-IMG_EXPLODE_END: machine/tz/animation/explode/frame_0018.pgm
+machine/tz/animation/explode/frame_0002.pgm
+machine/tz/animation/explode/frame_0003.pgm
+machine/tz/animation/explode/frame_0004.pgm
+machine/tz/animation/explode/frame_0005.pgm
+machine/tz/animation/explode/frame_0006.pgm
+machine/tz/animation/explode/frame_0007.pgm
+machine/tz/animation/explode/frame_0008.pgm
+machine/tz/animation/explode/frame_0009.pgm
+IMG_EXPLODE_END: machine/tz/animation/explode/frame_0010.pgm
 
 IMG_CLOCK_START: !machine/tz/animation/clock/frame_0001.pgm
-IMG_CLOCK_2: !machine/tz/animation/clock/frame_0002.pgm
-#IMG_CLOCK_3: !machine/tz/animation/clock/frame_0003.pgm
-IMG_CLOCK_4: !machine/tz/animation/clock/frame_0004.pgm
-#IMG_CLOCK_5: !machine/tz/animation/clock/frame_0005.pgm
-IMG_CLOCK_6: !machine/tz/animation/clock/frame_0006.pgm
-#IMG_CLOCK_7: !machine/tz/animation/clock/frame_0007.pgm
-IMG_CLOCK_8: !machine/tz/animation/clock/frame_0008.pgm
-#IMG_CLOCK_9: !machine/tz/animation/clock/frame_0009.pgm
-IMG_CLOCK_10: !machine/tz/animation/clock/frame_0010.pgm
-#IMG_CLOCK_11: !machine/tz/animation/clock/frame_0011.pgm
-IMG_CLOCK_12: !machine/tz/animation/clock/frame_0012.pgm
-#IMG_CLOCK_13: !machine/tz/animation/clock/frame_0013.pgm
-IMG_CLOCK_14: !machine/tz/animation/clock/frame_0014.pgm
-#IMG_CLOCK_15: !machine/tz/animation/clock/frame_0015.pgm
-IMG_CLOCK_16: !machine/tz/animation/clock/frame_0016.pgm
-#IMG_CLOCK_17: !machine/tz/animation/clock/frame_0017.pgm
-IMG_CLOCK_18: !machine/tz/animation/clock/frame_0018.pgm
-#IMG_CLOCK_19: !machine/tz/animation/clock/frame_0019.pgm
-IMG_CLOCK_20: !machine/tz/animation/clock/frame_0020.pgm
-#IMG_CLOCK_21: !machine/tz/animation/clock/frame_0021.pgm
-IMG_CLOCK_22: !machine/tz/animation/clock/frame_0022.pgm
-#IMG_CLOCK_23: !machine/tz/animation/clock/frame_0023.pgm
-IMG_CLOCK_24: !machine/tz/animation/clock/frame_0024.pgm
-#IMG_CLOCK_25: !machine/tz/animation/clock/frame_0025.pgm
-IMG_CLOCK_26: !machine/tz/animation/clock/frame_0026.pgm
-#IMG_CLOCK_27: !machine/tz/animation/clock/frame_0027.pgm
+!machine/tz/animation/clock/frame_0002.pgm
+!machine/tz/animation/clock/frame_0003.pgm
+!machine/tz/animation/clock/frame_0004.pgm
+!machine/tz/animation/clock/frame_0005.pgm
+!machine/tz/animation/clock/frame_0006.pgm
+!machine/tz/animation/clock/frame_0007.pgm
+!machine/tz/animation/clock/frame_0008.pgm
+!machine/tz/animation/clock/frame_0009.pgm
+!machine/tz/animation/clock/frame_0010.pgm
+!machine/tz/animation/clock/frame_0011.pgm
+!machine/tz/animation/clock/frame_0012.pgm
+!machine/tz/animation/clock/frame_0013.pgm
+!machine/tz/animation/clock/frame_0014.pgm
+!machine/tz/animation/clock/frame_0015.pgm
+!machine/tz/animation/clock/frame_0016.pgm
+!machine/tz/animation/clock/frame_0017.pgm
+!machine/tz/animation/clock/frame_0018.pgm
+!machine/tz/animation/clock/frame_0019.pgm
+!machine/tz/animation/clock/frame_0020.pgm
+!machine/tz/animation/clock/frame_0021.pgm
+!machine/tz/animation/clock/frame_0022.pgm
+!machine/tz/animation/clock/frame_0023.pgm
+!machine/tz/animation/clock/frame_0024.pgm
+!machine/tz/animation/clock/frame_0025.pgm
+!machine/tz/animation/clock/frame_0026.pgm
+!machine/tz/animation/clock/frame_0027.pgm
 IMG_CLOCK_END: !machine/tz/animation/clock/frame_0028.pgm
 
 IMG_SNAKE_START: !machine/tz/animation/snake/frame_0001.pgm
-IMG_SNAKE_2: !machine/tz/animation/snake/frame_0002.pgm
-IMG_SNAKE_3: !machine/tz/animation/snake/frame_0003.pgm
-IMG_SNAKE_4: !machine/tz/animation/snake/frame_0004.pgm
-IMG_SNAKE_5: !machine/tz/animation/snake/frame_0005.pgm
+!machine/tz/animation/snake/frame_0002.pgm
+!machine/tz/animation/snake/frame_0003.pgm
+!machine/tz/animation/snake/frame_0004.pgm
+!machine/tz/animation/snake/frame_0005.pgm
 IMG_SNAKE_END: !machine/tz/animation/snake/frame_0006.pgm
 
 IMG_BOLT_TESLA_START: machine/tz/animation/bolt_tesla/frame_0001.pgm
@@ -296,19 +278,19 @@ machine/tz/animation/rocket/newrocket11.pgm
 IMG_NEWROCKET_END: machine/tz/animation/rocket/newrocket12.pgm
 
 IMG_JACKPOT_START: machine/tz/animation/jackpot/jackpot1.pgm
-IMG_JACKPOT_2: machine/tz/animation/jackpot/jackpot2.pgm
-IMG_JACKPOT_3: machine/tz/animation/jackpot/jackpot3.pgm
-IMG_JACKPOT_4: machine/tz/animation/jackpot/jackpot4.pgm
-IMG_JACKPOT_5: machine/tz/animation/jackpot/jackpot5.pgm
-IMG_JACKPOT_6: machine/tz/animation/jackpot/jackpot6.pgm
-IMG_JACKPOT_7: machine/tz/animation/jackpot/jackpot7.pgm
-IMG_JACKPOT_8: machine/tz/animation/jackpot/jackpot8.pgm
-IMG_JACKPOT_9: machine/tz/animation/jackpot/jackpot9.pgm
-IMG_JACKPOT_10: machine/tz/animation/jackpot/jackpot10.pgm
-IMG_JACKPOT_11: machine/tz/animation/jackpot/jackpot11.pgm
-IMG_JACKPOT_12: machine/tz/animation/jackpot/jackpot12.pgm
-IMG_JACKPOT_13: machine/tz/animation/jackpot/jackpot13.pgm
-IMG_JACKPOT_14: machine/tz/animation/jackpot/jackpot14.pgm
+machine/tz/animation/jackpot/jackpot2.pgm
+machine/tz/animation/jackpot/jackpot3.pgm
+machine/tz/animation/jackpot/jackpot4.pgm
+machine/tz/animation/jackpot/jackpot5.pgm
+machine/tz/animation/jackpot/jackpot6.pgm
+machine/tz/animation/jackpot/jackpot7.pgm
+machine/tz/animation/jackpot/jackpot8.pgm
+machine/tz/animation/jackpot/jackpot9.pgm
+machine/tz/animation/jackpot/jackpot10.pgm
+machine/tz/animation/jackpot/jackpot11.pgm
+machine/tz/animation/jackpot/jackpot12.pgm
+machine/tz/animation/jackpot/jackpot13.pgm
+machine/tz/animation/jackpot/jackpot14.pgm
 IMG_JACKPOT_END: machine/tz/animation/jackpot/jackpot15.pgm
 
 IMG_BTTZMELT_START: !machine/tz/animation/bttzmelt/bttzmelt_001.pgm

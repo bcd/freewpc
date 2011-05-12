@@ -72,7 +72,8 @@ void amode_leff (void)
 	}
 }
 
-static void show_silverball (const char *line1, const char *line2)
+/* We have to inline these so the return skips the page properly */
+static inline void show_silverball (const char *line1, const char *line2)
 {
 	amode_page_start ();
 	U16 fno;
@@ -86,7 +87,7 @@ static void show_silverball (const char *line1, const char *line2)
 			break;
 	}
 	amode_sleep_sec (1);
-	for (fno = 0; fno < 5; fno++)
+	for (fno = 0; fno < 7; fno++)
 	{
 		dmd_alloc_pair_clean ();
 		dmd_map_overlay ();
@@ -101,6 +102,7 @@ static void show_silverball (const char *line1, const char *line2)
 		dmd_show2 ();
 		amode_sleep_sec (1);
 	}
+	dmd_sched_transition (&trans_bitfade_slow);
 }
 
 static inline void show_bcd (void)
@@ -325,15 +327,22 @@ CALLSET_ENTRY (tz_amode, amode_page)
 {
 	if (amode_show_scores_long)
 		return;
-	if (random_scaled (4) == 1)
-		show_silverball ("PINBALL", "HAVE YOU GOT THE BALLS?");
-	else
-		show_silverball ("FREEWPC", "MAKING OLD NEW AGAIN");
-	if (random_scaled (10) == 1)
+
+	/* We can't get our names on the playfield, but at least we can get our
+	 * ugly mugs on the DMD :-)
+	 */
+	if (random_scaled (3) == 1)
 	{
 		show_bcd ();
 		show_sonny_jim ();
+		//show_hydra();
+		return;
 	}
+	else if (random_scaled (4) == 1)
+		show_silverball ("PINBALL", "HAVE YOU GOT THE BALLS?");
+	else
+		show_silverball ("FREEWPC", "MAKING OLD NEW AGAIN");
+	
 	if (amode_show_scores_long)
 		return;
 

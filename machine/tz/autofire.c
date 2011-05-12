@@ -106,6 +106,7 @@ void autofire_monitor (void)
 	shooter_div_start ();
 	/* Wait for the diverter to fully open before firing */
 	task_sleep_sec (1);	
+	task_sleep (TIME_500MS);	
 	
 	if (in_live_game && single_ball_play ())
 	{
@@ -119,7 +120,7 @@ void autofire_monitor (void)
 	/* Clear the magnet so we can fire a ball */
 	magnet_disable_catch (MAG_RIGHT);
 	/* Launch the ball */
-	if (feature_config.fire_when_detected_empty == NO)
+	if (feature_config.fire_empty == NO)
 	{
 		if (switch_poll_logical (SW_AUTOFIRE2))
 			sol_request (SOL_AUTOFIRE);
@@ -229,7 +230,7 @@ CALLSET_ENTRY (autofire, clear_autofire)
 	 * during attract mode */
 	shooter_div_start ();
 	task_sleep_sec (2);
-	if (feature_config.fire_when_detected_empty == NO)
+	if (feature_config.fire_empty == NO)
 	{
 		if (switch_poll_logical (SW_AUTOFIRE2))
 			sol_request (SOL_AUTOFIRE);

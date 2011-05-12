@@ -62,6 +62,8 @@ __machine__ void shot_slot_machine (void);
 __machine__ void shot_piano (void);
 __machine__ void award_door_panel (void);
 __machine__ void award_door_panel_task (void);
+__machine__ bool can_award_door_panel (void);
+__machine__ bool check_relight_slot_or_piano (void);
 
 /* gumball.c */
 __machine__ void gumball_diverter_open(void);
@@ -112,11 +114,22 @@ __machine__ void fastlock_lock_entered (void);
 #define PB_IN_GUMBALL 0x4
 #define PB_MAYBE_IN_PLAY 0x10
 #define PB_IN_PLAY 0x8
+
+typedef enum {
+	PF_STEEL_DETECTED = 1,
+	PF_PB_DETECTED,
+	TROUGH_STEEL_DETECTED,
+	TROUGH_PB_DETECTED,
+	GUMBALL_PB_DETECTED,
+} pb_event_t;
+
+
 __machine__ void pb_clear_location (U8 location);
 __machine__ void powerball_magnet_detect_task (void);
 __machine__ bool pb_maybe_in_play (void);
 __machine__ bool pb_in_lock (void);
 __machine__ void pb_announce (void);
+__machine__ void pb_detect_event (pb_event_t event);
 /* thingfl.c */
 /* outhole.c */
 __common__ bool ballsave_test_active (void);
@@ -159,7 +172,6 @@ __machine2__ void slow_music_log (U8 count, U8 delay);
 __machine2__ void speed_up_music_lin (U8 count, U8 delay);
 
 /* oddchange.c */
-__machine2__ void oddchange_collected (void);
 
 /* shots.c */
 __machine2__ bool task_find_or_kill_gid (free_timer_id_t gid);
