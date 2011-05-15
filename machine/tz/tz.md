@@ -44,7 +44,7 @@ define CONFIG_TZONE_IP y
 # Allow only one high score entry per player
 #define CONFIG_ONE_HS_PER_PLAYER 
 
-##########################################################################
+#########################################################################
 # Lamp Description
 # The key is given in column/row format.  The first parameter must be
 # the lamp name.  Optionally you can specify a color, and x() and y()
@@ -406,6 +406,8 @@ Unlit shots: Dead End, Slot Machine, Piano Panel, Ramp Battle, Camera
 Inlanes: Left Inlane1, Left Inlane2, Right Inlane
 Chaosmb Jackpots: Multiball, Ramp Battle, Piano Jackpot, Camera, Power Payoff, Dead End
 
+Select mode: Door Locks, Door Gumball, Spiral Awards, Lower Lanes, Jets, Powerfield Values, Left Spiral, Left Powerball, Left Ramp Awards, Ramp Battle, Lock Awards, Piano Awards, Right Spiral, Right Powerball, Greed Targets, Dead End, Slot Machine, Camera
+
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
 # machine.
@@ -458,7 +460,7 @@ Dixon anti cradle:yes_no, NO
 One HS entry:yes_no, NO
 
 # Set the highest oddchange random award, 20 = 500K
-Oddchange Level:integer, 10
+Oddchange Level:integer, 18
 
 ##########################################################################
 # Items for the Feature Audits menu.
@@ -634,7 +636,8 @@ Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 
-Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
+Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED+D_PAUSE
+Select mode: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
 
 PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 PB Loop: page(MACHINE_PAGE), PRI_GAME_LOW8, D_QUEUED+D_TIMEOUT
@@ -668,8 +671,8 @@ Rollover Completed: page(MACHINE3_PAGE), PRI_GAME_LOW3
 Ball Drain Outlane: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
 Ball Explode: page(MACHINE_PAGE), PRI_JACKPOT, D_RESTARTABLE
 TZ Ball Save: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
-Two Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
-Three Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
+Two Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
+Three Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
 In the lead: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Home and Dry: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 PB Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
@@ -709,10 +712,11 @@ Anti Cradle: page(MACHINE_PAGE), PRI_TILT, D_PAUSE+D_QUEUED
 Hurryup Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 Hurryup awarded: page(MACHINE3_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
-Match loop: page(MACHINE3_PAGE), PRI_MATCH, D_PAUSE+D_QUEUED
+#Match loop: page(MACHINE3_PAGE), PRI_MATCH, D_PAUSE+D_QUEUED
 
 Oddchange grows: page(MACHINE2_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE
 Oddchange collected: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT+D_SCORE
+Bitmap test: page(MACHINE2_PAGE), PRI_GAME_QUICK5
 
 
 ##########################################################################
@@ -723,6 +727,7 @@ Oddchange collected: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT+D_
 perlinclude machine/tz/leff.pl
 
 Bonus: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
+Select Mode: runner, PRI_LEFF7, LAMPS(SELECT_MODE), GI(ALL), page(MACHINE2_PAGE)
 GI Cycle: PRI_LEFF3, GI(ALL), page(MACHINE2_PAGE)
 Flasher Happy: shared, PRI_LEFF1, page(MACHINE2_PAGE)
 Left Ramp: shared, PRI_LEFF2, page(MACHINE2_PAGE)

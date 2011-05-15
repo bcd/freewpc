@@ -24,7 +24,10 @@
 /* Total Size, including x,y padding */
 #define TOTAL_BITMAP_SIZE 10
 #define BITMAP_SIZE 8
-#define MAX_STAR2S 8
+/* How many are shown at once */
+#define MAX_BITMAPS 8
+/* How many different bitmaps we have to show */
+#define NUM_BITMAPS 4
 
 /* Planes go in order of low, high */
 const U8 test_bitmap_2plane[] = {
@@ -47,7 +50,7 @@ const U8 star_bitmap_2plane[] = {
 };
 
 const U8 dollar_bitmap_2plane[] = {
-	8,8,0,64,0,240,8,68,4,190,
+	8,8,0,64,0,240,8,68,4,248,
 	8,8,0,0,64,8,244,8,72,4,
 
 	8,8,0,1,0,31,0,1,0,15,
@@ -60,31 +63,61 @@ const U8 dollar_bitmap_2plane[] = {
 	8,8,14,8,9,0,15,0,1,0,
 };
 
-struct star2_state 
+const U8 trophy_bitmap_2plane[] = {
+	8,8,240,6,1,1,1,1,2,4,
+	8,8,0,240,254,114,50,114,116,56,
+
+	8,8,7,48,64,64,64,64,32,16,
+	8,8,0,7,63,39,39,39,23,14,
+
+	8,8,8,16,32,32,32,48,8,248,
+	8,8,240,224,192,192,192,192,240,0,
+	
+	8,8,8,4,2,2,2,6,8,15,
+	8,8,7,3,1,1,1,1,7,0,
+};
+
+const U8 pound_bitmap_2plane[] = {
+	8,8,64,32,16,16,16,24,4,4,
+	8,8,128,192,224,224,224,224,248,248,
+
+	8,8,32,64,64,76,58,30,32,32,
+	8,8,31,63,63,57,1,1,31,31,
+
+	8,8,4,24,28,0,2,2,253,0,
+	8,8,248,224,224,252,252,252,0,0,
+
+	8,8,32,30,62,64,64,64,63,0,
+	8,8,31,1,1,63,63,63,0,0,
+};
+
+struct bitmap_state 
 {
 	U8 x;
 	U8 y;
 	U8 x_speed;
 	U8 y_speed;
 	U8 ticks_till_alive;
+	U8 type;
 	bool dir_left;
-} star2_states[MAX_STAR2S];
+} bitmap_states[MAX_BITMAPS];
 
-static void respawn_star (U8 star_number)
+static void respawn_bitmap (U8 bitmap_number)
 {
-	struct star2_state *s = &star2_states[star_number];
+	struct bitmap_state *s = &bitmap_states[bitmap_number];
 	s->y = 0;
 	s->x = 20;
 	s->x += random_scaled (88);
 	s->dir_left = random_scaled (2);
-	s->ticks_till_alive = random_scaled (MAX_STAR2S);
+	s->ticks_till_alive = random_scaled (MAX_BITMAPS);
 	s->y_speed = random_scaled (3) + 1;
 	s->x_speed = random_scaled (3) + 1;
+	s->type = random_scaled (NUM_BITMAPS);
 }
 
-static void move_star (U8 star_number)
+static void move_bitmap (U8 bitmap_number)
 {
-	struct star2_state *s = &star2_states[star_number];
+	struct bitmap_state *s = &bitmap_states[bitmap_number];
 	if (s->ticks_till_alive == 0)
 	{
 		s->y += s->y_speed;
@@ -94,29 +127,47 @@ static void move_star (U8 star_number)
 			s->x += s->x_speed;
 		
 		if (s->y >= 16 - s->y_speed || s->x <= s->x_speed || s->x >= 112 - s->x_speed)
-			respawn_star (star_number);
+			respawn_bitmap (bitmap_number);
 	}
 	else 
 		s->ticks_till_alive--;
 }
 
-static void draw_star2 (U8 star_number)
+static void draw_bitmap (U8 bitmap_number)
 {
-	struct star2_state *s = &star2_states[star_number];
+	struct bitmap_state *s = &bitmap_states[bitmap_number];
+	U8 *src;
 	if (s->ticks_till_alive)
 		return;
+	switch (s->type)
+	{
+		default:
+		case 0:
+			src = &star_bitmap_2plane;
+			break;
+		case 1:	
+			src = &dollar_bitmap_2plane;
+			break;
+		case 2:	
+			src = &trophy_bitmap_2plane;
+			break;
+		case 3:	
+			src = &pound_bitmap_2plane;
+			break;
+	}
+
 	/* Draw the low plane */
-	bitmap_blit (dollar_bitmap_2plane + TOTAL_BITMAP_SIZE, s->x, s->y);
-	bitmap_blit (dollar_bitmap_2plane + (TOTAL_BITMAP_SIZE * 3), s->x + BITMAP_SIZE, s->y);
-	bitmap_blit (dollar_bitmap_2plane + (TOTAL_BITMAP_SIZE * 5), s->x, s->y + BITMAP_SIZE);
-	bitmap_blit (dollar_bitmap_2plane + (TOTAL_BITMAP_SIZE * 7), s->x + BITMAP_SIZE, s->y + BITMAP_SIZE);
+	bitmap_blit (src + TOTAL_BITMAP_SIZE, s->x, s->y);
+	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 3), s->x + BITMAP_SIZE, s->y);
+	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 5), s->x, s->y + BITMAP_SIZE);
+	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 7), s->x + BITMAP_SIZE, s->y + BITMAP_SIZE);
 	dmd_flip_low_high ();
 
 	/* Draw the high plane */
-	bitmap_blit (dollar_bitmap_2plane, s->x, s->y);
-	bitmap_blit (dollar_bitmap_2plane + (TOTAL_BITMAP_SIZE * 2), s->x + BITMAP_SIZE, s->y);
-	bitmap_blit (dollar_bitmap_2plane + (TOTAL_BITMAP_SIZE * 4), s->x, s->y + BITMAP_SIZE);
-	bitmap_blit (dollar_bitmap_2plane + (TOTAL_BITMAP_SIZE * 6), s->x + BITMAP_SIZE, s->y + BITMAP_SIZE);
+	bitmap_blit (src, s->x, s->y);
+	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 2), s->x + BITMAP_SIZE, s->y);
+	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 4), s->x, s->y + BITMAP_SIZE);
+	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 6), s->x + BITMAP_SIZE, s->y + BITMAP_SIZE);
 	dmd_flip_low_high ();
 	
 }
@@ -124,9 +175,9 @@ static void draw_star2 (U8 star_number)
 CALLSET_ENTRY (bitmap_test, score_deff_start)
 {
 	U8 i;
-	for (i = 0; i < MAX_STAR2S; i++)
+	for (i = 0; i < MAX_BITMAPS; i++)
 	{
-		respawn_star (i);	
+		respawn_bitmap (i);	
 	}
 
 }
@@ -134,10 +185,10 @@ CALLSET_ENTRY (bitmap_test, score_deff_start)
 CALLSET_ENTRY (bitmap_test, score_overlay)
 {
 	U8 i;
-	for (i = 0; i < MAX_STAR2S; i++)
+	for (i = 0; i < MAX_BITMAPS; i++)
 	{
-		draw_star2 (i);
-		move_star (i);
+		draw_bitmap (i);
+		move_bitmap (i);
 	}
 
 }
@@ -147,18 +198,19 @@ void bitmap_test_deff (void)
 	U8 i;
 	timer_restart_free (GID_BITMAP_TEST, TIME_30S);
 
-	for (i = 0; i < MAX_STAR2S; i++)
+	for (i = 0; i < MAX_BITMAPS; i++)
 	{
-		respawn_star (i);	
+		respawn_bitmap (i);	
 	}
 
-	while (task_find_gid (GID_BITMAP_TEST))
+	//while (task_find_gid (GID_BITMAP_TEST))
+	for (;;)
 	{
 		dmd_alloc_pair_clean ();
-		for (i = 0; i < MAX_STAR2S; i++)
+		for (i = 0; i < MAX_BITMAPS; i++)
 		{
-			draw_star2 (i);
-			move_star (i);
+			draw_bitmap (i);
+			move_bitmap (i);
 		}
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
