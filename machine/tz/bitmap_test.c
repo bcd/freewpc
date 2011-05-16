@@ -25,9 +25,11 @@
 #define TOTAL_BITMAP_SIZE 10
 #define BITMAP_SIZE 8
 /* How many are shown at once */
-#define MAX_BITMAPS 8
+#define MAX_BITMAPS 10
 /* How many different bitmaps we have to show */
 #define NUM_BITMAPS 4
+
+static bool bitmap_bounce;
 
 /* Planes go in order of low, high */
 const U8 test_bitmap_2plane[] = {
@@ -78,17 +80,17 @@ const U8 trophy_bitmap_2plane[] = {
 };
 
 const U8 pound_bitmap_2plane[] = {
-	8,8,64,32,16,16,16,24,4,4,
 	8,8,128,192,224,224,224,224,248,248,
+	8,8,64,32,16,16,16,24,4,4,
 
-	8,8,32,64,64,76,58,30,32,32,
 	8,8,31,63,63,57,1,1,31,31,
+	8,8,32,64,64,70,62,30,32,32,
 
-	8,8,4,24,28,0,2,2,253,0,
 	8,8,248,224,224,252,252,252,0,0,
+	8,8,4,24,28,0,2,2,252,0,
 
-	8,8,32,30,62,64,64,64,63,0,
 	8,8,31,1,1,63,63,63,0,0,
+	8,8,32,30,62,64,64,64,63,0,
 };
 
 struct bitmap_state 
@@ -100,7 +102,28 @@ struct bitmap_state
 	U8 ticks_till_alive;
 	U8 type;
 	bool dir_left;
+	bool dir_up;
 } bitmap_states[MAX_BITMAPS];
+
+static void change_direction (U8 bitmap_number)
+{
+	struct bitmap_state *s = &bitmap_states[bitmap_number];
+
+	if (s->y >= 16 - s->y_speed && s->dir_up == FALSE)
+		s->dir_up = TRUE;
+	else if (s->y_speed >= s->y && s->dir_up == TRUE)
+		s->dir_up = FALSE;
+
+	if (s->x >= 112 - s->x_speed && s->dir_left == FALSE)
+		s->dir_left = TRUE;
+	else if (s->x <= s->x_speed && s->dir_left == TRUE)
+		s->dir_left = FALSE;
+	
+	s->y_speed = random_scaled (3) + 1;
+	s->x_speed = random_scaled (3) + 1;
+	if (random_scaled(2))
+		s->type = random_scaled (NUM_BITMAPS);
+}
 
 static void respawn_bitmap (U8 bitmap_number)
 {
@@ -109,10 +132,23 @@ static void respawn_bitmap (U8 bitmap_number)
 	s->x = 20;
 	s->x += random_scaled (88);
 	s->dir_left = random_scaled (2);
+	s->dir_up = FALSE;
 	s->ticks_till_alive = random_scaled (MAX_BITMAPS);
 	s->y_speed = random_scaled (3) + 1;
 	s->x_speed = random_scaled (3) + 1;
 	s->type = random_scaled (NUM_BITMAPS);
+}
+
+static bool check_boundary (U8 bitmap_number)
+{
+	struct bitmap_state *s = &bitmap_states[bitmap_number];
+	if ((s->y >= 16 - s->y_speed &&s->dir_up == FALSE)
+			|| (s->y_speed >= s->y && s->dir_up == TRUE)
+			|| (s->x <= s->x_speed && s->dir_left == TRUE) 
+			|| (s->x >= 112 - s->x_speed && s->dir_left == FALSE))
+		return TRUE;
+	else
+		return FALSE;
 }
 
 static void move_bitmap (U8 bitmap_number)
@@ -120,14 +156,23 @@ static void move_bitmap (U8 bitmap_number)
 	struct bitmap_state *s = &bitmap_states[bitmap_number];
 	if (s->ticks_till_alive == 0)
 	{
-		s->y += s->y_speed;
-		if (s->dir_left == TRUE && s->x > s->x_speed)
+		if (s->dir_up == TRUE && s->y >= s->y_speed)
+			s->y -= s->y_speed;
+		else if (s->y + s->y_speed <= 32)
+			s->y += s->y_speed;
+
+		if (s->dir_left == TRUE && s->x >= s->x_speed)
 			s->x -= s->x_speed;
-		else
+		else if (s->x + s->x_speed <= 112)
 			s->x += s->x_speed;
 		
-		if (s->y >= 16 - s->y_speed || s->x <= s->x_speed || s->x >= 112 - s->x_speed)
-			respawn_bitmap (bitmap_number);
+		if (check_boundary (bitmap_number))
+		{
+			if (bitmap_bounce)
+				change_direction (bitmap_number);
+			else
+				respawn_bitmap (bitmap_number);
+		}
 	}
 	else 
 		s->ticks_till_alive--;
@@ -139,6 +184,13 @@ static void draw_bitmap (U8 bitmap_number)
 	U8 *src;
 	if (s->ticks_till_alive)
 		return;
+	/* Don't draw if it's going to be off the screen */
+	if (s->x > 112 || s->y > 16)
+	{
+		respawn_bitmap (bitmap_number);
+		return;
+	}
+
 	switch (s->type)
 	{
 		default:
@@ -155,7 +207,8 @@ static void draw_bitmap (U8 bitmap_number)
 			src = &pound_bitmap_2plane;
 			break;
 	}
-
+	
+	//TODO Draw an 2 16x8 blocks instead 
 	/* Draw the low plane */
 	bitmap_blit (src + TOTAL_BITMAP_SIZE, s->x, s->y);
 	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 3), s->x + BITMAP_SIZE, s->y);
@@ -174,6 +227,7 @@ static void draw_bitmap (U8 bitmap_number)
 
 CALLSET_ENTRY (bitmap_test, score_deff_start)
 {
+	bitmap_bounce = random_scaled(2);
 	U8 i;
 	for (i = 0; i < MAX_BITMAPS; i++)
 	{
@@ -182,7 +236,22 @@ CALLSET_ENTRY (bitmap_test, score_deff_start)
 
 }
 
-CALLSET_ENTRY (bitmap_test, score_overlay)
+void tz_draw_overlay (void)
+{
+	for (;;)
+	{
+		dmd_map_overlay ();
+		dmd_dup_mapped ();
+		dmd_overlay_color ();
+		callset_invoke (score_overlay);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+		if (score_update_required ()|| deff_get_active () != DEFF_LEFT_RAMP)
+			break;
+	}
+}
+
+void stardrop_overlay_draw (void)
 {
 	U8 i;
 	for (i = 0; i < MAX_BITMAPS; i++)
@@ -203,17 +272,14 @@ void bitmap_test_deff (void)
 		respawn_bitmap (i);	
 	}
 
+	bitmap_bounce = TRUE;
 	//while (task_find_gid (GID_BITMAP_TEST))
 	for (;;)
 	{
 		dmd_alloc_pair_clean ();
-		for (i = 0; i < MAX_BITMAPS; i++)
-		{
-			draw_bitmap (i);
-			move_bitmap (i);
-		}
+		stardrop_overlay_draw ();
 		dmd_show2 ();
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_16MS);
 	}
 	deff_exit ();
 }
