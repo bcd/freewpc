@@ -26,18 +26,13 @@
 /* Width of each bitmap */
 #define BITMAP_SIZE 8
 /* How many are shown at once */
-#define MAX_BITMAPS 6
+#define MAX_BITMAPS 20
 /* How many different bitmaps that are defined */
 #define NUM_BITMAPS 4
 
 static bool bitmap_bounce;
 
 /* Planes go in order of low, high */
-const U8 test_bitmap_2plane[] = {
-	4,4,0,6,6,0,
-	4,4,15,9,9,15,
-};
-
 const U8 star_bitmap_2plane[] = {
 	8,16,128,64,64,32,32,31,65,66,68,8,4,4,130,98,25,7, //Left low
 	8,16,0,128,128,192,192,224,190,188,184,240,248,248,124,28,6,0, //Left high
@@ -159,7 +154,7 @@ static void draw_bitmap (U8 bitmap_number)
 {
 	struct bitmap_state *s = &bitmap_states[bitmap_number];
 	U8 *src;
-	if (s->ticks_till_alive || bitmap_number > NUM_BITMAPS)
+	if (s->ticks_till_alive || bitmap_number > MAX_BITMAPS)
 		return;
 	/* Don't draw if it's going to be off the screen */
 	if (s->x > 112 || s->y > 16)
