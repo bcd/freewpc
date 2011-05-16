@@ -22,11 +22,12 @@
 #include <freewpc.h>
 
 /* Total Size, including x,y padding */
-#define TOTAL_BITMAP_SIZE 10
+#define TOTAL_BITMAP_SIZE 18
+/* Width of each bitmap */
 #define BITMAP_SIZE 8
 /* How many are shown at once */
-#define MAX_BITMAPS 10
-/* How many different bitmaps we have to show */
+#define MAX_BITMAPS 6
+/* How many different bitmaps that are defined */
 #define NUM_BITMAPS 4
 
 static bool bitmap_bounce;
@@ -38,59 +39,35 @@ const U8 test_bitmap_2plane[] = {
 };
 
 const U8 star_bitmap_2plane[] = {
-	8,8,128,64,64,32,32,31,65,66, // Top left Low
-	8,8,0,128,128,192,192,224,190,188, // Top left High
+	8,16,128,64,64,32,32,31,65,66,68,8,4,4,130,98,25,7, //Left low
+	8,16,0,128,128,192,192,224,190,188,184,240,248,248,124,28,6,0, //Left high
 	
-	8,8,0,1,1,2,2,124,65,33,
-	8,8,0,0,0,1,1,3,62,30, //Top Right High
-	
-	8,8,68,8,4,4,130,98,25,7,
-	8,8,184,240,248,248,124,28,6,0, //Bottom left High
-	
-	8,8,17,8,16,16,32,35,76,112,
-	8,8,14,7,15,15,31,28,48,0, //Bottom left High
+	8,16,0,1,1,2,2,124,65,33,17,8,16,16,32,35,76,112, //Right low
+	8,16,0,0,0,1,1,3,62,30,14,7,15,15,31,28,48,0, //Right High
 };
 
 const U8 dollar_bitmap_2plane[] = {
-	8,8,0,64,0,240,8,68,4,248,
-	8,8,0,0,64,8,244,8,72,4,
+	8,16,0,64,0,240,8,68,4,248,64,64,0,252,0,64,0,0,
+	8,16,0,0,64,8,244,8,72,4,184,0,64,0,252,0,64,0,
 
-	8,8,0,1,0,31,0,1,0,15,
-	8,8,0,0,1,0,31,0,1,0,
-
-	8,8,64,64,0,252,0,64,0,0,
-	8,8,184,0,64,0,252,0,64,0,
-
-	8,8,17,17,16,15,0,1,0,0,
-	8,8,14,8,9,0,15,0,1,0,
+	8,16,0,1,0,31,0,1,0,15,17,17,16,15,0,1,0,0,
+	8,16,0,0,1,0,31,0,1,0,14,8,9,0,15,0,1,0,
 };
 
 const U8 trophy_bitmap_2plane[] = {
-	8,8,240,6,1,1,1,1,2,4,
-	8,8,0,240,254,114,50,114,116,56,
+	8,16,240,6,1,1,1,1,2,4,8,16,32,32,32,48,8,248,
+	8,16,0,240,254,114,50,114,116,56,240,224,192,192,192,192,240,0,
 
-	8,8,7,48,64,64,64,64,32,16,
-	8,8,0,7,63,39,39,39,23,14,
-
-	8,8,8,16,32,32,32,48,8,248,
-	8,8,240,224,192,192,192,192,240,0,
-	
-	8,8,8,4,2,2,2,6,8,15,
-	8,8,7,3,1,1,1,1,7,0,
+	8,16,7,48,64,64,64,64,32,16,8,4,2,2,2,6,8,15,
+	8,16,0,7,63,39,39,39,23,14,7,3,1,1,1,1,7,0,
 };
 
 const U8 pound_bitmap_2plane[] = {
-	8,8,128,192,224,224,224,224,248,248,
-	8,8,64,32,16,16,16,24,4,4,
+	8,16,128,192,224,224,224,224,248,248,248,224,224,252,252,252,0,0,
+	8,16,64,32,16,16,16,24,4,4,4,24,28,0,2,2,252,0,
 
-	8,8,31,63,63,57,1,1,31,31,
-	8,8,32,64,64,70,62,30,32,32,
-
-	8,8,248,224,224,252,252,252,0,0,
-	8,8,4,24,28,0,2,2,252,0,
-
-	8,8,31,1,1,63,63,63,0,0,
-	8,8,32,30,62,64,64,64,63,0,
+	8,16,31,63,63,57,1,1,31,31,31,1,1,63,63,63,0,0,
+	8,16,32,64,64,70,62,30,32,32,32,30,62,64,64,64,63,0,
 };
 
 struct bitmap_state 
@@ -124,7 +101,7 @@ static void change_direction (U8 bitmap_number)
 	if (random_scaled(2))
 		s->type = random_scaled (NUM_BITMAPS);
 }
-
+//TODO Always start in the middle?
 static void respawn_bitmap (U8 bitmap_number)
 {
 	struct bitmap_state *s = &bitmap_states[bitmap_number];
@@ -182,7 +159,7 @@ static void draw_bitmap (U8 bitmap_number)
 {
 	struct bitmap_state *s = &bitmap_states[bitmap_number];
 	U8 *src;
-	if (s->ticks_till_alive)
+	if (s->ticks_till_alive || bitmap_number > NUM_BITMAPS)
 		return;
 	/* Don't draw if it's going to be off the screen */
 	if (s->x > 112 || s->y > 16)
@@ -208,19 +185,14 @@ static void draw_bitmap (U8 bitmap_number)
 			break;
 	}
 	
-	//TODO Draw an 2 16x8 blocks instead 
-	/* Draw the low plane */
+	/* Draw the 2nd plane */
 	bitmap_blit (src + TOTAL_BITMAP_SIZE, s->x, s->y);
 	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 3), s->x + BITMAP_SIZE, s->y);
-	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 5), s->x, s->y + BITMAP_SIZE);
-	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 7), s->x + BITMAP_SIZE, s->y + BITMAP_SIZE);
 	dmd_flip_low_high ();
 
-	/* Draw the high plane */
+	/* Draw the 1st plane */
 	bitmap_blit (src, s->x, s->y);
 	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 2), s->x + BITMAP_SIZE, s->y);
-	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 4), s->x, s->y + BITMAP_SIZE);
-	bitmap_blit (src + (TOTAL_BITMAP_SIZE * 6), s->x + BITMAP_SIZE, s->y + BITMAP_SIZE);
 	dmd_flip_low_high ();
 	
 }
