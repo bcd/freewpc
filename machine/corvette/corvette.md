@@ -239,8 +239,7 @@ Route 66 Popper: Route 66 Kickout, Route 66 Kickout
 [adjustments]
 Ball Saver: yes_no, YES
 
-# todo change the default to YES, this is just for testing...
-Enable ZR1_Engine: yes_no, NO
+Enable ZR1_Engine: yes_no, YES
 
 [audits]
 ZR1 Errors:
