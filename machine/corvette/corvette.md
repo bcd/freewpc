@@ -199,7 +199,7 @@ A3: Right Rear Panel, flash, duty(SOL_DUTY_75), time(TIME_16MS)
 A4: Right Standup, flash, duty(SOL_DUTY_75), time(TIME_16MS)
 
 # F = J902 on Fliptronic II
-F5: Ramp Diverter, duty(SOL_DUTY_100), time(TIME_50MS)
+F5: Ramp Diverter, duty(SOL_DUTY_100), time(TIME_100MS)
 F6: Ramp Diverter Hold, duty(SOL_DUTY_100), time(TIME_100MS)
 F7: U.L. Flip Power, duty(SOL_DUTY_100), time(TIME_50MS)
 F8: U.L. Flip Hold, duty(SOL_DUTY_100), time(TIME_100MS)
@@ -213,6 +213,7 @@ F8: U.L. Flip Hold, duty(SOL_DUTY_100), time(TIME_100MS)
 
 [tests]
 corvette_zr1:
+corvette_diverter:
 #corvette_racetrack:
 
 #############################################################

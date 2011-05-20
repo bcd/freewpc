@@ -43,12 +43,12 @@ enum {
 	LAST_TEST = BALL_SEARCH
 } zr1_test_command;
 
-char *short_names[] = {
+char *zr1_test_short_names[] = {
 	"CALIBRATE",
 	"SHAKE",
 	"CENTER",
 	"FLOAT",
-	"BALL_SEARCH"
+	"SEARCH"
 };
 
 // error messages, see enum mech_zr1_calibration_codes;
@@ -163,7 +163,7 @@ void zr1_test_draw (void)
 
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
 
-	sprintf(short_names[zr1_test_command]);
+	sprintf(zr1_test_short_names[zr1_test_command]);
 	font_render_string_left (&font_mono5, 0, 27, sprintf_buffer);
 
 
