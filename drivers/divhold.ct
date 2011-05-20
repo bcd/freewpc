@@ -61,7 +61,7 @@
 #define @self_DIVERTER_SCHED 8
 
 /* Length of time for the initial power pulse */
-#define @self_POWER_PULSE 40
+#define @self_POWER_PULSE 96
 #define @self_POWER_TICKS (@self_POWER_PULSE / @self_DIVERTER_SCHED)
 
 extern __fastram__ S8 @self_timer;
@@ -76,11 +76,8 @@ void flipper_override_off (U8 switches);
 
 extern inline void @self_service (void)
 {
-	extern U8 fliptronic_powered_coil_outputs;
-	
-	register U8 out __areg__ = fliptronic_powered_coil_outputs;
-	
-	
+	register U8 out __areg__ = ~wpc_read_flippers ();
+
 	if (@self_timer == 0) {
 		//sol_disable (@power_sol | @hold_sol);
 		diverter_sol_contribute(@power_sol, out, 0);
@@ -109,7 +106,6 @@ extern inline void @self_service (void)
 		diverter_sol_contribute(@hold_sol, out, 1);
 		// TODO add a timeout so we don't stay on hold power forever
 	}
-	
 	wpc_write_flippers(out);
 }
 
