@@ -31,30 +31,52 @@ extern __local__ U8 extra_ball_enable_count;
 extern U8 unlit_shot_count;
 //bool door_awarded_from_slot;
 U8 door_active_lamp;
-
 /** Total number of door panels, not counting the handle */
 #define NUM_DOOR_PANELS 14
 
 #define BTTZ_DOOR_INDEX NUM_DOOR_PANELS
 
 /** Names of all the door panels, in order */
-const char *door_panel_names[] = {
-	"TOWNSQUARE MADNESS",
-	"LIGHT EXTRA BALL",
-	"SUPER SLOT",
-	"CLOCK MILLIONS",
-	"THE SPIRAL",
-	"BATTLE THE POWER",
+const char *door_panel_names_line1[] = {
+	"TOWNSQUARE",
+	"EXTRA BALL",
+	"SUPER",
+	"CLOCK",
+	"SPIRAL",
+	"BATTLE THE",
 	"10 MILLION",
 	"GREED",
-	"THE CAMERA",
+	"CAMERA",
 	"HITCHHIKER",
 	"CLOCK CHAOS",
-	"SUPER SKILL MB",
-	"FAST LOCK",
-	"LIGHT GUMBALL",
-	"BACK TO THE ZONE",
+	"SUPER SKILL",
+	"FASTLOCK",
+	"GUMBALL",
+	"BACK TO",
 };
+const char *door_panel_names_line2[] = {
+	"MADNESS",
+	"LIT",
+	"SLOT MACHINE",
+	"MILLIONS",
+	"ROUND",
+	"POWER",
+	"POINTS",
+	"ROUND",
+	"LIT",
+	"ROUND",
+	"MULTIBALL",
+	"MULTIBALL",
+	"ROUND",
+	"LIT",
+	"THE ZONE",
+};
+
+static void door_award_draw_text (U8 award)
+{
+	font_render_string_left (&font_mono5, 3, 3, door_panel_names_line1[award]);
+	font_render_string_left (&font_mono5, 3, 16, door_panel_names_line2[award]);
+}
 
 const char *door_award_goals[] = {
 	"JET BUMPERS",
@@ -125,7 +147,7 @@ static inline void door_set_flashing (U8 id)
 }
 
 
-static inline void door_advance_flashing (void)
+void door_advance_flashing (void)
 {
 	U8 new_door_index;
 
@@ -168,12 +190,10 @@ void slot_animation_sound_task (void)
 	task_exit ();
 }
 
-void door_award_deff (void)
+static void door_award_sound_task (U8 award)
 {
-	U8 index = door_index_awarded;
-	U16 fno;
-	
-	switch (door_index_awarded)
+	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
+	switch (award)
 	{
 		case 0:
 			sound_send (SND_THERE_IS_MADNESS);
@@ -233,95 +253,27 @@ void door_award_deff (void)
 			sound_send (SND_YOU_HAVE_COME_TO_THE_END);
 			break;
 	}
-	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
+	
+}
+
+void door_award_deff (void)
+{
+	U8 index = door_index_awarded;
+	U16 fno;
+	door_award_sound_task (door_index_awarded);	
 	/* Play once normally */
+	dmd_alloc_pair_clean ();
 	for (fno = IMG_DOOR_START; fno <= IMG_DOOR_END; fno += 2)
 	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		door_award_draw_text (door_index_awarded);
+		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
-		/* Flip it, as text is drawn to the low page */
-		dmd_flip_low_high ();	
-		//draw_door_award_text ();
-		switch (door_index_awarded)
-		{
-			case 0:
-				font_render_string_left (&font_mono5, 3, 3, "TOWNSQUARE");
-				font_render_string_left (&font_mono5, 3, 16, "MADNESS");
-				break;
-			case 1:
-				font_render_string_left (&font_mono5, 3, 3, "EXTRA BALL");
-				font_render_string_left (&font_mono5, 3, 16, "LIT");
-				break;
-	
-			case 2:
-				font_render_string_left (&font_mono5, 3, 3, "SUPER");
-				font_render_string_left (&font_mono5, 3, 16, "SLOT MACHINE");
-				break;
-	
-			case 3:
-				font_render_string_left (&font_mono5, 3, 3, "CLOCK");
-				font_render_string_left (&font_mono5, 3, 16, "MILLIONS");
-				break;
-	
-			case 4:
-				font_render_string_left (&font_mono5, 3, 3, "SPIRAL");
-				font_render_string_left (&font_mono5, 3, 16, "ROUND");
-				break;
-			case 5:
-				font_render_string_left (&font_mono5, 3, 3, "BATTLE THE");
-				font_render_string_left (&font_mono5, 3, 16, "POWER");
-				break;
-			
-			case 6:
-				font_render_string_left (&font_mono5, 3, 3, "10 MILLION");
-				font_render_string_left (&font_mono5, 3, 16, "POINTS");
-				break;
-	
-			case 7:
-				font_render_string_left (&font_mono5, 3, 3, "GREED");
-				font_render_string_left (&font_mono5, 3, 16, "ROUND");
-				break;
-	
-			case 8:
-				font_render_string_left (&font_mono5, 3, 3, "CAMERA");
-				font_render_string_left (&font_mono5, 3, 16, "LIT");
-				break;
-	
-			case 9:
-				font_render_string_left (&font_mono5, 3, 3, "HITCHHIKER");
-				font_render_string_left (&font_mono5, 3, 16, "ROUND");
-				break;
-	
-			case 10:
-				font_render_string_left (&font_mono5, 3, 3, "CLOCK CHAOS");
-				font_render_string_left (&font_mono5, 3, 16, "MULTIBALL");
-				break;
-	
-			case 11:
-				font_render_string_left (&font_mono5, 3, 3, "SUPER SKILL");
-				font_render_string_left (&font_mono5, 3, 16, "MULTIBALL");
-				break;
-	
-			case 12:
-				font_render_string_left (&font_mono5, 3, 3, "FASTLOCK");
-				font_render_string_left (&font_mono5, 3, 16, "ROUND");
-				break;
-	
-			case 13:
-				font_render_string_left (&font_mono5, 3, 3, "GUMBALL");
-				font_render_string_left (&font_mono5, 3, 16, "LIT");
-				break;
-	
-			case 14:
-				font_render_string_left (&font_mono5, 3, 3, "BACK TO");
-				font_render_string_left (&font_mono5, 3, 16, "THE ZONE");
-				break;
-	
-		}		
-		/* Flip it again so text is now on high page */
-		dmd_flip_low_high ();	
+		dmd_overlay_outline ();
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 	}
 	task_sleep_sec (1);	
 	/* Play backwards */
@@ -330,13 +282,8 @@ void door_award_deff (void)
 	dmd_alloc_pair_clean ();
 	for (fno = IMG_DOOR_END; fno >= IMG_DOOR_START; fno -= 2)
 	{
-		/* Draw the frame, leave it blank at the end */
-		if (fno <= IMG_DOOR_START)
-			dmd_alloc_pair_clean ();
-		else
-			frame_draw (fno);
-		
-		dmd_flip_low_high ();	
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
 		font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
 		if (on)
 		{
@@ -346,15 +293,17 @@ void door_award_deff (void)
 		else
 			on = TRUE;
 
-		/* Flip it again so text is now on high page */
-		dmd_flip_low_high ();	
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);	
+	dmd_overlay_outline ();
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 	}
 	dmd_alloc_pair_clean ();
 	font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
 	font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
-	dmd_show_low ();
+	dmd_show2 ();
 	task_sleep_sec (2);
 	deff_exit ();
 }
@@ -482,13 +431,13 @@ CALLSET_ENTRY(door, start_ball)
 	door_award_enable ();
 }
 
-CALLSET_ENTRY(door, machine_paused)
+CALLSET_ENTRY(door, machine_paused, stop_door_rotate)
 {
 	/* Stop the door lamps rotating */
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 }
 
-CALLSET_ENTRY(door, machine_unpaused)
+CALLSET_ENTRY(door, machine_unpaused, start_door_rotate)
 {
 	/* Start the door lamps rotating again */
 	door_award_enable ();

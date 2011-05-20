@@ -33,6 +33,14 @@ void bonus_leff (void)
 		task_sleep_sec (5);
 }
 
+void select_mode_leff (void)
+{
+	triac_leff_disable (TRIAC_GI_MASK);
+	for (;;)
+		task_sleep_sec (5);
+}
+
+
 void gi_cycle_leff (void)
 {
 	U8 i;

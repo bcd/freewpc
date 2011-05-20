@@ -68,7 +68,7 @@ void oddchange_collected_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_16MS);
 	}
-	task_sleep_sec (2);
+	task_sleep_sec (1);
 	deff_exit ();
 }
 
@@ -129,7 +129,7 @@ void oddchange_grows_deff (void)
 		task_sleep_sec (1);
 	}
 	else
-		task_sleep_sec (2);
+		task_sleep_sec (1);
 	deff_exit ();
 
 }

@@ -94,7 +94,8 @@ void dead_end_deff (void)
 	}
 	
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
-	dmd_show_low ();
+	dmd_copy_low_to_high ();
+	dmd_show2 ();
 	task_sleep_sec (2);
 	deff_exit ();
 }

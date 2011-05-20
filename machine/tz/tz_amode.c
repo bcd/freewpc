@@ -138,13 +138,11 @@ static inline void show_bcd (void)
 	dmd_show2 ();
 	/* Exit stage right */
 	dmd_sched_transition (&trans_scroll_right);
-#if 0
 	/* Draw a 'white' background for the transition again */
 	dmd_alloc_pair_clean ();
 	dmd_invert_page (dmd_low_buffer);
 	dmd_invert_page (dmd_high_buffer);
 	dmd_show2 ();
-#endif
 }
 
 static void amode_talking_task (void)
@@ -246,6 +244,7 @@ static inline void draw_bttzwave (void)
 	amode_page_start ();
 	U16 fno;
 	U8 i;
+	dmd_alloc_pair_clean ();
 	for (i = 0; i < 5; i++)
 	{
 		for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
@@ -259,11 +258,12 @@ static inline void draw_bttzwave (void)
 		}
 	}
 }
-	
+#if 0	
 static inline void draw_bttzmelt (void)
 {
 	amode_page_start ();
 	U16 fno;
+	dmd_alloc_pair_clean ();
 	for (fno = IMG_BTTZMELT_START; fno <= IMG_BTTZMELT_MIDDLE; fno += 2)
 	{
 		dmd_alloc_pair ();
@@ -284,7 +284,7 @@ static inline void draw_bttzmelt (void)
 		task_sleep (TIME_100MS);
 	}
 }
-
+#endif
 static inline void scroll_text (void)
 {
 	amode_page_start ();
@@ -323,22 +323,45 @@ static inline void scroll_text (void)
 	dmd_show_low ();
 }
 
+static void show_popups (void)
+{
+	/* We can't get our names on the playfield, but at least we can get our
+	 * ugly mugs on the DMD :-)
+	 */
+	U8 p;
+	/* 33% chance of happening */
+	if (random_scaled (3) != 1)
+		return;
+	/* Scan through scores and do popups if qualified */
+	for (p = 0; p < num_players; p++)
+	{
+		if (score_compare (score_table[SC_20M], scores[p]) == 1
+			&& score_compare (scores[p], score_table[SC_10]) == 1)
+		{
+			show_bcd ();
+			return;
+		}
+	}
+	
+	for (p = 0; p < num_players; p++)
+	{
+		if (score_compare (scores[p], score_table[SC_500M]) == 1)
+		{
+			show_sonny_jim ();
+			return;
+		}
+	}
+
+	//show_hydra();
+}
+
 CALLSET_ENTRY (tz_amode, amode_page)
 {
 	if (amode_show_scores_long)
 		return;
+	show_popups ();
 
-	/* We can't get our names on the playfield, but at least we can get our
-	 * ugly mugs on the DMD :-)
-	 */
-	if (random_scaled (3) == 1)
-	{
-		show_bcd ();
-		show_sonny_jim ();
-		//show_hydra();
-		return;
-	}
-	else if (random_scaled (4) == 1)
+	if (random_scaled (4) == 1)
 		show_silverball ("PINBALL", "HAVE YOU GOT THE BALLS?");
 	else
 		show_silverball ("FREEWPC", "MAKING OLD NEW AGAIN");
@@ -466,9 +489,9 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	if (amode_show_scores_long)
 		return;
 
-	draw_bttzmelt ();
-	if (amode_show_scores_long)
-		return;
+	//draw_bttzmelt ();
+	//if (amode_show_scores_long)
+	//	return;
 }
 
 static void lock_and_outhole_monitor (void)

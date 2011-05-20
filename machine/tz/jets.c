@@ -21,9 +21,12 @@
 #include <freewpc.h>
 #include <status.h>
 
+#define TOTAL_BAR_WIDTH 106
+#define SEG_SIZE 5
+
 U8 jet_sound_index;
 U8 jetscore;
-U8 jets_scored;
+U16 jets_scored;
 U8 jets_for_bonus;
 U8 jets_bonus_level;
 
@@ -37,6 +40,26 @@ bool noflash;
 bool tsm_hit;
 
 extern void award_unlit_shot (U8 unlit_called_from);
+
+const U8 jets_bar_end_bitmap[] = {
+	1,5,1,1,1,1,1,
+};
+const U8 jets_bar_start_bitmap[] = {
+	5,5,31,1,1,1,31,
+};
+
+const U8 jets_bar_seg1_bitmap[] = {
+	5,5,31,0,0,0,31,
+};
+
+const U8 jets_bar_seg2_bitmap[] = {
+	5,5,31,1,0,1,31,
+};
+
+const U8 jets_bar_fill_bitmap[] = {
+	1,5,0,1,1,1,0,
+};
+
 
 void tsm_mode_init (void);
 void tsm_mode_exit (void);
@@ -55,6 +78,30 @@ struct timed_mode_ops tsm_mode = {
 	.grace_timer = 3,
 	.pause = system_timer_pause,
 };
+
+
+
+void jets_draw_progress_bar (U8 x, U8 y)
+{
+	S16 i;
+	i = (jets_scored * TOTAL_BAR_WIDTH) / jets_for_bonus;
+	/* Draw 1x5 fill slices on the low page */
+	while (i > 0)
+	{
+		bitmap_blit (jets_bar_fill_bitmap, x + i, y);
+		i--;
+	}
+	/* Draw the bar outline on the high page */
+	dmd_flip_low_high ();
+	bitmap_blit (jets_bar_start_bitmap, x, y);
+	for (i = SEG_SIZE; i < TOTAL_BAR_WIDTH - (SEG_SIZE * 2); i += (SEG_SIZE * 2))
+	{
+		bitmap_blit (jets_bar_seg1_bitmap, x + i, y);
+		bitmap_blit (jets_bar_seg2_bitmap, x + SEG_SIZE + i, y);
+	}
+	bitmap_blit (jets_bar_end_bitmap, x + i, y);
+	dmd_flip_low_high ();
+}
 
 void jets_active_task (void)
 {
@@ -80,6 +127,7 @@ void tsm_mode_init (void)
 {
 	task_create_gid (GID_JETS_ACTIVE_TASK, jets_active_task);
 	score_zero (tsm_mode_total);
+	init_all_dollars ();
 }
 
 void tsm_mode_exit (void)
@@ -143,11 +191,10 @@ void tsm_mode_total_deff (void)
 
 void tsm_mode_deff (void)
 {	
-	dmd_alloc_pair_clean ();
 	//U16 fno;
+	dmd_alloc_pair_clean ();
 	for (;;)
 	{
-		//for (fno = IMG_
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_var5, 64, 5, "TOWN SQUARE MADNESS");
@@ -160,10 +207,11 @@ void tsm_mode_deff (void)
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (IMG_CITY);
+		dollar_overlay ();
 		dmd_overlay_outline ();
 
 		dmd_show2 ();
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_66MS);
 	}
 }
 
@@ -172,6 +220,9 @@ void jets_hit_deff (void)
 	U16 fno;
 	U16 img_start;
 	U16 img_end;
+	U8 x;
+	U8 y;
+
 	switch (random_scaled (3))
 	{
 		case 0:
@@ -192,31 +243,36 @@ void jets_hit_deff (void)
 	dmd_alloc_pair_clean ();
 	for (fno = img_start; fno < img_end; fno += 2)
 	{
-		U8 x = random_scaled (4);
-		U8 y = random_scaled (4);
+		x = random_scaled (4);
+		y = random_scaled (4);
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 
-		psprintf ("1 HIT", "%d HITS", jets_scored);
+		psprintf ("1 HIT", "%ld HITS", jets_scored);
 		font_render_string_center (&font_fixed6, 62 + x, 7 + y, sprintf_buffer);
-		sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
+		sprintf ("%ld FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
 		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_overlay_outline ();
+		jets_draw_progress_bar (8,26);
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
 	/* Redraw it so the 'HITS' text is centred */
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
-	psprintf ("1 HIT", "%d HITS", jets_scored);
+	psprintf ("1 HIT", "%ld HITS", jets_scored);
 	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
-	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
+	sprintf ("%ld FOR NEXT LEVEL", jets_for_bonus - jets_scored);
 	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep (TIME_200MS);
+	/* Copy to the high page so it doesn't look dark */
+	dmd_copy_low_to_high ();
+	jets_draw_progress_bar (8,26);
+	dmd_show2 ();
+	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
 	deff_exit ();
 }
 
@@ -246,17 +302,16 @@ void jets_level_up_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	dmd_clean_page_low ();
-	dmd_clean_page_high ();
-	dmd_alloc_low ();
+	dmd_alloc_pair_clean ();
 	sprintf ("TOWN SQUARE LEVEL %d", jets_bonus_level);
 	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
 	/* We don't use scoreget as it's likely another score
 	 * has been awarded */
 	sprintf("%d MILLION", jetscore);
 	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
-	dmd_show_low ();	
-	task_sleep_sec (1);
+	dmd_copy_low_to_high ();
+	dmd_show2 ();	
+	task_sleep (TIME_600MS);
 	deff_exit ();
 }
 
@@ -317,6 +372,7 @@ CALLSET_ENTRY (jet, sw_jet)
 	{
 		score (SC_500K);
 		score_add (tsm_mode_total, score_table[SC_500K]);
+		callset_invoke (respawn_dollar);
 	}
 	else
 	{	

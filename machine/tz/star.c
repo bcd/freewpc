@@ -90,6 +90,35 @@ CALLSET_ENTRY (star, score_deff_start)
 CALLSET_ENTRY (star, score_overlay)
 {
 	/* Don't draw any stars if paused */
-	if (!task_find_gid (GID_MUTE_AND_PAUSE))
-		star_draw ();
+	if (task_find_gid (GID_MUTE_AND_PAUSE))
+		return;
+
+	star_draw ();
+#if 0	
+	if (score_compare (current_score, score_table[SC_500M]) == 1)
+	{
+		bitmap_set_type (3);
+		stardrop_overlay_draw ();
+	}
+	else if (score_compare (current_score, score_table[SC_400M]) == 1)
+	{
+		bitmap_set_type (3);
+		stardrop_overlay_draw ();
+	}
+	else if (score_compare (current_score, score_table[SC_300M]) == 1)
+	{
+		bitmap_set_type (2);
+		stardrop_overlay_draw ();
+	}
+	else if (score_compare (current_score, score_table[SC_200M]) == 1)
+	{
+		bitmap_set_type (1);
+		stardrop_overlay_draw ();
+	}
+	else if (score_compare (current_score, score_table[SC_100M]) == 1)
+	{
+		bitmap_set_type (0);
+		stardrop_overlay_draw ();
+	}
+#endif
 }

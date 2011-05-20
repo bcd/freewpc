@@ -95,6 +95,7 @@
 #define __machine3__    __far__(C_STRING(MACHINE3_PAGE))
 #define __machine3__    __far__(C_STRING(MACHINE3_PAGE))
 #define __machine4__    __far__(C_STRING(MACHINE4_PAGE))
+#define __machine5__    __far__(C_STRING(MACHINE5_PAGE))
 #define __deff__        __far__(C_STRING(DEFF_PAGE))
 #define __leff__        __far__(C_STRING(DEFF_PAGE))
 #else

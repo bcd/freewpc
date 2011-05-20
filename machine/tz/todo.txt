@@ -1,8 +1,19 @@
+Tennis style scoring, player must be a certain amounts of points in front to
+win, or 2 balls past and the other play fails to retake the lead.
+
+show ZZzz's on skill shot if no one is playing
+
+sound_send (SND_HEY_ITS_ONLY_PINBALL, sl_200ms) for the HEY!
+
+put dmd_text_outline into score_deff.c
+
+Count balls going into slot tunnel for more accurate pb detection during
+multiball
 Wavy demo style text
 
 BUGS
-Show scores during amode, seems to just go boom
 Autofire ballsave multiball drain bug
+sssmb, make 'easy' jackpot and fix existing code
 
 Make TZ challenge
 Grand champion gets to enter a PIN which is stored in the machine.  This means

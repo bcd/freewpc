@@ -26,7 +26,7 @@
 /* Width of each bitmap */
 #define BITMAP_SIZE 8
 /* How many are shown at once */
-#define MAX_BITMAPS 20
+#define MAX_BITMAPS 1
 /* How many different bitmaps that are defined */
 #define NUM_BITMAPS 4
 
@@ -49,6 +49,14 @@ const U8 dollar_bitmap_2plane[] = {
 	8,16,0,0,1,0,31,0,1,0,14,8,9,0,15,0,1,0,
 };
 
+const U8 pound_bitmap_2plane[] = {
+	8,16,128,192,224,224,224,224,248,248,248,224,224,252,252,252,0,0,
+	8,16,64,32,16,16,16,24,4,4,4,24,28,0,2,2,252,0,
+
+	8,16,31,63,63,57,1,1,31,31,31,1,1,63,63,63,0,0,
+	8,16,32,64,64,70,62,30,32,32,32,30,62,64,64,64,63,0,
+};
+
 const U8 trophy_bitmap_2plane[] = {
 	8,16,240,6,1,1,1,1,2,4,8,16,32,32,32,48,8,248,
 	8,16,0,240,254,114,50,114,116,56,240,224,192,192,192,192,240,0,
@@ -57,13 +65,6 @@ const U8 trophy_bitmap_2plane[] = {
 	8,16,0,7,63,39,39,39,23,14,7,3,1,1,1,1,7,0,
 };
 
-const U8 pound_bitmap_2plane[] = {
-	8,16,128,192,224,224,224,224,248,248,248,224,224,252,252,252,0,0,
-	8,16,64,32,16,16,16,24,4,4,4,24,28,0,2,2,252,0,
-
-	8,16,31,63,63,57,1,1,31,31,31,1,1,63,63,63,0,0,
-	8,16,32,64,64,70,62,30,32,32,32,30,62,64,64,64,63,0,
-};
 
 struct bitmap_state 
 {
@@ -93,8 +94,8 @@ static void change_direction (U8 bitmap_number)
 	
 	s->y_speed = random_scaled (3) + 1;
 	s->x_speed = random_scaled (3) + 1;
-	if (random_scaled(2))
-		s->type = random_scaled (NUM_BITMAPS);
+//	if (random_scaled(2))
+//		s->type = random_scaled (NUM_BITMAPS);
 }
 //TODO Always start in the middle?
 static void respawn_bitmap (U8 bitmap_number)
@@ -108,7 +109,7 @@ static void respawn_bitmap (U8 bitmap_number)
 	s->ticks_till_alive = random_scaled (MAX_BITMAPS);
 	s->y_speed = random_scaled (3) + 1;
 	s->x_speed = random_scaled (3) + 1;
-	s->type = random_scaled (NUM_BITMAPS);
+//	s->type = random_scaled (NUM_BITMAPS);
 }
 
 static bool check_boundary (U8 bitmap_number)
@@ -173,10 +174,10 @@ static void draw_bitmap (U8 bitmap_number)
 			src = &dollar_bitmap_2plane;
 			break;
 		case 2:	
-			src = &trophy_bitmap_2plane;
+			src = &pound_bitmap_2plane;
 			break;
 		case 3:	
-			src = &pound_bitmap_2plane;
+			src = &trophy_bitmap_2plane;
 			break;
 	}
 	
@@ -192,30 +193,28 @@ static void draw_bitmap (U8 bitmap_number)
 	
 }
 
+void bitmap_set_type (U8 type)
+{
+	U8 i;
+	if (type > NUM_BITMAPS - 1)
+		type = NUM_BITMAPS - 1;
+	for (i = 0; i < MAX_BITMAPS; i++)
+	{
+		struct bitmap_state *s = &bitmap_states[i];
+		s->type = type;
+	}
+}
+
 CALLSET_ENTRY (bitmap_test, score_deff_start)
 {
-	bitmap_bounce = random_scaled(2);
+	bitmap_bounce = TRUE;
+	bitmap_set_type (0);
 	U8 i;
 	for (i = 0; i < MAX_BITMAPS; i++)
 	{
 		respawn_bitmap (i);	
 	}
 
-}
-
-void tz_draw_overlay (void)
-{
-	for (;;)
-	{
-		dmd_map_overlay ();
-		dmd_dup_mapped ();
-		dmd_overlay_color ();
-		callset_invoke (score_overlay);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-		if (score_update_required ()|| deff_get_active () != DEFF_LEFT_RAMP)
-			break;
-	}
 }
 
 void stardrop_overlay_draw (void)

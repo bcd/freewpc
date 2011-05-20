@@ -569,7 +569,7 @@ void snake_deff (void)
 	task_kill_gid (GID_SNAKE_TIMER);
 	#ifdef MACHINE_TZ
 	sound_send (SND_EXPLOSION_3);
-	dmd_alloc_pair ();
+	dmd_alloc_pair_clean ();
 	for (fno = IMG_EXPLODE_START; fno <= IMG_EXPLODE_END; fno += 2)
 	{
 		frame_draw (fno);

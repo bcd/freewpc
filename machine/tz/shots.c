@@ -141,6 +141,7 @@ CALLSET_ENTRY (shots, sw_piano)
 	{
 		flag_off (FLAG_PIANO_DOOR_LIT);
 		flag_on (FLAG_SLOT_DOOR_LIT);
+		callset_invoke (select_mode);
 		callset_invoke (award_door_panel);
 	}
 	else 

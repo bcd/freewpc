@@ -286,7 +286,7 @@ Bridge Open: driver(duty2),
 	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
 Shooter Div: driver(duty2),
-	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_500MS, duty_mask=DUTY_MASK_12
+	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_700MS, duty_mask=DUTY_MASK_50
 
 Ramp Div: driver(duty2),
 	sol=SOL_RAMP_DIVERTOR, timeout=TIME_3S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
@@ -529,6 +529,10 @@ Volume Change: MUS_SUPER_SLOT
 40M:
 50M:
 100M:
+200M:
+300M:
+400M:
+500M:
 
 ##########################################################################
 # The default high scores.  Use GC to indicate the grand champion.

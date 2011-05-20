@@ -17,7 +17,6 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* CALLSET_SECTION (bonus, __machine4__) */
 #include <freewpc.h>
 #include <eb.h>
 #include <status.h>
@@ -56,7 +55,7 @@ extern U8 score_ranks[MAX_PLAYERS];
 extern U8 door_panels_started;
 extern U8 loops;
 extern U8 jets_bonus_level;
-extern U8 jets_scored;
+extern U16 jets_scored;
 extern U8 left_ramps;
 extern U8 gumball_collected_count;
 extern U8 spiralawards_collected;
@@ -119,7 +118,7 @@ static void bonus_pause (void)
 		task_sleep (TIME_100MS);
 }
 
-void countup_pause (void)
+static void countup_pause (void)
 {
 	if (buttons_held)
 	{
@@ -218,13 +217,14 @@ inline bool check_if_last_ball_of_multiplayer_game (void)
 		return FALSE;
 }
 
-void draw_taunts (void)
+static void draw_taunts (void)
 {
 	/* 
 	 * Taunts.....
 	 * */
 	
 //	task_sleep (TIME_500MS);
+//
 	if (multidrain_count >= 3)
 	{
 		dmd_alloc_low_clean ();
@@ -235,19 +235,7 @@ void draw_taunts (void)
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
 		task_sleep_sec (2);
 	}
-	
-	if (stdm_death)
-	{
-		dmd_alloc_low_clean ();
-		sprintf ("SDTM DEATH");
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		dmd_sched_transition (&trans_bitfade_slow);
-		dmd_show_low ();
-		sound_send (SND_HEY_ITS_ONLY_PINBALL);
-		task_sleep_sec (2);
-	}
-	
-	if (unfair_death)
+	else if (unfair_death)
 	{
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed10, 64, 11, "BAD SHOW");
@@ -258,7 +246,19 @@ void draw_taunts (void)
 		task_sleep_sec (2);
 	}
 
-	if (quickdeath_timer_running && !unfair_death)
+
+	else if (stdm_death)
+	{
+		dmd_alloc_low_clean ();
+		sprintf ("SDTM DEATH");
+		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		dmd_sched_transition (&trans_bitfade_slow);
+		dmd_show_low ();
+		sound_send (SND_HEY_ITS_ONLY_PINBALL);
+		task_sleep_sec (2);
+	}
+	
+	else if (quickdeath_timer_running && !unfair_death)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("YOU LASTED LONG");

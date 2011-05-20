@@ -25,6 +25,7 @@ extern struct timed_mode_ops hitch_mode;
 extern U8 mute_and_pause_timeout;
 extern bool amode_show_scores_long;
 
+#if 0
 void match_loop_deff (void)
 {
 	U16 fno;
@@ -47,7 +48,7 @@ void match_loop_deff (void)
 	}
 	deff_exit ();
 }
-
+#endif
 void shoot_again_deff (void)
 {	
 	sound_send (SND_EXTRA_BALL_BALLOON);

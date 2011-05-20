@@ -34,7 +34,6 @@ __common__ void ballsave_disable(void);
 __common__ void ballsave_launch(void);
 
 /* camera.c * */
-__machine__ void door_start_camera (void);
 __machine2__ bool can_award_camera (void);
 
 /* clock.c */
@@ -64,6 +63,7 @@ __machine__ void award_door_panel (void);
 __machine__ void award_door_panel_task (void);
 __machine__ bool can_award_door_panel (void);
 __machine__ bool check_relight_slot_or_piano (void);
+__machine__ void door_advance_flashing (void);
 
 /* gumball.c */
 __machine__ void gumball_diverter_open(void);
@@ -175,3 +175,12 @@ __machine2__ void speed_up_music_lin (U8 count, U8 delay);
 
 /* shots.c */
 __machine2__ bool task_find_or_kill_gid (free_timer_id_t gid);
+
+/* test_bitmap.c */
+__machine2__ void stardrop_overlay_draw (void);
+__machine2__ void tz_draw_overlay (void);
+__machine2__ void bitmap_set_type (U8 type);
+
+/* dollar.c */
+__machine4__ void dollar_overlay (void);
+__machine4__ void init_all_dollars (void);

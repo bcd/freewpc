@@ -102,6 +102,12 @@ void hurryup_awarded_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
+	dmd_alloc_pair_clean ();
+	font_render_string_center (&font_var5, 64, 5, "HURRY UP AWARDED");
+	sprintf_score (hurryup_score);
+	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	dmd_copy_low_to_high ();
+	dmd_show2 ();
 	task_sleep_sec (2);
 	deff_exit ();
 }

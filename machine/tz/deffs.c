@@ -477,7 +477,7 @@ void ball_explode_deff (void)
 	/* This should stop the scores from showing just before the bonus screen */
 	dmd_alloc_pair_clean ();
 	dmd_show2 ();
-	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
 	deff_exit ();
 }
 

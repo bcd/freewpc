@@ -26,7 +26,6 @@ extern U8 masher_buttons_pressed;
 /* used to randomise the position of the doink text */
 U8 tnf_x;
 U8 tnf_y;
-U8 tnf_timer;
 
 /* Total amount scored from doink mode */
 __local__ score_t tnf_score;
@@ -46,6 +45,8 @@ static void tnf_draw_progress_bar (void)
 	/* 128 - Size of bar (80 pixels) / 2 */
 	U8 x = 24;
 
+	/* Draw the finish line */
+	bitmap_blit (progress_bar_slice_bitmap, 104, 20);
 	for (i = masher_buttons_pressed; i > 0; i--)
 	{
 		if (x > 128)
@@ -65,21 +66,25 @@ static void tnf_draw_progress_bar (void)
 
 void tnf_deff (void)
 {
-	/* tnf_timer is used to blink the text */
-	tnf_timer = 250;
+	bool blink_on = TRUE;
 	tnf_x = 0;
 	tnf_y = 0;
-	while (tnf_timer > 1)
+	timer_restart_free (GID_TNF_TIMER, TIME_4S);
+	while (masher_buttons_pressed < 100 && task_find_gid (GID_TNF_TIMER))
 	{
 			dmd_alloc_low_clean ();
-			if (tnf_timer % 2 != 0)
+			if (blink_on)
+			{
 				font_render_string_center (&font_mono5, 64, 4, "HIT FLIPPER BUTTONS");
+				blink_on = FALSE;
+			}
+			else
+				blink_on = TRUE;
 			tnf_draw_progress_bar ();
 			psprintf ("%d DOINK", "%d DOINKS", masher_buttons_pressed);
-			font_render_string_center (&font_term6, 64 + tnf_x, 12 + tnf_y, sprintf_buffer);
+			font_render_string_center (&font_term6, 60 + tnf_x, 12 + tnf_y, sprintf_buffer);
 			dmd_show_low ();
 			task_sleep (TIME_33MS);
-			bounded_decrement (tnf_timer, 0);
 	}
 	deff_exit ();
 }
@@ -108,6 +113,12 @@ void tnf_exit_deff (void)
 		sound_send (SND_OOH_GIMME_SHELTER);
 	else
 		sound_send (SND_RETURN_TO_YOUR_HOMES);
+	dmd_alloc_pair_clean ();
+	sprintf_score (tnf_score);
+	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 20, "POINTS EARNED FROM DOINKS");
+	dmd_copy_low_to_high ();
+	dmd_show2 ();
 	task_sleep_sec (2);
 	deff_exit ();
 }
@@ -131,11 +142,6 @@ CALLSET_ENTRY (tnf, sw_left_button, sw_right_button)
 		tnf_y = random_scaled(3);
 		task_recreate_gid (GID_TNF_SOUND, tnf_sound_task);
 	}
-}
-
-CALLSET_ENTRY (tnf, init)
-{
-	tnf_timer = 0;
 }
 
 CALLSET_ENTRY (tnf, tnf_start)
