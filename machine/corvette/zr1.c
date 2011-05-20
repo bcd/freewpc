@@ -605,7 +605,10 @@ CALLSET_ENTRY (zr1, init)
 CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 {
 	dbprintf ("zr1: amode_stop, test_start, stop_game entry\n");
-	zr1_float();
+	// TODO check to see if it's calibrating now, if it is leave it alone
+	if (zr1_state != ZR1_CALIBRATE) {
+		zr1_float();
+	}
 }
 
 
