@@ -101,7 +101,8 @@ void spiral_mode_deff (void)
 {
 	U16 fno;
 	dmd_alloc_pair_clean ();
-	while (spiral_mode_timer > 0)
+//	while (spiral_mode_timer > 0)
+	for (;;)
 	{
 		for (fno = IMG_PINWHEEL_START; fno <= IMG_PINWHEEL_END; fno += 2)
 		{

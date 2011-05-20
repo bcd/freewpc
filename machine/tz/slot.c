@@ -74,7 +74,8 @@ void sslot_mode_deff (void)
 {
 	U16 fno;
 	dmd_alloc_pair_clean ();
-	while (timed_mode_running_p (&sslot_mode))
+	//while (timed_mode_running_p (&sslot_mode))
+	for (;;)
 	{
 		for (fno = IMG_REELSTRIP_START; fno <= IMG_REELSTRIP_END; fno += 2)
 		{
@@ -200,6 +201,32 @@ CALLSET_ENTRY (slot, slot_shot)
 {
 	
 }
+static void shot_sslot (void)
+{
+	sslot_award ();
+	score (SC_10M);
+	timed_mode_end (&sslot_mode);
+}
+
+static void shot_slot_door (void)
+{
+	flag_off (FLAG_SLOT_DOOR_LIT);
+	flag_on (FLAG_PIANO_DOOR_LIT);
+	callset_invoke (select_mode);
+	callset_invoke (award_door_panel);
+}
+
+static void shot_slot_oddchange (void)
+{
+	score (SC_5130);
+	if (check_relight_slot_or_piano ())
+	{
+		flag_on (FLAG_SLOT_DOOR_LIT);
+		sound_send (SND_FEEL_LUCKY);
+	}
+	award_unlit_shot (SW_SLOT);
+	callset_invoke (oddchange_collected);
+}
 
 CALLSET_ENTRY (slot, dev_slot_enter)
 {
@@ -232,26 +259,15 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	else if (timed_mode_running_p (&sslot_mode))
 	{
 		//TODO If shot from lite slot lane, allow player to choose award
-		sslot_award ();
-		score (SC_10M);
-		timed_mode_end (&sslot_mode);
+		shot_sslot ();
 	}
 	else if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT))
 	{
-		flag_off (FLAG_SLOT_DOOR_LIT);
-		flag_on (FLAG_PIANO_DOOR_LIT);
-		callset_invoke (award_door_panel);
+		shot_slot_door ();
 	}
 	else 
 	{
-		score (SC_5130);
-		if (check_relight_slot_or_piano ())
-		{
-			flag_on (FLAG_SLOT_DOOR_LIT);
-			sound_send (SND_FEEL_LUCKY);
-		}
-		award_unlit_shot (SW_SLOT);
-		callset_invoke (oddchange_collected);
+		shot_slot_oddchange ();
 	}
 	/* Sleep so the deffs can get a chance to start and stop it
 	 * kicking out too early */
@@ -261,17 +277,16 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 
 CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 {
-	while (kickout_locks != 0)
-		task_sleep (TIME_500MS);
-	
 	if (in_live_game)
 	{
+		while (kickout_locks > 0)
+			task_sleep (TIME_500MS);
 		/* start Slot kick -> STDM timer for combo.c */
-		event_can_follow (slot_kick, outhole, TIME_1S);
 		sound_send (SND_SLOT_KICKOUT_1);
 		leff_start (LEFF_SLOT_KICKOUT);
 		task_sleep (TIME_500MS);
 		task_create_gid (0, slot_kick_sound);
+		event_can_follow (slot_kick, outhole, TIME_1S);
 	}
 }
 

@@ -63,7 +63,7 @@ struct timed_mode_ops mball_restart_mode = {
 	.exit = mball_restart_mode_exit,
 	.gid = GID_MBALL_RESTART_MODE,
 	.music = MUS_FASTLOCK_COUNTDOWN,
-	.deff_running = NULL,
+	.deff_running = DEFF_MBALL_RESTART,
 	.prio = PRI_MULTIBALL,
 	.init_timer = 15,
 	.timer = &mball_restart_timer,
@@ -71,7 +71,7 @@ struct timed_mode_ops mball_restart_mode = {
 	.pause = system_timer_pause,
 };
 
-static void call_number (U8 number)
+static inline void call_number (U8 number)
 {
 	switch (number)
 	{
@@ -94,10 +94,11 @@ static void call_number (U8 number)
 	}
 }
 
-void mball_restart_countdown_task (void)
+static void mball_restart_countdown_task (void)
 {
 	U8 last_number_called = 6;
-	while (mball_restart_timer >= 1)
+	task_sleep_sec (8);
+	while (mball_restart_timer)
 	{
 		if (last_number_called > mball_restart_timer)
 		{
@@ -113,12 +114,11 @@ void mball_restart_countdown_task (void)
 void mball_restart_mode_init (void)
 {
 	callset_invoke (stop_hurryup);
-	task_create_gid (GID_MBALL_RESTART_COUNTDOWN, mball_restart_countdown_task);
+	task_create_gid (GID_MBALL_RESTART_MODE, mball_restart_countdown_task);
 }
 
 void mball_restart_mode_exit (void)
 {
-	task_kill_gid (GID_MBALL_RESTART_COUNTDOWN);
 }
 
 void mball_restart_deff (void)
@@ -126,7 +126,8 @@ void mball_restart_deff (void)
 	U16 fno;
 	U8 j = 0;
 	dmd_alloc_pair_clean ();
-	while (mball_restart_timer > 0)
+	//while (mball_restart_timer > 0)
+	for (;;)
 	{
 		for (fno = IMG_BOLT_TESLA_START; fno < IMG_BOLT_TESLA_END; fno += 2)
 		{
@@ -138,7 +139,7 @@ void mball_restart_deff (void)
 				j = 0;
 			if (j % 2 != 0)
 			{
-			font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
+				font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
 			}
 			sprintf ("%d", mball_restart_timer);
 			font_render_string_center (&font_fixed6, 64, 25, sprintf_buffer);
@@ -159,9 +160,8 @@ CALLSET_ENTRY (mball_restart, mball_restart_stop)
 		timed_mode_end (&mball_restart_mode);
 }
 
-CALLSET_ENTRY (mball_restart, mball_restart_start)
+inline void mball_restart_start (void)
 {
-	task_kill_gid (GID_MPF_COUNTDOWN_TASK);
 	timed_mode_begin (&mball_restart_mode);
 }
 /* Rules to say whether we can start multiball */
@@ -546,7 +546,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		music_refresh ();
 		/* If a jackpot wasn't collected, offer a restart */
 		if (mball_jackpot_uncollected && !mball_restart_collected)
-			callset_invoke (mball_restart_start);
+			mball_restart_start ();
 	}
 }
 
@@ -713,7 +713,7 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 CALLSET_ENTRY (mball, end_ball)
 {
 	callset_invoke (mball_stop);
-	timed_mode_end (&mball_restart_mode);
+//	callset_invoke (mball_restart_stop);
 }
 
 CALLSET_ENTRY (mball, start_ball)
