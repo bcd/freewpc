@@ -76,7 +76,6 @@ void @self_stop (void);
 
 #if (@SELF_MODE > 0)
 
-extern __fastram__ U8 @self_sol_bits;
 extern U8 fliptronic_powered_coil_outputs;
 #define diverter_sol_bitmask(id) (1 << ((id & (CHAR_BIT - 1))))
 
@@ -134,9 +133,6 @@ extern inline void @self_service (void)
 	}
 	
 #if (@SELF_MODE > 0)	
-	// XXX for debugging
-	@self_sol_bits = out;
-	
 	/* Write the final output to the hardware */
 	fliptronic_powered_coil_outputs = out;
 #endif	
@@ -157,9 +153,6 @@ extern inline void @self_service (void)
  *   0 - no power
  */
 __fastram__ S8 @self_timer;
-#if (@SELF_MODE > 0)
-__fastram__ U8 @self_sol_bits;
-#endif
 
 /**
  * The user API to start a diverter.
@@ -228,7 +221,7 @@ CALLSET_ENTRY (@self, tilt, stop_game)
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* diverter Test :
+/* @self test:
  * - Enable/Disable solenoids.
  * - Calibrate the left right and center positions.
  * - Shake engine.
@@ -257,7 +250,9 @@ char *@self_test_short_names[] = {
 
 
 extern __fastram__ S8 @self_timer;
+#if (@SELF_MODE > 0)
 extern __fastram__ U8 fliptronic_powered_coil_outputs;
+#endif
 
 void @self_test_init (void)
 {
