@@ -47,7 +47,7 @@ char *diverter_test_short_names[] = {
 
 
 extern __fastram__ S8 diverter_timer;
-extern __fastram__ U8 diverter_sol_bits;
+extern __fastram__ U8 fliptronic_powered_coil_outputs;
 
 void diverter_test_init (void)
 {
@@ -84,7 +84,7 @@ void diverter_test_draw (void)
 	font_render_string_center (&font_var5, 64, LINE_2_Y + 2, sprintf_buffer);
 
 	// XXX for debugging
-	sprintf ("SOLBITS:%d\n", diverter_sol_bits);
+	sprintf ("FPCO:%d\n", fliptronic_powered_coil_outputs);
 	font_render_string_center (&font_var5, 64, LINE_3_Y + 2, sprintf_buffer);
 
 

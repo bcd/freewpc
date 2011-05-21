@@ -68,45 +68,31 @@ extern __fastram__ S8 @self_timer;
 
 void @self_start (void);
 void @self_stop (void);
-void flipper_override_on (U8 switches);
-void flipper_override_off (U8 switches);
-
-#define diverter_sol_contribute(id,bits,enable) \
-	{ bits |= (enable << ((id) & (CHAR_BIT - 1))); }
 
 extern inline void @self_service (void)
 {
-	register U8 out __areg__ = ~wpc_read_flippers ();
-
 	if (@self_timer == 0) {
-		//sol_disable (@power_sol | @hold_sol);
-		diverter_sol_contribute(@power_sol, out, 0);
-		diverter_sol_contribute(@hold_sol, out, 0);
+		sol_disable (@power_sol | @hold_sol);
 	} 
 	
 	if (@self_timer > 0) {
 		/* Allow the high power pulse to keep running */
-		//sol_enable (@power_sol | @hold_sol);
-		diverter_sol_contribute(@power_sol, out, 1);
-		diverter_sol_contribute(@hold_sol, out, 1);
+		sol_enable (@power_sol | @hold_sol);
 		
 		if (--@self_timer == 0)
 		{
-			/* The high power pulse has expired.  Switch to hold power */			
-			//sol_disable (@power_sol);
-			diverter_sol_contribute(@power_sol, out, 0);
-			
 			@self_timer = -1;
+			/* The high power pulse has expired.  Switch to hold power */			
+			sol_disable (@power_sol);
 		}
 	}
 	
 	if (@self_timer < 0) {
 		/* Allow the hold power to keep running */
-		//sol_enable (@hold_sol);
-		diverter_sol_contribute(@hold_sol, out, 1);
+		sol_enable (@hold_sol);
+		
 		// TODO add a timeout so we don't stay on hold power forever
 	}
-	wpc_write_flippers(out);
 }
 
 @@
@@ -123,6 +109,7 @@ extern inline void @self_service (void)
  *   0 - no power
  */
 __fastram__ S8 @self_timer;
+__fastram__ U8 @self_sol_bits; // XXX for debugging
 
 /**
  * The user API to start a diverter.
