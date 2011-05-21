@@ -66,7 +66,7 @@
 
 /* Length of time for the initial power pulse */
 #define @SELF_POWER_PULSE 96 // must be divisible exactly by SELF_DIVERTER_SCHED (above) 
-#define @self_POWER_TICKS (@SELF_POWER_PULSE / @SELF_DIVERTER_SCHED)
+#define @SELF_POWER_TICKS (@SELF_POWER_PULSE / @SELF_DIVERTER_SCHED)
 
 extern __fastram__ S8 @self_timer;
 
@@ -169,7 +169,7 @@ void @self_start (void) {
 	
 	/* Start the high power pulse */
 	sample_start (SND_GUITAR_01, SL_100MS); // XXX
-	@self_timer = @self_POWER_TICKS;	
+	@self_timer = @SELF_POWER_TICKS;	
 	
 	enable_interrupts ();
 }
