@@ -65,34 +65,69 @@
 #define @self_POWER_TICKS (@self_POWER_PULSE / @self_DIVERTER_SCHED)
 
 extern __fastram__ S8 @self_timer;
+extern __fastram__ U8 @self_sol_bits;
+
+extern U8 fliptronic_powered_coil_outputs;
 
 void @self_start (void);
 void @self_stop (void);
 
+#define diverter_sol_bitmask(id) (1 << ((id & (CHAR_BIT - 1))))
+
+#define diverter_sol_contribute(id, bits, enable) \
+	{ if (enable) { bits |= diverter_sol_bitmask(id); } else { bits &= ~(diverter_sol_bitmask(id)); } };
+
+#define diverter_sol_enable(id, bits) \
+	{ bits |= diverter_sol_bitmask(id); };
+
+#define diverter_sol_disable(id, bits) \
+ 	{ bits &= ~(diverter_sol_bitmask(id)); };
+
+
+/*
+#define diverter_solenoid_bit(id) (1 << ((id & (CHAR_BIT - 1)))
+
+#define diverter_sol_contribute(id, bits, enable) \
+	{ if (enable) { bits |= (1 << ((id) & (CHAR_BIT - 1))) } else { bits &= ~(1 << ((id) & (CHAR_BIT - 1))) } };
+*/			
 extern inline void @self_service (void)
 {
+	register U8 out __areg__ = fliptronic_powered_coil_outputs;
+	
 	if (@self_timer == 0) {
-		sol_disable (@power_sol | @hold_sol);
+		//sol_disable (@power_sol | @hold_sol);
+		diverter_sol_disable(@power_sol, out);
+		diverter_sol_disable(@hold_sol, out);
 	} 
 	
 	if (@self_timer > 0) {
 		/* Allow the high power pulse to keep running */
-		sol_enable (@power_sol | @hold_sol);
+		//sol_enable (@power_sol | @hold_sol);
+		diverter_sol_enable(@power_sol, out);
+		diverter_sol_enable(@hold_sol, out);
 		
 		if (--@self_timer == 0)
 		{
 			@self_timer = -1;
 			/* The high power pulse has expired.  Switch to hold power */			
-			sol_disable (@power_sol);
+			//sol_disable (@power_sol);
+			diverter_sol_disable(@power_sol, out);			
 		}
 	}
 	
 	if (@self_timer < 0) {
 		/* Allow the hold power to keep running */
-		sol_enable (@hold_sol);
+		//sol_enable (@hold_sol);
+		diverter_sol_enable(@hold_sol, out);
 		
 		// TODO add a timeout so we don't stay on hold power forever
 	}
+	
+	// XXX for debugging
+	@self_sol_bits = out;
+	
+	/* Write the final output to the hardware */
+	fliptronic_powered_coil_outputs = out;
 }
 
 @@
@@ -109,7 +144,7 @@ extern inline void @self_service (void)
  *   0 - no power
  */
 __fastram__ S8 @self_timer;
-__fastram__ U8 @self_sol_bits; // XXX for debugging
+__fastram__ U8 @self_sol_bits;
 
 /**
  * The user API to start a diverter.
