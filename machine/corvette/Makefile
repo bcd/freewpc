@@ -62,7 +62,7 @@ PINMAME_OTHER_ROMS = corvsnd*
 
 GAME_OBJS = zr1.o
 
-GAME_TEST_OBJS = zr1_test.o diverter_test.o
+GAME_TEST_OBJS = zr1_test.o #diverter_test.o
 
 GAME_INCLUDES =
 

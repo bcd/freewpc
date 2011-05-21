@@ -40,6 +40,8 @@
 @@parameter power_sol
 /* The solenoid that is used for hold power */
 @@parameter hold_sol
+/* Set to 1 if the solenoids are fliptronic powered */
+@@parameter mode
 
 
 @@
@@ -47,7 +49,7 @@
 @@
 
 # note, the template is hard coded to use a frequency value of 8, the value below must match
-# See @self_DIVERTER_SCHED
+# See @SELF_DIVERTER_SCHED
 !@self_service 8 40c
 
 @@
@@ -56,22 +58,26 @@
 
 #include <freewpc.h>
 
+#define @SELF_MODE @mode // 1 == fliptronics, 0 == normal
+
 // TODO probably can make this less frequent as we don't care about any switches.
 /* Schedule this driver every 8ms. */
-#define @self_DIVERTER_SCHED 8
+#define @SELF_DIVERTER_SCHED 8
 
 /* Length of time for the initial power pulse */
-#define @self_POWER_PULSE 96
-#define @self_POWER_TICKS (@self_POWER_PULSE / @self_DIVERTER_SCHED)
+#define @SELF_POWER_PULSE 96 // must be divisible exactly by SELF_DIVERTER_SCHED (above) 
+#define @self_POWER_TICKS (@SELF_POWER_PULSE / @SELF_DIVERTER_SCHED)
 
 extern __fastram__ S8 @self_timer;
-extern __fastram__ U8 @self_sol_bits;
 
-extern U8 fliptronic_powered_coil_outputs;
 
 void @self_start (void);
 void @self_stop (void);
 
+#if (@SELF_MODE > 0)
+
+extern __fastram__ U8 @self_sol_bits;
+extern U8 fliptronic_powered_coil_outputs;
 #define diverter_sol_bitmask(id) (1 << ((id & (CHAR_BIT - 1))))
 
 #define diverter_sol_contribute(id, bits, enable) \
@@ -82,29 +88,31 @@ void @self_stop (void);
 
 #define diverter_sol_disable(id, bits) \
  	{ bits &= ~(diverter_sol_bitmask(id)); };
+#endif
 
-
-/*
-#define diverter_solenoid_bit(id) (1 << ((id & (CHAR_BIT - 1)))
-
-#define diverter_sol_contribute(id, bits, enable) \
-	{ if (enable) { bits |= (1 << ((id) & (CHAR_BIT - 1))) } else { bits &= ~(1 << ((id) & (CHAR_BIT - 1))) } };
-*/			
 extern inline void @self_service (void)
 {
+#if (@SELF_MODE > 0)
 	register U8 out __areg__ = fliptronic_powered_coil_outputs;
+#endif
 	
 	if (@self_timer == 0) {
-		//sol_disable (@power_sol | @hold_sol);
+#if (@SELF_MODE > 0)	
 		diverter_sol_disable(@power_sol, out);
 		diverter_sol_disable(@hold_sol, out);
+#else
+		sol_disable (@power_sol | @hold_sol);
+#endif
 	} 
 	
 	if (@self_timer > 0) {
 		/* Allow the high power pulse to keep running */
-		//sol_enable (@power_sol | @hold_sol);
+#if (@SELF_MODE > 0)
 		diverter_sol_enable(@power_sol, out);
 		diverter_sol_enable(@hold_sol, out);
+#else
+		sol_enable (@power_sol | @hold_sol);
+#endif
 		
 		if (--@self_timer == 0)
 		{
@@ -117,17 +125,21 @@ extern inline void @self_service (void)
 	
 	if (@self_timer < 0) {
 		/* Allow the hold power to keep running */
-		//sol_enable (@hold_sol);
+#if (@SELF_MODE > 0)
 		diverter_sol_enable(@hold_sol, out);
-		
+#else
+		//sol_enable (@hold_sol);
+#endif
 		// TODO add a timeout so we don't stay on hold power forever
 	}
 	
+#if (@SELF_MODE > 0)	
 	// XXX for debugging
 	@self_sol_bits = out;
 	
 	/* Write the final output to the hardware */
 	fliptronic_powered_coil_outputs = out;
+#endif	
 }
 
 @@
@@ -137,6 +149,7 @@ extern inline void @self_service (void)
 #include <freewpc.h>
 #include "@self.h"
 
+
 /** Each diverter has it's own timer variable.
  *
  * < 0 - use hold power only
@@ -144,7 +157,9 @@ extern inline void @self_service (void)
  *   0 - no power
  */
 __fastram__ S8 @self_timer;
+#if (@SELF_MODE > 0)
 __fastram__ U8 @self_sol_bits;
+#endif
 
 /**
  * The user API to start a diverter.
@@ -166,7 +181,6 @@ void @self_stop (void) {
 	disable_interrupts ();
 	
 	@self_timer = 0;
-	//sol_disable (@power_sol | @hold_sol); // just for good measure
 	sample_start (SND_GUITAR_03, SL_100MS); // XXX
 	
 	enable_interrupts ();
@@ -177,6 +191,11 @@ CALLSET_ENTRY (@self, init)
 	@self_timer = 0;
 	dbprintf("Diverter power: '@power_sol' (%d)\n", @power_sol);
 	dbprintf("Diverter hold: '@hold_sol' (%d)\n", @hold_sol);
+#if (@SELF_MODE > 0)
+	dbprintf("Diverter mode: FLIPTRONICS\n");
+#else
+	dbprintf("Diverter mode: NORMAL\n");
+#endif	
 }
 
 CALLSET_ENTRY (@self, tilt, stop_game)
@@ -185,3 +204,180 @@ CALLSET_ENTRY (@self, tilt, stop_game)
 }
 
 /* vim: set filetype=c: */
+
+
+@@
+@@file @self_test.c
+@@
+
+/*
+ * Copyright 2010 by Dominic Clifton <me@dominicclifton.name>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/* diverter Test :
+ * - Enable/Disable solenoids.
+ * - Calibrate the left right and center positions.
+ * - Shake engine.
+ */
+
+#include <freewpc.h>
+#include <window.h>
+#include <test.h>
+#include "@self.h"
+
+// FIXME - font_render_string_right vertically offsets the text by 1 pixel (downwards)
+// When this is removed removed all references to FR_WORKAROUND
+#define FRSR_WORKAROUND 1
+
+enum {
+	FIRST_TEST = 0,
+	START = FIRST_TEST,
+	STOP,
+	LAST_TEST = STOP
+} @self_test_command;
+
+char *@self_test_short_names[] = {
+	"START",
+	"STOP"
+};
+
+
+extern __fastram__ S8 @self_timer;
+extern __fastram__ U8 fliptronic_powered_coil_outputs;
+
+void @self_test_init (void)
+{
+	@self_test_command = START;
+}
+
+void @self_draw_test_title(void) {
+	font_render_string_center (&font_mono5, 64, 2, "DIVERTER TEST");
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
+}
+
+#define LINE_1_Y 7
+#define LINE_2_Y 13
+#define LINE_3_Y 19
+
+void @self_test_draw (void)
+{
+	dmd_alloc_low_clean ();
+
+	@self_draw_test_title();
+
+	// 21 characters wide max when using 5 point font.
+
+	if (@self_timer < 0) {
+		sprintf ("HOLD");
+	} else if (@self_timer > 0) {
+		sprintf ("FULL");
+	} else {
+		sprintf ("FLOAT");
+	}
+	font_render_string_center (&font_var5, 64, LINE_1_Y + 2, sprintf_buffer);
+
+	sprintf ("TIMER:%d\n", @self_timer);
+	font_render_string_center (&font_var5, 64, LINE_2_Y + 2, sprintf_buffer);
+
+	// XXX for debugging
+#if (@SELF_MODE > 0)		
+	sprintf ("FPCO:%d\n", fliptronic_powered_coil_outputs);
+	font_render_string_center (&font_var5, 64, LINE_3_Y + 2, sprintf_buffer);
+#endif
+
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
+
+	sprintf(@self_test_short_names[@self_test_command]);
+	font_render_string_left (&font_mono5, 0, 27, sprintf_buffer);
+
+
+
+	dmd_show_low ();
+}
+
+
+void @self_test_thread (void)
+{
+	for (;;)
+	{
+
+		task_sleep (TIME_100MS);
+
+		@self_test_draw ();
+	}
+}
+
+
+void @self_test_up (void)
+{
+	if (@self_test_command < LAST_TEST)
+		@self_test_command++;
+}
+
+
+void @self_test_down (void)
+{
+	if (@self_test_command > FIRST_TEST)
+		@self_test_command--;
+}
+
+void @self_test_escape (void) {
+
+	// stop everything
+	@self_stop();
+
+	window_pop();
+}
+
+void @self_test_enter (void)
+{
+	sound_send (SND_TEST_ENTER);
+  	switch (@self_test_command)
+  	{
+  		case START:
+			dbprintf ("@self_test_enter: starting 'open'\n");
+			@self_start();
+			@self_test_command = STOP;
+  		break;
+  		case STOP:
+			dbprintf ("@self_test_enter: starting 'close'\n");
+			@self_stop();
+			@self_test_command = START;
+  		break;
+  	}
+
+}
+
+struct window_ops @self_test_window = {
+	DEFAULT_WINDOW,
+	.init = @self_test_init,
+	.draw = @self_test_draw,
+	.up = @self_test_up,
+	.down = @self_test_down,
+	.enter = @self_test_enter,
+	.escape = @self_test_escape,
+	.thread = @self_test_thread,
+};
+
+
+struct menu @self_test_item = {
+	.name = "@SELF TEST", // TODO template needs @SELF for uppercase version of 'self'
+	.flags = M_ITEM,
+	.var = { .subwindow = { &@self_test_window, NULL } },
+};
