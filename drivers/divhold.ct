@@ -168,7 +168,6 @@ void @self_start (void) {
 	disable_interrupts ();
 	
 	/* Start the high power pulse */
-	sample_start (SND_GUITAR_01, SL_100MS); // XXX
 	@self_timer = @SELF_POWER_TICKS;	
 	
 	enable_interrupts ();
@@ -181,7 +180,6 @@ void @self_stop (void) {
 	disable_interrupts ();
 	
 	@self_timer = 0;
-	sample_start (SND_GUITAR_03, SL_100MS); // XXX
 	
 	enable_interrupts ();
 }
