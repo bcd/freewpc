@@ -184,3 +184,16 @@ __machine2__ void bitmap_set_type (U8 type);
 /* dollar.c */
 __machine4__ void dollar_overlay (void);
 __machine4__ void init_all_dollars (void);
+
+/* bar.c */
+
+struct progress_bar_ops 
+{
+	U8 x;
+	U8 y;
+	U8 *fill_level;
+	U8 *max_level;
+	U8 bar_width; //Needs to be a multiple of 5 + 
+};
+
+__machine4__ void draw_progress_bar (struct progress_bar_ops *ops);

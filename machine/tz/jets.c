@@ -43,26 +43,6 @@ bool tsm_hit;
 
 extern void award_unlit_shot (U8 unlit_called_from);
 
-const U8 jets_bar_end_bitmap[] = {
-	1,5,1,1,1,1,1,
-};
-const U8 jets_bar_start_bitmap[] = {
-	5,5,31,1,1,1,31,
-};
-
-const U8 jets_bar_seg1_bitmap[] = {
-	5,5,31,0,0,0,31,
-};
-
-const U8 jets_bar_seg2_bitmap[] = {
-	5,5,31,1,0,1,31,
-};
-
-const U8 jets_bar_fill_bitmap[] = {
-	1,5,0,1,1,1,0,
-};
-
-
 void tsm_mode_init (void);
 void tsm_mode_exit (void);
 
@@ -81,29 +61,13 @@ struct timed_mode_ops tsm_mode = {
 	.pause = system_timer_pause,
 };
 
-
-
-void jets_draw_progress_bar (U8 x, U8 y)
-{
-	S16 i;
-	i = (jets_scored * TOTAL_BAR_WIDTH) / jets_for_bonus;
-	/* Draw 1x5 fill slices on the low page */
-	while (i > 0)
-	{
-		bitmap_blit (jets_bar_fill_bitmap, x + i, y);
-		i--;
-	}
-	/* Draw the bar outline on the high page */
-	dmd_flip_low_high ();
-	bitmap_blit (jets_bar_start_bitmap, x, y);
-	for (i = SEG_SIZE; i < TOTAL_BAR_WIDTH - (SEG_SIZE * 2); i += (SEG_SIZE * 2))
-	{
-		bitmap_blit (jets_bar_seg1_bitmap, x + i, y);
-		bitmap_blit (jets_bar_seg2_bitmap, x + SEG_SIZE + i, y);
-	}
-	bitmap_blit (jets_bar_end_bitmap, x + i, y);
-	dmd_flip_low_high ();
-}
+struct progress_bar_ops jets_progress_bar = {
+	.x = 8,
+	.y = 26,
+	.fill_level = &jets_scored,
+	.max_level = &jets_for_bonus,
+	.bar_width = 106,
+};
 
 void jets_active_task (void)
 {
@@ -251,9 +215,9 @@ void jets_hit_deff (void)
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 
-		psprintf ("1 HIT", "%ld HITS", jets_scored);
+		psprintf ("1 HIT", "%d HITS", jets_scored);
 		font_render_string_center (&font_fixed6, 62 + x, 7 + y, sprintf_buffer);
-		sprintf ("%ld FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
+		sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
 		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 		dmd_text_outline ();
 		dmd_alloc_pair ();
@@ -261,7 +225,8 @@ void jets_hit_deff (void)
 		callset_invoke (score_overlay);
 		dmd_overlay_outline ();
 		
-		draw_progress_bar (8,26, jets_scored, jets_for_bonus);
+		//draw_progress_bar (8,26, jets_scored, jets_for_bonus);
+		draw_progress_bar (&jets_progress_bar);
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
@@ -269,14 +234,14 @@ void jets_hit_deff (void)
 	{
 		dmd_alloc_pair_clean ();
 		dmd_clean_page_low ();
-		psprintf ("1 HIT", "%ld HITS", jets_scored);
+		psprintf ("1 HIT", "%d HITS", jets_scored);
 		font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
-		sprintf ("%ld FOR NEXT LEVEL", jets_for_bonus - jets_scored);
+		sprintf ("%d FOR NEXT LEVEL", jets_for_bonus - jets_scored);
 		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 		/* Copy to the high page so it doesn't look dark */
 		dmd_copy_low_to_high ();
 		callset_invoke (score_overlay);
-		draw_progress_bar (8,26, jets_scored, jets_for_bonus);
+		draw_progress_bar (&jets_progress_bar);
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
 	}

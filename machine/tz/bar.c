@@ -18,57 +18,60 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+//TODO Add support  different sized segments
+
 /* CALLSET_SECTION (bar, __machine4__) */
 #include <freewpc.h>
 
-#define TOTAL_BAR_WIDTH 106
+/* Allows for 11 pixels of padding */
+#define DEFAULT_BAR_WIDTH 106
 #define SEG_SIZE 5
 
-const U8 bar_end_bitmap[] = {
+static const U8 bar_end_bitmap[] = {
 	1,5,1,1,1,1,1,
 };
-const U8 bar_start_bitmap[] = {
+static const U8 bar_start_bitmap[] = {
 	5,5,31,1,1,1,31,
 };
 
-const U8 bar_seg1_bitmap[] = {
+static const U8 bar_seg1_bitmap[] = {
 	5,5,31,0,0,0,31,
 };
 
-const U8 bar_seg2_bitmap[] = {
+static const U8 bar_seg2_bitmap[] = {
 	5,5,31,1,0,1,31,
 };
 
-const U8 bar_fill_bitmap[] = {
+static const U8 bar_fill_bitmap[] = {
 	1,5,0,1,1,1,0,
 };
 
-__machine4__ void draw_progress_bar (U8 x, U8 y, U8 fill_level, U8 max_level)
+void draw_progress_bar (struct progress_bar_ops *ops)
 {
 	U8 i;
 	/* Boundary checks */
-	if (x + TOTAL_BAR_WIDTH > 128)
-		x = 128 - TOTAL_BAR_WIDTH;
-	if (y + SEG_SIZE > 32)
-		y = 32 - SEG_SIZE;
-	if (fill_level > max_level)
-		fill_level = max_level;
+	if (ops->x + ops->bar_width > 128)
+		ops->x = 128 - ops->bar_width;
+	if (ops->y + SEG_SIZE > 32)
+		ops->y = 32 - SEG_SIZE;
+	if (*ops->fill_level > *ops->max_level)
+		*ops->fill_level = *ops->max_level;
 	/* calculate fill level */
-	i = (fill_level * TOTAL_BAR_WIDTH) / max_level;
+	i = (*ops->fill_level * ops->bar_width) / *ops->max_level;
 	/* Draw 1x5 fill slices on the low page */
 	while (i > 0)
 	{
-		bitmap_blit (bar_fill_bitmap, x + i, y);
+		bitmap_blit (bar_fill_bitmap, ops->x + i, ops->y);
 		i--;
 	}
 	/* Draw the bar outline on the high page */
 	dmd_flip_low_high ();
-	bitmap_blit (bar_start_bitmap, x, y);
-	for (i = SEG_SIZE; i < TOTAL_BAR_WIDTH - (SEG_SIZE * 2); i += (SEG_SIZE * 2))
+	bitmap_blit (bar_start_bitmap, ops->x, ops->y);
+	for (i = SEG_SIZE; i < ops->bar_width - (SEG_SIZE * 2); i += (SEG_SIZE * 2))
 	{
-		bitmap_blit (bar_seg1_bitmap, x + i, y);
-		bitmap_blit (bar_seg2_bitmap, x + SEG_SIZE + i, y);
+		bitmap_blit (bar_seg1_bitmap, ops->x + i, ops->y);
+		bitmap_blit (bar_seg2_bitmap, ops->x + SEG_SIZE + i, ops->y);
 	}
-	bitmap_blit (bar_end_bitmap, x + i, y);
+	bitmap_blit (bar_end_bitmap, ops->x + i, ops->y);
 	dmd_flip_low_high ();
 }
