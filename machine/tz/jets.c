@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (jets, __machine__) */
+
 #include <freewpc.h>
 #include <status.h>
 
@@ -26,7 +28,7 @@
 
 U8 jet_sound_index;
 U8 jetscore;
-U16 jets_scored;
+U8 jets_scored;
 U8 jets_for_bonus;
 U8 jets_bonus_level;
 
@@ -258,7 +260,8 @@ void jets_hit_deff (void)
 		frame_draw (fno);
 		callset_invoke (score_overlay);
 		dmd_overlay_outline ();
-		jets_draw_progress_bar (8,26);
+		
+		draw_progress_bar (8,26, jets_scored, jets_for_bonus);
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
@@ -273,7 +276,7 @@ void jets_hit_deff (void)
 		/* Copy to the high page so it doesn't look dark */
 		dmd_copy_low_to_high ();
 		callset_invoke (score_overlay);
-		jets_draw_progress_bar (8,26);
+		draw_progress_bar (8,26, jets_scored, jets_for_bonus);
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
 	}
