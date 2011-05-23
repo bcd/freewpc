@@ -82,7 +82,7 @@ void tz_flipcode_entered_deff (void)
 
 	dmd_text_outline ();
 	dmd_alloc_pair ();
-	frame_draw (IMG_COW);
+//	frame_draw (IMG_COW);
 	dmd_overlay_outline ();
 	dmd_show2 ();
 	task_sleep_sec (3);

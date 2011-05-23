@@ -105,7 +105,7 @@ void jets_draw_progress_bar (U8 x, U8 y)
 
 void jets_active_task (void)
 {
-	while (tsm_mode_timer > 0)
+	while (timed_mode_running_p (&tsm_mode))
 	{
 		lamp_tristate_off (LM_RIGHT_JET);
 		lamp_tristate_on (LM_LEFT_JET);
@@ -184,15 +184,16 @@ void tsm_mode_total_deff (void)
 	frame_draw (IMG_CITY);
 	dmd_overlay_outline ();
 	dmd_show2 ();
-	task_sleep_sec (4);
+	task_sleep_sec (2);
+	dmd_sched_transition (&trans_bitfade_fast);
 	deff_exit ();
 }
 
 
 void tsm_mode_deff (void)
 {	
-	//U16 fno;
 	dmd_alloc_pair_clean ();
+	//U16 fno;
 	for (;;)
 	{
 		dmd_map_overlay ();
@@ -255,24 +256,27 @@ void jets_hit_deff (void)
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
+		callset_invoke (score_overlay);
 		dmd_overlay_outline ();
 		jets_draw_progress_bar (8,26);
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	/* Redraw it so the 'HITS' text is centred */
-	dmd_alloc_pair ();
-	dmd_clean_page_low ();
-	psprintf ("1 HIT", "%ld HITS", jets_scored);
-	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
-	sprintf ("%ld FOR NEXT LEVEL", jets_for_bonus - jets_scored);
-	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
-	/* Copy to the high page so it doesn't look dark */
-	dmd_copy_low_to_high ();
-	jets_draw_progress_bar (8,26);
-	dmd_show2 ();
-	task_sleep_sec (1);
-	task_sleep (TIME_500MS);
+	for (fno = 0; fno < 10; fno++)
+	{
+		dmd_alloc_pair_clean ();
+		dmd_clean_page_low ();
+		psprintf ("1 HIT", "%ld HITS", jets_scored);
+		font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+		sprintf ("%ld FOR NEXT LEVEL", jets_for_bonus - jets_scored);
+		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+		/* Copy to the high page so it doesn't look dark */
+		dmd_copy_low_to_high ();
+		callset_invoke (score_overlay);
+		jets_draw_progress_bar (8,26);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 	deff_exit ();
 }
 
@@ -298,20 +302,25 @@ void jets_level_up_deff (void)
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
+		callset_invoke (score_overlay);
 		dmd_overlay_outline ();
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	dmd_alloc_pair_clean ();
-	sprintf ("TOWN SQUARE LEVEL %d", jets_bonus_level);
-	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
-	/* We don't use scoreget as it's likely another score
-	 * has been awarded */
-	sprintf("%d MILLION", jetscore);
-	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
-	dmd_copy_low_to_high ();
-	dmd_show2 ();	
-	task_sleep (TIME_600MS);
+	for (fno = 0; fno < 10; fno++)
+	{
+		dmd_alloc_pair_clean ();
+		sprintf ("TOWN SQUARE LEVEL %d", jets_bonus_level);
+		font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+		/* We don't use scoreget as it's likely another score
+		 * has been awarded */
+		sprintf("%d MILLION", jetscore);
+		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+		dmd_copy_low_to_high ();
+		callset_invoke (score_overlay);
+		dmd_show2 ();	
+		task_sleep (TIME_100MS);
+	}
 	deff_exit ();
 }
 
@@ -341,6 +350,7 @@ CALLSET_ENTRY (jet, sw_jet)
 	
 	if (jets_scored >= jets_for_bonus)
 	{	
+		timer_restart_free (GID_JETS_LEVEL_UP, TIME_2S);
 		jets_scored = 1;
 		bounded_increment (jets_bonus_level, 50);
 		jets_for_bonus += 5;
@@ -380,8 +390,7 @@ CALLSET_ENTRY (jet, sw_jet)
 		/* Stop deff from restarting whilst we
 		 * are showing the level up deff
 		 * or when the hitch anim is running */
-		if ((jets_scored <= jets_for_bonus) 
-			&& (!timer_find_gid (GID_HITCHHIKER)))
+		if (!timer_find_gid (GID_HITCHHIKER) && !timer_find_gid (GID_JETS_LEVEL_UP))
 			deff_restart (DEFF_JETS_HIT);
 	}
 }

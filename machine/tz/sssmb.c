@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -95,7 +95,7 @@ void sssmb_jackpot_lit_deff (void)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("JACKPOT IS %d,000,000", sssmb_jackpot_value);
-		font_render_string_center (&font_var5, 64, 24, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_100MS);
 	}
@@ -122,11 +122,12 @@ static void sssmb_relight_all_jackpots (void)
 	global_flag_on (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
 }
 
-
 static void sssmb_award_jackpot (void)
 {
+	if (!task_kill_gid (GID_SSSMB_JACKPOT_READY))
+		return;
+
 	mball_jackpot_uncollected = FALSE;
-	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	sssmb_initial_ramps_to_divert++;
 	if (feature_config.dixon_anti_cradle == YES)
 		sssmb_jackpot_value += 5;
@@ -253,6 +254,11 @@ CALLSET_ENTRY (sssmb, end_ball)
 	sssmb_stop ();
 }
 
+CALLSET_ENTRY (sssmb, skill_missed)
+{
+	task_kill_gid (GID_SSSMB_JACKPOT_READY);
+}
+
 CALLSET_ENTRY (sssmb, skill_red)
 {
 	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
@@ -309,7 +315,7 @@ CALLSET_ENTRY (sssmb, sw_shooter)
 		&& timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 	{
 		extern U8 skill_switch_reached;
-		/* It will always reach at least the fist switch */
+		/* It will always reach at least the first switch */
 		skill_switch_reached = 1;
 		task_create_gid1 (GID_SSSMB_JACKPOT_READY, sssmb_jackpot_ready_task);
 	}

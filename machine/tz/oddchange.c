@@ -72,15 +72,6 @@ void oddchange_collected_deff (void)
 	deff_exit ();
 }
 
-const char *greed_text [] = { 
-	"GREEEEEEEED",
-	"GREEEEEEED",
-	"GEEEEEEED",
-	"GEEEEEED",
-	"GEEEEED",
-	"GREEED",
-};
-
 void oddchange_grows_deff (void)
 {
 	U16 fno;
@@ -93,43 +84,30 @@ void oddchange_grows_deff (void)
 		i++;
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
-		if (timed_mode_running_p (&greed_mode))
-		{
-			font_render_string_center (&font_mono5, 64, y, greed_text[i]);
-		}
-		else
-			font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
+		font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
+		callset_invoke (score_overlay);
 		dmd_overlay_outline ();
 		dmd_show2 ();
-		task_sleep (TIME_16MS);
+		task_sleep (TIME_33MS);
 	}
-	dmd_alloc_pair ();
-	dmd_clean_page_low ();
-	if (timed_mode_running_p (&greed_mode))
+	dmd_alloc_pair_clean ();
+	for (fno = 0; fno < 20; fno++);
 	{
-		sound_send (SND_KACHING);
-		font_render_string_center (&font_mono5, 64, y, "GREED");
-		sprintf_score (greed_mode_total);
-	}
-	else
-	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
 		font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
 		sprintf_score (oddchange_score);
+		font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		callset_invoke (score_overlay);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_100MS);;
 	}
-	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
-	dmd_show_low ();
-	if (timed_mode_running_p (&greed_mode))
-	{
-		dmd_copy_low_to_high ();
-		dmd_invert_page (dmd_low_buffer);
-		deff_swap_low_high (50, TIME_33MS);
-		task_sleep_sec (1);
-	}
-	else
-		task_sleep_sec (1);
 	deff_exit ();
 
 }
@@ -157,7 +135,7 @@ CALLSET_ENTRY (oddchange, minute_elapsed)
 		sound_send (SND_THE_STAKES_ARE_HIGHER);
 }
 
-CALLSET_ENTRY (oddchange, start_ball)
+CALLSET_ENTRY (oddchange, start_ball, end_game)
 {
 	reset_oddchange_score ();
 }

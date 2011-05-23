@@ -26,7 +26,7 @@
 /* Width of each bitmap */
 #define BITMAP_SIZE 8
 /* How many are shown at once */
-#define MAX_BITMAPS 1
+#define MAX_BITMAPS 2
 /* How many different bitmaps that are defined */
 #define NUM_BITMAPS 4
 
@@ -205,7 +205,7 @@ void bitmap_set_type (U8 type)
 	}
 }
 
-CALLSET_ENTRY (bitmap_test, score_deff_start)
+CALLSET_ENTRY (bitmap_test, start_ball)
 {
 	bitmap_bounce = TRUE;
 	bitmap_set_type (0);
@@ -231,7 +231,6 @@ void stardrop_overlay_draw (void)
 void bitmap_test_deff (void)
 {
 	U8 i;
-	timer_restart_free (GID_BITMAP_TEST, TIME_30S);
 
 	for (i = 0; i < MAX_BITMAPS; i++)
 	{
@@ -239,7 +238,6 @@ void bitmap_test_deff (void)
 	}
 
 	bitmap_bounce = TRUE;
-	//while (task_find_gid (GID_BITMAP_TEST))
 	for (;;)
 	{
 		dmd_alloc_pair_clean ();

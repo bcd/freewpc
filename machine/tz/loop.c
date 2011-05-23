@@ -166,6 +166,7 @@ void pb_loop_deff (void)
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
+		callset_invoke (score_overlay);
 		dmd_overlay_outline ();
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
@@ -177,6 +178,7 @@ void pb_loop_deff (void)
 	sprintf_score (score_table[SC_10M]);
 	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
 	dmd_copy_low_to_high ();
+	callset_invoke (score_overlay);
 	dmd_show2 ();
 	task_sleep (TIME_600MS);
 	dmd_show_low ();
@@ -216,6 +218,7 @@ void loop_deff (void)
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
+		callset_invoke (score_overlay);
 		dmd_overlay_outline ();
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
@@ -227,6 +230,7 @@ void loop_deff (void)
 	sprintf_score (loop_score);
 	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
 	dmd_copy_low_to_high ();
+	callset_invoke (score_overlay);
 	dmd_show2 ();
 //	task_sleep_sec (1);
 	task_sleep (TIME_600MS);

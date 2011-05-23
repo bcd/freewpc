@@ -42,6 +42,7 @@ void rocket_deff (void)
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
+		callset_invoke (score_overlay);
 		dmd_overlay_outline ();
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
@@ -54,6 +55,7 @@ void rocket_deff (void)
 	{
 		dmd_alloc_pair_clean ();
 		frame_draw (fno);
+		callset_invoke (score_overlay);
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}

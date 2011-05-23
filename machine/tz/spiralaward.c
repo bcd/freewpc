@@ -87,6 +87,7 @@ void spiralaward_collected_deff (void)
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
+		callset_invoke (score_overlay);
 		dmd_overlay_outline ();
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
@@ -94,6 +95,7 @@ void spiralaward_collected_deff (void)
 	dmd_alloc_pair_clean ();
 	write_spiralaward_text ();
 	dmd_copy_low_to_high ();
+	callset_invoke (score_overlay);
 	dmd_show2 ();
 	task_sleep_sec (2);
 	deff_exit ();

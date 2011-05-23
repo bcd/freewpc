@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,6 +24,8 @@
 #define MAX_STARS 12
 
 #define MAX_STATE 4
+
+bool draw_bouncing_overlay;
 
 struct star_state
 {
@@ -87,38 +89,48 @@ CALLSET_ENTRY (star, score_deff_start)
 		star_states[n].time = 0;
 }
 
+CALLSET_ENTRY (star, idle_every_10_seconds, start_ball)
+{
+	if (score_compare (current_score, score_table[SC_500M]) == 1)
+	{
+		draw_bouncing_overlay = TRUE;
+		bitmap_set_type (3);
+		return;
+	}
+	else if (score_compare (current_score, score_table[SC_400M]) == 1)
+	{
+		draw_bouncing_overlay = TRUE;
+		bitmap_set_type (3);
+		return;
+	}
+	else if (score_compare (current_score, score_table[SC_300M]) == 1)
+	{
+		draw_bouncing_overlay = TRUE;
+		bitmap_set_type (2);
+		return;
+	}
+	else if (score_compare (current_score, score_table[SC_200M]) == 1)
+	{
+		draw_bouncing_overlay = TRUE;
+		bitmap_set_type (1);
+		return;
+	}
+	else if (score_compare (current_score, score_table[SC_100M]) == 1)
+	{
+		draw_bouncing_overlay = TRUE;
+		bitmap_set_type (0);
+		return;
+	}
+	else 
+		draw_bouncing_overlay = FALSE;
+}
+
 CALLSET_ENTRY (star, score_overlay)
 {
 	/* Don't draw any stars if paused */
 	if (task_find_gid (GID_MUTE_AND_PAUSE))
 		return;
-
 	star_draw ();
-#if 0	
-	if (score_compare (current_score, score_table[SC_500M]) == 1)
-	{
-		bitmap_set_type (3);
+	if (draw_bouncing_overlay)
 		stardrop_overlay_draw ();
-	}
-	else if (score_compare (current_score, score_table[SC_400M]) == 1)
-	{
-		bitmap_set_type (3);
-		stardrop_overlay_draw ();
-	}
-	else if (score_compare (current_score, score_table[SC_300M]) == 1)
-	{
-		bitmap_set_type (2);
-		stardrop_overlay_draw ();
-	}
-	else if (score_compare (current_score, score_table[SC_200M]) == 1)
-	{
-		bitmap_set_type (1);
-		stardrop_overlay_draw ();
-	}
-	else if (score_compare (current_score, score_table[SC_100M]) == 1)
-	{
-		bitmap_set_type (0);
-		stardrop_overlay_draw ();
-	}
-#endif
 }

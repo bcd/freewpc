@@ -250,7 +250,8 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		/* camera was recently hit, so ignore slot */
 	}
 	else if (event_did_follow (skill_shot, slot)
-		|| skill_shot_enabled == TRUE)
+		|| skill_shot_enabled
+		|| global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 	{
 		/* TODO, this may be buggy during sssmb */
 		/* skill shot has been missed or ball landed in plunger lane*/

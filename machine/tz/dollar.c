@@ -45,9 +45,9 @@ struct dollar_state {
 static void init_dollar (U8 dollar_number)
 {
 	struct dollar_state *d = &dollar_states[dollar_number];
-	d->x = 64;
-	d->y = 32 - DOLLAR_HEIGHT;
-	d->x_speed = random_scaled (4) + 1;
+	d->x = 64 - (DOLLAR_WIDTH / 2);
+	d->y = 31 - DOLLAR_HEIGHT;
+	d->x_speed = random_scaled (3) + 2;
 	d->y_speed = random_scaled (2) + 1;
 	d->alive = FALSE;
 	d->left = random_scaled (2);
@@ -80,25 +80,25 @@ CALLSET_ENTRY (dollar, respawn_dollar)
 static void move_dollar (U8 dollar_number)
 {
 	struct dollar_state *d = &dollar_states[dollar_number];
-	if (d->y > DOLLAR_HEIGHT - d->y_speed)
+	if (d->y > d->y_speed)
 		d->y -= d->y_speed;
 	else
 		d->alive = FALSE;
 
 	if (d->x > d->x_speed && d->left)
 		d->x -= d->x_speed;
-	else if (d->x < 128 - DOLLAR_WIDTH - d->x_speed && d->left == FALSE)
+	else if (d->x < 128 - d->x_speed - DOLLAR_WIDTH && d->left == FALSE)
 		d->x += d->x_speed;
 	else
 		d->alive = FALSE;
-	bounded_decrement (d->x_speed, 1);
+	//bounded_decrement (d->x_speed, 1);
 }
 
 static void draw_dollar (U8 dollar_number)
 {
 	struct dollar_state *d = &dollar_states[dollar_number];
 	/* Check to make sure we don't draw off the screem */
-	if (d->x > 128 - DOLLAR_WIDTH || d->y < DOLLAR_HEIGHT)
+	if (d->x > 128 - DOLLAR_WIDTH || d->y > 32 - DOLLAR_HEIGHT)
 	{
 		d->alive = FALSE;
 		return;

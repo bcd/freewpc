@@ -212,6 +212,13 @@ static void chaosmb_score_jackpot (void)
 	tz_clock_start_forward ();
 }
 
+static void start_clock_task (void)
+{
+	task_sleep_sec (2);
+	tz_clock_start_forward ();
+	task_exit ();
+}
+
 CALLSET_ENTRY (chaosmb, chaosmb_start)
 {
 	if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
@@ -228,7 +235,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_start)
 		/* Check and light jackpot lamp */
 		chaosmb_check_jackpot_lamps ();
 		/* TODO vary speed based on jackpot? */
-		tz_clock_start_forward ();
+		task_create_anon (start_clock_task);
 	}
 }
 

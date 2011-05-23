@@ -431,13 +431,7 @@ void ball_explode_deff (void)
 	extern bool powerball_death;
 	
 
-	/* Do a vstripe wipe if ball went down the outlanes
-	 * otherwise scroll down, so it looks like the ball
-	 * falls then explodes */
-	if (timer_find_gid (GID_BALL_DRAIN_OUTLANE))
-		dmd_sched_transition (&trans_bitfade_fast);
-	else
-		dmd_sched_transition (&trans_scroll_down_fast);
+	dmd_sched_transition (&trans_scroll_down_fast);
 	dmd_alloc_pair ();
 	frame_draw (IMG_BALLEXPLODE_START);
 	dmd_show2 ();

@@ -79,15 +79,21 @@ static void left_ramp_deff_subtask (void)
 	}
 	else
 		sprintf ("");
-	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 }
 
 void left_ramp_deff (void)
 {
-	dmd_alloc_low_clean ();
+	U8 i;
 	left_ramp_deff_subtask ();
-	dmd_show_low ();
-	task_sleep_sec (2);
+	for (i = 0; i < 20; i++)
+	{
+		dmd_alloc_pair_clean ();
+		font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
+		dmd_copy_low_to_high ();
+		callset_invoke (score_overlay);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 	deff_exit ();
 }
 

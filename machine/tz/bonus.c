@@ -210,8 +210,7 @@ inline bool check_if_last_ball_for_multiplayer (void)
 
 inline bool check_if_last_ball_of_multiplayer_game (void)
 {
-	if (ball_up == system_config.balls_per_game && player_up == num_players && 
-		num_players > 1 && extra_balls == 0)
+	if (ball_up == system_config.balls_per_game && player_up == num_players && num_players > 1 && extra_balls == 0)
 		return TRUE;
 	else
 		return FALSE;

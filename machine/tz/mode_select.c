@@ -57,6 +57,7 @@ CALLSET_ENTRY (mode_select, select_mode)
 
 	callset_invoke (stop_door_rotate);
 	leff_start (LEFF_SELECT_MODE);
+	timer_restart_free (GID_SELECT_MODE_DEBOUNCE, TIME_2S);
 	//TODO Chaosmb twice Bug?
 	door_advance_flashing ();
 	sound_send (SND_PIANO_ENTRY_TUNE);
@@ -69,7 +70,7 @@ CALLSET_ENTRY (mode_select, select_mode)
 
 CALLSET_ENTRY (mode_select, sw_left_button)
 {
-	if (deff_get_active () == DEFF_SELECT_MODE)
+	if (deff_get_active () == DEFF_SELECT_MODE && !timer_find_gid (GID_SELECT_MODE_DEBOUNCE))
 		deff_stop (DEFF_SELECT_MODE);
 }
 
