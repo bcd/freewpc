@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You shoud have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
@@ -159,7 +159,6 @@ void tsm_mode_total_deff (void)
 void tsm_mode_deff (void)
 {	
 	dmd_alloc_pair_clean ();
-	//U16 fno;
 	for (;;)
 	{
 		dmd_map_overlay ();
@@ -217,7 +216,7 @@ void jets_hit_deff (void)
 
 		psprintf ("1 HIT", "%d HITS", jets_scored);
 		font_render_string_center (&font_fixed6, 62 + x, 7 + y, sprintf_buffer);
-		sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
+		sprintf ("%d FOR LEVEL %d", (jets_for_bonus - jets_scored), jets_bonus_level + 1);
 		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 		dmd_text_outline ();
 		dmd_alloc_pair ();
@@ -236,7 +235,7 @@ void jets_hit_deff (void)
 		dmd_clean_page_low ();
 		psprintf ("1 HIT", "%d HITS", jets_scored);
 		font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
-		sprintf ("%d FOR NEXT LEVEL", jets_for_bonus - jets_scored);
+		sprintf ("%d FOR LEVEL %d", (jets_for_bonus - jets_scored), jets_bonus_level + 1);
 		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 		/* Copy to the high page so it doesn't look dark */
 		dmd_copy_low_to_high ();
@@ -321,11 +320,12 @@ CALLSET_ENTRY (jet, sw_jet)
 		timer_restart_free (GID_JETS_LEVEL_UP, TIME_2S);
 		jets_scored = 1;
 		bounded_increment (jets_bonus_level, 50);
-		jets_for_bonus += 5;
+		if (jets_for_bonus <= 195)
+			jets_for_bonus += 5;
 		award_unlit_shot (SW_BOTTOM_JET);
 		task_sleep (TIME_500MS);
 		/* jetscore is used rather than score_deff_get 
-		 * because it's likely another score would of
+		 * because it's likely another score woud of
 		 * happened */
 		if (jets_bonus_level < 3)
 		{
@@ -388,7 +388,7 @@ CALLSET_ENTRY (jet, status_report)
 	status_page_init ();
 	sprintf ("JET LEVEL %d", jets_bonus_level + 1);
 	font_render_string_center (&font_mono5, 64, 9, sprintf_buffer);
-	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
+	sprintf ("%d FOR LEVEL UP", (jets_for_bonus - jets_scored));
 	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 	status_page_complete ();
 }

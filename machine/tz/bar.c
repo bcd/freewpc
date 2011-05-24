@@ -48,7 +48,8 @@ static const U8 bar_fill_bitmap[] = {
 
 void draw_progress_bar (struct progress_bar_ops *ops)
 {
-	U8 i;
+	S16 i;
+	S16 j;
 	/* Boundary checks */
 	if (ops->x + ops->bar_width > 128)
 		ops->x = 128 - ops->bar_width;
@@ -56,8 +57,10 @@ void draw_progress_bar (struct progress_bar_ops *ops)
 		ops->y = 32 - SEG_SIZE;
 	if (*ops->fill_level > *ops->max_level)
 		*ops->fill_level = *ops->max_level;
+
 	/* calculate fill level */
-	i = (*ops->fill_level * ops->bar_width) / *ops->max_level;
+	j = *ops->fill_level;
+	i = ( j * ops->bar_width) / *ops->max_level;
 	/* Draw 1x5 fill slices on the low page */
 	while (i > 0)
 	{

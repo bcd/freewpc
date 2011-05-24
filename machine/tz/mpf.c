@@ -442,6 +442,7 @@ CALLSET_ENTRY (mpf, sw_mpf_left)
 {
 	if (mpf_ball_count > 0)
 	{
+		/* TRUE refers to travelling left */
 		spawn_lightning (TRUE);
 		if (!task_find_gid (GID_MPF_COUNTDOWN))
 			sound_send (SND_POWER_GRUNT_1);
@@ -500,6 +501,11 @@ void mpf_lamp_task (void)
 	task_exit ();
 }
 
+/* A friend of mine likes to pummel the flipper buttons rather than actually use
+ * skill to get the ball into the top, so I put this code in to stop him 
+ * Pressing > 20 buttons in 3 seconds will trigger it
+ *
+ * */
 static void check_button_masher (void)
 {
 	if (masher_buttons_pressed > 20)
@@ -528,12 +534,7 @@ static void mpf_button_masher_handler (void)
 	}
 }
 
-CALLSET_ENTRY (mpf, sw_left_button)
-{
-	mpf_button_masher_handler ();
-}
-
-CALLSET_ENTRY (mpf, sw_right_button)
+CALLSET_ENTRY (mpf, sw_left_button, sw_right_button)
 {
 	mpf_button_masher_handler ();
 }

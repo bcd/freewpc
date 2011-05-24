@@ -91,6 +91,11 @@ CALLSET_ENTRY (star, score_deff_start)
 
 CALLSET_ENTRY (star, idle_every_10_seconds, start_ball)
 {
+	if (num_players != 1)
+	{
+		draw_bouncing_overlay = FALSE;
+		return;
+	}
 	if (score_compare (current_score, score_table[SC_500M]) == 1)
 	{
 		draw_bouncing_overlay = TRUE;

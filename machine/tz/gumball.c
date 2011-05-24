@@ -351,13 +351,19 @@ void gumball_deff (void)
 	}
 	music_effect_start (SND_GUMBALL_LOAD_END, SL_3S);
 	task_sleep_sec (2);
-	dmd_alloc_low_clean ();
-	psprintf("1 GUMBALL", "%d GUMBALLS", gumball_collected_count);
-	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
-	sprintf("%d MILLION", gumball_score);
-	font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (1);
+	for (fno = 0; fno < 20; fno++)
+	{
+		dmd_alloc_pair_clean ();
+		dmd_clean_page_low ();
+		psprintf("1 GUMBALL", "%d GUMBALLS", gumball_collected_count);
+		font_render_string_center (&font_steel, 64, 7, sprintf_buffer);
+		sprintf("%d MILLION", gumball_score);
+		font_render_string_center (&font_steel, 64, 20, sprintf_buffer);
+		dmd_copy_low_to_high ();
+		callset_invoke (score_overlay);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 	deff_exit ();
 }
 

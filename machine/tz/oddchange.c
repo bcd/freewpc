@@ -93,20 +93,17 @@ void oddchange_grows_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	dmd_alloc_pair_clean ();
-	for (fno = 0; fno < 20; fno++);
+	for (fno = 0; fno < 30; fno++);
 	{
-		dmd_map_overlay ();
+		dmd_alloc_pair_clean ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_mono5, 64, y, "ODDCHANGE GROWS");
 		sprintf_score (oddchange_score);
 		font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
-		dmd_text_outline ();
-		dmd_alloc_pair ();
+		dmd_copy_low_to_high ();
 		callset_invoke (score_overlay);
-		dmd_overlay_outline ();
 		dmd_show2 ();
-		task_sleep (TIME_100MS);;
+		task_sleep (TIME_100MS);
 	}
 	deff_exit ();
 
@@ -154,7 +151,7 @@ CALLSET_ENTRY (oddchange, grow_oddchange)
 			random_number = random_scaled(feature_config.oddchange_level);
 		/* Always remembering that random_scaled returns from 0 to N-1 */
 		score_add (oddchange_score, score_table[random_number + 1]);
-		deff_restart (DEFF_ODDCHANGE_GROWS);
+		deff_start (DEFF_ODDCHANGE_GROWS);
 	}
 }
 

@@ -169,7 +169,7 @@ CALLSET_ENTRY (lanes, sw_right_inlane)
 	/* Light Dead end if not lit */
 	lamp_on (LM_DEAD_END);
 	timer_restart_free (GID_TNF_READY, TIME_4S);
-	event_can_follow (right_inlane, left_ramp, TIME_4S);
+	//event_can_follow (right_inlane, left_ramp, TIME_4S);
 }
 
 CALLSET_ENTRY (lanes, start_ball)

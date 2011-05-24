@@ -37,6 +37,32 @@ extern void chaosmb_left_ramp_exit (void);
 
 extern score_t tnf_score;
 
+static inline void left_ramp_speech_subtask (void)
+{
+	switch (left_ramps)
+	{
+		default:
+			break;
+		case 3:
+			sound_send (SND_MOST_UNUSUAL_CAMERA);
+			break;
+		case 6:
+			sound_send (SND_THIS_IS_NO_ORDINARY_GUMBALL);
+			break;
+		case 10:
+			if (can_award_extra_ball ())
+				sound_send (SND_GET_THE_EXTRA_BALL);
+			else
+				sound_send (SND_TEN_MILLION_POINTS);
+			break;
+		case 20:	
+			sound_send (SND_YES);
+			break;
+	}
+
+
+}
+
 static void left_ramp_deff_subtask (void)
 {
 	psprintf ("1 LEFT RAMP", "%d LEFT RAMPS", left_ramps);
@@ -47,47 +73,42 @@ static void left_ramp_deff_subtask (void)
 	else if (left_ramps == 3)
 	{
 		sprintf ("CAMERA LIT");
-		sound_send (SND_MOST_UNUSUAL_CAMERA);
 	}
 	else if (left_ramps < 6)
 		sprintf ("GUMBALL AT 6");
 	else if (left_ramps == 6)
 	{
 		sprintf ("GUMBALL LIT");
-		sound_send (SND_THIS_IS_NO_ORDINARY_GUMBALL);
 	}
 	else if (left_ramps < 10 && can_award_extra_ball ())
 		sprintf ("EXTRA BALL AT 10");
 	else if (left_ramps < 10 && !can_award_extra_ball ())
 		sprintf ("10M AT 10");
-	else if (left_ramps == 10 && can_award_extra_ball ())
+	else if (left_ramps == 10)
 	{
-		sprintf ("EXTRA BALL LIGHT");
-		sound_send (SND_GET_THE_EXTRA_BALL);
-	}
-	else if (left_ramps == 10 && !can_award_extra_ball ())
-	{
-		sprintf ("10 MILLION");
-		sound_send (SND_TEN_MILLION_POINTS);
+		if (can_award_extra_ball ())
+			sprintf ("EXTRA BALL LIT");
+		else	
+			sprintf ("10 MILLION");
 	}
 	else if (left_ramps > 10)
 		sprintf ("20 MILLION AT 20");
 	else if (left_ramps == 20)
 	{
 		sprintf ("20 MILLION");
-		sound_send (SND_YES);
 	}
 	else
-		sprintf ("");
+		sprintf ("VROOOM");
 }
 
 void left_ramp_deff (void)
 {
+	left_ramp_speech_subtask ();
 	U8 i;
-	left_ramp_deff_subtask ();
 	for (i = 0; i < 20; i++)
 	{
 		dmd_alloc_pair_clean ();
+		left_ramp_deff_subtask ();
 		font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 		dmd_copy_low_to_high ();
 		callset_invoke (score_overlay);
@@ -135,19 +156,12 @@ inline static bool right_inlane_combo_check (void)
 	if (!single_ball_play ())
 		return FALSE;
 
-	if (event_did_follow (right_inlane, left_ramp) 
-		&& score_compare (score_table[SC_10], tnf_score) == 1)
+	if (task_kill_gid (GID_TNF_READY))
 	{
-		event_can_follow (left_ramp_exit, tnf, TIME_4S);
+		//event_can_follow (left_ramp_exit, tnf, TIME_4S);
+		timer_restart_free (GID_TNF_APPROACHING, TIME_4S);
 		deff_start (DEFF_GET_READY_TO_DOINK);
 		return TRUE;
-	}
-	if (event_did_follow (right_inlane, left_ramp) 
-		&&  score_compare (tnf_score, score_table[SC_20M]) == 1)
-	{
-		score (SC_10M);
-		sound_send (SND_YES);
-		return FALSE;
 	}
 	else
 		return FALSE;
