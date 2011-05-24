@@ -154,7 +154,7 @@ static void move_bitmap (U8 bitmap_number)
 static void draw_bitmap (U8 bitmap_number)
 {
 	struct bitmap_state *s = &bitmap_states[bitmap_number];
-	U8 *src;
+	const U8 *src;
 	if (s->ticks_till_alive || bitmap_number > MAX_BITMAPS)
 		return;
 	/* Don't draw if it's going to be off the screen */
@@ -168,16 +168,16 @@ static void draw_bitmap (U8 bitmap_number)
 	{
 		default:
 		case 0:
-			src = &star_bitmap_2plane;
+			src = dollar_bitmap_2plane;
 			break;
 		case 1:	
-			src = &dollar_bitmap_2plane;
+			src = pound_bitmap_2plane;
 			break;
 		case 2:	
-			src = &pound_bitmap_2plane;
+			src = star_bitmap_2plane;
 			break;
 		case 3:	
-			src = &trophy_bitmap_2plane;
+			src = trophy_bitmap_2plane;
 			break;
 	}
 	
