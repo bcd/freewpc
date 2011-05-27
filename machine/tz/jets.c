@@ -224,7 +224,6 @@ void jets_hit_deff (void)
 		callset_invoke (score_overlay);
 		dmd_overlay_outline ();
 		
-		//draw_progress_bar (8,26, jets_scored, jets_for_bonus);
 		draw_progress_bar (&jets_progress_bar);
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
@@ -303,11 +302,38 @@ CALLSET_ENTRY (jet, sw_jet_noflash)
 	callset_invoke (sw_jet);
 }
 
+static void jets_level_up (void)
+{
+	timer_restart_free (GID_JETS_LEVEL_UP, TIME_2S);
+	jets_scored = 1;
+	bounded_increment (jets_bonus_level, 50);
+	if (jets_for_bonus <= 195)
+		jets_for_bonus += 5;
+	award_unlit_shot (SW_BOTTOM_JET);
+	/* jetscore is used rather than score_deff_get 
+	 * because it's likely another score woud of
+	 * happened */
+	if (jets_bonus_level < 3)
+	{
+		score (SC_1M);
+		jetscore = 1;
+	}
+	else if (jets_bonus_level < 5)
+	{
+		score (SC_5M);
+		jetscore = 5;
+	}
+	else if (jets_bonus_level < 7)
+	{
+		score (SC_10M);
+		jetscore = 10;
+	}
+	if (!timer_find_gid (GID_HITCHHIKER))
+		deff_start (DEFF_JETS_LEVEL_UP);
+}
+
 CALLSET_ENTRY (jet, sw_jet)
 {
-	/* Hack for when mpf_exit switch breaks */
-	if (!multi_ball_play () && mpf_timer > 0)
-		callset_invoke (sw_mpf_exit);
 	
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 	if (global_flag_test(GLOBAL_FLAG_POWERBALL_IN_PLAY))
@@ -317,33 +343,7 @@ CALLSET_ENTRY (jet, sw_jet)
 	
 	if (jets_scored >= jets_for_bonus)
 	{	
-		timer_restart_free (GID_JETS_LEVEL_UP, TIME_2S);
-		jets_scored = 1;
-		bounded_increment (jets_bonus_level, 50);
-		if (jets_for_bonus <= 195)
-			jets_for_bonus += 5;
-		award_unlit_shot (SW_BOTTOM_JET);
-		task_sleep (TIME_500MS);
-		/* jetscore is used rather than score_deff_get 
-		 * because it's likely another score woud of
-		 * happened */
-		if (jets_bonus_level < 3)
-		{
-			score (SC_1M);
-			jetscore = 1;
-		}
-		else if (jets_bonus_level < 5)
-		{
-			score (SC_5M);
-			jetscore = 5;
-		}
-		else if (jets_bonus_level < 7)
-		{
-			score (SC_10M);
-			jetscore = 10;
-		}
-		if (!timer_find_gid (GID_HITCHHIKER))
-			deff_start (DEFF_JETS_LEVEL_UP);
+		jets_level_up ();
 	}
 
 	if (timed_mode_running_p (&tsm_mode))
@@ -358,9 +358,12 @@ CALLSET_ENTRY (jet, sw_jet)
 		/* Stop deff from restarting whilst we
 		 * are showing the level up deff
 		 * or when the hitch anim is running */
-		if (!timer_find_gid (GID_HITCHHIKER) && !timer_find_gid (GID_JETS_LEVEL_UP))
+		if (!timer_find_gid (GID_HITCHHIKER) && !task_find_gid (GID_JETS_LEVEL_UP))
 			deff_restart (DEFF_JETS_HIT);
 	}
+	/* Hack for when mpf_exit switch breaks */
+	if (!multi_ball_play () && mpf_timer > 0)
+		callset_invoke (sw_mpf_exit);
 }
 
 CALLSET_ENTRY (jets, end_ball)

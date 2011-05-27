@@ -313,17 +313,6 @@ machine/tz/animation/reelstrip/reelstrip_0016.pgm
 machine/tz/animation/reelstrip/reelstrip_0017.pgm
 IMG_REELSTRIP_END: machine/tz/animation/reelstrip/reelstrip_0018.pgm
 
-IMG_ODDCHANGE_START: machine/tz/animation/oddchange/frame_0001.pgm
-machine/tz/animation/oddchange/frame_0002.pgm
-machine/tz/animation/oddchange/frame_0003.pgm
-machine/tz/animation/oddchange/frame_0004.pgm
-machine/tz/animation/oddchange/frame_0005.pgm
-machine/tz/animation/oddchange/frame_0006.pgm
-machine/tz/animation/oddchange/frame_0007.pgm
-machine/tz/animation/oddchange/frame_0008.pgm
-machine/tz/animation/oddchange/frame_0009.pgm
-IMG_ODDCHANGE_END: machine/tz/animation/oddchange/frame_0010.pgm
-
 IMG_FASTLOCK_START: !machine/tz/animation/dance/frame_0001.pgm
 !machine/tz/animation/dance/frame_0002.pgm
 !machine/tz/animation/dance/frame_0003.pgm
@@ -444,5 +433,16 @@ machine/tz/animation/bttzwave/bttzwave_0001_012.pgm
 machine/tz/animation/bttzwave/bttzwave_0001_013.pgm
 machine/tz/animation/bttzwave/bttzwave_0001_014.pgm
 IMG_BTTZWAVE_END: machine/tz/animation/bttzwave/bttzwave_0001_015.pgm 
+
+IMG_ODDCHANGE_START: machine/tz/animation/oddchange/frame_0001.pgm
+machine/tz/animation/oddchange/frame_0002.pgm
+machine/tz/animation/oddchange/frame_0003.pgm
+machine/tz/animation/oddchange/frame_0004.pgm
+machine/tz/animation/oddchange/frame_0005.pgm
+machine/tz/animation/oddchange/frame_0006.pgm
+machine/tz/animation/oddchange/frame_0007.pgm
+machine/tz/animation/oddchange/frame_0008.pgm
+machine/tz/animation/oddchange/frame_0009.pgm
+IMG_ODDCHANGE_END: machine/tz/animation/oddchange/frame_0010.pgm
 
 

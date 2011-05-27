@@ -33,11 +33,11 @@ void oddchange_collected_deff (void)
 {
 	sprintf_score (score_deff_get ());
 	U16 fno;
-	dmd_alloc_pair_clean ();
 	sound_send (SND_ODD_CHANGE_BEGIN);
 	U8 y = 30;
 	for (fno = IMG_ODDCHANGE_START; fno < IMG_ODDCHANGE_END; fno += 2)
 	{
+		dmd_alloc_pair_clean ();
 		y--;
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
@@ -49,13 +49,11 @@ void oddchange_collected_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_16MS);
 	}
-	dmd_clean_page_low ();
-	dmd_clean_page_high ();
-	dmd_alloc_pair ();
 
 	sound_send (SND_KACHING);
 	for (fno = IMG_FLASHCENTRE_START; fno < IMG_FLASHCENTRE_END; fno += 2)
 	{
+		dmd_alloc_pair_clean ();
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_var5, 64, y, "ODDCHANGE COLLECTED");
@@ -75,11 +73,11 @@ void oddchange_collected_deff (void)
 void oddchange_grows_deff (void)
 {
 	U16 fno;
-	dmd_alloc_pair_clean ();
 	U8 y = 10;
 	U8 i = 0;
 	for (fno = IMG_ODDCHANGE_END; fno > IMG_ODDCHANGE_START; fno -= 3)
 	{
+		dmd_alloc_pair_clean ();
 		y += 2;
 		i++;
 		dmd_map_overlay ();
@@ -93,7 +91,8 @@ void oddchange_grows_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	for (fno = 0; fno < 30; fno++);
+	timer_restart_free (GID_ODDCHANGE_DEFF, TIME_2S);
+	while (task_find_gid (GID_ODDCHANGE_DEFF))
 	{
 		dmd_alloc_pair_clean ();
 		dmd_clean_page_low ();

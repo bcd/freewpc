@@ -90,10 +90,11 @@ void autofire_monitor (void)
 	
 	/* Wait a little longer for the ball to settle 
 	 * and the divertor to close */
-	task_sleep (TIME_500MS);
+	task_sleep (TIME_200MS);
 	
 	/* If Right inlane -> Left ramp combo, start tnf mode */
-	if (event_did_follow (left_ramp_exit, tnf) && single_ball_play ())
+	//if (event_did_follow (left_ramp_exit, tnf) && single_ball_play ())
+	if (task_kill_gid (GID_TNF_APPROACHING) && single_ball_play ())
 	{
 		callset_invoke (tnf_start);
 	}
@@ -106,7 +107,7 @@ void autofire_monitor (void)
 	shooter_div_start ();
 	/* Wait for the diverter to fully open before firing */
 	task_sleep_sec (1);	
-	task_sleep (TIME_500MS);	
+	task_sleep (TIME_400MS);	
 	
 	if (in_live_game && single_ball_play ())
 	{

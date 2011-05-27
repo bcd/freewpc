@@ -52,21 +52,21 @@ void tnf_deff (void)
 	timer_restart_free (GID_TNF_TIMER, TIME_4S);
 	while (tnf_buttons_pressed < 100 && task_find_gid (GID_TNF_TIMER))
 	{
-			dmd_alloc_pair_clean ();
-			if (blink_on)
-			{
-				font_render_string_center (&font_mono5, 64, 4, "HIT FLIPPER BUTTONS");
-				blink_on = FALSE;
-			}
-			else
-				blink_on = TRUE;
-			psprintf ("%d DOINK", "%d DOINKS", tnf_buttons_pressed);
-			font_render_string_center (&font_term6, 60 + tnf_x, 12 + tnf_y, sprintf_buffer);
-			dmd_copy_low_to_high ();
-			callset_invoke (score_overlay);
-			draw_progress_bar (&tnf_progress_bar);
-			dmd_show2 ();
-			task_sleep (TIME_66MS);
+		dmd_alloc_pair_clean ();
+		if (blink_on)
+		{
+			font_render_string_center (&font_mono5, 64, 4, "HIT FLIPPER BUTTONS");
+			blink_on = FALSE;
+		}
+		else
+			blink_on = TRUE;
+		psprintf ("%d DOINK", "%d DOINKS", tnf_buttons_pressed);
+		font_render_string_center (&font_term6, 60 + tnf_x, 12 + tnf_y, sprintf_buffer);
+		dmd_copy_low_to_high ();
+		callset_invoke (score_overlay);
+		draw_progress_bar (&tnf_progress_bar);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
 	}
 	deff_exit ();
 }
