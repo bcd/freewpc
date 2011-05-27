@@ -1,9 +1,13 @@
 Tennis style scoring, player must be a certain amounts of points in front to
 win, or 2 balls past and the other play fails to retake the lead.
 
+tnf - Change rules:
+Only gain score if you reach the end bar, add on an extra 10 button pushes
+required each time till a certain point (3 times only?);
+also, use Jet progress bar
+
 show ZZzz's on skill shot if no one is playing
 
-sound_send (SND_HEY_ITS_ONLY_PINBALL, sl_200ms) for the HEY!
 
 put dmd_text_outline into score_deff.c
 

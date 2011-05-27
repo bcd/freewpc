@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Ewan Meadows <sonny_jim@hotmail.com>
+ * Copyright 2011 by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* CALLSET_SECTION (tnf, __machine3__) */
+/* CALLSET_SECTION (tnf, __machine4__) */
 
 #include <freewpc.h>
 
@@ -43,42 +43,6 @@ struct progress_bar_ops tnf_progress_bar = {
 
 /* Total amount scored from doink mode */
 __local__ score_t tnf_score;
-
-#if 0
-const U8 progress_bar_slice_bitmap[] = {
-	1,5,1,1,1,1,1,
-};
-
-const U8 progress_bar_chunk_bitmap[] = {
-	5,5,15,15,15,15,15,
-};
-
-static void tnf_draw_progress_bar (void)
-{
-	U8 i;
-	/* Where the next slice needs to be put */
-	/* 128 - Size of bar (80 pixels) / 2 */
-	U8 x = 24;
-
-	/* Draw the finish line */
-	bitmap_blit (progress_bar_slice_bitmap, 104, 20);
-	for (i = tnf_buttons_pressed; i > 0; i--)
-	{
-		if (x > 128)
-			break;
-		else if (i < 5)
-			bitmap_blit (progress_bar_slice_bitmap, x, 20);
-		else
-		{
-			/* Draw the 5x5 chunks */
-			bitmap_blit (progress_bar_chunk_bitmap, x, 20);
-			x += 4;
-			i -= 4;
-		}
-		x++;
-	}
-}
-#endif
 
 void tnf_deff (void)
 {
@@ -167,14 +131,15 @@ CALLSET_ENTRY (tnf, sw_left_button, sw_right_button)
 	}
 }
 
-static inline void set_tnf_target (void)
+static void set_tnf_target (void)
 {
 	tnf_target = 20 + (tnf_level * 20);
 }
 
+
 static void tnf_increase_level (void)
 {
-	bounded_increment (tnf_level, 3);
+	bounded_increment (tnf_level, 4);
 }
 
 CALLSET_ENTRY (tnf, tnf_start)
@@ -206,9 +171,8 @@ CALLSET_ENTRY (tnf, tnf_end)
 	magnet_enable_catch_and_throw (MAG_LEFT);
 }
 
-CALLSET_ENTRY (tnf, start_game)
+CALLSET_ENTRY (tnf, start_player)
 {
-
 	tnf_level = 1;
 }
 

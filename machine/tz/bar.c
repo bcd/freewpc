@@ -51,12 +51,12 @@ void draw_progress_bar (struct progress_bar_ops *ops)
 	S16 i;
 	S16 j;
 	/* Boundary checks */
-	if (ops->x + ops->bar_width > 128)
-		ops->x = 128 - ops->bar_width;
-	if (ops->y + SEG_SIZE > 32)
-		ops->y = 32 - SEG_SIZE;
-	if (*ops->fill_level > *ops->max_level)
-		*ops->fill_level = *ops->max_level;
+//	if (ops->x + ops->bar_width > 128)
+//		ops->x = 128 - ops->bar_width;
+//	if (ops->y + SEG_SIZE > 32)
+//		ops->y = 32 - SEG_SIZE;
+//	if (*ops->fill_level > *ops->max_level)
+//		*ops->fill_level = *ops->max_level;
 
 	/* calculate fill level */
 	j = *ops->fill_level;

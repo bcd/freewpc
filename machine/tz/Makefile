@@ -84,10 +84,10 @@ GAME2_OBJS = unlit.o spiralaward.o leffs.o star.o rocket.o tz_amode.o \
 	music.o oddchange.o shots.o mode_select.o bitmap_test.o
 
 GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
-	spiral.o tnf.o bttz.o factoids.o master.o snake.o \
+	spiral.o bttz.o factoids.o master.o snake.o \
 	lock.o lanes.o combo.o deffs2.o hurryup.o
 
-GAME4_OBJS = bonus.o dollar.o bar.o
+GAME4_OBJS = bonus.o dollar.o bar.o tnf.o
 
 IMAGE_MAP += $(M)/tz.ild
 
