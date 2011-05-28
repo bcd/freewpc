@@ -87,7 +87,6 @@ __fastram__ enum mech_zr1_state zr1_previous_state;
 // RTT counters and flags
 __fastram__ U8 zr1_center_ticks_remaining;
 __fastram__ U8 zr1_shake_ticks_remaining;
-//__fastram__ U16 zr1_calibrate_timeout_ticks_remaining;
 __fastram__ U8 zr1_calibrate_move_ticks_remaining;
 
 enum mech_zr1_shake_direction {
