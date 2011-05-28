@@ -24,7 +24,7 @@
  * This is an implementation of a diverter which has separate electrical circuits
  * for pulse and hold power.
  *
- * Examples can be found on Corvette, AFM and WCS (TODO confirm latter two)
+ * An example of which can be found on Corvette.
  *
  * On Corvette the fliptonic II's spare Upper Right Flipper circuits are used to
  * driver a diverter.  The solenoid, unlike the flippers on the game, does NOT have
@@ -60,12 +60,12 @@
 
 #define @SELF_MODE @mode // 1 == fliptronics, 0 == normal
 
-// TODO probably can make this less frequent as we don't care about any switches.
-/* Schedule this driver every 8ms. */
-#define @SELF_DIVERTER_SCHED 8
+// Note: The driver doesn't care about any switches.
+/* Schedule this driver every 16ms. */
+#define @SELF_DIVERTER_SCHED 16
 
 /* Length of time for the initial power pulse */
-#define @SELF_POWER_PULSE 96 // must be divisible exactly by SELF_DIVERTER_SCHED (above) 
+#define @SELF_POWER_PULSE 96 // must be divisible exactly by @SELF_DIVERTER_SCHED (above) 
 #define @SELF_POWER_TICKS (@SELF_POWER_PULSE / @SELF_DIVERTER_SCHED)
 
 extern __fastram__ S8 @self_timer;
@@ -129,7 +129,12 @@ extern inline void @self_service (void)
 #else
 		//sol_enable (@hold_sol);
 #endif
-		// TODO add a timeout so we don't stay on hold power forever
+		// We could add a timeout here so that we don't stay on hold power forever but that 
+		// is better left to the game logic, e.g. via timed modes, switches etc.
+		// On the Willimans Corvette original ROM code the diverter stays on for a while, and
+		// then turns off if the ball hasn't been up the ramp.  Then if a ball should go up
+		// the ramp while the diverter is off an opto is triggered near the bottom of the
+		// ramp which is then used to determine if the diverter should be re-opened.
 	}
 	
 #if (@SELF_MODE > 0)	
@@ -370,7 +375,7 @@ struct window_ops @self_test_window = {
 
 
 struct menu @self_test_item = {
-	.name = "@SELF TEST", // TODO template needs @SELF for uppercase version of 'self'
+	.name = "@SELF TEST", // needs @SELF for uppercase version of 'self' as test menu font doesn't have lower-case letters.
 	.flags = M_ITEM,
 	.var = { .subwindow = { &@self_test_window, NULL } },
 };
