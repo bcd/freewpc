@@ -340,6 +340,8 @@ Diverter: driver(divhold),
 	power_sol=SOL_RAMP_DIVERTER,
 	hold_sol=SOL_RAMP_DIVERTER_HOLD,
 	mode=1,
+	power_pulse_ms=96,
+	schedule_ms=32,
 	includetest(yes)
 
 ZR-1 Low Rev Gate: driver(duty),

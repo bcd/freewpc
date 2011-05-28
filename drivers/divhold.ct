@@ -42,6 +42,10 @@
 @@parameter hold_sol
 /* Set to 1 if the solenoids are fliptronic powered */
 @@parameter mode
+/* Durations of the pulse for the full power solenoid (in ms) - must be divisible by the value used by the schedule_ms parameter */
+@@parameter power_pulse_ms
+/* Schedule for the driver, in ms, go as high as you can, try 32 to start with */
+@@parameter schedule_ms
 
 
 @@
@@ -50,7 +54,7 @@
 
 # note, the template is hard coded to use a frequency value of 8, the value below must match
 # See @SELF_DIVERTER_SCHED
-!@self_service 8 40c
+!@self_service @schedule_ms 40c
 
 @@
 @@file @self.h
@@ -61,11 +65,11 @@
 #define @SELF_MODE @mode // 1 == fliptronics, 0 == normal
 
 // Note: The driver doesn't care about any switches.
-/* Schedule this driver every 16ms. */
-#define @SELF_DIVERTER_SCHED 16
+/* Schedule this driver every @schedule_ms ms. */
+#define @SELF_DIVERTER_SCHED @schedule_ms // see the 'schedule_ms' driver parameter
 
 /* Length of time for the initial power pulse */
-#define @SELF_POWER_PULSE 96 // must be divisible exactly by @SELF_DIVERTER_SCHED (above) 
+#define @SELF_POWER_PULSE @power_pulse_ms // must be divisible exactly by @SELF_DIVERTER_SCHED (above), see the 'power_pulse_ms' driver parameter 
 #define @SELF_POWER_TICKS (@SELF_POWER_PULSE / @SELF_DIVERTER_SCHED)
 
 extern __fastram__ S8 @self_timer;
