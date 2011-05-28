@@ -81,7 +81,7 @@ void zr1_test_init (void)
 	zr1_test_command = CALIBRATE;
 }
 
-void draw_test_title(void) {
+void zr1_draw_test_title(void) {
 	font_render_string_center (&font_mono5, 64, 2, "ZR1 ENGINE TEST");
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
 }
@@ -94,7 +94,7 @@ void zr1_test_draw (void)
 {
 	dmd_alloc_low_clean ();
 
-	draw_test_title();
+	zr1_draw_test_title();
 
 	// 21 characters wide max when using 5 point font.
 
