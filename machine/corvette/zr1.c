@@ -64,7 +64,7 @@ U8 zr1_pos_full_left_opto_off;
 U8 zr1_pos_full_right_opto_on;
 U8 zr1_pos_full_right_opto_off;
 
-// TODO these are somewhat similar to mech_zr1_calibration_messages but with line feeds instead of spaces
+// FIXME these are somewhat similar to mech_zr1_calibration_messages but with line feeds instead of spaces
 char *mech_zr1_diag_messages[] = {
 	"NOT CALIBRATED\n",             // NEVER SEEN
 	"ZR1 ERROR 1\nCHECK F111\n",
@@ -620,9 +620,9 @@ void zr1_shake_2sec_task (void)
 }
 
 /**
- * Reset the engine to the center position at the start of each ball.
+ * Shake the engine at the start of a ball.
  */
-CALLSET_ENTRY (zr1, start_ball, end_ball)
+CALLSET_ENTRY (zr1, start_ball)
 {
 	task_create_gid1 (GID_ZR1_SHAKE, zr1_shake_2sec_task);
 }
