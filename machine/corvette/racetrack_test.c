@@ -31,6 +31,7 @@ enum {
 	FIRST_TEST = 0,
 	CALIBRATE = FIRST_TEST,
 	RACE,
+	CAR_TEST,
 	CAR_RETURN,
 	FLOAT,
 	LAST_TEST = FLOAT
@@ -39,8 +40,26 @@ enum {
 char *racetrack_test_short_names[] = {
 	"CALIBRATE",
 	"RACE",
-	"RETURN",
+	"CAR TEST",
+	"CAR RETURN",
 	"FLOAT"
+};
+
+char *racetrack_state_codes[] = {
+	"INI",
+	"CAL",
+	"FLT",
+	"RDY",
+	"TES",
+	"RTN",
+	"RAC"
+};
+
+char *racetrack_lane_state_codes[] = {
+	"STP",
+	"SEK",
+	"RTN",
+	"CAL"
 };
 
 // TODO add more calibration result messages
@@ -57,12 +76,8 @@ extern U8 racetrack_calibrated;
 extern U8 racetrack_calibration_attempted;
 extern enum mech_racetrack_calibration_codes racetrack_last_calibration_result_code;
 
-extern /*__fastram__*/ U8 racetrack_watchdog_counter;
-extern /*__fastram__*/ U8 racetrack_seen_encoder_mask;
-
-extern /*__fastram__*/ U8 left_car_desired_position;
-extern /*__fastram__*/ U8 right_car_desired_position;
-
+extern U8 racetrack_encoder_mask;
+extern racetrack_lane_t racetrack_lanes[RACETRACK_LANES];
 
 void racetrack_test_init (void)
 {
@@ -74,6 +89,9 @@ void racetrack_draw_test_title(void) {
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
 }
 
+// 21 characters wide max when using font_mono5
+// ~30 characters when using font_var5
+
 #define LINE_1_Y 7
 #define LINE_2_Y 13
 #define LINE_3_Y 19
@@ -84,52 +102,47 @@ void racetrack_test_draw (void)
 
 	racetrack_draw_test_title();
 
-	// 21 characters wide max when using 5 point font.
 
+	// ~30 c
 	//123456789012345678901
 	//S:n
 
 	// S = State
 	// e.g. "S:1"
-	sprintf ("S:%1d",
-		racetrack_state
+	sprintf ("LS:%s, S:%s, RS:%s",
+		racetrack_lane_state_codes[racetrack_lanes[LANE_LEFT].state],
+		racetrack_state_codes[racetrack_state],
+		racetrack_lane_state_codes[racetrack_lanes[LANE_RIGHT].state]
 	);
 	font_render_string_center (&font_var5, 64, LINE_1_Y + 2, sprintf_buffer);
 
-	sprintf ("L:%c%c",
-		(switch_poll_logical (SW_LEFT_RACE_ENCODER) ? 'X' : '-'),
-		(switch_poll_logical (SW_LEFT_RACE_START) ? 'X' : '-')
+	sprintf ("L:%c%c %c%c%c %ld",
+		switch_poll_logical (SW_LEFT_RACE_ENCODER) ? 'E' : '-',
+		switch_poll_logical (SW_LEFT_RACE_START) ? 'R' : '-',
+		(racetrack_encoder_mask & RT_EM_SEEN_LEFT) > 0 ? 'Y' : 'N',
+		(racetrack_encoder_mask & RT_EM_PREVIOUS_STATE_LEFT) > 0 ? '1' : '0',
+		(racetrack_encoder_mask & RT_EM_STALLED_LEFT) > 0 ? 'S' : '-',
+		racetrack_lanes[LANE_LEFT].encoder_count
 	);
 	font_render_string_left (&font_var5, 0, LINE_3_Y, sprintf_buffer);
 
-	sprintf ("R:%c%c",
-		(switch_poll_logical (SW_RIGHT_RACE_ENCODER) ? 'X' : '-'),
-		(switch_poll_logical (SW_RIGHT_RACE_START) ? 'X' : '-')
+	sprintf ("R:%c%c %c%c%c %ld",
+		switch_poll_logical (SW_RIGHT_RACE_ENCODER) ? 'E' : '-',
+		switch_poll_logical (SW_RIGHT_RACE_START) ? 'R' : '-',
+		(racetrack_encoder_mask & RT_EM_SEEN_RIGHT) > 0 ? 'Y' : 'N',
+		(racetrack_encoder_mask & RT_EM_PREVIOUS_STATE_RIGHT) > 0 ? '1' : '0',
+		(racetrack_encoder_mask & RT_EM_STALLED_RIGHT) > 0 ? 'S' : '-',
+		racetrack_lanes[LANE_RIGHT].encoder_count
 	);
 	font_render_string_right (&font_var5, 0, LINE_3_Y - FRSR_WORKAROUND, sprintf_buffer);
-
-	//123456789012345678901
-	//WC:nnn ES:n
-
-	// WC = watchdog counter, ES = encoders seen
-	sprintf ("WC:%3d ES:%1d",
-			racetrack_watchdog_counter,
-			racetrack_seen_encoder_mask
-	);
-	font_render_string_left (&font_var5, 0, LINE_2_Y, sprintf_buffer);
-
 
 	switch (racetrack_test_command) {
 		case CALIBRATE:
 			if (racetrack_state == RACETRACK_CALIBRATE) {
-
-				//123456789012345678901
-				//L:XX CALIBRATING R:XX
-
-				font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "CALIBRATING");
+				font_render_string_center(&font_var5, 64, LINE_2_Y + 2, "CALIBRATING");
 			} else {
 				//dbprintf("calibration result: %d\n", racetrack_last_calibration_result_code);
-				font_render_string_center(&font_var5, 64, LINE_3_Y + 2, mech_racetrack_calibration_messages[racetrack_last_calibration_result_code]);
+				font_render_string_center(&font_var5, 64, LINE_2_Y + 2, mech_racetrack_calibration_messages[racetrack_last_calibration_result_code]);
 			}
 		break;
 
@@ -152,7 +165,7 @@ void racetrack_test_thread (void)
 	for (;;)
 	{
 
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_33MS);
 
 		racetrack_test_draw ();
 	}
@@ -162,12 +175,29 @@ void racetrack_test_left (void)
 {
 	switch (racetrack_test_command) {
 		case RACE:
-			// TODO move this into a function in racetrack.c
-			if (left_car_desired_position < 100) {
-				enable_interrupts();
-				left_car_desired_position++;
-				disable_interrupts();
+			if (racetrack_state != RACETRACK_RACE) {
+				break;
 			}
+			// TODO move this into a function in racetrack.c?
+			if (racetrack_lanes[LANE_LEFT].desired_car_position < 100) {
+				disable_interrupts();
+				racetrack_lanes[LANE_LEFT].desired_car_position++;
+				enable_interrupts();
+			}
+		break;
+		case CAR_TEST:
+			if (racetrack_state != RACETRACK_CAR_TEST) {
+				break;
+			}
+			disable_interrupts();
+			if (racetrack_lanes[LANE_LEFT].state == LANE_STOP) {
+				racetrack_lanes[LANE_LEFT].state = LANE_CALIBRATE;
+				racetrack_encoder_mask &= ~RT_EM_SEEN_LEFT;
+				racetrack_encoder_mask &= ~RT_EM_STALLED_LEFT;
+			} else {
+				racetrack_lanes[LANE_LEFT].state = LANE_STOP;
+			}
+			enable_interrupts();
 		break;
 		default:
 			// shut the compiler up
@@ -179,13 +209,30 @@ void racetrack_test_right (void)
 {
 	switch (racetrack_test_command) {
 		case RACE:
+			if (racetrack_state != RACETRACK_RACE) {
+				break;
+			}
 			// TODO move this into a function in racetrack.c
-			if (right_car_desired_position < 100) {
-				enable_interrupts();
-				right_car_desired_position++;
+			if (racetrack_lanes[LANE_RIGHT].desired_car_position < 100) {
 				disable_interrupts();
+				racetrack_lanes[LANE_RIGHT].desired_car_position++;
+				enable_interrupts();
 			}
 		break;
+		case CAR_TEST:
+			if (racetrack_state != RACETRACK_CAR_TEST) {
+				break;
+			}
+			disable_interrupts();
+			if (racetrack_lanes[LANE_RIGHT].state == LANE_STOP) {
+				racetrack_lanes[LANE_RIGHT].state = LANE_CALIBRATE;
+				racetrack_encoder_mask &= ~RT_EM_STALLED_RIGHT;
+			} else {
+				racetrack_lanes[LANE_RIGHT].state = LANE_STOP;
+			}
+			enable_interrupts();
+		break;
+
 		default:
 			// shut the compiler up
 		break;
@@ -228,6 +275,10 @@ void racetrack_test_enter (void)
 
   		case RACE:
   			racetrack_race();
+  		break;
+
+  		case CAR_TEST:
+  			racetrack_car_test();
   		break;
 
   		case CAR_RETURN:

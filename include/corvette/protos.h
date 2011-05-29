@@ -43,6 +43,13 @@ __machine__ void zr1_start_ball_search(void);
 __machine__ void zr1_set_shake_speed(U8 new_shake_speed);
 __machine__ void zr1_set_shake_range(U8 new_shake_range);
 
+/* racetrack.c */
+void racetrack_float(void);
+void racetrack_calibrate(void);
+void racetrack_race(void);
+void racetrack_car_return(void);
+void racetrack_car_test(void);
+
 // TODO remove when real-machine testing is complete - begin
 __machine__ void zr1_enable_solenoids(void);
 __machine__ void zr1_disable_solenoids(void);
