@@ -2831,7 +2831,10 @@ many bytes forward to move the cursor.
 @section Using TrueType Fonts
 
 The script @command{fontgen2} converts TrueType font files (.ttf files)
-into WPC font files (.fon).
+into WPC font files (.fon).  Not all characters are supported; in particular,
+lowercase characters are not included by default in order to save space.
+Trying to display any characters not included in the font will generally
+cause a system crash, as there is not much error checking.
 
 @section Printing Text
 
