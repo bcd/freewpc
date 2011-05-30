@@ -26,14 +26,15 @@
  * 2) left car (drives a motor for the left car)
  * 3) right car (drives a motor for the right car)
  *
- * There are 4 switches that are used by the racetrack.
+ * There are 4 switches that are used by the racetrack:
  * 4 optos
  * one for each car's encoder wheel, used to determine if the car is stationary or moving.
  * one for each car's at-start-of-track, used to determine if the car is at the start of the track.
  *
- * There are about 350 encoder on/off cycles when moving the car very slowly from the start to the end of the track.
+ * There are about 727 encoder on/off cycles from the start to the end of the track.
+ * If you count encoder cycles from the start of the track you can determine where on the track the car is.
  *
- * There are few lamps too.
+ * There are few lamps:
  * 8 lights arranged in a tree, 4 amber, 2 green, 2 red.
  * 2 lights under the start of the cars, appear to be controlled by the race enable solenoids. (TODO Verify)
  *
@@ -65,8 +66,16 @@
  * 55: Left Race Encoder, noscore, opto
  * 56: Right Race Encoder, noscore, opto
  *
+ * Lamps:
+ * 81: Right Tree Red
+ * 82: Left Tree Red
+ * 83: Tree Bottom Yellow
+ * 84: Tree Top Yellow
+ * 85: Right Tree Green
+ * 86: Left Tree Green
  *
- * The racetrack needs to be calibrated at power-up.
+ *
+ * The racetrack needs to be calibrated.
  * The calibration routine needs to reset each car to the start of the racetrack
  * Then it needs to drive each car in turn to the end of the racetrack
  * Then finally it needs to reset them again to the start of the racetrack.
@@ -76,22 +85,22 @@
  *
  * The schedule needs to be set to run the RTT frequently otherwise it's not possible to
  * count the race encoder switch transitions when the cars are moving quickly.
- * FIXME The Williams ROM manages to catch every transition, this code does not. Experiment with scheduling further.
  *
  * The Williams ROM uses a fixed value of 670 switch transitions for the length of the track, as
  * displayed in it's test menu.  It doesn't care if the car reaches the end of the track or not.
  * It does not measure the length of the track by detecting stalled cars.
  *
+ * The Williams ROM does not initialise the racetrack at power-up, it does it at the start of the first game.
+ * This may be to reduce wear or power consumption.
  */
 #include <freewpc.h>
 #include <diag.h>
 #include <corvette/racetrack.h>
 
-// racetrack schedule defined in corvetee.sched as 8ms.
-// it needs to be called frequently so that encoder ticks can be counted without loss
-// and so that the cars will stop at the end of the tracks without slipping the drive belt
-#define RACETRACK_SCHEDULE 4
-
+// racetrack schedule as defined in corvetee.sched.
+// it needs to be called frequently to control the speed of the cars
+// and if stall detection is used to detect cars that have stalled so that the drive belt doesn't slip.
+#define RACETRACK_SCHEDULE 16
 
 //
 // Lane state
@@ -100,7 +109,9 @@
 racetrack_lane_t racetrack_lanes[RACETRACK_LANES];
 
 // 8-bit mask, first 4 bit left track, second 4 bits right track
-U8 racetrack_encoder_mask; // See RT_EM_* defines
+__fastram__ U8 racetrack_encoder_mask; // See RT_EM_* defines
+__fastram__ U8 racetrack_encoder_previous_mask;
+
 
 #define LANE_STALL_IGNORE_TICKS (160 / RACETRACK_SCHEDULE) // check for stall after X ms
 #define LANE_STALL_DETECT_TICKS (200 / RACETRACK_SCHEDULE) // check for stall every X ms
@@ -111,12 +122,14 @@ U8 racetrack_stall_ignore_ticks_remaining;
 // Calibration
 //
 
-// TODO work out how many encoder 'ticks' there are when driving each car
-// from the start to the end of the track.
-// 120 ticks = 100%. 120 / 100 = 1.2 ticks per percent.
-// Thus, to move a car from the start to reach 50% we must drive it 1.2 * 50
-//
-// The calibration routine should count ticks for each car in both directions, the result should be similar
+// TODO car position percentage handling
+
+// From the start to the end of the track = 670 encoder cycles = 100%. 670 / 100 = 6.7 encoder cycles per percent.
+// Thus, to move a car from the start to reach 50% we must drive it 6.7 * 50 = 335 cycles
+#define RACETRACK_LENGTH_MAX 727
+#define RACETRACK_LENGTH_LIMIT 715 // used to prevent belt slipping when driving backwards in case of faulty start-of-track opto
+#define RACETRACK_LENGTH_USABLE 670 // used to prevent belt slipping when driving forwards.
+
 
 U8 racetrack_calibrate_ticks; // ticks remaining is initialised to this value, which changes depending on requirements
 U8 racetrack_calibrate_ticks_remaining;
@@ -152,22 +165,6 @@ char *mech_racetrack_diag_messages[] = {
 
 enum mech_racetrack_calibration_codes racetrack_last_calibration_result_code;
 
-
-/*
-	if (!global_flag_test(GLOBAL_FLAG_RACETRACK_SOLENOIDS_POWERED)) {
-		sample_start (SND_STARTER_MOTOR, SL_500MS); // XXX
-		global_flag_on(GLOBAL_FLAG_RACETRACK_SOLENOIDS_POWERED);
-	}
-*/
-
-/*
-
-	if (global_flag_test(GLOBAL_FLAG_RACETRACK_SOLENOIDS_POWERED)) {
-		//sample_start (SND_SPARK_PLUG_01, SL_500MS); // XXX
-		global_flag_off(GLOBAL_FLAG_RACETRACK_SOLENOIDS_POWERED);
-	}
-*/
-
 /**
  * @param lane_number See LANE_* defines.
  */
@@ -179,6 +176,9 @@ void racetrack_process_lane(U8 lane_number) {
 
 	switch(racetrack_lanes[lane_number].state) {
 		case LANE_RETURN:
+			//
+			// detect at-start-of-track
+			//
 			if (switch_poll_logical(racetrack_lanes[lane_number].start_switch)) {
 				racetrack_lanes[lane_number].state = LANE_STOP;
 			}
@@ -197,8 +197,34 @@ void racetrack_process_lane(U8 lane_number) {
 	switch(racetrack_lanes[lane_number].state) {
 		case LANE_SEEK:
 		case LANE_CALIBRATE:
+			//
+			// detect end-of-track (usable)
+			//
+
+			if (racetrack_lanes[lane_number].encoder_count > RACETRACK_LENGTH_USABLE) {
+				racetrack_lanes[lane_number].state = LANE_STOP;
+				if (lane_number == LANE_LEFT) {
+					racetrack_encoder_mask |= RT_EM_END_OF_TRACK_LEFT;
+				} else {
+					racetrack_encoder_mask |= RT_EM_END_OF_TRACK_RIGHT;
+				}
+				break;
+			}
 		case LANE_RETURN:
+			//
+			// detect end-of-track (limit)
+			//
+			// If the cars are pushed all the way to the end of the track, and then reversed we
+			// should wait for the start-of-track opto to be switched on, if it's not switched
+			// on and we should stop if the encoder has registered almost all of the track.
+			if (racetrack_lanes[lane_number].encoder_count > RACETRACK_LENGTH_LIMIT) {
+				racetrack_lanes[lane_number].state = LANE_STOP;
+				break;
+			}
+
+			//
 			// detect stall
+			//
 
 			// don't look for a stall condition if we've only just started to move, wait a bit first
 			if (racetrack_stall_ignore_ticks_remaining > 0) {
@@ -289,37 +315,6 @@ void racetrack_reset_track_state(void) {
 }
 
 void racetrack_update_track_state(void) {
-
-	// check the optos and update the bitmask
-	U8 racetrack_encoder_previous_mask = racetrack_encoder_mask;
-
-	// left lane
-	if (switch_poll_logical (SW_LEFT_RACE_ENCODER)) {
-		racetrack_encoder_mask |= (RT_EM_PREVIOUS_STATE_LEFT);
-	} else {
-		racetrack_encoder_mask &= ~RT_EM_PREVIOUS_STATE_LEFT;
-	}
-
-	if ((racetrack_encoder_mask & RT_EM_PREVIOUS_STATE_LEFT) != (racetrack_encoder_previous_mask & RT_EM_PREVIOUS_STATE_LEFT)) {
-		// encoder state changed
-		racetrack_lanes[LANE_LEFT].encoder_count++;
-		racetrack_encoder_mask |= (RT_EM_SEEN_LEFT);
-	}
-
-
-	// right lane
-	if (switch_poll_logical (SW_RIGHT_RACE_ENCODER)) {
-		racetrack_encoder_mask |= (RT_EM_PREVIOUS_STATE_RIGHT);
-	} else {
-		racetrack_encoder_mask &= ~RT_EM_PREVIOUS_STATE_RIGHT;
-	}
-
-	if ((racetrack_encoder_mask & RT_EM_PREVIOUS_STATE_RIGHT) != (racetrack_encoder_previous_mask & RT_EM_PREVIOUS_STATE_RIGHT)) {
-		// encoder state changed
-		racetrack_lanes[LANE_RIGHT].encoder_count++;
-		racetrack_encoder_mask |= (RT_EM_SEEN_RIGHT);
-	}
-
 	racetrack_process_lane(LANE_LEFT);
 	racetrack_process_lane(LANE_RIGHT);
 }
@@ -579,6 +574,39 @@ static inline void racetrack_state_car_test_run(void) {
 	sol_enable(SOL_RACE_DIRECTION);
 }
 
+// This RTT needs to be FAST as it's scheduled frequently
+void corvette_racetrack_encoder_rtt (void) {
+
+	racetrack_encoder_previous_mask = racetrack_encoder_mask;
+	// check the optos and update the bitmask
+
+	// left lane
+	if (rt_switch_poll (SW_LEFT_RACE_ENCODER)) {
+		racetrack_encoder_mask |= (RT_EM_PREVIOUS_STATE_LEFT);
+	} else {
+		racetrack_encoder_mask &= ~RT_EM_PREVIOUS_STATE_LEFT;
+	}
+
+	if ((racetrack_encoder_mask & RT_EM_PREVIOUS_STATE_LEFT) != (racetrack_encoder_previous_mask & RT_EM_PREVIOUS_STATE_LEFT)) {
+		// encoder state changed
+		racetrack_lanes[LANE_LEFT].encoder_count++;
+		racetrack_encoder_mask |= (RT_EM_SEEN_LEFT);
+	}
+
+
+	// right lane
+	if (rt_switch_poll (SW_RIGHT_RACE_ENCODER)) {
+		racetrack_encoder_mask |= (RT_EM_PREVIOUS_STATE_RIGHT);
+	} else {
+		racetrack_encoder_mask &= ~RT_EM_PREVIOUS_STATE_RIGHT;
+	}
+
+	if ((racetrack_encoder_mask & RT_EM_PREVIOUS_STATE_RIGHT) != (racetrack_encoder_previous_mask & RT_EM_PREVIOUS_STATE_RIGHT)) {
+		// encoder state changed
+		racetrack_lanes[LANE_RIGHT].encoder_count++;
+		racetrack_encoder_mask |= (RT_EM_SEEN_RIGHT);
+	}
+}
 
 void corvette_racetrack_rtt (void) {
 

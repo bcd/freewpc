@@ -46,6 +46,7 @@
 # See ZR1_*_TICKS defines
 corvette_zr1_engine_rtt   16    1c
 
-corvette_racetrack_rtt   4    40c
+corvette_racetrack_encoder_rtt   2    20c
+corvette_racetrack_rtt   16    40c
 
 # EOF

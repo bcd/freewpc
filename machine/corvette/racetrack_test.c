@@ -76,7 +76,7 @@ extern U8 racetrack_calibrated;
 extern U8 racetrack_calibration_attempted;
 extern enum mech_racetrack_calibration_codes racetrack_last_calibration_result_code;
 
-extern U8 racetrack_encoder_mask;
+extern __fastram__ U8 racetrack_encoder_mask;
 extern racetrack_lane_t racetrack_lanes[RACETRACK_LANES];
 
 void racetrack_test_init (void)
@@ -116,22 +116,24 @@ void racetrack_test_draw (void)
 	);
 	font_render_string_center (&font_var5, 64, LINE_1_Y + 2, sprintf_buffer);
 
-	sprintf ("L:%c%c %c%c%c %ld",
+	sprintf ("L:%c%c%c%c%c%c %ld",
 		switch_poll_logical (SW_LEFT_RACE_ENCODER) ? 'E' : '-',
 		switch_poll_logical (SW_LEFT_RACE_START) ? 'R' : '-',
 		(racetrack_encoder_mask & RT_EM_SEEN_LEFT) > 0 ? 'Y' : 'N',
 		(racetrack_encoder_mask & RT_EM_PREVIOUS_STATE_LEFT) > 0 ? '1' : '0',
 		(racetrack_encoder_mask & RT_EM_STALLED_LEFT) > 0 ? 'S' : '-',
+		(racetrack_encoder_mask & RT_EM_END_OF_TRACK_LEFT) > 0 ? 'M' : '-',
 		racetrack_lanes[LANE_LEFT].encoder_count
 	);
 	font_render_string_left (&font_var5, 0, LINE_3_Y, sprintf_buffer);
 
-	sprintf ("R:%c%c %c%c%c %ld",
+	sprintf ("R:%c%c%c%c%c%c %ld",
 		switch_poll_logical (SW_RIGHT_RACE_ENCODER) ? 'E' : '-',
 		switch_poll_logical (SW_RIGHT_RACE_START) ? 'R' : '-',
 		(racetrack_encoder_mask & RT_EM_SEEN_RIGHT) > 0 ? 'Y' : 'N',
 		(racetrack_encoder_mask & RT_EM_PREVIOUS_STATE_RIGHT) > 0 ? '1' : '0',
 		(racetrack_encoder_mask & RT_EM_STALLED_RIGHT) > 0 ? 'S' : '-',
+		(racetrack_encoder_mask & RT_EM_END_OF_TRACK_RIGHT) > 0 ? 'M' : '-',
 		racetrack_lanes[LANE_RIGHT].encoder_count
 	);
 	font_render_string_right (&font_var5, 0, LINE_3_Y - FRSR_WORKAROUND, sprintf_buffer);
@@ -226,6 +228,7 @@ void racetrack_test_right (void)
 			disable_interrupts();
 			if (racetrack_lanes[LANE_RIGHT].state == LANE_STOP) {
 				racetrack_lanes[LANE_RIGHT].state = LANE_CALIBRATE;
+				racetrack_encoder_mask &= ~RT_EM_SEEN_RIGHT;
 				racetrack_encoder_mask &= ~RT_EM_STALLED_RIGHT;
 			} else {
 				racetrack_lanes[LANE_RIGHT].state = LANE_STOP;

@@ -7,11 +7,11 @@
 #define RT_EM_SEEN_LEFT            (1 << 0)
 #define RT_EM_PREVIOUS_STATE_LEFT  (1 << 1)
 #define RT_EM_STALLED_LEFT         (1 << 2)
-#define RT_EM_RESERVED_LEFT        (1 << 3)
+#define RT_EM_END_OF_TRACK_LEFT    (1 << 3)
 #define RT_EM_SEEN_RIGHT           (1 << 4)
 #define RT_EM_PREVIOUS_STATE_RIGHT (1 << 5)
 #define RT_EM_STALLED_RIGHT        (1 << 6)
-#define RT_EM_RESERVED_RIGHT       (1 << 7)
+#define RT_EM_END_OF_TRACK_RIGHT   (1 << 7)
 
 //
 // State
