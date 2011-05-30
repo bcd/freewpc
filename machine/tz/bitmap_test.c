@@ -26,11 +26,12 @@
 /* Width of each bitmap */
 #define BITMAP_SIZE 8
 /* How many are shown at once */
-#define MAX_BITMAPS 2
+#define MAX_BITMAPS 1
 /* How many different bitmaps that are defined */
 #define NUM_BITMAPS 4
 
 static bool bitmap_bounce;
+extern bool draw_bouncing_overlay;
 
 /* Planes go in order of low, high */
 const U8 star_bitmap_2plane[] = {
@@ -154,7 +155,7 @@ static void move_bitmap (U8 bitmap_number)
 static void draw_bitmap (U8 bitmap_number)
 {
 	struct bitmap_state *s = &bitmap_states[bitmap_number];
-	const U8 *src;
+	U8 *src;
 	if (s->ticks_till_alive || bitmap_number > MAX_BITMAPS)
 		return;
 	/* Don't draw if it's going to be off the screen */
@@ -163,23 +164,16 @@ static void draw_bitmap (U8 bitmap_number)
 		respawn_bitmap (bitmap_number);
 		return;
 	}
+	
 
-	switch (s->type)
-	{
-		default:
-		case 0:
-			src = dollar_bitmap_2plane;
-			break;
-		case 1:	
-			src = pound_bitmap_2plane;
-			break;
-		case 2:	
-			src = star_bitmap_2plane;
-			break;
-		case 3:	
-			src = trophy_bitmap_2plane;
-			break;
-	}
+	if (s->type == 1)
+		src = &pound_bitmap_2plane;
+	else if (s->type == 2)
+		src = &star_bitmap_2plane;
+	else if (s->type == 3)
+		src = &trophy_bitmap_2plane;
+	else
+		src = &dollar_bitmap_2plane;
 	
 	/* Draw the 2nd plane */
 	bitmap_blit (src + TOTAL_BITMAP_SIZE, s->x, s->y);
@@ -193,11 +187,11 @@ static void draw_bitmap (U8 bitmap_number)
 	
 }
 
-void bitmap_set_type (U8 type)
+static void bitmap_set_type (U8 type)
 {
+//	if (type > NUM_BITMAPS - 1)
+//		type = NUM_BITMAPS - 1;
 	U8 i;
-	if (type > NUM_BITMAPS - 1)
-		type = NUM_BITMAPS - 1;
 	for (i = 0; i < MAX_BITMAPS; i++)
 	{
 		struct bitmap_state *s = &bitmap_states[i];
@@ -208,7 +202,6 @@ void bitmap_set_type (U8 type)
 CALLSET_ENTRY (bitmap_test, start_ball)
 {
 	bitmap_bounce = TRUE;
-	bitmap_set_type (0);
 	U8 i;
 	for (i = 0; i < MAX_BITMAPS; i++)
 	{
@@ -228,6 +221,28 @@ void stardrop_overlay_draw (void)
 
 }
 
+void check_bitmap_overlay (void)
+{
+	draw_bouncing_overlay = FALSE;
+	if (num_players != 1)
+		return;
+
+	if (score_compare (current_score, score_table[SC_100M]) == 1)
+	{
+		draw_bouncing_overlay = TRUE;
+		bitmap_set_type (0);
+	}
+
+	if (score_compare (current_score, score_table[SC_500M]) == 1)
+		bitmap_set_type (3);
+	else if (score_compare (current_score, score_table[SC_400M]) == 1)
+		bitmap_set_type (3);
+	else if (score_compare (current_score, score_table[SC_300M]) == 1)
+		bitmap_set_type (2);
+	else if (score_compare (current_score, score_table[SC_200M]) == 1)
+		bitmap_set_type (1);
+}
+
 void bitmap_test_deff (void)
 {
 	U8 i;
@@ -235,6 +250,7 @@ void bitmap_test_deff (void)
 	for (i = 0; i < MAX_BITMAPS; i++)
 	{
 		respawn_bitmap (i);	
+		bitmap_set_type (random_scaled (NUM_BITMAPS));
 	}
 
 	bitmap_bounce = TRUE;
