@@ -79,9 +79,20 @@ extern enum mech_racetrack_calibration_codes racetrack_last_calibration_result_c
 extern __fastram__ U8 racetrack_encoder_mask;
 extern racetrack_lane_t racetrack_lanes[RACETRACK_LANES];
 
+U8 position_step_index;
+U8 position_steps[] = {
+	1,
+	5,
+	10,
+	25
+};
+#define MAX_POSITION_STEPS 4
+
+
 void racetrack_test_init (void)
 {
 	racetrack_test_command = CALIBRATE;
+	position_step_index = 0;
 }
 
 void racetrack_draw_test_title(void) {
@@ -102,17 +113,15 @@ void racetrack_test_draw (void)
 
 	racetrack_draw_test_title();
 
+	//123456789012345678901234567890
+	// LS:sss/nnn S:sss RS:sss/nnn
 
-	// ~30 c
-	//123456789012345678901
-	//S:n
-
-	// S = State
-	// e.g. "S:1"
-	sprintf ("LS:%s, S:%s, RS:%s",
+	sprintf ("LS:%s/%d S:%s RS:%s/%d",
 		racetrack_lane_state_codes[racetrack_lanes[LANE_LEFT].state],
+		racetrack_lanes[LANE_LEFT].car_position,
 		racetrack_state_codes[racetrack_state],
-		racetrack_lane_state_codes[racetrack_lanes[LANE_RIGHT].state]
+		racetrack_lane_state_codes[racetrack_lanes[LANE_RIGHT].state],
+		racetrack_lanes[LANE_RIGHT].car_position
 	);
 	font_render_string_center (&font_var5, 64, LINE_1_Y + 2, sprintf_buffer);
 
@@ -147,7 +156,15 @@ void racetrack_test_draw (void)
 				font_render_string_center(&font_var5, 64, LINE_2_Y + 2, mech_racetrack_calibration_messages[racetrack_last_calibration_result_code]);
 			}
 		break;
-
+		case RACE:
+			if (racetrack_state == RACETRACK_RACE) {
+				sprintf("LDP:%d STEP: %d RDP:%d",
+					racetrack_lanes[LANE_LEFT].desired_car_position,
+					position_steps[position_step_index],
+					racetrack_lanes[LANE_RIGHT].desired_car_position
+				);
+				font_render_string_center(&font_var5, 64, LINE_2_Y + 2, sprintf_buffer);
+			}
 		default:
 			// shut the compiler up
 		break;
@@ -180,12 +197,7 @@ void racetrack_test_left (void)
 			if (racetrack_state != RACETRACK_RACE) {
 				break;
 			}
-			// TODO move this into a function in racetrack.c?
-			if (racetrack_lanes[LANE_LEFT].desired_car_position < 100) {
-				disable_interrupts();
-				racetrack_lanes[LANE_LEFT].desired_car_position++;
-				enable_interrupts();
-			}
+			racetrack_set_desired_car_position(LANE_LEFT, racetrack_lanes[LANE_LEFT].desired_car_position + position_steps[position_step_index]);
 		break;
 		case CAR_TEST:
 			if (racetrack_state != RACETRACK_CAR_TEST) {
@@ -214,12 +226,7 @@ void racetrack_test_right (void)
 			if (racetrack_state != RACETRACK_RACE) {
 				break;
 			}
-			// TODO move this into a function in racetrack.c
-			if (racetrack_lanes[LANE_RIGHT].desired_car_position < 100) {
-				disable_interrupts();
-				racetrack_lanes[LANE_RIGHT].desired_car_position++;
-				enable_interrupts();
-			}
+			racetrack_set_desired_car_position(LANE_RIGHT, racetrack_lanes[LANE_RIGHT].desired_car_position + position_steps[position_step_index]);
 		break;
 		case CAR_TEST:
 			if (racetrack_state != RACETRACK_CAR_TEST) {
@@ -242,13 +249,31 @@ void racetrack_test_right (void)
 	}
 }
 
+void racetrack_test_start (void)
+{
+	switch (racetrack_test_command) {
+		case RACE:
+			if (racetrack_state != RACETRACK_RACE) {
+				break;
+			}
+
+			position_step_index++;
+			if (position_step_index >= MAX_POSITION_STEPS) {
+				position_step_index = 0;
+			}
+		break;
+
+		default:
+			// shut the compiler up
+		break;
+	}
+}
 
 void racetrack_test_up (void)
 {
 	if (racetrack_test_command < LAST_TEST)
 		racetrack_test_command++;
 }
-
 
 void racetrack_test_down (void)
 {
@@ -308,6 +333,7 @@ struct window_ops corvette_racetrack_test_window = {
 	.escape = racetrack_test_escape,
 	.left = racetrack_test_left,
 	.right = racetrack_test_right,
+	.start = racetrack_test_start,
 	.thread = racetrack_test_thread,
 };
 

@@ -49,6 +49,7 @@ void racetrack_calibrate(void);
 void racetrack_race(void);
 void racetrack_car_return(void);
 void racetrack_car_test(void);
+void racetrack_set_desired_car_position(U8 lane, U8 position_percentage);
 
 // TODO remove when real-machine testing is complete - begin
 __machine__ void zr1_enable_solenoids(void);

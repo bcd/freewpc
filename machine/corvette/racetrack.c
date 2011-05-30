@@ -171,6 +171,18 @@ enum mech_racetrack_calibration_codes racetrack_last_calibration_result_code;
 void racetrack_process_lane(U8 lane_number) {
 
 	//
+	// status update
+	//
+	// FIXME this uses too much CPU time and slows the machine to a crawl.
+	// The solution is to move the percentage calculations out of the RTT code and put it in user-mode code
+	racetrack_lanes[lane_number].car_position = ((racetrack_lanes[lane_number].encoder_count >> 1) * 100) / (RACETRACK_LENGTH_USABLE >> 1);
+	if (racetrack_lanes[lane_number].car_position > 100) {
+		// it's possible for the encoder count to be higher then RACETRACK_LENGTH_USABLE
+		// as it takes a while for the car to slow down at full speed.
+		racetrack_lanes[lane_number].car_position = 100;
+	}
+
+	//
 	// handle transitions
 	//
 
@@ -273,6 +285,7 @@ void racetrack_process_lane(U8 lane_number) {
 			sol_disable(racetrack_lanes[lane_number].solenoid);
 		break;
 
+		case LANE_SEEK:
 		case LANE_CALIBRATE:
 		case LANE_RETURN:
 			racetrack_lanes[lane_number].speed_ticks_remaining--;
@@ -305,6 +318,12 @@ void racetrack_reset_track_state(void) {
 
 	racetrack_lanes[LANE_LEFT].encoder_count = 0;
 	racetrack_lanes[LANE_RIGHT].encoder_count = 0;
+
+	racetrack_lanes[LANE_LEFT].car_position = 0;
+	racetrack_lanes[LANE_RIGHT].car_position = 0;
+
+	racetrack_lanes[LANE_LEFT].desired_car_position = 0;
+	racetrack_lanes[LANE_RIGHT].desired_car_position = 0;
 
 	if (switch_poll_logical (SW_LEFT_RACE_ENCODER)) {
 		racetrack_encoder_mask |= RT_EM_PREVIOUS_STATE_LEFT;
@@ -534,7 +553,7 @@ static inline void racetrack_state_car_return_enter(void) {
 	racetrack_reset_track_state();
 
 	set_lane_speed(LANE_LEFT, 1);
-	set_lane_speed(LANE_RIGHT, 5);
+	set_lane_speed(LANE_RIGHT, 3);
 
 	racetrack_lanes[LANE_LEFT].state = LANE_RETURN;
 	racetrack_lanes[LANE_RIGHT].state = LANE_RETURN;
@@ -559,7 +578,7 @@ static inline void racetrack_state_car_test_enter(void) {
 	racetrack_reset_track_state();
 
 	set_lane_speed(LANE_LEFT, 1);
-	set_lane_speed(LANE_RIGHT, 5);
+	set_lane_speed(LANE_RIGHT, 3);
 
 	racetrack_lanes[LANE_LEFT].state = LANE_STOP;
 	racetrack_lanes[LANE_RIGHT].state = LANE_STOP;
@@ -572,6 +591,35 @@ static inline void racetrack_state_car_test_run(void) {
 	// b) set the desired lane speeds
 
 	sol_enable(SOL_RACE_DIRECTION);
+}
+
+static inline void racetrack_state_race_enter(void) {
+
+	sol_enable(SOL_RACE_DIRECTION);
+
+	racetrack_reset_track_state();
+
+	set_lane_speed(LANE_LEFT, 1);
+	set_lane_speed(LANE_RIGHT, 1);
+
+	racetrack_lanes[LANE_LEFT].state = LANE_SEEK;
+	racetrack_lanes[LANE_RIGHT].state = LANE_SEEK;
+
+}
+
+static inline void racetrack_state_race_run(void) {
+	// TODO in this mode the game-code should increase the desired_car_positions value
+	// the RTT will advance the cars so they reach the desired position.
+	sol_enable(SOL_RACE_DIRECTION);
+
+	/* move this into lane state? */
+	if (racetrack_lanes[LANE_LEFT].desired_car_position > racetrack_lanes[LANE_LEFT].car_position) {
+		racetrack_lanes[LANE_LEFT].state = LANE_SEEK;
+	}
+	if (racetrack_lanes[LANE_RIGHT].desired_car_position > racetrack_lanes[LANE_RIGHT].car_position) {
+		racetrack_lanes[LANE_RIGHT].state = LANE_SEEK;
+	}
+
 }
 
 // This RTT needs to be FAST as it's scheduled frequently
@@ -654,6 +702,14 @@ void corvette_racetrack_rtt (void) {
 			}
 		break;
 
+		case RACETRACK_RACE:
+			if (racetrack_previous_state != racetrack_state) {
+				racetrack_state_race_enter();
+			} else {
+				racetrack_state_race_run();
+			}
+		break;
+
 
 		// TODO implement remaining states
 
@@ -682,9 +738,8 @@ void racetrack_reset(void) {
 	racetrack_lanes[LANE_LEFT].start_switch = SW_LEFT_RACE_START;
 	racetrack_lanes[LANE_RIGHT].start_switch = SW_RIGHT_RACE_START;
 
-	set_lane_speed(LANE_LEFT, 5);
-	set_lane_speed(LANE_RIGHT, 5);
-
+	set_lane_speed(LANE_LEFT, 3);
+	set_lane_speed(LANE_RIGHT, 3);
 
 	// set flags
 	racetrack_calibrated = FALSE;
@@ -703,9 +758,11 @@ void racetrack_reset(void) {
 void racetrack_enter_state(enum mech_racetrack_state new_state) {
 	U8 allow_state_change = FALSE;
 	switch (new_state) {
-		case RACETRACK_RACE:
-			allow_state_change = racetrack_calibrated;
+/* TODO re-enable this after calibration is implemented.
+ 		case RACETRACK_RACE:
+			allow_state_change = racetrack_calibrated && racetrack_state == RACETRACK_READY;
 			break;
+*/
 		default:
 			allow_state_change = TRUE;
 	}
@@ -718,6 +775,12 @@ void racetrack_enter_state(enum mech_racetrack_state new_state) {
 		enable_interrupts();
 	}
 }
+
+/*
+ *
+ * User API
+ *
+ */
 
 void racetrack_float(void) {
 	racetrack_enter_state(RACETRACK_FLOAT);
@@ -738,6 +801,20 @@ void racetrack_car_return(void) {
 void racetrack_car_test(void) {
 	racetrack_enter_state(RACETRACK_CAR_TEST);
 }
+
+void racetrack_set_desired_car_position(U8 lane, U8 position_percentage) {
+
+	disable_interrupts();
+	if (position_percentage > 100) {
+		position_percentage = 100;
+	}
+
+	if (racetrack_state == RACETRACK_RACE && racetrack_lanes[lane].desired_car_position < position_percentage) {
+		racetrack_lanes[lane].desired_car_position = position_percentage;
+	}
+	enable_interrupts();
+}
+
 
 CALLSET_ENTRY (racetrack, init)
 {
