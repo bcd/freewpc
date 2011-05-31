@@ -118,31 +118,33 @@ void racetrack_test_draw (void)
 
 	sprintf ("LS:%s/%d S:%s RS:%s/%d",
 		racetrack_lane_state_codes[racetrack_lanes[LANE_LEFT].state],
-		racetrack_lanes[LANE_LEFT].car_position,
+		racetrack_get_actual_car_position(LANE_LEFT),
 		racetrack_state_codes[racetrack_state],
 		racetrack_lane_state_codes[racetrack_lanes[LANE_RIGHT].state],
-		racetrack_lanes[LANE_RIGHT].car_position
+		racetrack_get_actual_car_position(LANE_RIGHT)
 	);
 	font_render_string_center (&font_var5, 64, LINE_1_Y + 2, sprintf_buffer);
 
-	sprintf ("L:%c%c%c%c%c%c %ld",
+	sprintf ("L:%c%c%c%c%c%c %d %ld",
 		switch_poll_logical (SW_LEFT_RACE_ENCODER) ? 'E' : '-',
 		switch_poll_logical (SW_LEFT_RACE_START) ? 'R' : '-',
 		(racetrack_encoder_mask & RT_EM_SEEN_LEFT) > 0 ? 'Y' : 'N',
 		(racetrack_encoder_mask & RT_EM_PREVIOUS_STATE_LEFT) > 0 ? '1' : '0',
 		(racetrack_encoder_mask & RT_EM_STALLED_LEFT) > 0 ? 'S' : '-',
 		(racetrack_encoder_mask & RT_EM_END_OF_TRACK_LEFT) > 0 ? 'M' : '-',
+		racetrack_lanes[LANE_LEFT].speed,
 		racetrack_lanes[LANE_LEFT].encoder_count
 	);
 	font_render_string_left (&font_var5, 0, LINE_3_Y, sprintf_buffer);
 
-	sprintf ("R:%c%c%c%c%c%c %ld",
+	sprintf ("R:%c%c%c%c%c%c %d %ld",
 		switch_poll_logical (SW_RIGHT_RACE_ENCODER) ? 'E' : '-',
 		switch_poll_logical (SW_RIGHT_RACE_START) ? 'R' : '-',
 		(racetrack_encoder_mask & RT_EM_SEEN_RIGHT) > 0 ? 'Y' : 'N',
 		(racetrack_encoder_mask & RT_EM_PREVIOUS_STATE_RIGHT) > 0 ? '1' : '0',
 		(racetrack_encoder_mask & RT_EM_STALLED_RIGHT) > 0 ? 'S' : '-',
 		(racetrack_encoder_mask & RT_EM_END_OF_TRACK_RIGHT) > 0 ? 'M' : '-',
+		racetrack_lanes[LANE_RIGHT].speed,
 		racetrack_lanes[LANE_RIGHT].encoder_count
 	);
 	font_render_string_right (&font_var5, 0, LINE_3_Y - FRSR_WORKAROUND, sprintf_buffer);
@@ -158,10 +160,12 @@ void racetrack_test_draw (void)
 		break;
 		case RACE:
 			if (racetrack_state == RACETRACK_RACE) {
-				sprintf("LDP:%d STEP: %d RDP:%d",
-					racetrack_lanes[LANE_LEFT].desired_car_position,
+				sprintf("%d/%ld STEP: %d %d/%ld",
+					racetrack_lanes[LANE_LEFT].desired_position,
+					racetrack_lanes[LANE_LEFT].desired_encoder_count,
 					position_steps[position_step_index],
-					racetrack_lanes[LANE_RIGHT].desired_car_position
+					racetrack_lanes[LANE_RIGHT].desired_position,
+					racetrack_lanes[LANE_RIGHT].desired_encoder_count
 				);
 				font_render_string_center(&font_var5, 64, LINE_2_Y + 2, sprintf_buffer);
 			}
@@ -187,6 +191,17 @@ void racetrack_test_thread (void)
 		task_sleep (TIME_33MS);
 
 		racetrack_test_draw ();
+
+		if (racetrack_state == RACETRACK_RACE || racetrack_state == CAR_TEST) {
+			if (racetrack_get_actual_car_position(LANE_LEFT) == 100 && racetrack_get_actual_car_position(LANE_RIGHT) == 100) {
+				racetrack_car_return();
+			}
+		}
+
+		if (racetrack_test_command == RACE && racetrack_state == RACETRACK_READY) {
+			// wait for user to press buttons to move cars
+			racetrack_race();
+		}
 	}
 }
 
@@ -197,7 +212,7 @@ void racetrack_test_left (void)
 			if (racetrack_state != RACETRACK_RACE) {
 				break;
 			}
-			racetrack_set_desired_car_position(LANE_LEFT, racetrack_lanes[LANE_LEFT].desired_car_position + position_steps[position_step_index]);
+			racetrack_set_desired_car_position(LANE_LEFT, racetrack_lanes[LANE_LEFT].desired_position + position_steps[position_step_index]);
 		break;
 		case CAR_TEST:
 			if (racetrack_state != RACETRACK_CAR_TEST) {
@@ -226,7 +241,7 @@ void racetrack_test_right (void)
 			if (racetrack_state != RACETRACK_RACE) {
 				break;
 			}
-			racetrack_set_desired_car_position(LANE_RIGHT, racetrack_lanes[LANE_RIGHT].desired_car_position + position_steps[position_step_index]);
+			racetrack_set_desired_car_position(LANE_RIGHT, racetrack_lanes[LANE_RIGHT].desired_position + position_steps[position_step_index]);
 		break;
 		case CAR_TEST:
 			if (racetrack_state != RACETRACK_CAR_TEST) {

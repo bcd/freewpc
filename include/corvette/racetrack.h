@@ -53,17 +53,17 @@ enum mech_racetrack_lane_state {
 };
 
 typedef struct {
-	// position are specified as a percentage, 0% being start 100% being the end.
-	// percentages are used because they are easily used when drawing progress
-	// meters, raising events, etc.
-	U8 desired_car_position; // TODO implement
-	U8 car_position;         // TODO implement
 
 	// track lengths are specified in encoder ticks, only valid after calibration.
 	U16 track_length;
 
 	// counts the ON state changes of the encoder
 	U16 encoder_count;
+
+	// the cars will move forward so that the encoder_count will match this value.
+	U16 desired_encoder_count;
+	// the value used to calculate desired_encoder_count, stored for user-api calls only.
+	U8 desired_position;
 
 	// speed of the car, 1 = fastest (always on)
 	U8 speed;
