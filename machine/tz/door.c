@@ -300,18 +300,18 @@ void door_award_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
-	dmd_copy_low_to_high ();
-	dmd_flip_low_high ();
-	font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
 	timer_restart_free (GID_DOOR_DEFF, TIME_2S);
 	while (task_find_gid (GID_DOOR_DEFF))
 	{
-		dmd_show_other ();
+		dmd_alloc_pair_clean ();
+		font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
+		font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
+		dmd_copy_low_to_high ();
+		callset_invoke (score_overlay);
+		dmd_show2 ();
+		
 		task_sleep (TIME_100MS);
 	}
-//	dmd_show2 ();
 //	task_sleep_sec (2);
 	deff_exit ();
 }
