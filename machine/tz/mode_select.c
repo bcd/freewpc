@@ -51,6 +51,13 @@ void select_mode_deff (void)
 	deff_exit ();
 }
 
+static void flipper_enable_task (void)
+{
+	task_sleep (TIME_200MS);
+	flipper_enable ();
+	task_exit ();
+}
+
 /* The ball should be held at this point */
 CALLSET_ENTRY (mode_select, select_mode)
 {
@@ -64,8 +71,8 @@ CALLSET_ENTRY (mode_select, select_mode)
 	flipper_disable ();
 	deff_start_sync (DEFF_SELECT_MODE);
 	leff_stop (LEFF_SELECT_MODE);
-	flipper_enable ();
-	/* stop GI flicking back on again */
+	leff_start (LEFF_FLASHER_HAPPY);
+	task_create_anon (flipper_enable_task);
 }
 
 CALLSET_ENTRY (mode_select, sw_left_button)

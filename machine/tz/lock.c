@@ -25,18 +25,10 @@
 #include <freewpc.h>
 #include <eb.h>
 
-CALLSET_ENTRY (lock, dev_lock_enter)
-{
-	collect_extra_ball ();
-	score (SC_50K);
-	sound_send (SND_ROBOT_FLICKS_GUN);
-	leff_start (LEFF_LOCK);
-}
-
 
 CALLSET_ENTRY (lock, dev_lock_kick_attempt)
 {
-	while (timer_find_gid (GID_BALL_LAUNCH))
+	while (timer_find_gid (GID_AUTOFIRE_HANDLER))
 	{
 		task_sleep (TIME_100MS);
 	}
@@ -45,9 +37,4 @@ CALLSET_ENTRY (lock, dev_lock_kick_attempt)
 	/* Used to disable camera magnet grab */
 	timer_restart_free (GID_LOCK_KICKED, TIME_3S);
 	magnet_disable_catch (MAG_RIGHT);
-}
-
-CALLSET_ENTRY (lock, dev_lock_kick_success)
-{
-	event_can_follow (lock_kick, right_magnet, TIME_3S);
 }

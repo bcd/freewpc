@@ -255,6 +255,8 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	{
 		/* TODO, this may be buggy during sssmb */
 		/* skill shot has been missed or ball landed in plunger lane*/
+		if (timer_find_gid (GID_SDSS_READY)) 
+			deff_start (DEFF_SDSS_READY);
 		callset_invoke (skill_missed);
 	}
 	else if (timed_mode_running_p (&sslot_mode))
@@ -280,6 +282,7 @@ CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 {
 	if (in_live_game)
 	{
+		task_sleep (TIME_200MS);
 		while (kickout_locks > 0)
 			task_sleep (TIME_500MS);
 		/* start Slot kick -> STDM timer for combo.c */

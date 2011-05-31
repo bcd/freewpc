@@ -157,7 +157,6 @@ void sw_gumball_right_loop_entered (void)
 	}
 	/* Don't open if autofired into play or dropped from the lock*/
 	else if (event_did_follow (autolaunch, right_loop)
-		|| event_did_follow (dev_lock_kick_attempt, right_loop)
 		|| timer_find_gid (GID_LOCK_KICKED))
 	{
 	}

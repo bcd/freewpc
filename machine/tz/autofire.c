@@ -102,7 +102,7 @@ void autofire_monitor (void)
 	
 	/* Wait until allowed to kickout */
 	task_sleep (TIME_200MS);
-	while (kickout_locks)
+	while (kickout_locks || task_find_gid (GID_LOCK_KICKED))
 		task_sleep (TIME_200MS);
 	
 	/* Open diverter again */
