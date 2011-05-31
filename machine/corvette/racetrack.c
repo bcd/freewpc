@@ -76,18 +76,24 @@
  * 86: Left Tree Green
  *
  *
- * The racetrack needs to be calibrated.
- * The calibration routine needs to reset each car to the start of the racetrack
+ * The racetrack needs to be tested (aka calibrated).
+ * The calibration routine needs to reset each car to the start of the racetrack.
  * Then it needs to drive each car in turn to the end of the racetrack
  * Then finally it needs to reset them again to the start of the racetrack.
+ * The above sequence will test at least the following:
+ * switch, motor and opto power; opto switches; failing motors; broken drive belts; stalling cars; etc.
  *
- * From the start to the end of the track = 670 encoder cycles = 100%. 670 / 100 = 6.7 encoder cycles per percent.
+ * From the start to the end of the usable track = 670 encoder cycles = 100%. 670 / 100 = 6.7 encoder cycles per percent.
  * Thus, to move a car from the start to reach 50% we must drive it 6.7 * 50 = 335 cycles
  *
  * Here's what I found during experimentation:
  *
  * The schedule needs to be set to run the RTT frequently otherwise it's not possible to
  * count the race encoder switch transitions when the cars are moving quickly.
+ *
+ * We want to count encoder ticks going in reverse too so we can slow down near the end so the cars don't
+ * bang into a dead stop which causes the belt to slip until the code notices the encoder or start-of-track optos
+ *
  *
  * The Williams ROM uses a fixed value of 670 switch transitions for the length of the track, as
  * displayed in it's test menu.  It doesn't care if the car reaches the end of the track or not.
@@ -134,6 +140,7 @@ U8 racetrack_stall_ignore_ticks_remaining;
 #define RACETRACK_LENGTH_MAX 727
 #define RACETRACK_LENGTH_LIMIT 715 // used to prevent belt slipping when driving backwards in case of faulty start-of-track opto
 #define RACETRACK_LENGTH_USABLE 670 // used to prevent belt slipping when driving forwards.
+#define RACETRACK_LENGTH_SLOWDOWN_IN_REVERSE 650
 
 
 #define RACETRACK_CALIBRATE_TICKS (1024 / RACETRACK_SCHEDULE)
@@ -301,6 +308,13 @@ void racetrack_process_lane(U8 lane_number) {
 			// follow though ...
 		case LANE_CALIBRATE:
 		case LANE_RETURN:
+			if (racetrack_lanes[lane_number].state == LANE_RETURN) { // yes, because we followed though
+				// slow down when we get near the start, to prevent belt slip
+				if (racetrack_lanes[lane_number].encoder_count > RACETRACK_LENGTH_SLOWDOWN_IN_REVERSE) {
+					racetrack_lanes[lane_number].speed = RACETRACK_SPEED_SLOW;
+				}
+			}
+
 			// turn the solenoid on once every 'speed' ticks
 			racetrack_lanes[lane_number].speed_ticks_remaining--;
 			if (racetrack_lanes[lane_number].speed_ticks_remaining == 0) {
