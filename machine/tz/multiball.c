@@ -690,9 +690,9 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		}
 
 		sound_send (SND_FAST_LOCK_STARTED);
-		deff_start_sync (DEFF_MB_LIT);
 		bounded_decrement (mball_locks_lit, 0);
 		bounded_increment (mball_locks_made, 2);
+		deff_start_sync (DEFF_MB_LIT);
 		/* Lock 2 balls, drop a ball if it's full */
 		if (device_recount (device_entry (DEVNO_LOCK)) <= 2)
 		//if (!device_full_p (device_entry (DEVNO_LOCK)))
