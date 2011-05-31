@@ -22,79 +22,151 @@
  * - Enable/Disable solenoids.
  * - Calibrate the left right and center positions.
  * - Shake engine.
- *
- * @TODO integration with test report
- * @TODO initialise ZR1 on startup
  */
 
 #include <freewpc.h>
 #include <window.h>
 #include <test.h>
+#include <corvette/zr1.h>
+
+// FIXME - font_render_string_right vertically offsets the text by 1 pixel (downwards)
+// When this is removed removed all references to FR_WORKAROUND
+#define FRSR_WORKAROUND 1
 
 enum {
 	FIRST_TEST = 0,
 	CALIBRATE = FIRST_TEST,
 	SHAKE,
-	IDLE,
-	STOP,
-	ENABLE_SOLENOIDS,  // XXX
-	DISABLE_SOLENOIDS, // XXX
-	LAST_TEST = DISABLE_SOLENOIDS
+	CENTER,
+	FLOAT,
+	BALL_SEARCH,
+	LAST_TEST = BALL_SEARCH
 } zr1_test_command;
 
-char *short_names[] = {
+char *zr1_test_short_names[] = {
 	"CALIBRATE",
 	"SHAKE",
-	"IDLE",
-	"STOP",
-	"ENABLE SOL.", // XXX
-	"DISABLE SOL." // XXX
+	"CENTER",
+	"FLOAT",
+	"SEARCH"
 };
 
-extern U8 calibration_running;
+// error messages, see enum mech_zr1_calibration_codes;
+char *mech_zr1_calibration_messages[] = {
+	"NOT CALIBRATED",
+	"ZR1 ERROR 1 CHECK F111",
+	"CHECK OPTO ZR1 FULL LEFT",
+	"CHECK OPTO ZR1 FULL RIGHT",
+	"ZR1 ERROR 2 CHECK ENGINE",
+	"CALIBRATED O.K."
+};
+
+extern __fastram__ enum mech_zr1_state zr1_state;
+extern U8 zr1_calibrated;
+extern U8 zr1_calibration_attempted;
 extern U8 zr1_pos_center;
 extern U8 zr1_pos_full_left_opto_off;
 extern U8 zr1_pos_full_right_opto_off;
-extern U8 zr1_engine_position;
+extern __fastram__ U8 zr1_last_position;
+extern __fastram__ U8 zr1_shake_speed;
+extern __fastram__ U8 zr1_shake_range;
+extern enum mech_zr1_calibration_codes zr1_last_calibration_result_code;
+
+
+U8 new_shake_range;
+U8 new_shake_speed;
 
 void zr1_test_init (void)
 {
 	zr1_test_command = CALIBRATE;
 }
 
-void draw_test_title(void) {
+void zr1_draw_test_title(void) {
 	font_render_string_center (&font_mono5, 64, 2, "ZR1 ENGINE TEST");
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
 }
+
+#define LINE_1_Y 7
+#define LINE_2_Y 13
+#define LINE_3_Y 19
 
 void zr1_test_draw (void)
 {
 	dmd_alloc_low_clean ();
 
-	draw_test_title();
+	zr1_draw_test_title();
 
-	sprintf ("POS %d", zr1_engine_position);
-	font_render_string_left (&font_mono5, 0, 6, sprintf_buffer);
+	// 21 characters wide max when using 5 point font.
 
-	sprintf ("POWER %s",
-		global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED) ? "ON" : "OFF");
-	font_render_string_right (&font_mono5, 0, 6, sprintf_buffer);
+	// P = Current Position, S = State, PWR = Power, C = Center Position
+	// e.g. "P:127 S:1 PWR:1 C:127"
+	sprintf ("P:%d S:%d PWR:%d C:%d",
+		zr1_last_position,
+		zr1_state,
+		global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED) ? 1 : 0,
+		zr1_pos_center
+	);
+	font_render_string_center (&font_var5, 64, LINE_1_Y + 2, sprintf_buffer);
 
-	sprintf ("LEFT %s %d",
-		(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? "X" : "-"), zr1_pos_full_left_opto_off);
-	font_render_string_left (&font_mono5, 0, 12, sprintf_buffer);
+	switch (zr1_test_command) {
+		case CALIBRATE:
+			if (zr1_state == ZR1_CALIBRATE) {
+				font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "CALIBRATING");
+				sprintf ("L:%c %s%d",
+					(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? 'X' : '-'),
+					zr1_pos_full_left_opto_off > 100 ? "" : (zr1_pos_full_left_opto_off < 10 ?  "00" : "0"), // FIXME %03d doesn't pad with leading zeros..
+					zr1_pos_full_left_opto_off
+				);
+				font_render_string_left (&font_var5, 0, LINE_3_Y, sprintf_buffer);
 
-	sprintf ("%d %s RIGHT",
-		zr1_pos_full_right_opto_off, (switch_poll_logical (SW_ZR_1_FULL_RIGHT) ? "X" : "-"));
-	font_render_string_right (&font_mono5, 0, 12, sprintf_buffer);
+				sprintf ("R:%c %s%d",
+					(switch_poll_logical (SW_ZR_1_FULL_RIGHT) ? 'X' : '-'),
+					zr1_pos_full_right_opto_off > 100 ? "" : (zr1_pos_full_right_opto_off < 10 ?  "00" : "0"), // FIXME %03d doesn't pad with leading zeros..
+					zr1_pos_full_right_opto_off
+				);
+				font_render_string_right (&font_var5, 0, LINE_3_Y - FRSR_WORKAROUND, sprintf_buffer);
+			} else {
+				dbprintf("calibration result: %d\n", zr1_last_calibration_result_code);
+				font_render_string_center(&font_var5, 64, LINE_3_Y + 2, mech_zr1_calibration_messages[zr1_last_calibration_result_code]);
+			}
+		break;
 
-	sprintf ("CENTER %d", zr1_pos_center);
-	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+		case SHAKE:
+			sprintf ("SPD: %s%d, RNG: %d",
+				zr1_shake_speed < 10 ?  "0" : "", // FIXME %02d doesn't pad with leading zeros..
+				zr1_shake_speed,
+				zr1_shake_range
+			);
+			font_render_string_left (&font_var5, 0, LINE_2_Y, sprintf_buffer);
+
+			sprintf ("L:%c R:%c",
+				(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? 'X' : '-'),
+				(switch_poll_logical (SW_ZR_1_FULL_RIGHT) ? 'X' : '-')
+			);
+			font_render_string_right (&font_var5, 0, LINE_2_Y - FRSR_WORKAROUND, sprintf_buffer);
+
+			if (zr1_state == ZR1_SHAKE) {
+				font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "SHAKING");
+			} else {
+				if (!zr1_calibrated) {
+					font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "NOT CALIBRATED");
+				} else {
+					font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "NOT SHAKING");
+				}
+			}
+
+		break;
+		default:
+			// shut the compiler up
+		break;
+	}
 
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
 
-	sprintf(short_names[zr1_test_command]);
+	sprintf(zr1_test_short_names[zr1_test_command]);
 	font_render_string_left (&font_mono5, 0, 27, sprintf_buffer);
+
+
 
 	dmd_show_low ();
 }
@@ -108,6 +180,38 @@ void zr1_test_thread (void)
 		task_sleep (TIME_100MS);
 
 		zr1_test_draw ();
+	}
+}
+
+void zr1_test_left (void)
+{
+	switch (zr1_test_command) {
+		case SHAKE:
+			new_shake_range = zr1_shake_range + 1;
+			if (new_shake_range > ZR1_SHAKE_RANGE_MAX) {
+				new_shake_range = ZR1_SHAKE_RANGE_MIN;
+			}
+			zr1_set_shake_range(new_shake_range);
+		break;
+		default:
+			// shut the compiler up
+		break;
+	}
+}
+
+void zr1_test_right (void)
+{
+	switch (zr1_test_command) {
+		case SHAKE:
+			new_shake_speed = zr1_shake_speed - 1;
+			if (new_shake_speed < ZR1_SHAKE_SPEED_MIN) {
+				new_shake_speed = ZR1_SHAKE_SPEED_MAX;
+			}
+			zr1_set_shake_speed(new_shake_speed);
+		break;
+		default:
+			// shut the compiler up
+		break;
 	}
 }
 
@@ -125,12 +229,11 @@ void zr1_test_down (void)
 		zr1_test_command--;
 }
 
-/**
- * Ensures user can exit test menu when calibration still running
- */
 void zr1_test_escape (void) {
-	if (calibration_running) {
-		return;
+
+	// allow calibrate to continue, but stop everything else
+	if (zr1_state != ZR1_CALIBRATE) {
+		zr1_float();
 	}
 
 	window_pop();
@@ -139,44 +242,45 @@ void zr1_test_escape (void) {
 void zr1_test_enter (void)
 {
 	sound_send (SND_TEST_ENTER);
-	switch (zr1_test_command)
-	{
-		case CALIBRATE:
-			zr1_calibrate();
-		break;
+  	switch (zr1_test_command)
+  	{
+  		case CALIBRATE:
+ 			dbprintf ("zr1_test_enter: starting 'calibrate'\n");
+ 			zr1_calibrate();
+  		break;
 
-		case SHAKE:
-			if (zr1_is_shaking()) {
-				zr1_stop();
-				break;
-			}
-			zr1_shake();
-		break;
+  		case SHAKE:
+  			if (zr1_state == ZR1_SHAKE) {
+ 				dbprintf ("zr1_test_enter: engine already shaking, starting 'float' instead\n");
+  				zr1_float();
+  				break;
+  			}
+ 			dbprintf ("zr1_test_enter: starting 'shake'\n");
+  			zr1_shake();
+  		break;
 
-		case IDLE:
-			if (zr1_is_idle()) {
-				zr1_stop();
-				break;
-			}
-			zr1_idle();
-		break;
+  		case CENTER:
+ 			dbprintf ("zr1_test_enter: starting 'center'\n");
+  			zr1_center();
+  		break;
 
-		case STOP:
-			zr1_stop();
-		break;
+  		case FLOAT:
+ 			dbprintf ("zr1_test_enter: starting 'float'\n");
+  			zr1_float();
+  		break;
 
-		// TODO remove when real-machine testing is complete - begin
+  		case BALL_SEARCH:
+  			if (zr1_state == ZR1_BALL_SEARCH) {
+ 				dbprintf ("zr1_test_enter: engine already shaking, starting 'float' instead\n");
+  				zr1_float();
+  				break;
+  			}
+ 			dbprintf ("zr1_test_enter: starting 'float'\n");
+  			zr1_start_ball_search();
+  		break;
 
-		case ENABLE_SOLENOIDS:
-			zr1_enable_solenoids();
-		break;
+  	}
 
-		case DISABLE_SOLENOIDS:
-			zr1_disable_solenoids();
-		break;
-
-		// TODO remove when tseting complete - end
-	}
 }
 
 
@@ -188,6 +292,8 @@ struct window_ops corvette_zr1_test_window = {
 	.down = zr1_test_down,
 	.enter = zr1_test_enter,
 	.escape = zr1_test_escape,
+	.left = zr1_test_left,
+	.right = zr1_test_right,
 	.thread = zr1_test_thread,
 };
 
@@ -197,4 +303,3 @@ struct menu corvette_zr1_test_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &corvette_zr1_test_window, NULL } },
 };
-

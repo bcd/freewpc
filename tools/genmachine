@@ -949,12 +949,17 @@ sub machine_write_container_decls {
 		my $sw_count = $def->{'size'};
 		my $sws = $def->{'switches'};
 		my $init_max_count = $def->{'init_max_count'};
+		my $settle_delay = $def->{'settle_delay'};
 		print "[" . $def->{'c_ident'} . "] = {\n";
 		print "   .ops = \&${name}_ops,\n";
 		print "   .name = " . $def->{'c_string'} . ",\n";
 		print "   .sol = $coilname,\n";
 		print "   .sw_count = $sw_count,\n";
 		print "   .init_max_count = $init_max_count,\n";
+		if (!defined $settle_delay) {
+			$settle_delay = "TIME_700MS";
+		}
+		print "   .settle_delay = $settle_delay,\n";
 		print "   .sw = { ";
 		for $swname (@$sws) {
 			my $sw = ($m->{'switches'})->{$swname};
@@ -1085,14 +1090,19 @@ sub machine_write_makefile {
 		my $c_file = "build/$ident.c";
 		my $h_file = "build/$ident.h";
 		my $o_file = "\$(BLDDIR)/$ident.o";
+		my $test_c_file = "build/${ident}_test.c";
+		my $test_o_file = "\$(BLDDIR)/${ident}_test.o";
 		my $sched_file = "\$(BLDDIR)/$ident.sched";
 		my $class_file = "build/$ident.h";
 		my $template_file = "drivers/$driver.ct";
 
+		my $include_test = $inst->{'includetest'} eq "yes";
+		
 		print "\n# Template ID : $id\n";
 		print "# Identifier: $ident\n";
 		print "# Driver: $driver\n";
 		print "# Arguments: $args\n";
+		print "# Include test: " . ($include_test eq 1 ? "Yes" : "No") . "\n";
 		print <<END;
 
 SCHED_HEADERS += $h_file
@@ -1102,7 +1112,15 @@ $o_file : $c_file $h_file build/mach-Makefile
 
 $c_file $h_file : $template_file \$(CTEMP)
 	\$(CTEMP) -s $ident -i $id $args $template_file
+
 END
+		if ($include_test) {  
+			print <<END;
+TEST_OBJS += $test_o_file
+
+$test_o_file : $test_c_file build/mach-Makefile
+END
+		}
 	}
 	print "\nKERNEL_HW_OBJS += \$(TEMPLATE_OBJS)\n";
 	print "MACHINE_SCHED_FLAGS += \$(BLDDIR)/*.sched\n";

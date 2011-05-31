@@ -112,7 +112,6 @@ void frame_decode (U8 *data, U8 type)
 	}
 }
 
-
 /**
  * Draw one plane of a DMD frame.
  * ID identifies the source of the frame data.

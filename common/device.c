@@ -238,7 +238,7 @@ wait_and_recount:
 	 * this device happens while we sleep here, this task will
 	 * be killed and restarted.
 	 */
-	task_sleep (TIME_700MS);
+	task_sleep (dev->props->settle_delay);
 
 	/* The device is probably stable now.  Poll all of the
 	 * switches and recount */

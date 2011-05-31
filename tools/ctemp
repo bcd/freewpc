@@ -191,7 +191,7 @@ GetOptions ("D=s" => sub {
 								define ($var, $value);
 							},
 				"i=s" => sub { define ("instance", $_[1]); },
-				"s=s" => sub { define ("self", $_[1]); },
+				"s=s" => sub { define ("self", $_[1]); define ("SELF", uc($_[1])); },
 				"o=s" => \$outdir
 				) or die "Invalid options";
 

@@ -33,13 +33,13 @@ void kickback_relit_deff (void)
 void kickback_enable (void)
 {
 	lamplist_apply (LAMPLIST_KICKBACKS, lamp_on);
-	spsol_enables |= (1 << 5);
+	kickback_driver_enable();
 }
 
 void kickback_disable (void)
 {
 	lamplist_apply (LAMPLIST_KICKBACKS, lamp_off);
-	spsol_enables &= ~(1 << 5);
+	kickback_driver_disable();
 }
 
 static inline bool kickback_enabled (void)

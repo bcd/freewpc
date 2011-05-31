@@ -33,7 +33,7 @@ void kickback_relit_deff (void)
 void kickback_enable (void)
 {
 	lamp_on(LM_KICKBACK_ARROW);
-	spsol_enables |= (1 << 5);
+	kickback_driver_enable();
 }
 
 void kickback_disable (void)
@@ -41,7 +41,7 @@ void kickback_disable (void)
 	lamp_off(LM_KICKBACK_ARROW);
 	lamp_flash_on(LM_LITE_KICKBACK);
 	lamp_flash_on(LM_RIGHT_STANDUP_ARROW);
-	spsol_enables &= ~(1 << 5);
+	kickback_driver_disable();
 }
 
 static inline bool kickback_enabled (void)
