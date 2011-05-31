@@ -36,7 +36,8 @@
  *
  * There are few lamps:
  * 8 lights arranged in a tree, 4 amber, 2 green, 2 red.
- * 2 lights under the start of the cars, appear to be controlled by the race enable solenoids. (TODO Verify)
+ * 2 lights under the start of the cars in vpinmame are activiated by the race enable solenoids and
+ *   do not exist on the real machine.
  *
  * The lights in the tree are not all independent.
  * The two top amber lights can only be enabled at the same time.
@@ -80,6 +81,8 @@
  * Then it needs to drive each car in turn to the end of the racetrack
  * Then finally it needs to reset them again to the start of the racetrack.
  *
+ * From the start to the end of the track = 670 encoder cycles = 100%. 670 / 100 = 6.7 encoder cycles per percent.
+ * Thus, to move a car from the start to reach 50% we must drive it 6.7 * 50 = 335 cycles
  *
  * Here's what I found during experimentation:
  *
@@ -128,14 +131,13 @@ U8 racetrack_stall_ignore_ticks_remaining;
 // Calibration
 //
 
-// TODO car position percentage handling
-
-// From the start to the end of the track = 670 encoder cycles = 100%. 670 / 100 = 6.7 encoder cycles per percent.
-// Thus, to move a car from the start to reach 50% we must drive it 6.7 * 50 = 335 cycles
 #define RACETRACK_LENGTH_MAX 727
 #define RACETRACK_LENGTH_LIMIT 715 // used to prevent belt slipping when driving backwards in case of faulty start-of-track opto
 #define RACETRACK_LENGTH_USABLE 670 // used to prevent belt slipping when driving forwards.
 
+
+#define RACETRACK_CALIBRATE_TICKS (1024 / RACETRACK_SCHEDULE)
+#define RACETRACK_CALIBRATE_TIMEOUT_COUNTER 15
 
 U8 racetrack_calibrate_ticks; // ticks remaining is initialised to this value, which changes depending on requirements
 U8 racetrack_calibrate_ticks_remaining;
@@ -145,27 +147,18 @@ U8 racetrack_calibrated;
 U8 racetrack_calibration_attempted;
 
 /* Mode that drives the racetrack state machine */
-/*__fastram__*/ enum mech_racetrack_state racetrack_state;
-/*__fastram__*/ enum mech_racetrack_state racetrack_previous_state;
+enum mech_racetrack_state racetrack_state;
+enum mech_racetrack_state racetrack_previous_state;
 
-enum mech_racetrack_calibrate_state {
-	RT_CALIBRATE_CAR_RETURN = 0,
-	RT_CALIBRATE_LEFT_CAR_FORWARDS,
-	RT_CALIBRATE_RIGHT_CAR_FORWARDS
-// TODO implement remaining states
-//	RT_CALIBRATE_LEFT_CAR_BACKWARDS,
-//	RT_CALIBRATE_RIGHT_CAR_BACKWARDS
-};
-
-/*__fastram__*/ enum mech_racetrack_calibrate_state racetrack_calibrate_state;
-/*__fastram__*/ enum mech_racetrack_calibrate_state racetrack_calibrate_next_state;
+enum mech_racetrack_calibrate_state racetrack_calibrate_state;
+enum mech_racetrack_calibrate_state racetrack_calibrate_previous_state;
 
 // FIXME these are somewhat similar to mech_racetrack_calibration_messages but with line feeds instead of spaces
-// TODO add more calibration result messages
 char *mech_racetrack_diag_messages[] = {
 	"NOT CALIBRATED\n",
 	"CHECK RACETRACK\n",
 	"CHECK LEFT TRACK\n",
+	"CHECK RIGHT TRACK\n",
 	"CALIBRATED O.K.\n"
 };
 
@@ -372,191 +365,219 @@ void racetrack_update_track_state(void) {
 
 
 
-//void racetrack_state_calibrate_exit(void) {
-//	racetrack_calibration_attempted = TRUE;
-//
-//	if (racetrack_calibrated) {
-//		racetrack_state = RACETRACK_CAR_RETURN; // if calibration was ok, cars will already be in the right place.
-//	} else {
-//		racetrack_state = RACETRACK_INITIALIZE;
-//	}
-//}
-//
-//void racetrack_calibration_failed(enum mech_racetrack_calibration_codes code) {
-//	// store the code for use outside the RTT as diag_post can't be called from an RTT.
-//	racetrack_last_calibration_result_code = code;
-//	racetrack_state_calibrate_exit();
-//}
-//
-//void racetrack_calibration_complete(void) {
-//	racetrack_calibrated = TRUE;
-//	racetrack_last_calibration_result_code = CC_SUCCESS;
-//	global_flag_on(GLOBAL_FLAG_RACETRACK_WORKING);
-//	racetrack_state_calibrate_exit();
-//}
-//
-//void racetrack_state_calibrate_enter(void) {
-//
-//	// reset flags
-//	racetrack_calibrated = FALSE;
-//	racetrack_calibration_attempted = FALSE;
-//	racetrack_last_calibration_result_code = CC_NOT_CALIBRATED;
-//	global_flag_off(GLOBAL_FLAG_RACETRACK_WORKING);
-//
-//	// reset the track lengths
-//	racetrack_lanes[LANE_LEFT].track_length = 0;
-//	racetrack_lanes[LANE_RIGHT].track_length = 0;
-//
-//	// initialise the first calibration state
-//
-//	racetrack_calibrate_counter = 0;
-//	racetrack_calibrate_state = RT_CALIBRATE_CAR_RETURN;
-//	racetrack_calibrate_ticks = 1024 / RACETRACK_SCHEDULE;
-//	racetrack_calibrate_ticks_remaining = racetrack_calibrate_ticks;
-//
-//	racetrack_lanes[LANE_LEFT] = RETURN;
-//	racetrack_lanes[LANE_RIGHT] = RETURN;
-//
-//	reset_race_encoder_watchdog();
-//}
-//
-//void racetrack_state_calibrate_run(void) {
-//
-//	racetrack_calibrate_ticks_remaining--;
-//	if (racetrack_calibrate_ticks_remaining != 0) {
-//		return;
-//	}
-//	// reset the timer
-//	racetrack_calibrate_ticks_remaining = RACETRACK_CALIBRATE_TICKS;
-//
-//	// we've waited long enough now until we should check things again.
-//
-//	racetrack_calibrate_counter++;
-//
-//	racetrack_calibrate_next_state = racetrack_calibrate_state;
-//
-//	switch(racetrack_calibrate_state) {
-//		case RT_CALIBRATE_CAR_RETURN:
-//
-//			/**
-//			 * The first time this state is hit the cars can be anywhere on the track
-//			 *
-//			 * The goal is to return both cars to the start position
-//			 */
-//
-//			if (switch_poll_logical (SW_LEFT_RACE_START) && switch_poll_logical (SW_RIGHT_RACE_START)) {
-//				racetrack_calibrate_next_state = RT_CALIBRATE_LEFT_CAR_FORWARDS;
-//				break;
-//			}
-//
-//			sol_disable(SOL_RACE_DIRECTION); // backwards
-//
-//			if (switch_poll_logical (SW_LEFT_RACE_START)) {
-//				sol_disable(SOL_LEFT_RACE_ENABLE);
-//			} else {
-//				sol_enable(SOL_LEFT_RACE_ENABLE);
-//			}
-//
-//			if (switch_poll_logical (SW_RIGHT_RACE_START)) {
-//				sol_disable(SOL_RIGHT_RACE_ENABLE);
-//			} else {
-//				sol_enable(SOL_RIGHT_RACE_ENABLE);
-//			}
-//
-//			// both cars should be moving backwards
-//
-//			if (racetrack_calibrate_counter < 2) {
-//				// wait ~1 seconds for the cars to move before checking the encoders.
-//				break;
-//			}
-//
-//			// the time elapsed = ((RT_CALIBRATE_WATCHDOG_COUNTER_IGNORE * RACETRACK_WATCHDOG_TICKS) + RACETRACK_CALIBRATE_TICKS) * SCHEDULED RTT TIME
-//			// eg. ((10 * 6) + 16) * 32 = 2432ms (~2.5 seconds, should be plenty long enough for the cars to have moved.
-//
-//			if (racetrack_seen_encoder_mask == 0) {
-//				// the cars should have been moving backwards, but the encoders were never seen.
-//
-//				// Not sure if it's possible at this stage to determine what's at fault.
-//				// could be opto power, racetrack encoder or start optos, switch power, switch matrix, engine power, left or right car mechanisms (motor, gears, pulleys)
-//				// Ideally the racetrack test-menu would be able to help isolate the problem.
-//				racetrack_calibration_failed(CC_CHECK_RACETRACK);
-//				break;
-//			}
-//
-//			if (racetrack_calibrate_counter >= 20) {
-//				// the encoder was still moving after 20 seconds
-//				racetrack_calibration_failed(CC_CHECK_RACETRACK);
-//				break;
-//			}
-//
-//			// check again later
-//		break;
-//		case RT_CALIBRATE_LEFT_CAR_FORWARDS:
-//
-//			/**
-//			 * The first time this state is hit both cars will be at the start position.
-//			 *
-//			 * The goal is to drive the left car to the end of the track and stop
-//			 */
-//			sol_enable(SOL_RACE_DIRECTION);
-//			sol_enable(SOL_LEFT_RACE_ENABLE);
-//			sol_disable(SOL_RIGHT_RACE_ENABLE);
-//
-//			if (switch_poll_logical (SW_LEFT_RACE_START)) {
-//				if (racetrack_watchdog_counter >= RT_CALIBRATE_WATCHDOG_COUNTER_IGNORE) {
-//					// car didn't move forwards, or opto stuck on
-//					racetrack_calibration_failed(CC_CHECK_RACETRACK);
-//					break;
-//				}
-//				// wait till the car moves off the start before checking again
-//				break;
-//			}
-//
-//			// the car has definitely moved, but has it stalled yet?
-//
-//			if ((racetrack_seen_encoder_mask & RT_LEFT_ENCODER_BIT) == 0) {
-//				// yes, it has stalled as the encoder hasn't changed
-//
-//				left_car_track_length = left_encoder_count;
-//				racetrack_calibrate_next_state = RT_CALIBRATE_RIGHT_CAR_FORWARDS;
-//				break;
-//			}
-//
-//			// car still moving
-//
-//			reset_race_encoder_watchdog(); // TODO needed?
-//
-//			if (racetrack_calibrate_counter >= 20) { // ~20 seconds
-//				// If the encoder wheel is still going round after 20 seconds then something is wrong
-//				// could be a sticking car.
-//				racetrack_calibration_failed(CC_CHECK_LEFT_TRACK);
-//				break;
-//			}
-//		break;
-//
-//		case RT_CALIBRATE_RIGHT_CAR_FORWARDS:
-//
-//			/**
-//			 * The first time this state is hit the left car will be at the end of the track and the
-//			 * right car will be at the start of the track.
-//			 *
-//			 * The goal is to drive the right car to the end of the track and stop
-//			 */
-//
-//			// TODO implement remaining calibration states
-//			racetrack_calibration_complete();
-//		break;
-//
-//	}
-//
-//	if (racetrack_calibrate_next_state != racetrack_calibrate_state) {
-//		reset_race_encoder_watchdog();
-//		racetrack_calibrate_state = racetrack_calibrate_next_state;
-//		racetrack_calibrate_counter = 0;
-//		racetrack_calibrate_ticks_remaining = 1; // wait for the next tick, then run. otherwise we'd wait too long between states.
-//	}
-//
-//}
+void racetrack_state_calibrate_exit(void) {
+	racetrack_calibration_attempted = TRUE;
+
+	if (racetrack_calibrated) {
+		racetrack_state = RACETRACK_CAR_RETURN; // if calibration was ok, cars will already be in the right place.
+	} else {
+		racetrack_state = RACETRACK_INITIALIZE;
+	}
+}
+
+void racetrack_calibration_failed(enum mech_racetrack_calibration_codes code) {
+	// store the code for use outside the RTT as diag_post can't be called from an RTT.
+	racetrack_last_calibration_result_code = code;
+	racetrack_state_calibrate_exit();
+}
+
+void racetrack_calibration_complete(void) {
+	racetrack_calibrated = TRUE;
+	racetrack_last_calibration_result_code = CC_SUCCESS;
+	global_flag_on(GLOBAL_FLAG_RACETRACK_WORKING);
+	racetrack_state_calibrate_exit();
+}
+
+void racetrack_state_calibrate_enter(void) {
+	// reset flags
+	racetrack_calibrated = FALSE;
+	racetrack_calibration_attempted = FALSE;
+	racetrack_last_calibration_result_code = CC_NOT_CALIBRATED;
+	global_flag_off(GLOBAL_FLAG_RACETRACK_WORKING);
+
+	// initialise the first calibration state
+
+	racetrack_calibrate_counter = 0;
+	racetrack_calibrate_previous_state = RT_CALIBRATE_INITIALISE;
+	racetrack_calibrate_state = RT_CALIBRATE_CAR_RETURN;
+
+	racetrack_calibrate_ticks = RACETRACK_CALIBRATE_TICKS;
+	racetrack_calibrate_ticks_remaining = racetrack_calibrate_ticks;
+}
+
+void racetrack_state_calibrate_run(void) {
+
+	//
+	// handle transition
+	//
+
+	if (racetrack_calibrate_state != racetrack_calibrate_previous_state) {
+		racetrack_calibrate_counter = 0;
+		racetrack_calibrate_ticks_remaining = 1; // process the state this tick!
+		racetrack_calibrate_previous_state = racetrack_calibrate_state;
+
+		// process new state
+		switch(racetrack_calibrate_state) {
+			case RT_CALIBRATE_CAR_RETURN:
+
+				/**
+				 * The first time this state is hit the cars can be anywhere on the track
+				 *
+				 * The goal is to return both cars to the start position
+				 */
+
+				sol_disable(SOL_RACE_DIRECTION); // backwards
+				racetrack_reset_track_state();
+
+				set_lane_speed(LANE_LEFT, RACETRACK_SPEED_FASTEST);
+				set_lane_speed(LANE_RIGHT, RACETRACK_SPEED_FASTEST);
+
+				racetrack_lanes[LANE_LEFT].state = LANE_RETURN;
+				racetrack_lanes[LANE_RIGHT].state = LANE_RETURN;
+			break;
+			case RT_CALIBRATE_LEFT_CAR_FORWARDS:
+				/**
+				 * The first time this state is hit both cars will be at the start position.
+				 *
+				 * The goal is to drive the left car to the end of the track and stop
+				 */
+				sol_enable(SOL_RACE_DIRECTION); // forwards
+				racetrack_reset_track_state();
+				racetrack_lanes[LANE_LEFT].state = LANE_CALIBRATE;
+			break;
+			case RT_CALIBRATE_RIGHT_CAR_FORWARDS:
+				/**
+				 * The first time this state is hit the left car will be at the end of the track and the
+				 * right car will be at the start of the track.
+				 *
+				 * The goal is to drive the right car to the end of the track and stop
+				 */
+				sol_enable(SOL_RACE_DIRECTION); // forwards
+				racetrack_lanes[LANE_RIGHT].state = LANE_CALIBRATE;
+			break;
+			case RT_CALIBRATE_LEFT_CAR_RETURN:
+				/**
+				 * The first time this state is hit both cars will be at the end of the track
+				 *
+				 * The goal is to drive the left car to the end of the start of the track and stop
+				 */
+				sol_disable(SOL_RACE_DIRECTION); // backwards
+				racetrack_reset_track_state();
+				racetrack_lanes[LANE_LEFT].state = LANE_RETURN;
+			break;
+			case RT_CALIBRATE_RIGHT_CAR_RETURN:
+				/**
+				 * The first time this state is hit the left car will be at the start of the track and the
+				 * right car will be at the end of the track
+				 *
+				 * The goal is to drive the right car to the end of the start of the track and stop
+				 */
+				sol_disable(SOL_RACE_DIRECTION); // backwards
+				racetrack_lanes[LANE_RIGHT].state = LANE_RETURN;
+			break;
+			default:
+				// shut the compiler up
+			break;
+		}
+	}
+
+	racetrack_calibrate_ticks_remaining--;
+	if (racetrack_calibrate_ticks_remaining != 0) {
+		// TODO check if we need to update the SOL_RACE_DIRECTION more frequently, seems to work so far for me on my machine
+		return;
+	}
+	// reset the timer
+	racetrack_calibrate_ticks_remaining = RACETRACK_CALIBRATE_TICKS;
+
+	// we've waited long enough now until we should check things again.
+
+	racetrack_calibrate_counter++;
+
+
+	switch(racetrack_calibrate_state) {
+		case RT_CALIBRATE_CAR_RETURN:
+			sol_disable(SOL_RACE_DIRECTION); // backwards
+
+			if (switch_poll_logical (SW_LEFT_RACE_START) && switch_poll_logical (SW_RIGHT_RACE_START)) {
+				racetrack_calibrate_state = RT_CALIBRATE_LEFT_CAR_FORWARDS;
+				break;
+			}
+
+			// both cars should be moving backwards
+
+			if (racetrack_calibrate_counter >= RACETRACK_CALIBRATE_TIMEOUT_COUNTER) {
+				// both start of track optos should be on
+				racetrack_calibration_failed(CC_CHECK_RACETRACK);
+				break;
+			}
+		break;
+
+		case RT_CALIBRATE_LEFT_CAR_FORWARDS:
+			sol_enable(SOL_RACE_DIRECTION); // forwards
+
+			if ((racetrack_encoder_mask & RT_EM_END_OF_TRACK_LEFT) != 0) {
+				racetrack_calibrate_state = RT_CALIBRATE_RIGHT_CAR_FORWARDS;
+				break;
+			}
+
+			if (racetrack_calibrate_counter >= RACETRACK_CALIBRATE_TIMEOUT_COUNTER) {
+				racetrack_calibration_failed(CC_CHECK_LEFT_TRACK);
+				break;
+			}
+		break;
+
+		case RT_CALIBRATE_RIGHT_CAR_FORWARDS:
+			sol_enable(SOL_RACE_DIRECTION); // forwards
+			if ((racetrack_encoder_mask & RT_EM_END_OF_TRACK_RIGHT) != 0) {
+				racetrack_calibrate_state = RT_CALIBRATE_LEFT_CAR_RETURN;
+				break;
+			}
+
+			if (racetrack_calibrate_counter >= RACETRACK_CALIBRATE_TIMEOUT_COUNTER) {
+				racetrack_calibration_failed(CC_CHECK_RIGHT_TRACK);
+				break;
+			}
+		break;
+
+		case RT_CALIBRATE_LEFT_CAR_RETURN:
+			sol_disable(SOL_RACE_DIRECTION); // backwards
+
+			if (switch_poll_logical (SW_LEFT_RACE_START)) {
+				racetrack_calibrate_state = RT_CALIBRATE_RIGHT_CAR_RETURN;
+				break;
+			}
+
+			// left car should be moving backwards
+
+			if (racetrack_calibrate_counter >= RACETRACK_CALIBRATE_TIMEOUT_COUNTER) {
+				// both start of track optos should be on
+				racetrack_calibration_failed(CC_CHECK_LEFT_TRACK);
+				break;
+			}
+		break;
+
+		case RT_CALIBRATE_RIGHT_CAR_RETURN:
+			sol_disable(SOL_RACE_DIRECTION); // backwards
+
+			if (switch_poll_logical (SW_RIGHT_RACE_START)) {
+				racetrack_calibration_complete();
+				break;
+			}
+
+			// right car should be moving backwards
+
+			if (racetrack_calibrate_counter >= RACETRACK_CALIBRATE_TIMEOUT_COUNTER) {
+				// both start of track optos should be on
+				racetrack_calibration_failed(CC_CHECK_RIGHT_TRACK);
+				break;
+			}
+		break;
+		default:
+			// shut the compiler up
+		break;
+
+	}
+}
 
 static inline void racetrack_state_float_enter(void) {
 	racetrack_reset_track_state();
@@ -691,13 +712,13 @@ void corvette_racetrack_rtt (void) {
 	racetrack_update_track_state();
 
 	switch (racetrack_state) {
-//		case RACETRACK_CALIBRATE:
-//			if (racetrack_previous_state != racetrack_state) {
-//				racetrack_state_calibrate_enter();
-//			} else {
-//				racetrack_state_calibrate_run();
-//			}
-//		break;
+		case RACETRACK_CALIBRATE:
+			if (racetrack_previous_state != racetrack_state) {
+				racetrack_state_calibrate_enter();
+			} else {
+				racetrack_state_calibrate_run();
+			}
+		break;
 
 		case RACETRACK_FLOAT:
 			if (racetrack_previous_state != racetrack_state) {
@@ -740,9 +761,6 @@ void corvette_racetrack_rtt (void) {
 			}
 		break;
 
-
-		// TODO implement remaining states
-
 		default:
 			// shut the compiler up
 		break;
@@ -778,7 +796,7 @@ void racetrack_reset(void) {
 
 	// set states
 	racetrack_reset_track_state();
-	racetrack_state = RACETRACK_CAR_RETURN;
+	racetrack_state = RACETRACK_INITIALIZE;
 	racetrack_previous_state = RACETRACK_INITIALIZE;
 	global_flag_off(GLOBAL_FLAG_RACETRACK_WORKING);
 
@@ -788,11 +806,9 @@ void racetrack_reset(void) {
 void racetrack_enter_state(enum mech_racetrack_state new_state) {
 	U8 allow_state_change = FALSE;
 	switch (new_state) {
-/* TODO re-enable this after calibration is implemented.
  		case RACETRACK_RACE:
 			allow_state_change = racetrack_calibrated && racetrack_state == RACETRACK_READY;
 			break;
-*/
 		default:
 			allow_state_change = TRUE;
 	}

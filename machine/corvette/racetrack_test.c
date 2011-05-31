@@ -62,19 +62,30 @@ char *racetrack_lane_state_codes[] = {
 	"CAL"
 };
 
-// TODO add more calibration result messages
+char *racetrack_calibrate_state_codes[] = {
+	"INI",
+	"RTN",
+	"L F",
+	"R F",
+	"L B",
+	"R B"
+};
+
 // error messages, see enum mech_racetrack_calibration_codes;
 char *mech_racetrack_calibration_messages[] = {
 	"NOT CALIBRATED",
 	"CHECK RACETRACK",
 	"CHECK LEFT TRACK",
+	"CHECK RIGHT TRACK",
 	"CALIBRATED O.K."
 };
 
-extern /*__fastram__*/ enum mech_racetrack_state racetrack_state;
+extern enum mech_racetrack_state racetrack_state;
 extern U8 racetrack_calibrated;
 extern U8 racetrack_calibration_attempted;
 extern enum mech_racetrack_calibration_codes racetrack_last_calibration_result_code;
+extern enum mech_racetrack_calibrate_state racetrack_calibrate_state;
+extern U8 racetrack_calibrate_counter;
 
 extern __fastram__ U8 racetrack_encoder_mask;
 extern racetrack_lane_t racetrack_lanes[RACETRACK_LANES];
@@ -152,7 +163,9 @@ void racetrack_test_draw (void)
 	switch (racetrack_test_command) {
 		case CALIBRATE:
 			if (racetrack_state == RACETRACK_CALIBRATE) {
-				font_render_string_center(&font_var5, 64, LINE_2_Y + 2, "CALIBRATING");
+				sprintf("STATE:%s COUNTER:%d", racetrack_calibrate_state_codes[racetrack_calibrate_state], racetrack_calibrate_counter);
+				font_render_string_center(&font_var5, 64, LINE_2_Y + 2, sprintf_buffer);
+				//font_render_string_center(&font_var5, 64, LINE_2_Y + 2, "CALIBRATING");
 			} else {
 				//dbprintf("calibration result: %d\n", racetrack_last_calibration_result_code);
 				font_render_string_center(&font_var5, 64, LINE_2_Y + 2, mech_racetrack_calibration_messages[racetrack_last_calibration_result_code]);

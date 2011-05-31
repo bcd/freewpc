@@ -81,12 +81,20 @@ typedef struct {
 // Calibration
 //
 
-// TODO add more calibration result codes
-
 //CC = calibration code
 enum mech_racetrack_calibration_codes {
 	CC_NOT_CALIBRATED = 0,
 	CC_CHECK_RACETRACK,
 	CC_CHECK_LEFT_TRACK,
+	CC_CHECK_RIGHT_TRACK,
 	CC_SUCCESS
+};
+
+enum mech_racetrack_calibrate_state {
+	RT_CALIBRATE_INITIALISE = 0,
+	RT_CALIBRATE_CAR_RETURN,
+	RT_CALIBRATE_LEFT_CAR_FORWARDS,
+	RT_CALIBRATE_RIGHT_CAR_FORWARDS,
+	RT_CALIBRATE_LEFT_CAR_RETURN,
+	RT_CALIBRATE_RIGHT_CAR_RETURN
 };
