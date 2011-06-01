@@ -23,7 +23,7 @@
  *       use event following instead of timed task or just adjust the timer value?
  *
  * @TODO find out why task sleep between ball unlocks doesn't work.
- *       They player needs enough time after the first ball it launched to hit
+ *       The player needs enough time after the first ball it launched to hit
  *       the inner loop and attempt a shot on the skid pad.
  *       currently the second ball is launched too quickly and gets it the way
  *
