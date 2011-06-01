@@ -51,11 +51,8 @@
 // Specifies how long it takes the engine to move the engine from ANY position to the center, and settle.
 #define ZR1_CENTER_TICKS (128 / ZR1_SCHEDULE)
 
-// Specifies how long it takes the engine to move from one side to the other at full speed.
-#define ZR1_BALL_SEARCH_TICKS (128 / ZR1_SCHEDULE)
-
-// used to calculate the delay between ball-search moves
-#define ZR1_BALL_SEARCH_TICK_MULTIPLIER 20
+// Specifies how long to wait before adjusting the position in ball search mode
+#define ZR1_BALL_SEARCH_TICKS (2560 / ZR1_SCHEDULE)
 
 
 //
@@ -103,7 +100,7 @@ __fastram__ enum mech_zr1_state zr1_previous_state;
 
 // RTT counters and flags
 __fastram__ U8 zr1_center_ticks_remaining;
-__fastram__ U8 zr1_shake_ticks_remaining;
+__fastram__ U8 zr1_search_ticks_remaining;
 __fastram__ U8 zr1_calibrate_move_ticks_remaining;
 
 enum mech_zr1_shake_direction {
@@ -419,7 +416,7 @@ void zr1_state_shake_run(void) {
 }
 
 void zr1_state_ball_search_enter(void) {
-	zr1_shake_ticks_remaining = ZR1_BALL_SEARCH_TICKS;
+	zr1_search_ticks_remaining = 0; // move now
 	zr1_set_position(zr1_pos_center);
 	zr1_enable_solenoids();
 }
@@ -427,12 +424,12 @@ void zr1_state_ball_search_enter(void) {
 void zr1_state_ball_search_run(void) {
 	zr1_enable_solenoids();
 
-	if (zr1_shake_ticks_remaining > 0) {
-		zr1_shake_ticks_remaining--;
+	if (zr1_search_ticks_remaining > 0) {
+		zr1_search_ticks_remaining--;
 		return;
 	}
 	// reset counter
-	zr1_shake_ticks_remaining = (U8)ZR1_BALL_SEARCH_TICKS * (U8)ZR1_BALL_SEARCH_TICK_MULTIPLIER;
+	zr1_search_ticks_remaining = ZR1_BALL_SEARCH_TICKS;
 
 	// center >> right >> left >> center >> right >> left >> center >> ...
 	if (zr1_last_position == zr1_pos_center) {
