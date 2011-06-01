@@ -178,8 +178,7 @@ __machine2__ bool task_find_or_kill_gid (free_timer_id_t gid);
 
 /* test_bitmap.c */
 __machine2__ void stardrop_overlay_draw (void);
-__machine2__ void tz_draw_overlay (void);
-__machine2__ void bitmap_set_type (U8 type);
+__machine2__ void check_bitmap_overlay (void);
 
 /* dollar.c */
 __machine4__ void dollar_overlay (void);

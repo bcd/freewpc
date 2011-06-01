@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <status.h>
+#include <eb.h>
 
 __local__ U8 mball_locks_lit;
 __local__ U8 mball_locks_made;
@@ -432,7 +433,7 @@ void mball_light_lock (void)
 	bounded_increment (mball_locks_lit, 2);
 }
 
-/* Check to see if GUMBAL has been completed and light lock */
+/* Check to see if GUMBALL has been completed and light lock */
 void mball_check_light_lock (void)
 {
 	if (lamp_test (LM_GUM) && lamp_test (LM_BALL))
@@ -644,6 +645,11 @@ CALLSET_ENTRY (mball, single_ball_play)
 
 CALLSET_ENTRY (mball, dev_lock_enter)
 {
+	collect_extra_ball ();
+	score (SC_50K);
+	sound_send (SND_ROBOT_FLICKS_GUN);
+	leff_start (LEFF_LOCK);
+
 	/* Tell fastlock that the lock was entered */
 	fastlock_lock_entered ();
 
@@ -680,10 +686,13 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 			score (SC_5M);
 			deff_start (DEFF_LUCKY_BOUNCE);
 			bounded_increment (lucky_bounces, 99);
+			task_sleep_sec (1);
 		}
 
+		sound_send (SND_FAST_LOCK_STARTED);
 		bounded_decrement (mball_locks_lit, 0);
 		bounded_increment (mball_locks_made, 2);
+		deff_start_sync (DEFF_MB_LIT);
 		/* Lock 2 balls, drop a ball if it's full */
 		if (device_recount (device_entry (DEVNO_LOCK)) <= 2)
 		//if (!device_full_p (device_entry (DEVNO_LOCK)))
@@ -696,13 +705,12 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 			//TODO leff as well?
 			deff_start (DEFF_BALL_FROM_LOCK);
 		}
-		sound_send (SND_FAST_LOCK_STARTED);
+		
 		if (mball_locks_lit == 0)
 		{
 			lamp_off (LM_GUM);
 			lamp_off (LM_BALL);
 		}
-		deff_start (DEFF_MB_LIT);
 		unlit_shot_count = 0;
 	}
 	else
@@ -713,7 +721,6 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 CALLSET_ENTRY (mball, end_ball)
 {
 	callset_invoke (mball_stop);
-//	callset_invoke (mball_restart_stop);
 }
 
 CALLSET_ENTRY (mball, start_ball)
@@ -749,8 +756,4 @@ CALLSET_ENTRY (mball, left_ball_grabbed)
 	{
 		deff_start (DEFF_SHOOT_JACKPOT);
 	}
-}
-
-CALLSET_ENTRY (mball, ball_search)
-{
 }

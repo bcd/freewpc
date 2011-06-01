@@ -81,53 +81,17 @@ void star_draw (void)
 	}
 }
 
+CALLSET_ENTRY (star, idle_every_ten_seconds)
+{
+	check_bitmap_overlay ();
+}
 
 CALLSET_ENTRY (star, score_deff_start)
 {
 	U8 n;
 	for (n=0; n < MAX_STARS; n++)
 		star_states[n].time = 0;
-}
-
-CALLSET_ENTRY (star, idle_every_10_seconds, start_ball)
-{
-	if (num_players != 1)
-	{
-		draw_bouncing_overlay = FALSE;
-		return;
-	}
-	if (score_compare (current_score, score_table[SC_500M]) == 1)
-	{
-		draw_bouncing_overlay = TRUE;
-		bitmap_set_type (3);
-		return;
-	}
-	else if (score_compare (current_score, score_table[SC_400M]) == 1)
-	{
-		draw_bouncing_overlay = TRUE;
-		bitmap_set_type (3);
-		return;
-	}
-	else if (score_compare (current_score, score_table[SC_300M]) == 1)
-	{
-		draw_bouncing_overlay = TRUE;
-		bitmap_set_type (2);
-		return;
-	}
-	else if (score_compare (current_score, score_table[SC_200M]) == 1)
-	{
-		draw_bouncing_overlay = TRUE;
-		bitmap_set_type (1);
-		return;
-	}
-	else if (score_compare (current_score, score_table[SC_100M]) == 1)
-	{
-		draw_bouncing_overlay = TRUE;
-		bitmap_set_type (0);
-		return;
-	}
-	else 
-		draw_bouncing_overlay = FALSE;
+	check_bitmap_overlay ();
 }
 
 CALLSET_ENTRY (star, score_overlay)

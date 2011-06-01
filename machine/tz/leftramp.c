@@ -28,7 +28,7 @@ extern U8 gumball_enable_count;
 extern U8 autofire_request_count;	
 extern U8 mball_locks_made;
 extern bool multiball_ready (void);
-extern bool autofire_busy;
+//extern bool autofire_busy;
 extern bool chaosmb_can_divert_to_autoplunger (void);
 
 extern void mball_left_ramp_exit (void);
@@ -173,7 +173,7 @@ static void maybe_ramp_divert (void)
 	/* Don't divert if a ball is waiting to be fired */
 	if (autofire_request_count != 0)
 		return;
-	if (autofire_busy)
+	if (task_find_gid (GID_AUTOFIRE_HANDLER))
 		return;
 	
 	/* Divert to autoplunger if mball ready */
@@ -195,7 +195,7 @@ static void maybe_ramp_divert (void)
 
 CALLSET_ENTRY (left_ramp, lamp_update)
 {
-	if (timer_find_gid (GID_TNF_READY))
+	if (timer_find_gid (GID_TNF_READY) || task_find_gid (GID_SDSS_READY))
 		lamp_tristate_flash (LM_BONUS_X);
 	else
 		lamp_tristate_off (LM_BONUS_X);
@@ -215,6 +215,7 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 	sssmb_left_ramp_exit ();
 	mball_left_ramp_exit ();
 	chaosmb_left_ramp_exit ();
+	callset_invoke (left_ramp_exit);
 	
 	/* Add two ramps if hit from the right inlane */
 	if (task_find_gid (GID_LEFT_RAMP))

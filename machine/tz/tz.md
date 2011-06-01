@@ -238,7 +238,7 @@ L4: Lower Jet, duty(SOL_DUTY_100)
 L5: Left Jet, duty(SOL_DUTY_100)
 L6: Right Jet, duty(SOL_DUTY_100)
 L7: Lock Release, duty(SOL_DUTY_75), time(TIME_133MS)
-L8: Shooter Div, nosearch, duty(SOL_DUTY_100)
+L8: Shooter Div, nosearch
 
 G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
@@ -594,7 +594,7 @@ Extra Ball: page(MACHINE_PAGE), PRI_EB, D_PAUSE+D_QUEUED
 Shoot Again: page(MACHINE3_PAGE), PRI_SHOOT_AGAIN, D_PAUSE+D_QUEUED
 
 Greed Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE2, D_QUEUED+D_TIMEOUT
-Greed Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED+D_PAUSE
+Greed Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED+D_PAUSE+D_ABORTABLE
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5, D_QUEUED+D_TIMEOUT
 
 #These are in order of how they get triggered
@@ -611,9 +611,9 @@ SSSMB Jackpot Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_PAUSE+D_QUEUED+D_RESTAR
 SSlot Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 SSlot Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
 TSM Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
-TSM Mode total: page(MACHINE_PAGE), PRI_GAME_MODE4, D_QUEUED+D_PAUSE
+TSM Mode total: page(MACHINE_PAGE), PRI_GAME_MODE4, D_QUEUED+D_PAUSE+D_ABORTABLE
 Spiral Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE5
-Spiral Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE
+Spiral Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE+D_ABORTABLE
 Spiral Loop: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_SCORE+D_QUEUED
 Fastlock Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT
@@ -623,7 +623,7 @@ Clock Millions Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE3
 # D_PAUSE so it will stop the clock
 Clock Millions Hit: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_RESTARTABLE+D_PAUSE
 Clock Millions Explode: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_RESTARTABLE
-Clock Millions Mode Total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE
+Clock Millions Mode Total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE+D_ABORTABLE
 
 MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT+D_PAUSE
 MPF Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
@@ -722,6 +722,8 @@ Oddchange grows: page(MACHINE2_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE
 Oddchange collected: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT+D_SCORE
 Bitmap test: page(MACHINE2_PAGE), PRI_GAME_QUICK5
 
+SDSS Ready: page(MACHINE4_PAGE), PRI_GAME_MODE6, D_PAUSE
+SDSS Awarded: page(MACHINE4_PAGE), PRI_JACKPOT, D_PAUSE
 
 ##########################################################################
 # Lamp effects
