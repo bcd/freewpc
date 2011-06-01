@@ -38,11 +38,15 @@
 # Drivers for diverter with hold power
 # note, the template is hard coded to use a frequence value of 8, the value below must match
 # See DIVERTER_SCHED
-#!diverter_driver           8     40c
+#!diverter_driver           16     40c
 
-# Game specific drivers
+# Corvette game specific drivers
+
 # note, the zr1 rtt code is hard coded to use a frequence value of 16, the value below must match
 # See ZR1_*_TICKS defines
 corvette_zr1_engine_rtt   16    1c
+
+corvette_racetrack_encoder_rtt   2    20c
+corvette_racetrack_rtt   16    40c
 
 # EOF
