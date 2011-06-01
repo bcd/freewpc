@@ -26,18 +26,20 @@
 CALLSET_ENTRY (simple, device_update) {
 	if (flag_test (FLAG_LOOP_GATE_OPENED)) {
 		loop_gate_start ();
-	}
-	else
-	{
+	} else {
 		loop_gate_stop ();
 	}
 
 	if (flag_test (FLAG_ZR_1_UP_REV_GATE_OPENED)) {
 		zr_1_up_rev_gate_start ();
-	}
-	else
-	{
+	} else {
 		zr_1_up_rev_gate_stop ();
+	}
+
+	if (flag_test (FLAG_DIVERTER_OPENED)) {
+		diverter_start();
+	} else {
+		diverter_stop();
 	}
 
 }
@@ -45,23 +47,5 @@ CALLSET_ENTRY (simple, device_update) {
 CALLSET_ENTRY (simple, end_ball, tilt) {
 	flag_off (FLAG_ZR_1_UP_REV_GATE_OPENED);
 	flag_off (FLAG_LOOP_GATE_OPENED);
+	flag_off (FLAG_DIVERTER_OPENED);
 }
-
-CALLSET_ENTRY (simple, start_ball) {
-	flag_on (FLAG_ZR_1_UP_REV_GATE_OPENED);
-}
-
-
-/***
- * XXX diverter testing
- */
-CALLSET_ENTRY (diverter_test, start_ball) {
-	dbprintf ("diverter_test: start_ball\n");
-	diverter_start();
-}
-
-CALLSET_ENTRY (diverter_test, end_ball) {
-	dbprintf ("diverter_test: end_ball\n");
-	diverter_stop();
-}
-

@@ -29,21 +29,13 @@
 #include <freewpc.h>
 
 U8 current_rollover; // there are 3
-U8 counted_switches;
 
-void skillshot_enable( void ) {
-	counted_switches = 0;
-	current_rollover = SW_MIDDLE_ROLLOVER;
-	global_flag_on(GLOBAL_FLAG_SKILLSHOT_ENABLED);
-	flag_off (FLAG_LOOP_GATE_OPENED);
-}
-
-void skillshot_disable( void ) {
-	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ENABLED)) {
+void skillshot_rollover_disable( void ) {
+	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED)) {
 		return;
 	}
 
-	global_flag_off ( GLOBAL_FLAG_SKILLSHOT_ENABLED );
+	global_flag_off ( GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED );
 
 	lamp_tristate_off (LM_LEFT_ROLLOVER);
 	lamp_tristate_off (LM_MIDDLE_ROLLOVER);
@@ -52,10 +44,27 @@ void skillshot_disable( void ) {
 	// open the loop gate when the first pf switch is hit
 	//task_sleep_sec(1);
 	flag_on (FLAG_LOOP_GATE_OPENED);
+
+	task_kill_gid (GID_SKILLSHOT_ROLLOVER_TIMER);
 }
 
-void award_skillshot(U8 rollover_switch) {
-	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ENABLED)) {
+void skillshot_rollover_timer( void )
+{
+	task_sleep_sec (10);
+	skillshot_rollover_disable();
+	task_exit ();
+}
+
+void skillshot_rollover_enable( void ) {
+	current_rollover = SW_MIDDLE_ROLLOVER;
+	global_flag_on(GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED);
+	flag_off (FLAG_LOOP_GATE_OPENED);
+
+	task_create_gid1 (GID_SKILLSHOT_ROLLOVER_TIMER, skillshot_rollover_timer);
+}
+
+void award_rollover_skillshot(U8 rollover_switch) {
+	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED)) {
 		return;
 	}
 
@@ -64,12 +73,12 @@ void award_skillshot(U8 rollover_switch) {
 		// TODO display skillshot award.
 	}
 
-	skillshot_disable();
+	skillshot_rollover_disable();
 }
 
 CALLSET_ENTRY (skill, lamp_update)
 {
-	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ENABLED)) {
+	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED)) {
 		return;
 	}
 
@@ -80,21 +89,21 @@ CALLSET_ENTRY (skill, lamp_update)
 
 CALLSET_ENTRY (skill, sw_left_rollover)
 {
-	award_skillshot(SW_LEFT_ROLLOVER);
+	award_rollover_skillshot(SW_LEFT_ROLLOVER);
 }
 
 CALLSET_ENTRY (skill, sw_middle_rollover)
 {
-	award_skillshot(SW_MIDDLE_ROLLOVER);
+	award_rollover_skillshot(SW_MIDDLE_ROLLOVER);
 }
 
 CALLSET_ENTRY (skill, sw_right_rollover)
 {
-	award_skillshot(SW_RIGHT_ROLLOVER);
+	award_rollover_skillshot(SW_RIGHT_ROLLOVER);
 }
 
 CALLSET_ENTRY (skill, sw_left_button) {
-	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ENABLED)) {
+	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED)) {
 		return;
 	}
 
@@ -116,7 +125,7 @@ CALLSET_ENTRY (skill, sw_left_button) {
 }
 
 CALLSET_ENTRY (skill, sw_right_button) {
-	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ENABLED)) {
+	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED)) {
 		return;
 	}
 
@@ -136,34 +145,14 @@ CALLSET_ENTRY (skill, sw_right_button) {
 	callset_invoke( lamp_update );
 }
 
-CALLSET_ENTRY (skill, any_pf_switch) {
-	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ENABLED)) {
-		return;
-	}
-
-	counted_switches ++;
-
-	// FIXME should be < 2 == bail, where's the other switch press coming from?  the other edge of the sw_right_loop switch?
-	if (counted_switches < 3) {
-		return;
-	}
-
-	// disable skillshot after the second pf switch is activated when skillshot is enabled.
-	// can't disable it after the first one as the first one is normally always the sw_right_loop
-	// switch that the ball travels over on it's way to the rollovers above the jets.
-	//
-	// the skillshot can never be made without passing over either the left or right loop
-	// switches or through the spinner (without spinning it much, and also missing the jets)
-	//
-	// so if it ball launches, misses the sw_right_loop the player can quickly shoot the left
-	// or right loop to flashing roll-over shot to get the skill shot - any other 2 switches
-	// will disable the skillshot.
-
-	skillshot_disable();
-}
 
 CALLSET_ENTRY (skill, serve_ball) {
-	// TODO let the user select if they want to enable the rollover skillshot or the skid pad ramp super skillshot.
-	skillshot_enable();
+	// TODO skillshot menu - let the user select if they want to enable the rollover skillshot or the skid pad ramp super skillshot.
+	skillshot_rollover_enable();
+}
+
+CALLSET_ENTRY (skill, shoot_again) {
+	// the player clearly sucks, that, or the machine was being evil. :D
+	skillshot_rollover_disable();
 }
 

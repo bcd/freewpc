@@ -289,9 +289,10 @@ Horsepower Jackpot Lit:
 Loop Gate Opened:
 ZR-1 Up Rev Gate Opened:
 ZR-1 Low Rev Gate Opened:
+Diverter Opened:
 
 [globalflags]
-Skillshot Enabled:
+Skillshot Rollover Enabled:
 ZR1 Working:
 ZR1 Solenoids Powered:
 Racetrack Working:
