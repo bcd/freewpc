@@ -1,0 +1,4 @@
+= Todo list for Corvette =
+
+* Make engine shake for 2 seconds when it captures the first 2 balls.
+* Improve the engine shake
