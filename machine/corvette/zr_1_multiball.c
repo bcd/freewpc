@@ -144,9 +144,6 @@ void zr_1_mb_start_task( void )
 {
 	flag_off (FLAG_ZR_1_MULTIBALL_LOCK_LIT);
 
-	device_enable_lock(device_entry (DEVNO_TROUGH));
-	device_enable_lock(device_entry (DEVNO_ZR1_POPPER));
-
 	zr1_set_shake_speed(ZR1_SHAKE_SPEED_MEDIUM);
 	zr1_shake();
 
@@ -179,8 +176,7 @@ void zr_1_mb_start_task( void )
 	task_sleep_sec (3);
 
 	flasher_pulse(FLASH_ZR_1_RAMP);
-	device_disable_lock(device_entry (DEVNO_ZR1_POPPER));
-	device_disable_lock(device_entry (DEVNO_TROUGH));
+	// third ball kicked out by returning from callset zr1_multiball dev_zr1_popper_enter
 
 	task_exit ();
 }
@@ -288,6 +284,11 @@ CALLSET_ENTRY (zr_1_multiball, dev_zr1_popper_enter)
 	}
 
 	zr_1_mb_award_lock ();
+
+	while (task_find_gid (GID_ZR_1_MB_START_TASK)) {
+		task_sleep_sec(1);
+	}
+
 }
 
 CALLSET_ENTRY (zr_1_multiball, skid_pad_shot)
