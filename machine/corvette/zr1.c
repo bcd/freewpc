@@ -621,6 +621,7 @@ CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 
 void zr1_shake_2sec_task (void)
 {
+	zr1_set_shake_speed(ZR1_SHAKE_SPEED_MEDIUM);
 	zr1_shake();
 	task_sleep_sec (2);
 	zr1_center();
