@@ -33,6 +33,7 @@ U8 jackpot_level_stored;
 /* Used to restart if multiball ends without picking up a jackpot */
 bool mball_jackpot_uncollected;
 bool mball_restart_collected;
+extern bool lock_powerball;
 extern struct timed_mode_ops mball_restart_mode;
 
 extern U8 unlit_shot_count;
@@ -65,7 +66,7 @@ struct timed_mode_ops mball_restart_mode = {
 	.gid = GID_MBALL_RESTART_MODE,
 	.music = MUS_FASTLOCK_COUNTDOWN,
 	.deff_running = DEFF_MBALL_RESTART,
-	.prio = PRI_MULTIBALL,
+	.prio = PRI_GAME_LOW3,
 	.init_timer = 15,
 	.timer = &mball_restart_timer,
 	.grace_timer = 3,
@@ -233,7 +234,7 @@ void mb_start_deff (void)
 		
 	U16 fno;
 	U8 i;
-	for (i = 0; i < 6; i++)
+	for (i = 0; i < 5; i++)
 	{
 		U8 j = 0;
 		for (fno = IMG_BOLT_TESLA_START; fno < IMG_BOLT_TESLA_END; fno += 2)
@@ -261,9 +262,9 @@ void mb_start_deff (void)
 			frame_draw (fno);
 			dmd_overlay_outline ();
 			dmd_show2 ();
-			if (i < 3)
+			if (i == 1)
 				task_sleep (TIME_100MS);
-			else if (i < 5)
+			else if (i < 2)
 				task_sleep (TIME_66MS);
 			else
 				task_sleep (TIME_33MS);
@@ -347,8 +348,7 @@ bool can_lock_ball (void)
 		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING) 
 		&& !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING) 
 		&& !global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
-		&& !multi_ball_play ()
-		&& !pb_in_lock ())
+		&& !multi_ball_play ())
 		return TRUE;
 	else
 		return FALSE;
@@ -643,9 +643,15 @@ CALLSET_ENTRY (mball, single_ball_play)
 	callset_invoke (mball_stop);
 }
 
-CALLSET_ENTRY (mball, dev_lock_enter)
+static void collect_extra_ball_task (void)
 {
 	collect_extra_ball ();
+	task_exit ();
+}
+
+CALLSET_ENTRY (mball, dev_lock_enter)
+{
+	task_create_anon (collect_extra_ball_task);
 	score (SC_50K);
 	sound_send (SND_ROBOT_FLICKS_GUN);
 	leff_start (LEFF_LOCK);
@@ -679,6 +685,13 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 	/* Lock check should pretty much always go last */
 	else if (can_lock_ball ())
 	{
+		/* Ask the player if they wish to lock the powerball */
+		if (pb_in_lock () && !multi_ball_play () && device_recount (device_entry (DEVNO_LOCK)) == 1)
+		{
+			callset_invoke (pb_lock_choose);
+			if (!lock_powerball)
+				return;
+		}
 		/* Right loop -> Locked ball lucky bounce handler */
 		if (event_did_follow (right_loop, locked_ball))
 		{
@@ -695,7 +708,6 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		deff_start_sync (DEFF_MB_LIT);
 		/* Lock 2 balls, drop a ball if it's full */
 		if (device_recount (device_entry (DEVNO_LOCK)) <= 2)
-		//if (!device_full_p (device_entry (DEVNO_LOCK)))
 		{	
 			device_lock_ball (device_entry (DEVNO_LOCK));
 			enable_skill_shot ();
