@@ -24,11 +24,12 @@
 /* Super Duper Skill Shot rules:
  * Hold down right flipper and launch ball straight into slot
  * You then get 4 seconds to shoot the left ramp
+ * If sucessful
  */
 
 extern bool skill_shot_enabled;
 bool sdss_enabled;
-__local__ U8 sdss_level;
+U8 sdss_level;
 
 static void sdss_enable (void)
 {
@@ -58,27 +59,58 @@ static void flash_text_deff (U8 flash_count, task_ticks_t flash_delay)
 
 void sdss_ready_deff (void)
 {
+	sound_send (SND_SUPER_SKILL);
 	sprintf ("SUPER");
-	flash_text_deff (10, TIME_33MS);
+	flash_text_deff (5, TIME_33MS);
 	sprintf ("DUPER");
-	flash_text_deff (10, TIME_33MS);
+	flash_text_deff (5, TIME_33MS);
 	sprintf ("SKILL");
 	flash_text_deff (10, TIME_33MS);
 	sprintf ("SHOT");
-	flash_text_deff (10, TIME_33MS);
+	flash_text_deff (15, TIME_33MS);
 	deff_exit ();
 }
 
+void usdss_awarded_deff (void)
+{	
+	sound_send (SND_FAST_LOCK_STARTED);
+	sound_send (SND_YES);
+	sprintf ("ULTRA");
+	flash_text_deff (7, TIME_100MS);
+	
+	sound_send (SND_YES);
+	sprintf ("SUPER");
+	flash_text_deff (5, TIME_66MS);
+	
+	sprintf ("DUPER");
+	flash_text_deff (5, TIME_66MS);
+	
+	sound_send (SND_YES);
+	sprintf ("SKILL");
+	flash_text_deff (5, TIME_66MS);
+	
+	sprintf ("SHOT");
+	flash_text_deff (5, TIME_66MS);
+
+	sound_send (SND_EXPLOSION_2);
+	sprintf ("%d0 MILLION", sdss_level);
+	flash_text_deff (10, TIME_200MS);
+	deff_exit ();
+}
+
+
 void sdss_awarded_deff (void)
 {	
-	sprintf ("SUPER");
-	flash_text_deff (5, TIME_33MS);
-	sprintf ("DUPER");
-	flash_text_deff (5, TIME_33MS);
-	sprintf ("SKILL");
-	flash_text_deff (5, TIME_33MS);
-	sprintf ("SHOT");
-	flash_text_deff (5, TIME_33MS);
+	sound_send (SND_FAST_LOCK_STARTED);
+	sound_send (SND_EXPLOSION_1);
+	sprintf ("SUPER DUPER");
+	flash_text_deff (5, TIME_66MS);
+	
+	sound_send (SND_EXPLOSION_1);
+	sprintf ("SKILL SHOT");
+	flash_text_deff (5, TIME_66MS);
+	
+	sound_send (SND_EXPLOSION_2);
 	sprintf ("%d0 MILLION", sdss_level);
 	flash_text_deff (10, TIME_200MS);
 	deff_exit ();
@@ -90,13 +122,47 @@ static void sdss_awarded (void)
 	task_kill_gid (GID_SDSS_READY);
 	bounded_increment (sdss_level, 5);
 	score_multiple (SC_10M, sdss_level);
+	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 	deff_start (DEFF_SDSS_AWARDED);
+}
+
+static void usdss_awarded (void)
+{
+	task_kill_gid (GID_USDSS_APPROACHING);
+	task_kill_gid (GID_USDSS_READY);
+	timer_restart_free (GID_USDSS_AWARDED, TIME_4S);
+	score_multiple (SC_10M, sdss_level);
+	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
+	deff_start (DEFF_USDSS_AWARDED);
+}
+
+CALLSET_ENTRY (sdss, sw_left_inlane_2)
+{
+	if (task_kill_gid (GID_USDSS_APPROACHING))
+		timer_restart_free (GID_USDSS_READY, TIME_5S);
 }
 
 CALLSET_ENTRY (sdss, left_ramp_exit)
 {
 	if (task_kill_gid (GID_SDSS_READY))
+	{
+		timer_restart_free (GID_USDSS_APPROACHING, TIME_5S);
 		sdss_awarded ();
+	}
+}
+
+CALLSET_ENTRY (sdss, sw_right_ramp)
+{
+	task_kill_gid (GID_SDSS_READY);
+	if (task_kill_gid (GID_USDSS_READY))
+		usdss_awarded ();
+}
+
+/* called from slot.c */
+CALLSET_ENTRY (sdss, sdss_ready)
+{
+	timer_restart_free (GID_SDSS_READY, TIME_10S);
+	deff_start (DEFF_SDSS_READY);
 }
 
 CALLSET_ENTRY (sdss, sw_skill_top)
@@ -104,7 +170,7 @@ CALLSET_ENTRY (sdss, sw_skill_top)
 	if (sdss_enabled && skill_shot_enabled)
 	{
 		sdss_enabled = FALSE;
-		timer_restart_free (GID_SDSS_READY, TIME_10S);
+		timer_restart_free (GID_SDSS_APPROACHING, TIME_4S);
 		task_kill_gid (GID_SDSS_BUTTON_MONITOR);
 		task_kill_gid (GID_SDSS_SWITCH_MONITOR);
 	}
@@ -120,22 +186,70 @@ static void sdss_switch_monitor (void)
 /* Ball is rolling back down, kill sdss */
 CALLSET_ENTRY (sdss, sw_skill_center, sw_skill_bottom)
 {
-	task_recreate_gid (GID_SDSS_SWITCH_MONITOR, sdss_switch_monitor);
+	if (sdss_enabled)
+		task_recreate_gid (GID_SDSS_SWITCH_MONITOR, sdss_switch_monitor);
 }
 
-static void sdss_monitor_button_task (void)
+static bool sdss_ready_to_enable (void)
+{
+	if (skill_shot_enabled && !task_find_gid (GID_SKILL_SWITCH_TRIGGER) 
+		&& !sdss_enabled
+		&& !task_find_gid (GID_SDSS_LEFT_BUTTON))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+static void sdss_monitor_right_button_task (void)
 {
 	U8 timer = 0;
 
-	while (switch_poll_logical (SW_RIGHT_BUTTON) 
-			&& !sdss_enabled && ++timer < 254)
+	while (switch_poll_logical (SW_RIGHT_BUTTON)
+			&& sdss_ready_to_enable ()
+			&& ++timer < 254)
 	{
-		if (timer == 5)
-			sound_send (SND_ROBOT_WALK);
-		if (timer == 10)
-			sound_send (SND_ROBOT_WALK_2);
-		if (timer == 15)
-			sdss_enable ();
+		switch (timer)
+		{
+			case 5:
+				sound_send (SND_ROBOT_WALK);
+				break;
+			case 10:
+				sound_send (SND_ROBOT_WALK_2);
+				break;
+			case 15:
+				sound_send (SND_ROBOT_WALK);
+				timer_restart_free (GID_SDSS_LEFT_BUTTON, TIME_2S);
+				break;
+			default:
+				break;
+		}
+		task_sleep (TIME_200MS);
+	}
+	task_exit ();
+}
+
+static void sdss_monitor_left_button_task (void)
+{
+	U8 timer = 0;
+	while (++timer < 254 && sdss_ready_to_enable ()
+			&& switch_poll_logical (SW_LEFT_BUTTON)
+			&& !switch_poll_logical (SW_RIGHT_BUTTON))
+	{
+		switch (timer)
+		{
+			case 6:
+				sound_send (SND_ROBOT_WALK);
+				break;
+			case 1:
+			case 11:
+				sound_send (SND_ROBOT_WALK_2);
+				break;
+			case 16:
+				sdss_enable ();
+				break;
+			default:
+				break;
+		}
 		task_sleep (TIME_200MS);
 	}
 	task_exit ();
@@ -143,17 +257,21 @@ static void sdss_monitor_button_task (void)
 
 CALLSET_ENTRY (sdss, sw_right_button)
 {
-	if (skill_shot_enabled && !task_find_gid (GID_SDSS_BUTTON_MONITOR) &&
-			!sdss_enabled)
-		task_create_gid (GID_SDSS_BUTTON_MONITOR, sdss_monitor_button_task);
+	if (skill_shot_enabled && !task_find_gid (GID_SDSS_BUTTON_MONITOR) 
+			&& !task_find_gid (GID_SDSS_READY)
+			&& !sdss_enabled)
+		task_create_gid (GID_SDSS_BUTTON_MONITOR, sdss_monitor_right_button_task);
 }
 
-CALLSET_ENTRY (sdss, start_player)
+CALLSET_ENTRY (sdss, sw_left_button)
 {
-	sdss_level = 0;
+	if (task_kill_gid (GID_SDSS_LEFT_BUTTON))
+		task_create_gid (GID_SDSS_BUTTON_MONITOR, sdss_monitor_left_button_task);
+
 }
 
 CALLSET_ENTRY (sdss, start_ball)
 {
+	sdss_level = 0;
 	sdss_enabled = FALSE;
 }

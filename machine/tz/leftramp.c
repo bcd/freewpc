@@ -170,10 +170,12 @@ inline static bool right_inlane_combo_check (void)
 
 static void maybe_ramp_divert (void)
 {
-	/* Don't divert if a ball is waiting to be fired */
-	if (autofire_request_count != 0)
-		return;
-	if (task_find_gid (GID_AUTOFIRE_HANDLER))
+	/* Don't divert if a ball is waiting to be fired 
+	 * or if the player has a shot at a Ultra Super Duper
+	 * */
+	if (task_find_gid (GID_AUTOFIRE_HANDLER)
+		|| autofire_request_count != 0
+		|| task_find_gid (GID_USDSS_APPROACHING))
 		return;
 	
 	/* Divert to autoplunger if mball ready */

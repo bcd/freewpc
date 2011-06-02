@@ -304,7 +304,11 @@ bool mpf_ready_p (void)
 		 *  dropped back to the upper left flipper */
 		&& !hurryup_active ()
 		/* TODO Probably want to remove this later on */
-		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING))
+		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING)
+		/* Don't allow if Super Duper Skill Shot is enabled */
+		&& !task_find_gid (GID_USDSS_READY)
+		&& !task_find_gid (GID_USDSS_AWARDED)
+		&& !task_find_gid (GID_USDSS_APPROACHING))
 		return TRUE;
 	else
 		return FALSE;
@@ -331,7 +335,9 @@ CALLSET_ENTRY (mpf, end_ball)
 
 CALLSET_ENTRY (mpf, lamp_update)
 {
-	if (mpf_ready_p ())
+	if (task_find_gid (GID_USDSS_READY) || task_find_gid (GID_USDSS_APPROACHING))
+		lamp_tristate_flash (LM_RAMP_BATTLE);
+	else if (mpf_ready_p ())
 		lamp_tristate_on (LM_RAMP_BATTLE);
 	else
 		lamp_tristate_off (LM_RAMP_BATTLE);

@@ -125,6 +125,7 @@ CALLSET_ENTRY (skill, skill_missed)
 
 void award_skill_shot (void)
 {
+	task_kill_gid (GID_SDSS_READY);
 	set_valid_playfield ();
 	disable_skill_shot ();
 	leff_restart (LEFF_FLASHER_HAPPY);
