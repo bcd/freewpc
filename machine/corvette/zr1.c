@@ -131,8 +131,10 @@ __fastram__ enum mech_zr1_calibrate_state zr1_calibrate_state;
  * brings the left and right limits used by the shake-mode code in a bit (i.e. narrow the arc by the range)
  */
 void zr1_calculate_shake_range(void) {
-	zr1_pos_shake_left = zr1_pos_full_left_opto_off + (((zr1_pos_center - zr1_pos_full_left_opto_off) / ZR1_RANGE_DIVIDER) * zr1_shake_range);
-	zr1_pos_shake_right = zr1_pos_full_right_opto_off - (((zr1_pos_full_right_opto_off - zr1_pos_center) / ZR1_RANGE_DIVIDER) * zr1_shake_range);
+	U8 range = zr1_pos_full_right_opto_off - zr1_pos_full_left_opto_off;
+	U8 adjust_by = ((range / 2) / ZR1_RANGE_DIVIDER) * zr1_shake_range;
+	zr1_pos_shake_left = zr1_pos_full_left_opto_off + adjust_by;
+	zr1_pos_shake_right = zr1_pos_full_right_opto_off - adjust_by;
 }
 /**
  * Reset the engine position limits used during calibration

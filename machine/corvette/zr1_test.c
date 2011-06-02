@@ -67,6 +67,8 @@ extern U8 zr1_calibration_attempted;
 extern U8 zr1_pos_center;
 extern U8 zr1_pos_full_left_opto_off;
 extern U8 zr1_pos_full_right_opto_off;
+extern __fastram__ U8 zr1_pos_shake_left;
+extern __fastram__ U8 zr1_pos_shake_right;
 extern __fastram__ U8 zr1_last_position;
 extern __fastram__ U8 zr1_shake_speed;
 extern U8 zr1_shake_range;
@@ -129,8 +131,8 @@ void zr1_test_draw (void)
 
 		case SHAKE:
 			sprintf ("SPD: %s%d, RNG: %d",
-					zr1_shake_speed < 10 ? "0" : "", // FIXME %02d doesn't pad with leading zeros..
-					zr1_shake_speed,
+				zr1_shake_speed < 10 ? "0" : "", // FIXME %02d doesn't pad with leading zeros..
+				zr1_shake_speed,
 				zr1_shake_range
 			);
 			font_render_string_left (&font_var5, 0, LINE_2_Y, sprintf_buffer);
@@ -142,6 +144,11 @@ void zr1_test_draw (void)
 			font_render_string_right (&font_var5, 0, LINE_2_Y - FRSR_WORKAROUND, sprintf_buffer);
 
 			if (zr1_state == ZR1_SHAKE) {
+				sprintf("LSP:%d", zr1_pos_shake_left);
+				font_render_string_left (&font_var5, 0, LINE_3_Y, sprintf_buffer);
+				sprintf("RSP:%d", zr1_pos_shake_left);
+				font_render_string_right (&font_var5, 0, LINE_3_Y - FRSR_WORKAROUND, sprintf_buffer);
+
 				font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "SHAKING");
 			} else {
 				if (!zr1_calibrated) {
@@ -173,7 +180,7 @@ void zr1_test_thread (void)
 	for (;;)
 	{
 
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_50MS);
 
 		zr1_test_draw ();
 	}

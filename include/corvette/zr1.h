@@ -31,19 +31,19 @@ enum mech_zr1_calibration_codes {
 #define ZR1_SHAKE_SPEED_MIN 1
 #define ZR1_SHAKE_SPEED_MAX 10
 
-#define ZR1_SHAKE_SPEED_FASTEST 10
-#define ZR1_SHAKE_SPEED_FAST    9
-#define ZR1_SHAKE_SPEED_MEDIUM  8
-#define ZR1_SHAKE_SPEED_SLOW    7
-#define ZR1_SHAKE_SPEED_SLOWEST 6
+#define ZR1_SHAKE_SPEED_FASTEST 9
+#define ZR1_SHAKE_SPEED_FAST    8
+#define ZR1_SHAKE_SPEED_MEDIUM  7
+#define ZR1_SHAKE_SPEED_SLOW    6
+#define ZR1_SHAKE_SPEED_SLOWEST 5
 
 #define ZR1_SHAKE_SPEED_DEFAULT ZR1_SHAKE_SPEED_MEDIUM
 
-#define ZR1_RANGE_DIVIDER 5
+#define ZR1_RANGE_DIVIDER 10
 #define ZR1_SHAKE_RANGE_MIN 1
 #define ZR1_SHAKE_RANGE_MAX ZR1_RANGE_DIVIDER
 #define ZR1_SHAKE_RANGE_LARGEST_ARC ZR1_SHAKE_RANGE_MAX
 #define ZR1_SHAKE_RANGE_SMALLEST_ARC ZR1_SHAKE_RANGE_MIN // on a real machine the engine barely moves
 // on a real machine the value used should not cause the engine to slam into it's limits.
 // Ideally the optos shouldn't be activated either but they do get activated with the original Williams ROM on my machine
-#define ZR1_SHAKE_RANGE_DEFAULT 2
+#define ZR1_SHAKE_RANGE_DEFAULT 5
