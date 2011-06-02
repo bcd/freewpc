@@ -29,9 +29,13 @@
  *
  * @TODO use ZR-1 flasher so the player knows when and where the balls are going to come from.
  *
+ * @TODO reset all other players' locked_ball count to 0 at multiball start
+ *       I'ts not fair on other players, but no way round it as balls are ejected from zr-1 lock...
  */
 
 #include <freewpc.h>
+#include <corvette/zr1.h>
+#include <zr_1_low_rev_gate.h>
 
 __local__ U8 lock_count;
 
@@ -136,21 +140,56 @@ void zr_1_mb_light_torque_jackpot (void)
 	flag_on (FLAG_TORQUE_JACKPOT_LIT);
 }
 
-void zr_1_mb_start (void)
+void zr_1_mb_start_task( void )
 {
-	// TODO reset all other players' locked_ball count to 0 (not fair on other players, but no way round it as balls are ejected from zr-1 lock...)
-
 	flag_off (FLAG_ZR_1_MULTIBALL_LOCK_LIT);
+
+	device_enable_lock(device_entry (DEVNO_TROUGH));
+	device_enable_lock(device_entry (DEVNO_ZR1_POPPER));
+
+	zr1_set_shake_speed(ZR1_SHAKE_SPEED_MEDIUM);
+	zr1_shake();
+
+	deff_start (DEFF_ZR_1_MB_START);
+	flasher_pulse(FLASH_ZR_1_UNDERSIDE);
+	task_sleep_sec (1);
+	flasher_pulse(FLASH_ZR_1_UNDERSIDE);
+	task_sleep_sec (1);
+	flasher_pulse(FLASH_ZR_1_UNDERSIDE);
+	task_sleep_sec (1);
+	flasher_pulse(FLASH_ZR_1_UNDERSIDE);
+	task_sleep_sec (1);
+	flasher_pulse(FLASH_ZR_1_UNDERSIDE);
+	task_sleep_sec (1);
+
+	zr1_center();
+
 	flag_on (FLAG_ZR_1_MULTIBALL_RUNNING);
 	zr_1_mb_light_torque_jackpot ();
 	zr_1_mb_light_horsepower_jackpot ();
-	deff_start (DEFF_ZR_1_MB_START);
 
+	// start unlocking balls
 
-	task_sleep_sec (3);
+	flasher_pulse(FLASH_ZR_1_RAMP);
 	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
 	task_sleep_sec (3);
+
+	flasher_pulse(FLASH_ZR_1_RAMP);
 	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
+	task_sleep_sec (3);
+
+	flasher_pulse(FLASH_ZR_1_RAMP);
+	device_disable_lock(device_entry (DEVNO_ZR1_POPPER));
+	device_disable_lock(device_entry (DEVNO_TROUGH));
+
+	task_exit ();
+}
+
+void zr_1_mb_start (void)
+{
+	//
+
+	task_create_gid1 (GID_ZR_1_MB_START_TASK, zr_1_mb_start_task);
 }
 
 static void jackpot_check (void) {
@@ -226,6 +265,7 @@ static void zr_1_mb_award_lock ( void )
 	sound_start (ST_SAMPLE, SND_DITTY_07, SL_4S, PRI_GAME_QUICK5);
 	deff_start (DEFF_ZR_1_BALL_LOCKED);
 	if (unlock_from_engine) {
+		flasher_pulse(FLASH_ZR_1_RAMP);
 		sound_start (ST_SAMPLE, SND_BEEP_BEEP, SL_2S, PRI_GAME_QUICK5);
 	}
 }
