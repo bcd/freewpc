@@ -101,12 +101,12 @@ void chaos_jackpot_deff (void)
 void chaosmb_running_deff (void)
 {
 	U16 fno;
-	dmd_alloc_pair_clean ();
 	for (;;)
 	{
-		for (fno = IMG_CLOCK_START; fno <= IMG_CLOCK_END; fno += 2)
-		{
-			dmd_map_overlay ();
+//		for (fno = IMG_CLOCK_START; fno <= IMG_CLOCK_END; fno += 2)
+//		{
+			dmd_alloc_pair_clean ();
+	//		dmd_map_overlay ();
 			dmd_clean_page_low ();
 			font_render_string_center (&font_fixed6, 64, 4, "CHAOS MULTIBALL");
 			sprintf_current_score ();
@@ -128,13 +128,14 @@ void chaosmb_running_deff (void)
 				font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 				lamp_tristate_flash (LM_CLOCK_MILLIONS);
 			}
-			dmd_text_outline ();
-			dmd_alloc_pair ();
-			frame_draw (fno);
-			dmd_overlay_outline ();
+	//		dmd_text_outline ();
+	//		dmd_alloc_pair ();
+//			frame_draw (fno);
+			callset_invoke (score_overlay);
+	//		dmd_overlay_outline ();
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
-		}
+//		}
 	}
 
 }

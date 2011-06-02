@@ -244,12 +244,11 @@ static inline void draw_bttzwave (void)
 	amode_page_start ();
 	U16 fno;
 	U8 i;
-	dmd_alloc_pair_clean ();
 	for (i = 0; i < 5; i++)
 	{
 		for (fno = IMG_BTTZWAVE_START; fno <= IMG_BTTZWAVE_END; fno += 2)
 		{
-			dmd_alloc_pair ();
+			dmd_alloc_pair_clean ();
 			frame_draw (fno);
 			dmd_show2 ();
 			task_sleep (TIME_100MS);

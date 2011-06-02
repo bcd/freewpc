@@ -435,7 +435,7 @@ void ball_explode_deff (void)
 	dmd_alloc_pair ();
 	frame_draw (IMG_BALLEXPLODE_START);
 	dmd_show2 ();
-	task_sleep (TIME_200MS);
+	task_sleep (TIME_66MS);
 		
 	if (powerball_death == FALSE)	
 		sound_send (SND_EXPLOSION_3);

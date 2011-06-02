@@ -29,10 +29,12 @@
 
 extern bool skill_shot_enabled;
 bool sdss_enabled;
-U8 sdss_level;
+__local__ U8 sdss_level;
+score_t sdss_score;
 
 static void sdss_enable (void)
 {
+	score_zero (sdss_score);
 	sound_send (SND_LIGHT_SLOT_TIMED);
 	sdss_enabled = TRUE;
 	//disable_skill_shot (); ??
@@ -91,9 +93,9 @@ void usdss_awarded_deff (void)
 	
 	sprintf ("SHOT");
 	flash_text_deff (5, TIME_66MS);
-
+	
+	sprintf_score (sdss_score);
 	sound_send (SND_EXPLOSION_2);
-	sprintf ("%d0 MILLION", sdss_level);
 	flash_text_deff (10, TIME_200MS);
 	deff_exit ();
 }
@@ -111,9 +113,19 @@ void sdss_awarded_deff (void)
 	flash_text_deff (5, TIME_66MS);
 	
 	sound_send (SND_EXPLOSION_2);
-	sprintf ("%d0 MILLION", sdss_level);
+	sprintf_score (sdss_score);
 	flash_text_deff (10, TIME_200MS);
 	deff_exit ();
+}
+
+static void score_sdss (void)
+{
+	U8 i;
+	for (i = 0; i < sdss_level; i++)
+	{
+		score (SC_10M);
+		score_add (sdss_score, score_table[SC_10M]);
+	}
 }
 
 static void sdss_awarded (void)
@@ -121,8 +133,7 @@ static void sdss_awarded (void)
 	sdss_disable ();
 	task_kill_gid (GID_SDSS_READY);
 	bounded_increment (sdss_level, 5);
-	score_multiple (SC_10M, sdss_level);
-	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
+	score_sdss ();
 	deff_start (DEFF_SDSS_AWARDED);
 }
 
@@ -131,7 +142,7 @@ static void usdss_awarded (void)
 	task_kill_gid (GID_USDSS_APPROACHING);
 	task_kill_gid (GID_USDSS_READY);
 	timer_restart_free (GID_USDSS_AWARDED, TIME_4S);
-	score_multiple (SC_10M, sdss_level);
+	score_sdss ();
 	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 	deff_start (DEFF_USDSS_AWARDED);
 }
@@ -270,8 +281,12 @@ CALLSET_ENTRY (sdss, sw_left_button)
 
 }
 
-CALLSET_ENTRY (sdss, start_ball)
+CALLSET_ENTRY (sdss, start_player)
 {
 	sdss_level = 0;
+}
+
+CALLSET_ENTRY (sdss, start_ball)
+{
 	sdss_enabled = FALSE;
 }

@@ -255,8 +255,8 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	{
 		/* TODO, this may be buggy during sssmb */
 		/* skill shot has been missed or ball landed in plunger lane*/
-		if (timer_find_gid (GID_SDSS_READY)) 
-			deff_start (DEFF_SDSS_READY);
+		if (timer_kill_gid (GID_SDSS_APPROACHING)) 
+			callset_invoke (sdss_ready);
 		callset_invoke (skill_missed);
 	}
 	else if (timed_mode_running_p (&sslot_mode))

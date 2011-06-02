@@ -27,12 +27,13 @@
  * have triggered it.  During single ball play, it's better to kill the timer so
  * another sudden switch closure (slot -> Flipper -> Slot) doesn't get ignored
  */
-bool task_find_or_kill_gid (free_timer_id_t gid)
+inline bool task_find_or_kill_gid (task_gid_t gid)
 {
-	if (single_ball_play ())
-		return task_kill_gid (gid);
-	else
+	if (multi_ball_play ())
 		return task_find_gid (gid) ? TRUE : FALSE;
+	else
+		return task_kill_gid (gid);
+		//return task_find_gid (gid);
 }
 
 /* 

@@ -102,14 +102,14 @@ void autofire_monitor (void)
 	
 	/* Wait until allowed to kickout */
 	task_sleep (TIME_200MS);
-	while (kickout_locks || task_find_gid (GID_LOCK_KICKED))
+	while (kickout_locks || task_find_gid (GID_LOCK_KICKED) || deff_get_active () == DEFF_MB_START)
 		task_sleep (TIME_200MS);
 	
 	/* Open diverter again */
 	shooter_div_start ();
 	
 	/* Wait for the diverter to fully open before firing */
-	task_sleep (TIME_700MS);	
+	task_sleep (TIME_800MS);	
 	
 	/* Launch the ball */
 	if (feature_config.fire_empty == NO)
@@ -248,7 +248,7 @@ CALLSET_ENTRY (autofire, start_ball)
 {
 	/* TODO Bug in trough mech, multidrain can cause all other balls to be autofired 
 	 * live_balls > 0 even at the start of a ball*/
-//	live_balls = 0;
+	live_balls = 0;
 	autofire_request_count = 0;
 //	autofire_busy = FALSE;
 }

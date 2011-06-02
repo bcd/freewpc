@@ -144,13 +144,13 @@ void clock_millions_hit_deff (void)
 void clock_millions_mode_deff (void)
 {
 	U16 fno;
-	dmd_alloc_pair_clean ();
 	for (;;)
 	{
-		for (fno = IMG_CLOCK_START; fno <= IMG_CLOCK_END; fno += 2)
-		{
-			dmd_map_overlay ();
-			dmd_clean_page_low ();
+//		for (fno = IMG_CLOCK_START; fno <= IMG_CLOCK_END; fno += 2)
+//		{
+			dmd_alloc_pair_clean ();
+	//		dmd_map_overlay ();
+	//		dmd_clean_page_low ();
 	
 			font_render_string_center (&font_var5, 64, 5, "CLOCK MILLIONS");
 			sprintf_current_score ();
@@ -160,13 +160,15 @@ void clock_millions_mode_deff (void)
 			sprintf ("%d", clock_millions_mode_timer);
 			font_render_string (&font_var5, 2, 2, sprintf_buffer);
 			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-			dmd_text_outline ();
-			dmd_alloc_pair ();
-			frame_draw (fno);
-			dmd_overlay_outline ();
+	//		dmd_text_outline ();
+		//	dmd_alloc_pair ();
+			//frame_draw (fno);
+			dmd_copy_low_to_high ();
+			callset_invoke (score_overlay);
+		//	dmd_overlay_outline ();
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
-		}
+//		}
 	}
 }
 
