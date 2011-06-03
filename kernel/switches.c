@@ -409,19 +409,6 @@ void switch_sched_task (void)
 	const U8 sw = (U8)task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
-#ifdef DEBUGGER
-	if (sw < 72)
-	{
-	dbprintf ("SW: ");
-	sprintf_far_string (names_of_switches + sw);
-	dbprintf1 ();
-#ifdef DEBUG_SWITCH_NUMBER
-	dbprintf (" (%d) ", sw);
-#endif
-	dbprintf ("\n");
-	}
-#endif
-
 	/* For test mode : this lets it see what was the last switch
 	 * to be scheduled.  Used by the Switch Edges test. */
 	sw_last_scheduled = sw;
@@ -431,18 +418,12 @@ void switch_sched_task (void)
 	/* Don't service switches marked SW_IN_GAME at all, if we're
 	 * not presently in a game */
 	if ((swinfo->flags & SW_IN_GAME) && !in_game)
-	{
-		dbprintf ("Ignore: no game\n");
 		goto cleanup;
-	}
 
 	/* Don't service switches not marked SW_IN_TEST, unless we're
 	 * actually in test mode */
 	if (!(swinfo->flags & SW_IN_TEST) && in_test)
-	{
-		dbprintf ("Ignore: in test\n");
 		goto cleanup;
-	}
 
 	/* If the switch has an associated lamp, then flicker the lamp when
 	 * the switch triggers. */
@@ -460,10 +441,21 @@ void switch_sched_task (void)
 	if ((swinfo->sound != 0) && in_live_game)
 		sound_send (swinfo->sound);
 
-	/* If the switch declares a processing function, call it.
-	 * All functions are in the EVENT_PAGE. */
-	if (swinfo->fn)
-		callset_pointer_invoke (swinfo->fn);
+#ifdef DEBUGGER
+	if (swinfo->fn != null_function && sw < 72)
+	{
+		dbprintf ("SW: ");
+		sprintf_far_string (names_of_switches + sw);
+		dbprintf1 ();
+#ifdef DEBUG_SWITCH_NUMBER
+		dbprintf (" (%d) ", sw);
+#endif
+		dbprintf ("\n");
+	}
+#endif
+
+	/* Call the processing function.  All functions are in the EVENT_PAGE. */
+	callset_pointer_invoke (swinfo->fn);
 
 	/* If a switch is marked SW_PLAYFIELD and we're in a game,
 	 * then call the global playfield switch handler and mark
