@@ -101,7 +101,7 @@ void autofire_monitor (void)
 	}
 	
 	/* Wait until allowed to kickout */
-	task_sleep (TIME_200MS);
+	task_sleep (TIME_300MS);
 	while (kickout_locks || task_find_gid (GID_LOCK_KICKED) || deff_get_active () == DEFF_MB_START)
 		task_sleep (TIME_200MS);
 	
@@ -109,8 +109,7 @@ void autofire_monitor (void)
 	shooter_div_start ();
 	
 	/* Wait for the diverter to fully open before firing */
-	task_sleep (TIME_800MS);	
-	
+	task_sleep_sec (1);		
 	/* Launch the ball */
 	if (feature_config.fire_empty == NO)
 	{

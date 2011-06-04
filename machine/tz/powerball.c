@@ -413,8 +413,6 @@ void powerball_magnet_detect_task (void)
 {
 	/* Wait a little while for the ball to be grabbed */
 	task_sleep (TIME_600MS);
-//	pb_set_location (PB_IN_PLAY, 0);
-//	pb_announce ();
 	pb_detect_event (PF_PB_DETECTED);
 	task_exit ();
 }
