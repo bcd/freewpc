@@ -262,7 +262,7 @@ void zr1_state_calibrate_enter(void) {
 	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
 	zr1_reset_limits();
 
-	if (switch_poll_logical (SW_ZR_1_FULL_LEFT) && switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
+	if (switch_poll_logical (SW_ZR1_FULL_LEFT) && switch_poll_logical (SW_ZR1_FULL_RIGHT)) {
 		// Both engine optos cannot be on at the same time, probably F111 fuse, switch matrix problem, or one or more dirty/faulty optos.
 		zr1_calibration_failed(CC_CHECK_F111);
 		return;
@@ -290,7 +290,7 @@ void zr1_state_calibrate_run(void) {
 
 	switch(zr1_calibrate_state) {
 		case ZR1_CALIBRATE_CENTER:
-			if (switch_poll_logical (SW_ZR_1_FULL_LEFT) || switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
+			if (switch_poll_logical (SW_ZR1_FULL_LEFT) || switch_poll_logical (SW_ZR1_FULL_RIGHT)) {
 				// If either of the optos is still on then the engine is not in the center, bail!
 				zr1_calibration_failed(CC_CHECK_ENGINE);
 				break;
@@ -302,7 +302,7 @@ void zr1_state_calibrate_run(void) {
 		case ZR1_CALIBRATE_LEFT:
 			// move from center to the left until either the limit is hit or the left opto activates
 
-			if (switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
+			if (switch_poll_logical (SW_ZR1_FULL_LEFT)) {
 				// the position we're at is where the opto turned on.
 				zr1_pos_full_left_opto_on = zr1_last_position;
 
@@ -325,12 +325,12 @@ void zr1_state_calibrate_run(void) {
 			// move from left to right until either the limit is hit or the right opto activates
 
 			// if we've not already recorded the position at which the left opto turns off do that now
-			if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
+			if (!foundPos && !switch_poll_logical (SW_ZR1_FULL_LEFT)) {
 				zr1_pos_full_left_opto_off = zr1_last_position;
 				foundPos = TRUE;
 			}
 
-			if (switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
+			if (switch_poll_logical (SW_ZR1_FULL_RIGHT)) {
 				// the position we're at is where the opto turned on.
 				zr1_pos_full_right_opto_on = zr1_last_position;
 
@@ -352,7 +352,7 @@ void zr1_state_calibrate_run(void) {
 			// move from right to the center
 
 			// if we've not already recorded the position at which the right opto turns off do that now
-			if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
+			if (!foundPos && !switch_poll_logical (SW_ZR1_FULL_RIGHT)) {
 				zr1_pos_full_right_opto_off = zr1_last_position;
 				foundPos = TRUE;
 

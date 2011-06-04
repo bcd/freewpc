@@ -85,7 +85,7 @@
 #define SND_ENGINE_REV_04					MUSIC_SND(0x94) // Quick Rev
 #define SND_ENGINE_REV_05					MUSIC_SND(0x95) // Double Rev
 
-// Used during original rom's ZR-1 Multiball
+// Used during original rom's ZR1 Multiball
 #define SND_ENGINE_REV_THEN_IDLE_01			MUSIC_SND(0x96)
 #define SND_ENGINE_REV_THEN_IDLE_02			MUSIC_SND(0x97)
 #define SND_ENGINE_REV_THEN_IDLE_03			MUSIC_SND(0x98)
@@ -106,7 +106,7 @@
 
 #define SND_DITTY_04						MUSIC_SND(0xA6)
 #define SND_DITTY_05						MUSIC_SND(0xA7)
-#define SND_BEEP_BEEP						MUSIC_SND(0xA8) // ZR-1 Lock Release
+#define SND_BEEP_BEEP						MUSIC_SND(0xA8) // ZR1 Lock Release
 #define SND_DITTY_06						MUSIC_SND(0xA9)
 #define SND_BEEP							MUSIC_SND(0xAA) // Right Return Lane
 #define SND_ENGINE_REV_06					MUSIC_SND(0xAB) // Weird Rev
@@ -121,7 +121,7 @@
 #define SND_HIGH_LIFT_CAMS_AWARD			MUSIC_SND(0xB7)
 #define SND_CAR_AWARDED						MUSIC_SND(0xB8) // TODO I think.
 #define SND_ROUTE_66						MUSIC_SND(0xB9)
-#define SND_JACKPOT_02						MUSIC_SND(0xBA) // Jackpot - Similar to 0x9E, Used during ZR-1 Multiball
+#define SND_JACKPOT_02						MUSIC_SND(0xBA) // Jackpot - Similar to 0x9E, Used during ZR1 Multiball
 #define SND_BIG_BLOCK_AWARD					MUSIC_SND(0xBB)
 #define SND_BURNOUT_02						MUSIC_SND(0xBC) // Rev + Tire screech then engine fade into distance
 #define SND_EXTRA_BALL_AWARD				MUSIC_SND(0xBD)
@@ -131,7 +131,7 @@
 #define SND_JACKPOT_03						MUSIC_SND(0xC1) // Explosion Sound
 #define SND_AWARD_02						MUSIC_SND(0xC2) // Super Jackpot ?
 #define SND_AWARD_03						MUSIC_SND(0xC3)
-#define SND_AWARD_04						MUSIC_SND(0xC4) // ZR-1 Ball Lock
+#define SND_AWARD_04						MUSIC_SND(0xC4) // ZR1 Ball Lock
 #define SND_AWARD_05						MUSIC_SND(0xC5) // Garage door noise
 #define SND_AWARD_06						MUSIC_SND(0xC6)
 #define SND_KISS							MUSIC_SND(0xC7) // Catch me - Caught!
@@ -167,7 +167,7 @@
 #define SND_CROWD_CHEER_04					MUSIC_SND(0xEA)
 #define SND_CROWD_CHEER_05					MUSIC_SND(0xEB)
 #define SND_ROUTE_66_SIGN_POST_WOBBLE		MUSIC_SND(0xEC)
-#define SND_DITTY_07						MUSIC_SND(0xED) // ZR-1 ball lock without garage door sound, fades
+#define SND_DITTY_07						MUSIC_SND(0xED) // ZR1 ball lock without garage door sound, fades
 
 #define SND_WOOSH							MUSIC_SND(0xEE)
 #define SND_SPARK_PLUG_01					MUSIC_SND(0xF0) // Short

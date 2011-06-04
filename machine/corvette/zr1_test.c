@@ -111,14 +111,14 @@ void zr1_test_draw (void)
 			if (zr1_state == ZR1_CALIBRATE) {
 				font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "CALIBRATING");
 				sprintf ("L:%c %s%d",
-					(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? 'X' : '-'),
+					(switch_poll_logical (SW_ZR1_FULL_LEFT) ? 'X' : '-'),
 					zr1_pos_full_left_opto_off > 100 ? "" : (zr1_pos_full_left_opto_off < 10 ?  "00" : "0"), // FIXME %03d doesn't pad with leading zeros..
 					zr1_pos_full_left_opto_off
 				);
 				font_render_string_left (&font_var5, 0, LINE_3_Y, sprintf_buffer);
 
 				sprintf ("R:%c %s%d",
-					(switch_poll_logical (SW_ZR_1_FULL_RIGHT) ? 'X' : '-'),
+					(switch_poll_logical (SW_ZR1_FULL_RIGHT) ? 'X' : '-'),
 					zr1_pos_full_right_opto_off > 100 ? "" : (zr1_pos_full_right_opto_off < 10 ?  "00" : "0"), // FIXME %03d doesn't pad with leading zeros..
 					zr1_pos_full_right_opto_off
 				);
@@ -138,8 +138,8 @@ void zr1_test_draw (void)
 			font_render_string_left (&font_var5, 0, LINE_2_Y, sprintf_buffer);
 
 			sprintf ("L:%c R:%c",
-				(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? 'X' : '-'),
-				(switch_poll_logical (SW_ZR_1_FULL_RIGHT) ? 'X' : '-')
+				(switch_poll_logical (SW_ZR1_FULL_LEFT) ? 'X' : '-'),
+				(switch_poll_logical (SW_ZR1_FULL_RIGHT) ? 'X' : '-')
 			);
 			font_render_string_right (&font_var5, 0, LINE_2_Y - FRSR_WORKAROUND, sprintf_buffer);
 

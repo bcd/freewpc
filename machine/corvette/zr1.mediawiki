@@ -8,7 +8,7 @@ solenoids that move the LT5 engine.
 The AD7524 chip can be controlled by writing values to WPC_EXTBOARD2 (via the DIS1 line on J204/5) at 0x3FEC.
 
 The 74LS175 chip on the Motor Driver Master Board A-18532 at position U2 (incorrectly marked as a 74LS375 in the
-manual) on page 3-25 is used to enable or disable the ZR-1 solenoids completly.
+manual) on page 3-25 is used to enable or disable the ZR1 solenoids completly.
 
 The 74LS175 chip can be controlled by writing value to WPC_EXTBOARD3 (via the DIS2 line on J204/3) at 0x3FED.
 According to my electronics buddy he says that there's two pull-up resistors (R18/R19) which disable power to the
@@ -40,13 +40,13 @@ optos are not normally activated.
 === Calibration ===
 
 # Set the value to 127.
-# Slowly decrease the value until the "ZR-1 Full Left" opto is activated.
+# Slowly decrease the value until the "ZR1 Full Left" opto is activated.
 # Record the value and store as FULL LEFT OPTO ON.
-# Slowly increase the value until the "ZR-1 Full Left" opto is de-activated.
+# Slowly increase the value until the "ZR1 Full Left" opto is de-activated.
 # Record the value and store as FULL LEFT OPTO OFF.
-# Slowly increase the value until the "ZR-1 Full Right" opto is activated.
+# Slowly increase the value until the "ZR1 Full Right" opto is activated.
 # Record the value and store as FULL RIGHT OPTO ON.
-# Slowly decrease the value until the "ZR-1 Full Right" opto is de-activated.
+# Slowly decrease the value until the "ZR1 Full Right" opto is de-activated.
 # Record the value and store as FULL RIGHT OPTO OFF.
 # Calculate ENGINE CENTER 
 # Slowly decrease the value back to ENGINE CENTER.

@@ -19,6 +19,8 @@
  */
 
 /**
+ * @TODO sonny_jim says use kick_request instead of dev_enter.
+ *
  * @TODO It's possible to light the lock by doing a right orbit twice very quickly
  *       use event following instead of timed task or just adjust the timer value?
  *
@@ -27,21 +29,21 @@
  *       the inner loop and attempt a shot on the skid pad.
  *       currently the second ball is launched too quickly and gets it the way
  *
- * @TODO use ZR-1 flasher so the player knows when and where the balls are going to come from.
+ * @TODO use ZR1 flasher so the player knows when and where the balls are going to come from.
  *
  * @TODO reset all other players' locked_ball count to 0 at multiball start
- *       I'ts not fair on other players, but no way round it as balls are ejected from zr-1 lock...
+ *       I'ts not fair on other players, but no way round it as balls are ejected from ZR1 lock...
  */
 
 #include <freewpc.h>
 #include <corvette/zr1.h>
-#include <zr_1_low_rev_gate.h>
+#include <zr1_low_rev_gate.h>
 
 __local__ U8 lock_count;
 
-score_t zr_1_mb_jackpot_value;
+score_t zr1_mb_jackpot_value;
 
-void zr_1_ball_locked_deff (void)
+void zr1_ball_locked_deff (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
@@ -52,26 +54,26 @@ void zr_1_ball_locked_deff (void)
 	deff_exit ();
 }
 
-void zr_1_mb_lit_deff (void)
+void zr1_mb_lit_deff (void)
 {
 	speech_start(SPCH_HEAD_FOR_THE_LT5, SL_3S);
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
 	font_render_string_center (&font_term6, 64, 9, "SHOOT ENGINE");
-	font_render_string_center (&font_term6, 64, 21, "FOR ZR-1 MULTIBALL");
+	font_render_string_center (&font_term6, 64, 21, "FOR ZR1 MULTIBALL");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 }
 
-void zr_1_mb_start_deff (void)
+void zr1_mb_start_deff (void)
 {
-	sprintf ("ZR-1 MULTIBALL");
+	sprintf ("ZR1 MULTIBALL");
 	flash_and_exit_deff (30, TIME_100MS);
 }
 
 
-void zr_1_mb_running_deff (void)
+void zr1_mb_running_deff (void)
 {
 	for (;;)
 	{
@@ -96,100 +98,100 @@ void zr_1_mb_running_deff (void)
 }
 
 
-void zr_1_mb_trq_jp_deff (void)
+void zr1_mb_trq_jp_deff (void)
 {
 	sprintf ("TORQUE JACKPOT");
 	flash_and_exit_deff (20, TIME_100MS);
 }
 
-void zr_1_mb_hp_jp_deff (void)
+void zr1_mb_hp_jp_deff (void)
 {
 	sprintf ("H.P. JACKPOT");
 	flash_and_exit_deff (20, TIME_100MS);
 }
 
-void zr_1_mb_reset (void)
+void zr1_mb_reset (void)
 {
 	lock_count = 0;
-	flag_on (FLAG_ZR_1_MULTIBALL_LITE_LOCK_LIT);
-	flag_off (FLAG_ZR_1_MULTIBALL_LOCK_LIT);
-	flag_off (FLAG_ZR_1_MULTIBALL_RUNNING);
+	flag_on (FLAG_ZR1_MULTIBALL_LITE_LOCK_LIT);
+	flag_off (FLAG_ZR1_MULTIBALL_LOCK_LIT);
+	flag_off (FLAG_ZR1_MULTIBALL_RUNNING);
 	flag_off (FLAG_TORQUE_JACKPOT_LIT);
 	flag_off (FLAG_HORSEPOWER_JACKPOT_LIT);
 }
 
-void zr_1_mb_award_lite_lock (void)
+void zr1_mb_award_lite_lock (void)
 {
-	if (!flag_test (FLAG_ZR_1_MULTIBALL_LITE_LOCK_LIT)) {
+	if (!flag_test (FLAG_ZR1_MULTIBALL_LITE_LOCK_LIT)) {
 		return;
 	}
 
-	flag_on (FLAG_ZR_1_MULTIBALL_LOCK_LIT);
-	flag_off (FLAG_ZR_1_MULTIBALL_LITE_LOCK_LIT);
+	flag_on (FLAG_ZR1_MULTIBALL_LOCK_LIT);
+	flag_off (FLAG_ZR1_MULTIBALL_LITE_LOCK_LIT);
 
-	deff_start (DEFF_ZR_1_MB_LIT);
+	deff_start (DEFF_ZR1_MB_LIT);
 }
 
-void zr_1_mb_light_horsepower_jackpot (void)
+void zr1_mb_light_horsepower_jackpot (void)
 {
 	flag_on (FLAG_HORSEPOWER_JACKPOT_LIT);
 }
 
-void zr_1_mb_light_torque_jackpot (void)
+void zr1_mb_light_torque_jackpot (void)
 {
 	flag_on (FLAG_TORQUE_JACKPOT_LIT);
 }
 
-void zr_1_mb_start_task( void )
+void zr1_mb_start_task( void )
 {
-	flag_off (FLAG_ZR_1_MULTIBALL_LOCK_LIT);
+	flag_off (FLAG_ZR1_MULTIBALL_LOCK_LIT);
 
 	zr1_set_shake_speed(ZR1_SHAKE_SPEED_MEDIUM);
 	zr1_shake();
 
-	deff_start (DEFF_ZR_1_MB_START);
-	flasher_pulse(FLASH_ZR_1_UNDERSIDE);
+	deff_start (DEFF_ZR1_MB_START);
+	flasher_pulse(FLASH_ZR1_UNDERSIDE);
 	task_sleep_sec (1);
-	flasher_pulse(FLASH_ZR_1_UNDERSIDE);
+	flasher_pulse(FLASH_ZR1_UNDERSIDE);
 	task_sleep_sec (1);
-	flasher_pulse(FLASH_ZR_1_UNDERSIDE);
+	flasher_pulse(FLASH_ZR1_UNDERSIDE);
 	task_sleep_sec (1);
-	flasher_pulse(FLASH_ZR_1_UNDERSIDE);
+	flasher_pulse(FLASH_ZR1_UNDERSIDE);
 	task_sleep_sec (1);
-	flasher_pulse(FLASH_ZR_1_UNDERSIDE);
+	flasher_pulse(FLASH_ZR1_UNDERSIDE);
 	task_sleep_sec (1);
 
 	zr1_center();
 
-	flag_on (FLAG_ZR_1_MULTIBALL_RUNNING);
-	zr_1_mb_light_torque_jackpot ();
-	zr_1_mb_light_horsepower_jackpot ();
+	flag_on (FLAG_ZR1_MULTIBALL_RUNNING);
+	zr1_mb_light_torque_jackpot ();
+	zr1_mb_light_horsepower_jackpot ();
 
 	// start unlocking balls
 
-	flasher_pulse(FLASH_ZR_1_RAMP);
+	flasher_pulse(FLASH_ZR1_RAMP);
 	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
 	task_sleep_sec (3);
 
-	flasher_pulse(FLASH_ZR_1_RAMP);
+	flasher_pulse(FLASH_ZR1_RAMP);
 	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
 	task_sleep_sec (3);
 
-	flasher_pulse(FLASH_ZR_1_RAMP);
+	flasher_pulse(FLASH_ZR1_RAMP);
 	// third ball kicked out by returning from callset zr1_multiball dev_zr1_popper_enter
 
 	task_exit ();
 }
 
-void zr_1_mb_start (void)
+void zr1_mb_start (void)
 {
 	//
 
-	task_create_gid1 (GID_ZR_1_MB_START_TASK, zr_1_mb_start_task);
+	task_create_gid1 (GID_ZR1_MB_START_TASK, zr1_mb_start_task);
 }
 
 static void jackpot_check (void) {
-	if (!flag_test(FLAG_ZR_1_MULTIBALL_RUNNING)) {
+	if (!flag_test(FLAG_ZR1_MULTIBALL_RUNNING)) {
 		return;
 	}
 
@@ -197,14 +199,14 @@ static void jackpot_check (void) {
 		return; // jackpots still lit - player must collect both to relight jackpots
 	}
 
-	zr_1_mb_light_torque_jackpot();
-	zr_1_mb_light_horsepower_jackpot();
+	zr1_mb_light_torque_jackpot();
+	zr1_mb_light_horsepower_jackpot();
 
 
 	// TODO see if both hit very quickly, if so award super jackpot.
 }
 
-static void zr_1_mb_award_horsepower_jackpot (void)
+static void zr1_mb_award_horsepower_jackpot (void)
 {
 	if (!flag_test (FLAG_HORSEPOWER_JACKPOT_LIT)) {
 		return;
@@ -215,13 +217,13 @@ static void zr_1_mb_award_horsepower_jackpot (void)
 	score (SC_25M);
 	/* TODO increase horsepower jackpot value */
 
-	deff_start (DEFF_ZR_1_MB_HP_JP);
+	deff_start (DEFF_ZR1_MB_HP_JP);
 
 	jackpot_check();
 }
 
 
-static void zr_1_mb_award_torque_jackpot (void)
+static void zr1_mb_award_torque_jackpot (void)
 {
 	if (!flag_test (FLAG_TORQUE_JACKPOT_LIT)) {
 		return;
@@ -232,14 +234,14 @@ static void zr_1_mb_award_torque_jackpot (void)
 	score (SC_25M);
 	/* TODO increase torque jackpot value */
 
-	deff_start (DEFF_ZR_1_MB_TRQ_JP);
+	deff_start (DEFF_ZR1_MB_TRQ_JP);
 
 	jackpot_check();
 }
 
-static void zr_1_mb_award_lock ( void )
+static void zr1_mb_award_lock ( void )
 {
-	if (!flag_test (FLAG_ZR_1_MULTIBALL_LOCK_LIT)) {
+	if (!flag_test (FLAG_ZR1_MULTIBALL_LOCK_LIT)) {
 		return;
 	}
 
@@ -247,7 +249,7 @@ static void zr_1_mb_award_lock ( void )
 
 	if (lock_count == 3) {
 		// Note, we don't lock ball when 3rd ball goes in, if we did another ball would be automatically kicked out of the trough.
-		zr_1_mb_start();
+		zr1_mb_start();
 		return;
 	}
 
@@ -259,98 +261,98 @@ static void zr_1_mb_award_lock ( void )
 	}
 
 	sound_start (ST_SAMPLE, SND_DITTY_07, SL_4S, PRI_GAME_QUICK5);
-	deff_start (DEFF_ZR_1_BALL_LOCKED);
+	deff_start (DEFF_ZR1_BALL_LOCKED);
 	if (unlock_from_engine) {
-		flasher_pulse(FLASH_ZR_1_RAMP);
+		flasher_pulse(FLASH_ZR1_RAMP);
 		sound_start (ST_SAMPLE, SND_BEEP_BEEP, SL_2S, PRI_GAME_QUICK5);
 	}
 }
 
-CALLSET_ENTRY (zr_1_multiball, left_orbit_shot, left_orbit_to_rollover_shot)
+CALLSET_ENTRY (zr1_multiball, left_orbit_shot, left_orbit_to_rollover_shot)
 {
-	if (flag_test (FLAG_ZR_1_MULTIBALL_RUNNING)) {
+	if (flag_test (FLAG_ZR1_MULTIBALL_RUNNING)) {
 		return;
 	}
 
-	if (flag_test (FLAG_ZR_1_MULTIBALL_LITE_LOCK_LIT)) {
-		zr_1_mb_award_lite_lock();
+	if (flag_test (FLAG_ZR1_MULTIBALL_LITE_LOCK_LIT)) {
+		zr1_mb_award_lite_lock();
 	}
 }
 
-CALLSET_ENTRY (zr_1_multiball, dev_zr1_popper_enter)
+CALLSET_ENTRY (zr1_multiball, dev_zr1_popper_enter)
 {
-	if (flag_test (FLAG_ZR_1_MULTIBALL_RUNNING)) {
+	if (flag_test (FLAG_ZR1_MULTIBALL_RUNNING)) {
 		return;
 	}
 
-	zr_1_mb_award_lock ();
+	zr1_mb_award_lock ();
 
-	while (task_find_gid (GID_ZR_1_MB_START_TASK)) {
+	while (task_find_gid (GID_ZR1_MB_START_TASK)) {
 		task_sleep_sec(1);
 	}
 
 }
 
-CALLSET_ENTRY (zr_1_multiball, skid_pad_shot)
+CALLSET_ENTRY (zr1_multiball, skid_pad_shot)
 {
-	if (!flag_test (FLAG_ZR_1_MULTIBALL_RUNNING)) {
+	if (!flag_test (FLAG_ZR1_MULTIBALL_RUNNING)) {
 		return;
 	}
-	zr_1_mb_award_torque_jackpot ();
+	zr1_mb_award_torque_jackpot ();
 }
 
-CALLSET_ENTRY (zr_1_multiball, inner_loop_shot)
+CALLSET_ENTRY (zr1_multiball, inner_loop_shot)
 {
-	if (!flag_test (FLAG_ZR_1_MULTIBALL_RUNNING)) {
+	if (!flag_test (FLAG_ZR1_MULTIBALL_RUNNING)) {
 		return;
 	}
 
-	zr_1_mb_award_horsepower_jackpot ();
+	zr1_mb_award_horsepower_jackpot ();
 }
 
-CALLSET_ENTRY (zr_1_multiball, lamp_update)
+CALLSET_ENTRY (zr1_multiball, lamp_update)
 {
-	lamp_flash_if (LM_LITE_LOCK, flag_test (FLAG_ZR_1_MULTIBALL_LITE_LOCK_LIT));
-	lamp_flash_if (LM_ZR_1_RAMP_LOCK, flag_test (FLAG_ZR_1_MULTIBALL_LOCK_LIT));
+	lamp_flash_if (LM_LITE_LOCK, flag_test (FLAG_ZR1_MULTIBALL_LITE_LOCK_LIT));
+	lamp_flash_if (LM_ZR1_RAMP_LOCK, flag_test (FLAG_ZR1_MULTIBALL_LOCK_LIT));
 	lamp_flash_if (LM_INNER_LOOP_JACKPOT, flag_test (FLAG_HORSEPOWER_JACKPOT_LIT));
 	lamp_flash_if (LM_SKID_PAD_JACKPOT, flag_test (FLAG_TORQUE_JACKPOT_LIT));
 }
 
-CALLSET_ENTRY (zr_1_multiball, device_update)
+CALLSET_ENTRY (zr1_multiball, device_update)
 {
 	// TODO other modes will want to change (open) the up rev gate, perform suitable mode check here (e.g. if mode set then bail and let mode control it instead)
 
-	// close the ZR_1 upper 'rev' gate when zr1 multiball lock is lit
-	if (flag_test (FLAG_ZR_1_MULTIBALL_LOCK_LIT)) {
-		flag_off (FLAG_ZR_1_UP_REV_GATE_OPENED);
+	// close the ZR1 upper 'rev' gate when zr1 multiball lock is lit
+	if (flag_test (FLAG_ZR1_MULTIBALL_LOCK_LIT)) {
+		flag_off (FLAG_ZR1_UP_REV_GATE_OPENED);
 	} else {
-		flag_on (FLAG_ZR_1_UP_REV_GATE_OPENED);
+		flag_on (FLAG_ZR1_UP_REV_GATE_OPENED);
 	}
 }
 
-CALLSET_ENTRY (zr_1_multiball, music_refresh)
+CALLSET_ENTRY (zr1_multiball, music_refresh)
 {
-	if (flag_test (FLAG_ZR_1_MULTIBALL_RUNNING))
+	if (flag_test (FLAG_ZR1_MULTIBALL_RUNNING))
 	{
 		music_request (MUS_MULTIBALL, PRI_GAME_MODE3);
 	}
 }
 
-CALLSET_ENTRY (zr_1_multiball, display_update)
+CALLSET_ENTRY (zr1_multiball, display_update)
 {
-	if (flag_test (FLAG_ZR_1_MULTIBALL_RUNNING))
-		deff_start_bg (DEFF_ZR_1_MB_RUNNING, PRI_GAME_MODE3);
+	if (flag_test (FLAG_ZR1_MULTIBALL_RUNNING))
+		deff_start_bg (DEFF_ZR1_MB_RUNNING, PRI_GAME_MODE3);
 }
 
-CALLSET_ENTRY (zr_1_multiball, start_player, single_ball_play)
+CALLSET_ENTRY (zr1_multiball, start_player, single_ball_play)
 {
-	zr_1_mb_reset ();
+	zr1_mb_reset ();
 }
 
-CALLSET_ENTRY (zr_1_multiball, start_ball) {
+CALLSET_ENTRY (zr1_multiball, start_ball) {
 	// update the locked_balls count in case another player started a multiball
-	U8 zr_1_ball_count = device_recount (device_entry (DEVNO_ZR1_POPPER));
-	if (lock_count > zr_1_ball_count) {
-		lock_count = zr_1_ball_count;
+	U8 zr1_ball_count = device_recount (device_entry (DEVNO_ZR1_POPPER));
+	if (lock_count > zr1_ball_count) {
+		lock_count = zr1_ball_count;
 	}
 }
