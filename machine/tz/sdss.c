@@ -24,9 +24,14 @@
 /* Super Duper Skill Shot rules:
  * Hold down right flipper and launch ball straight into slot
  * You then get 4 seconds to shoot the left ramp
- * If sucessful
+ * If sucessfull, shoot the right ramp to get another 10M * Level
  */
 
+/* GID_SDSS_APPROACHING refers to the time between the skill shot and the slot
+ * GID_SDSS_READY refers to when the SDSS is ready to be collected
+ * GID_USDSS_APPROACHING refers to when the ball is travelling from the leftramp
+ * to the inlane
+ */
 extern bool skill_shot_enabled;
 bool sdss_enabled;
 __local__ U8 sdss_level;
@@ -37,15 +42,14 @@ static void sdss_enable (void)
 	score_zero (sdss_score);
 	sound_send (SND_LIGHT_SLOT_TIMED);
 	sdss_enabled = TRUE;
-	//disable_skill_shot (); ??
 }
 
 static void sdss_disable (void)
 {
 	sdss_enabled = FALSE;
-	deff_stop (DEFF_SDSS_READY);
-	task_kill_gid (GID_SDSS_SWITCH_MONITOR);
+	task_kill_gid (GID_SDSS_READY);
 	task_kill_gid (GID_SDSS_BUTTON_MONITOR);
+	lamp_tristate_off (LM_SUPER_SKILL);
 }
 
 static void flash_text_deff (U8 flash_count, task_ticks_t flash_delay)
@@ -66,9 +70,12 @@ void sdss_ready_deff (void)
 	flash_text_deff (5, TIME_33MS);
 	sprintf ("DUPER");
 	flash_text_deff (5, TIME_33MS);
+	sound_send (SND_SUPER_SKILL);
 	sprintf ("SKILL");
 	flash_text_deff (10, TIME_33MS);
 	sprintf ("SHOT");
+	flash_text_deff (10, TIME_33MS);
+	sprintf ("LEVEL %d", sdss_level + 1);
 	flash_text_deff (15, TIME_33MS);
 	deff_exit ();
 }
@@ -131,7 +138,6 @@ static void score_sdss (void)
 static void sdss_awarded (void)
 {
 	sdss_disable ();
-	task_kill_gid (GID_SDSS_READY);
 	bounded_increment (sdss_level, 5);
 	score_sdss ();
 	deff_start (DEFF_SDSS_AWARDED);
@@ -164,41 +170,42 @@ CALLSET_ENTRY (sdss, left_ramp_exit)
 
 CALLSET_ENTRY (sdss, sw_right_ramp)
 {
-	task_kill_gid (GID_SDSS_READY);
+	sdss_disable ();
 	if (task_kill_gid (GID_USDSS_READY))
 		usdss_awarded ();
+}
+
+static void sdss_ready_task (void)
+{
+	lamp_tristate_flash (LM_SUPER_SKILL);
+	deff_start (DEFF_SDSS_READY);
+	/* Wait for ten seconds and then disable */
+	task_sleep_sec (10);
+	sdss_disable ();
+	task_exit ();
 }
 
 /* called from slot.c */
 CALLSET_ENTRY (sdss, sdss_ready)
 {
-	timer_restart_free (GID_SDSS_READY, TIME_10S);
-	deff_start (DEFF_SDSS_READY);
+	task_create_gid (GID_SDSS_READY, sdss_ready_task);
 }
 
 CALLSET_ENTRY (sdss, sw_skill_top)
 {
 	if (sdss_enabled && skill_shot_enabled)
 	{
-		sdss_enabled = FALSE;
+		//sdss_enabled = FALSE;
 		timer_restart_free (GID_SDSS_APPROACHING, TIME_4S);
 		task_kill_gid (GID_SDSS_BUTTON_MONITOR);
-		task_kill_gid (GID_SDSS_SWITCH_MONITOR);
 	}
-}
-
-static void sdss_switch_monitor (void)
-{
-	task_sleep_sec (2);
-	sdss_disable ();
-	task_exit ();
 }
 
 /* Ball is rolling back down, kill sdss */
 CALLSET_ENTRY (sdss, sw_skill_center, sw_skill_bottom)
 {
-	if (sdss_enabled)
-		task_recreate_gid (GID_SDSS_SWITCH_MONITOR, sdss_switch_monitor);
+	if (task_kill_gid (GID_SDSS_APPROACHING))
+		sdss_disable ();
 }
 
 static bool sdss_ready_to_enable (void)

@@ -197,7 +197,7 @@ static void maybe_ramp_divert (void)
 
 CALLSET_ENTRY (left_ramp, lamp_update)
 {
-	if (timer_find_gid (GID_TNF_READY) || task_find_gid (GID_SDSS_READY))
+	if (timer_find_gid (GID_TNF_READY))
 		lamp_tristate_flash (LM_BONUS_X);
 	else
 		lamp_tristate_off (LM_BONUS_X);
@@ -213,11 +213,12 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 {
 	device_switch_can_follow (left_ramp_exit, inlane2, TIME_1S);
 	/* Tell the other bits of code that a left ramp has been completed */
+	callset_invoke (left_ramp_exit);
 	maybe_ramp_divert ();
 	sssmb_left_ramp_exit ();
-	mball_left_ramp_exit ();
+	if (!task_find_gid (GID_USDSS_APPROACHING))
+		mball_left_ramp_exit ();
 	chaosmb_left_ramp_exit ();
-	callset_invoke (left_ramp_exit);
 	
 	/* Add two ramps if hit from the right inlane */
 	if (task_find_gid (GID_LEFT_RAMP))
