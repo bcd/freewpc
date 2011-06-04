@@ -239,7 +239,8 @@ Route 66 Popper: Route 66 Kickout, Route 66 Kickout
 #############################################################
 
 [adjustments]
-Ball Saver: yes_no, YES
+#TODO allow and enable the ball saver when it doesn't save balls during multi-ball on a machine with no autofire
+Ball Saver: yes_no, NO
 
 Enable ZR1_Engine: yes_no, YES
 Enable Racetrack: yes_no, YES
@@ -298,8 +299,7 @@ ZR1 Solenoids Powered:
 Racetrack Working:
 
 [deffs]
-
-ZR1 Ball Locked: page(MACHINE_PAGE), PRI_GAME_QUICK4
+ZR1 Ball Locked: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_PAUSE
 ZR1 MB Lit: page(MACHINE_PAGE), PRI_GAME_QUICK5
 ZR1 MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 ZR1 MB Running: runner, page(MACHINE_PAGE), PRI_GAME_MODE5

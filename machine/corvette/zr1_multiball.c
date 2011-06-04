@@ -169,24 +169,19 @@ void zr1_mb_start_task( void )
 
 	// start unlocking balls
 
-	flasher_pulse(FLASH_ZR1_RAMP);
 	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
+
+	task_sleep_sec (3);
+	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
+
 	task_sleep_sec (3);
 
-	flasher_pulse(FLASH_ZR1_RAMP);
-	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
-	task_sleep_sec (3);
-
-	flasher_pulse(FLASH_ZR1_RAMP);
 	// third ball kicked out by returning from callset zr1_multiball dev_zr1_popper_enter
-
 	task_exit ();
 }
 
 void zr1_mb_start (void)
 {
-	//
-
 	task_create_gid1 (GID_ZR1_MB_START_TASK, zr1_mb_start_task);
 }
 
@@ -248,23 +243,18 @@ static void zr1_mb_award_lock ( void )
 	lock_count++;
 
 	if (lock_count == 3) {
-		// Note, we don't lock ball when 3rd ball goes in, if we did another ball would be automatically kicked out of the trough.
 		zr1_mb_start();
 		return;
 	}
 
-	U8 unlock_from_engine = 0;
-	// always leave at a ball in the trough - locking a ball causes one to be kicked out of the trough
-	if (device_recount (device_entry (DEVNO_TROUGH)) > 1 ) {
-		device_lock_ball (device_entry (DEVNO_ZR1_POPPER));
-		unlock_from_engine = 1;
-	}
-
 	sound_start (ST_SAMPLE, SND_DITTY_07, SL_4S, PRI_GAME_QUICK5);
 	deff_start (DEFF_ZR1_BALL_LOCKED);
-	if (unlock_from_engine) {
-		flasher_pulse(FLASH_ZR1_RAMP);
-		sound_start (ST_SAMPLE, SND_BEEP_BEEP, SL_2S, PRI_GAME_QUICK5);
+
+	U8 unlock_from_trough = (device_recount (device_entry (DEVNO_ZR1_POPPER)) >= lock_count);
+
+	if (unlock_from_trough) {
+		// locking a ball in the engine causes a new ball to be placed in the trough
+		device_lock_ball (device_entry (DEVNO_ZR1_POPPER));
 	}
 }
 
@@ -279,18 +269,42 @@ CALLSET_ENTRY (zr1_multiball, left_orbit_shot, left_orbit_to_rollover_shot)
 	}
 }
 
-CALLSET_ENTRY (zr1_multiball, dev_zr1_popper_enter)
+CALLSET_BOOL_ENTRY (zr1_multiball, dev_zr1_popper_kick_request)
 {
 	if (flag_test (FLAG_ZR1_MULTIBALL_RUNNING)) {
+		return TRUE;
+	}
+
+	if (!task_find_gid (GID_ZR1_MB_START_TASK)) {
+		return TRUE;
+	}
+
+	 // hold the kickout for a bit.
+	return FALSE;
+}
+
+CALLSET_ENTRY (zr1_multiball, dev_zr1_popper_kick_attempt) {
+	// TODO use custom flasher timings
+	flasher_pulse(FLASH_ZR1_RAMP);
+	task_sleep(TIME_100MS);
+	flasher_pulse(FLASH_ZR1_RAMP);
+	task_sleep(TIME_100MS);
+	flasher_pulse(FLASH_ZR1_RAMP);
+	task_sleep(TIME_100MS);
+	flasher_pulse(FLASH_ZR1_RAMP);
+	task_sleep(TIME_100MS);
+}
+
+CALLSET_ENTRY (zr1_multiball, dev_zr1_popper_kick_success) {
+	if (flag_test(FLAG_ZR1_MULTIBALL_RUNNING)) {
 		return;
 	}
 
+	sound_start (ST_SAMPLE, SND_BEEP_BEEP, SL_2S, PRI_GAME_QUICK5);
+}
+
+CALLSET_ENTRY (zr1_multiball, dev_zr1_popper_enter) {
 	zr1_mb_award_lock ();
-
-	while (task_find_gid (GID_ZR1_MB_START_TASK)) {
-		task_sleep_sec(1);
-	}
-
 }
 
 CALLSET_ENTRY (zr1_multiball, skid_pad_shot)
