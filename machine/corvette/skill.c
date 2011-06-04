@@ -60,6 +60,8 @@ void skillshot_rollover_enable( void ) {
 	global_flag_on(GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED);
 	flag_off (FLAG_LOOP_GATE_OPENED);
 
+	// kill any existing task, just to make sure
+	task_kill_gid (GID_SKILLSHOT_ROLLOVER_TIMER);
 	task_create_gid1 (GID_SKILLSHOT_ROLLOVER_TIMER, skillshot_rollover_timer);
 }
 
@@ -145,9 +147,12 @@ CALLSET_ENTRY (skill, sw_right_button) {
 	callset_invoke( lamp_update );
 }
 
+CALLSET_ENTRY (skill, end_ball, stop_game) {
+	skillshot_rollover_disable();
+}
 
 CALLSET_ENTRY (skill, serve_ball) {
-	// TODO skillshot menu - let the user select if they want to enable the rollover skillshot or the skid pad ramp super skillshot.
+	// IDEA skillshot menu - let the user select if they want to enable the rollover skillshot or the skid pad ramp super skillshot.
 	skillshot_rollover_enable();
 }
 
