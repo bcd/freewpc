@@ -651,6 +651,7 @@ static void collect_extra_ball_task (void)
 
 CALLSET_ENTRY (mball, dev_lock_enter)
 {
+	callset_invoke (pb_lock_enter);
 	//task_create_anon (collect_extra_ball_task);
 	score (SC_50K);
 	sound_send (SND_ROBOT_FLICKS_GUN);

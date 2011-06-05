@@ -458,7 +458,7 @@ CALLSET_ENTRY (pb_detect, dev_trough_enter)
 	pb_poll_trough ();
 }
 
-CALLSET_ENTRY (pb_detect, dev_lock_enter)
+CALLSET_ENTRY (pb_detect, pb_lock_enter)
 {
 	pb_container_enter (PB_IN_LOCK, DEVNO_LOCK);
 }

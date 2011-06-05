@@ -126,6 +126,7 @@ struct adjustment standard_adjustments[] = {
 	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, GAME_RESTART_SLOW, &system_config.game_restart },
 	{ "CHASE BALL", &yes_no_value, YES, &system_config.allow_chase_ball },
+	{ "LOWEST GOES NEXT", &yes_no_value, NO, &system_config.lowest_goes_next },
 	{ NULL, NULL, 0, NULL },
 };
 

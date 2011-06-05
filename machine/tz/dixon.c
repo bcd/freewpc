@@ -54,12 +54,12 @@ static inline void anti_cradle_monitor (U8 switch_number, U8 timeout)
 			break;
 		}
 		/* Warn the player 2 seconds before disabling*/
-		else if (timeout == 6)
+		else if (timeout == 4)
 		{
 			sound_send (SND_TILT_WARNING);
 			deff_start (DEFF_TILT_WARNING);
 		}
-		else if (timeout == 8)
+		else if (timeout == 6 || timeout == 2)
 			sound_send (SND_TILT_WARNING);
 	}
 }
