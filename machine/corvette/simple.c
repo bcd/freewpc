@@ -41,7 +41,11 @@ CALLSET_ENTRY (simple, device_update) {
 	} else {
 		diverter_stop();
 	}
+}
 
+CALLSET_ENTRY (simple, start_ball) {
+	flag_on (FLAG_LOOP_GATE_OPENED);
+	flag_off (FLAG_DIVERTER_OPENED);
 }
 
 CALLSET_ENTRY (simple, end_ball, tilt) {

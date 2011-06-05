@@ -18,15 +18,52 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/**
- * @TODO Currently on a real machine the skill shot is turned off after the player launches a ball
- *       Ignore more switch presses?
- *
- * @TODO The flashing lamp for the active rollover isn't changed quickly enough.
- *       There can be up to about 1 second before the state is reflected by the lamp.
- *       Use something like: lamplist_rotate_previous (LAMPLIST_INLANES, lamp_matrix) instead?
- */
 #include <freewpc.h>
+
+//
+// SKIDPAD SKILLSHOT
+//
+
+void skillshot_skidpad_disable( void ) {
+	lamp_tristate_off (LM_SKID_PAD_ARROW);
+	lamp_tristate_off (LM_SKID_PAD_JACKPOT);
+
+	task_kill_gid (GID_SKILLSHOT_SKIDPAD_TIMER);
+}
+
+void skillshot_skidpad_timer( void ) {
+	task_sleep_sec (10);
+	skillshot_skidpad_disable();
+	task_exit ();
+}
+
+void skillshot_skidpad_enable( void ) {
+	// kill any existing task, just to make sure
+	task_kill_gid (GID_SKILLSHOT_SKIDPAD_TIMER);
+	task_create_gid1 (GID_SKILLSHOT_SKIDPAD_TIMER, skillshot_skidpad_timer);
+}
+
+
+CALLSET_ENTRY(skillshot_skidpad, skid_pad_shot) {
+	if (!task_find_gid (GID_SKILLSHOT_SKIDPAD_TIMER)) {
+		return;
+	}
+	skillshot_skidpad_disable();
+	score (SC_20M);
+}
+
+CALLSET_ENTRY (skillshot_skidpad, lamp_update)
+{
+	if (!task_find_gid(GID_SKILLSHOT_SKIDPAD_TIMER)) {
+		return;
+	}
+
+	lamp_tristate_flash (LM_SKID_PAD_ARROW);
+	lamp_tristate_flash (LM_SKID_PAD_JACKPOT);
+}
+//
+// ROLLOVER SKILLSHOT
+//
 
 U8 current_rollover; // there are 3
 
@@ -41,15 +78,12 @@ void skillshot_rollover_disable( void ) {
 	lamp_tristate_off (LM_MIDDLE_ROLLOVER);
 	lamp_tristate_off (LM_RIGHT_ROLLOVER);
 
-	// open the loop gate when the first pf switch is hit
-	//task_sleep_sec(1);
 	flag_on (FLAG_LOOP_GATE_OPENED);
 
 	task_kill_gid (GID_SKILLSHOT_ROLLOVER_TIMER);
 }
 
-void skillshot_rollover_timer( void )
-{
+void skillshot_rollover_timer( void ) {
 	task_sleep_sec (10);
 	skillshot_rollover_disable();
 	task_exit ();
@@ -78,7 +112,7 @@ void award_rollover_skillshot(U8 rollover_switch) {
 	skillshot_rollover_disable();
 }
 
-CALLSET_ENTRY (skill, lamp_update)
+CALLSET_ENTRY (skillshot_rollover, lamp_update)
 {
 	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED)) {
 		return;
@@ -89,22 +123,22 @@ CALLSET_ENTRY (skill, lamp_update)
 	lamp_flash_if (LM_RIGHT_ROLLOVER, current_rollover == SW_RIGHT_ROLLOVER);
 }
 
-CALLSET_ENTRY (skill, sw_left_rollover)
+CALLSET_ENTRY (skillshot_rollover, sw_left_rollover)
 {
 	award_rollover_skillshot(SW_LEFT_ROLLOVER);
 }
 
-CALLSET_ENTRY (skill, sw_middle_rollover)
+CALLSET_ENTRY (skillshot_rollover, sw_middle_rollover)
 {
 	award_rollover_skillshot(SW_MIDDLE_ROLLOVER);
 }
 
-CALLSET_ENTRY (skill, sw_right_rollover)
+CALLSET_ENTRY (skillshot_rollover, sw_right_rollover)
 {
 	award_rollover_skillshot(SW_RIGHT_ROLLOVER);
 }
 
-CALLSET_ENTRY (skill, sw_left_button) {
+CALLSET_ENTRY (skillshot_rollover, sw_left_button) {
 	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED)) {
 		return;
 	}
@@ -126,7 +160,7 @@ CALLSET_ENTRY (skill, sw_left_button) {
 	callset_invoke( lamp_update );
 }
 
-CALLSET_ENTRY (skill, sw_right_button) {
+CALLSET_ENTRY (skillshot_rollover, sw_right_button) {
 	if (!global_flag_test (GLOBAL_FLAG_SKILLSHOT_ROLLOVER_ENABLED)) {
 		return;
 	}
@@ -147,13 +181,157 @@ CALLSET_ENTRY (skill, sw_right_button) {
 	callset_invoke( lamp_update );
 }
 
-CALLSET_ENTRY (skill, end_ball, stop_game) {
+//
+// SKILL MENU
+//
+
+U8 skill_menu_enabled;
+enum skill_menu_selections {
+	SKILL_MIN = 0,
+	SKILL_ROLLOVER = SKILL_MIN,
+	SKILL_SKIDPAD,
+	SKILL_QUICK_MB,
+	SKILL_MAX = SKILL_QUICK_MB
+};
+enum skill_menu_selections skill_menu_selection;
+
+void skill_menu_draw(void) {
+	dbprintf ("skill_menu: drawing menu, selection:%d\n", skill_menu_selection);
+	dmd_alloc_low_clean ();
+	//dmd_draw_border (dmd_low_buffer);
+	// 5 = y offset, 5 = height, 2 = space between lines
+	font_render_string_center (&font_var5, 32, 6, "SELECT");
+	font_render_string_center (&font_var5, 32, 6 + 5 + 2, "SKILL");
+	font_render_string_center (&font_var5, 32, 6 + 5 + 5 + 2 + 2, "SHOT");
+
+	// 5 = y offset, 5 = height, 4 = space between lines
+	// bigger gap between lines, so we can draw box around them
+	// TODO draw boxes round each item
+	font_render_string_center (&font_var5, 96, 5, "ROLLOVER");
+	font_render_string_center (&font_var5, 96, 13, "SKIDPAD");
+	font_render_string_center (&font_var5, 96, 4 + 5 + 5 + 4 + 3, "DRAGRACE");
+
+	font_render_string_center (&font_var5, 64, 29, "USE FLIPPERS TO SELECT");
+
+	// TODO flash box around selected item
+	switch (skill_menu_selection) {
+		case SKILL_ROLLOVER:
+			font_render_string_center (&font_var5, 70, 5, ">");
+			font_render_string_center (&font_var5, 122, 5, "<");
+		break;
+		case SKILL_SKIDPAD:
+			font_render_string_center (&font_var5, 70, 13, ">");
+			font_render_string_center (&font_var5, 122, 13, "<");
+		break;
+		case SKILL_QUICK_MB:
+			font_render_string_center (&font_var5, 70, 3 + 6 + 6 + 4 + 2, ">");
+			font_render_string_center (&font_var5, 122, 3 + 6 + 6 + 4 + 2, "<");
+		break;
+	}
+
+
+	dmd_show_low ();
+}
+
+void skill_menu_deff (void)
+{
+	dbprintf ("skill_menu_deff, enabled: %d\n", skill_menu_enabled);
+	do {
+		skill_menu_draw();
+		task_sleep(TIME_250MS);
+	} while (skill_menu_enabled == 1);
+	dbprintf ("skill_menu_deff: exit, selection:%d\n", skill_menu_selection);
+	deff_exit ();
+}
+
+void skill_menu_start(void) {
+	skill_menu_enabled = 1;
+	skill_menu_selection = SKILL_ROLLOVER;
+	dbprintf ("skill_menu_start\n");
+	deff_start (DEFF_SKILL_MENU);
+}
+
+void skill_menu_select(void) {
+	skill_menu_enabled = 0;
+	dbprintf ("skill_menu_select: selection:%d\n", skill_menu_selection);
+	switch(skill_menu_selection) {
+		case SKILL_ROLLOVER:
+			skillshot_rollover_enable();
+		break;
+		case SKILL_SKIDPAD:
+			skillshot_skidpad_enable();
+		default:
+			// TODO implement remaining skill-shot modes
+		break;
+	}
+}
+
+void skillshot_disable(void) {
 	skillshot_rollover_disable();
+	skill_menu_enabled = 0;
+}
+
+CALLSET_ENTRY (skill_menu, display_update) {
+	// the volume up/down, status reports, etc will cancel the menu, show it again if we should.
+	if (skill_menu_enabled == 1 && deff_get_active() != DEFF_SKILL_MENU) {
+		deff_start (DEFF_SKILL_MENU);
+	}
+}
+
+CALLSET_ENTRY (skill_menu, sw_left_button) {
+	if (skill_menu_enabled == 0) {
+		return;
+	}
+	if (skill_menu_selection == SKILL_MIN) {
+		skill_menu_selection = SKILL_MAX;
+	} else {
+		skill_menu_selection--;
+	}
+	dbprintf ("skill_menu: left, selection: %d\n", skill_menu_selection);
+}
+
+CALLSET_ENTRY (skill_menu, sw_right_button) {
+	if (skill_menu_enabled == 0) {
+		return;
+	}
+	if (skill_menu_selection == SKILL_MAX) {
+		skill_menu_selection = SKILL_MIN;
+	} else {
+		skill_menu_selection++;
+	}
+	dbprintf ("skill_menu: right, selection: %d\n", skill_menu_selection);
+}
+
+
+CALLSET_ENTRY (skill_menu, sw_plunger) {
+	if (!switch_poll_logical (SW_PLUNGER)) {
+		dbprintf ("skill_menu: sw_plunger\n");
+		skill_menu_select();
+	}
+}
+
+CALLSET_ENTRY (skill_menu, any_pf_switch) {
+	dbprintf ("skill_menu: any_pf_switch\n");
+	if (skill_menu_enabled == 0) {
+		return;
+	}
+	// wait for the ball to be fired off the plunger switch, which is marked as a playfield switch so
+	// that ball-search does not start when a ball is resting on it.
+	if (switch_poll_logical (SW_PLUNGER)) {
+		return;
+	}
+
+	skill_menu_select();
 }
 
 CALLSET_ENTRY (skill, serve_ball) {
-	// IDEA skillshot menu - let the user select if they want to enable the rollover skillshot or the skid pad ramp super skillshot.
-	skillshot_rollover_enable();
+	dbprintf ("skill_menu: serve_ball\n");
+	skill_menu_start();
+}
+
+CALLSET_ENTRY (skill, end_ball, stop_game) {
+	dbprintf ("skill_menu: end_ball/stop_game\n");
+	skillshot_disable();
 }
 
 CALLSET_ENTRY (skill, shoot_again) {

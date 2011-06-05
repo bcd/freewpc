@@ -109,7 +109,7 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 13: Start Button, start-button, cabinet, intest
 14: Tilt, cabinet, tilt, ingame, noplay
 # not called 'Shooter', see: trivial.c/CALLSET_ENTRY (trivial, sw_plunger)
-15: Plunger, shooter, edge, noplay, debounce(TIME_200MS)
+15: Plunger, shooter, edge, debounce(TIME_200MS)
 16: Left Return Lane, ingame
 17: Right Return Lane, ingame
 18: Spinner, ingame
@@ -117,13 +117,13 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 22: Coin Door Closed, noscore, noplay
 23: Buyin Button, buyin-button, cabinet
 #24: Always Closed
-31: Trough 1, noscore, opto
-32: Trough 2, noscore, opto
-33: Trough 3, noscore, opto
-34: Trough 4, noscore, opto
+31: Trough 1, noscore, noplay, opto
+32: Trough 2, noscore, noplay, opto
+33: Trough 3, noscore, noplay, opto
+34: Trough 4, noscore, noplay, opto
 35: Route 66 Entry, ingame, opto
 36: Pit Stop Popper, ingame, opto
-37: Trough Eject, ingame, opto # stuck off = ball jam
+37: Trough Eject, noscore, noplay, opto # stuck off = ball jam
 38: Inner Loop Entry, ingame
 41: ZR1 Bottom Entry, ingame, opto
 42: ZR1 Top Entry, ingame, opto
@@ -309,6 +309,7 @@ ZR1 MB TRQ JP: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_SCORE
 Kickback Relit: page(MACHINE_PAGE), PRI_GAME_QUICK2
 Jet: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Sling: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Skill Menu: page(MACHINE_PAGE), PRI_BALL_LAUNCH_MENU, D_RESTARTABLE
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
