@@ -430,26 +430,27 @@ void ball_explode_deff (void)
 	U16 fno;
 	extern bool powerball_death;
 	
+	dmd_sched_transition (&trans_scroll_down_fast);
+	dmd_alloc_pair_clean ();
+	callset_invoke (score_overlay);
+	dmd_show2 ();
 
 	dmd_sched_transition (&trans_scroll_down_fast);
-	dmd_alloc_pair ();
-	frame_draw (IMG_BALLEXPLODE_START);
-	dmd_show2 ();
-	task_sleep (TIME_66MS);
-		
 	if (powerball_death == FALSE)	
 		sound_send (SND_EXPLOSION_3);
 	for (fno = IMG_BALLEXPLODE_START; fno < IMG_BALLEXPLODE_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
+		callset_invoke (score_overlay);
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
 	/* Show a blank frame */
 	dmd_alloc_pair_clean ();
+	callset_invoke (score_overlay);
 	dmd_show2 ();
-	task_sleep (TIME_100MS);
+	task_sleep (TIME_66MS);
 	/* Play in reverse if ballsave is active */
 	if (ballsave_test_active ())
 	{
@@ -458,6 +459,7 @@ void ball_explode_deff (void)
 		{
 			dmd_alloc_pair ();
 			frame_draw (fno);
+			callset_invoke (score_overlay);
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
 		}
@@ -469,9 +471,13 @@ void ball_explode_deff (void)
 		
 	}
 	/* This should stop the scores from showing just before the bonus screen */
-	dmd_alloc_pair_clean ();
-	dmd_show2 ();
-	task_sleep (TIME_500MS);
+	for (fno = 0; fno < 5; fno++)
+	{
+		dmd_alloc_pair_clean ();
+		callset_invoke (score_overlay);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 	deff_exit ();
 }
 
