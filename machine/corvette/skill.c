@@ -20,6 +20,11 @@
 
 #include <freewpc.h>
 
+/*
+ * TODO implement race-for-pinks skill-shot mode
+ * TODO implement dragrace skill-shot mode
+ */
+
 //
 // SKIDPAD SKILLSHOT
 //
@@ -186,6 +191,7 @@ CALLSET_ENTRY (skillshot_rollover, sw_right_button) {
 //
 
 U8 skill_menu_enabled;
+U8 skill_menu_draw_count;
 enum skill_menu_selections {
 	SKILL_MIN = 0,
 	SKILL_ROLLOVER = SKILL_MIN,
@@ -195,14 +201,39 @@ enum skill_menu_selections {
 };
 enum skill_menu_selections skill_menu_selection;
 
+char *skill_menu_text[4][3] = {
+		// main set
+		{"SELECT", "SKILL", "SHOT"},
+		// set per mode
+		{"SHOOT", "FLASHING", "ROLLOVER"},
+		{"SHOOT", "SKID", "PAD"},
+		{"SHOOT", "RIGHT", "RAMP"},
+};
+
+char **current_skill_menu_text;
+
+// 4 = refreshes per second (see TIME_250MS in skill_menu_deff below)
+// 5 = change every 5 seconds
+#define SKILL_SHOW_SHOT_INFO (4 * 5)
+
 void skill_menu_draw(void) {
 	dbprintf ("skill_menu: drawing menu, selection:%d\n", skill_menu_selection);
 	dmd_alloc_low_clean ();
+
+	// every 5 seconds toggle left hand side of the menu screen between instructions for the menu and instructions for the shot
+	skill_menu_draw_count++;
+	// 2 = alternate between 2 things
+	if (skill_menu_draw_count % (SKILL_SHOW_SHOT_INFO * 2) > SKILL_SHOW_SHOT_INFO) {
+		current_skill_menu_text = &skill_menu_text[skill_menu_selection + 1];
+	} else {
+		current_skill_menu_text = skill_menu_text[0];
+	}
+
 	//dmd_draw_border (dmd_low_buffer);
 	// 5 = y offset, 5 = height, 2 = space between lines
-	font_render_string_center (&font_var5, 32, 6, "SELECT");
-	font_render_string_center (&font_var5, 32, 6 + 5 + 2, "SKILL");
-	font_render_string_center (&font_var5, 32, 6 + 5 + 5 + 2 + 2, "SHOT");
+	font_render_string_center (&font_var5, 32, 6, current_skill_menu_text[0]);
+	font_render_string_center (&font_var5, 32, 6 + 5 + 2, current_skill_menu_text[1]);
+	font_render_string_center (&font_var5, 32, 6 + 5 + 5 + 2 + 2, current_skill_menu_text[2]);
 
 	// 5 = y offset, 5 = height, 4 = space between lines
 	// bigger gap between lines, so we can draw box around them
@@ -245,6 +276,7 @@ void skill_menu_deff (void)
 }
 
 void skill_menu_start(void) {
+	skill_menu_draw_count = 0;
 	skill_menu_enabled = 1;
 	skill_menu_selection = SKILL_ROLLOVER;
 	dbprintf ("skill_menu_start\n");
@@ -287,6 +319,7 @@ CALLSET_ENTRY (skill_menu, sw_left_button) {
 	} else {
 		skill_menu_selection--;
 	}
+	skill_menu_draw_count = SKILL_SHOW_SHOT_INFO;
 	dbprintf ("skill_menu: left, selection: %d\n", skill_menu_selection);
 }
 
@@ -299,6 +332,7 @@ CALLSET_ENTRY (skill_menu, sw_right_button) {
 	} else {
 		skill_menu_selection++;
 	}
+	skill_menu_draw_count = SKILL_SHOW_SHOT_INFO;
 	dbprintf ("skill_menu: right, selection: %d\n", skill_menu_selection);
 }
 
