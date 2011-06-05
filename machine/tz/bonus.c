@@ -62,7 +62,7 @@ extern U8 spiralawards_collected;
 extern U8 dead_end_count;
 extern U8 hitch_count;
 extern U8 rollover_count;
-extern bool backdoor_award_collected;
+extern __local__ bool backdoor_award_collected;
 extern U8 multidrain_count;
 extern bool stdm_death;
 extern bool unfair_death;
@@ -622,68 +622,69 @@ void bonus_deff (void)
 		sprintf_score (temp_score);
 	}
 
-#ifndef CONFIG_CLOSEST_TO_THE_PIN
-	if (check_if_last_ball_of_multiplayer_game ())
+	if (system_config.lowest_goes_next == NO)
 	{
-		task_sleep_sec (2);
-	}
-	/* Check if last ball of game */
-	else if (num_players > 1 && player_up == num_players && ball_up != 1)
-	{
-		sound_send (SND_RABBLE_RABBLE);
-		dmd_alloc_low_clean ();
-		sprintf("PLAYER %d LEADS BY", find_player_ranked(1) + 1);
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf_score(temp_score);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		
-		if (num_players == 3)
+		if (check_if_last_ball_of_multiplayer_game ())
 		{
-			sprintf("2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1);
-			font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+			task_sleep_sec (2);
 		}
-		else if (num_players == 4)
+		/* Check if last ball of game */
+		else if (num_players > 1 && player_up == num_players && ball_up != 1)
 		{
-			sprintf("2ND P%d 3RD P%d 4TH P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1,
-				find_player_ranked(4) + 1);
-				font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
-		}
-		dmd_show_low ();
-		task_sleep_sec (3);
-		
-	
-	}
-
-
-	if (check_if_last_ball_of_multiplayer_game ()
-		&& feature_config.adv_bonus_info == YES)
-
-	{
-		task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
-		sound_send (SND_PLAYER_PIANO_UNUSED);
-		dmd_alloc_low_clean ();
+			sound_send (SND_RABBLE_RABBLE);
+			dmd_alloc_low_clean ();
+			sprintf("PLAYER %d LEADS BY", find_player_ranked(1) + 1);
+			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			sprintf_score(temp_score);
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 			
-		sprintf("PLAYER %d WINS BY", find_player_ranked(1) + 1);
-		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
-		sound_send (SND_GREED_MODE_BOOM);
-		sprintf_score (temp_score);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		if (score_compare (score_table[SC_10M], temp_score) == 1)
-		{
-			font_render_string_center (&font_mono5, 64, 29, "THAT WAS CLOSE");
+			if (num_players == 3)
+			{
+				sprintf("2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1);
+				font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+			}
+			else if (num_players == 4)
+			{
+				sprintf("2ND P%d 3RD P%d 4TH P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1,
+					find_player_ranked(4) + 1);
+					font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+			}
+			dmd_show_low ();
+			task_sleep_sec (3);
+			
+		
 		}
-		else if (score_compare (temp_score, score_table[SC_100M]) == 1)
+
+
+		if (check_if_last_ball_of_multiplayer_game ()
+			&& feature_config.adv_bonus_info == YES)
+
 		{
-			font_render_string_center (&font_mono5, 64, 29, "A LITTLE LOPSIDED");
+			task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
+			sound_send (SND_PLAYER_PIANO_UNUSED);
+			dmd_alloc_low_clean ();
+				
+			sprintf("PLAYER %d WINS BY", find_player_ranked(1) + 1);
+			font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
+			sound_send (SND_GREED_MODE_BOOM);
+			sprintf_score (temp_score);
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			if (score_compare (score_table[SC_10M], temp_score) == 1)
+			{
+				font_render_string_center (&font_mono5, 64, 29, "THAT WAS CLOSE");
+			}
+			else if (score_compare (temp_score, score_table[SC_100M]) == 1)
+			{
+				font_render_string_center (&font_mono5, 64, 29, "A LITTLE LOPSIDED");
+			}
+			else
+			{
+				font_render_string_center (&font_mono5, 64, 29, "CONGRATULATIONS");
+			}	
+			dmd_show_low ();
+			task_sleep_sec (5);
 		}
-		else
-		{
-			font_render_string_center (&font_mono5, 64, 29, "CONGRATULATIONS");
-		}	
-		dmd_show_low ();
-		task_sleep_sec (5);
 	}
-#endif       
 	/* Show final score */
 	dmd_alloc_low_clean ();
 	scores_draw ();
@@ -702,11 +703,10 @@ void bonus_deff (void)
 
 CALLSET_ENTRY (bonus, serve_ball)
 {
-#ifndef CONFIG_CLOSEST_TO_THE_PIN
 	if (check_if_last_ball_of_multiplayer_game ()
+		&& system_config.lowest_goes_next == NO
 		&& feature_config.adv_bonus_info == YES)
 		deff_start_sync (DEFF_SCORE_TO_BEAT);
-#endif
 }
 
 void score_to_beat_deff (void)
@@ -790,9 +790,8 @@ CALLSET_ENTRY (bonus, rank_change)
 	/* Don't do anything if the player up isn't now in first place */
 	if (!in_live_game || (score_ranks[player_up - 1] != 1))
 		return;
-#ifdef CONFIG_CLOSEST_TO_THE_PIN
-       return;
-#endif       
+	if (system_config.lowest_goes_next == YES)
+       		return;
 	/* Check if last ball of game */
 	/* Don't count extra balls because we don't need to */
 	if (ball_up == system_config.balls_per_game 

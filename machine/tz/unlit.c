@@ -41,7 +41,7 @@
 #include <freewpc.h>
 
 U8 unlit_shot_count;
-bool backdoor_award_collected;
+__local__ bool backdoor_award_collected;
 /* last switch that was collected unlit */
 U8 unlit_called_from_stored;
 
@@ -113,7 +113,7 @@ CALLSET_ENTRY (unlit, serve_ball)
 
 }
 
-CALLSET_ENTRY (unlit, start_game)
+CALLSET_ENTRY (unlit, start_player)
 {
 	unlit_shot_count = 0;
 	unlit_called_from_stored = 0;
