@@ -82,12 +82,14 @@ U8 player_up;
 
 /** The number of the current ball in play */
 U8 ball_up;
+__local__ U8 player_ball_up;
 
 /** Nonzero if the current ball will automatically end after a certain
 period of time.  The value indicates the number of seconds. */
 U8 timed_game_timer;
 
 U8 timed_game_suspend_count;
+extern U8 score_ranks[MAX_PLAYERS];
 
 #ifdef MACHINE_TZ
 extern void loop_master_check (void);
@@ -212,9 +214,6 @@ void end_game (void)
 }
 
 
-#ifdef CONFIG_CLOSEST_TO_THE_PIN
-extern U8 score_ranks[MAX_PLAYERS];
-__local__ U8 player_ball_up;
 /* Init per player ball count */
 CALLSET_ENTRY (game, start_player)
 {
@@ -247,7 +246,6 @@ void switch_to_player_ranked (U8 ranking)
 		i++;
 	player_up = i + 1;
 }
-#endif
 
 /**
  * Handle end-of-ball.  This is called from the ball device
@@ -364,38 +362,41 @@ void end_ball (void)
 	 * Save and restore the local player data. */
 	if (num_players > 1)
 	{
-#ifdef CONFIG_CLOSEST_TO_THE_PIN
-		player_ball_up++;
-		player_save ();
-		/* Special case so we switch to player 2 on the first ball */
-		if (ball_up == 1 && player_up != num_players)
+		if (system_config.lowest_goes_next == YES)
 		{
+			player_ball_up++;
+			player_save ();
+			/* Special case so we switch to players 2,3 and 4 on the first ball */
+			if (ball_up == 1 && player_up != num_players)
+			{
+				player_up++;
+				player_restore ();
+				start_ball ();
+				goto done;
+			}
+			else
+			{
+				switch_to_player_ranked (num_players);
+				player_restore ();
+				ball_up = player_ball_up;
+			}
+		}
+		else
+		{
+			player_save ();
 			player_up++;
-			player_restore ();
-			start_ball ();
-			goto done;
+			if (player_up <= num_players)
+			{
+				player_restore ();
+				start_ball ();
+				goto done;
+			}
+			else
+			{
+				player_up = 1;
+				player_restore ();
+			}
 		}
-		else
-		{
-			//switch_to_last_place ();
-			switch_to_player_ranked (num_players);
-			player_restore ();
-			ball_up = player_ball_up;
-		}
-#else
-		player_up++;
-		if (player_up <= num_players)
-		{
-			player_restore ();
-			start_ball ();
-			goto done;
-		}
-		else
-		{
-			player_up = 1;
-			player_restore ();
-		}
-#endif
 	}
 	/* If all players have had a turn, then increment the
 	 * current ball number.
@@ -404,9 +405,8 @@ void end_ball (void)
 	 */
 	if (config_timed_game == OFF)
 	{
-#ifndef CONFIG_CLOSEST_TO_THE_PIN
-		ball_up++;
-#endif
+		if (system_config.lowest_goes_next == NO)
+			ball_up++;
 		if (ball_up <= system_config.balls_per_game)
 		{
 			start_ball ();
@@ -414,25 +414,27 @@ void end_ball (void)
 		}
 	}
 
-#ifdef CONFIG_CLOSEST_TO_THE_PIN
-	/* Search through and check that each player has played all their balls
-	 */
-	U8 i;
-	for (i = num_players; i != 0; i--)
+	if (system_config.lowest_goes_next == YES)
 	{
-		switch_to_player_ranked (i);
-		player_restore ();
-		if (player_ball_up <= system_config.balls_per_game)
+		/* Search through the lowest scores and check that 
+		 * each player has played all their balls
+		 */
+		U8 i;
+		for (i = num_players; i != 0; i--)
 		{
-			ball_up = player_ball_up;
-			start_ball ();
-			goto done;
+			switch_to_player_ranked (i);
+			player_restore ();
+			if (player_ball_up <= system_config.balls_per_game)
+			{
+				ball_up = player_ball_up;
+				start_ball ();
+				goto done;
+			}
 		}
+		/* All balls have been played, end game */
+		player_up = num_players;
+		player_restore ();
 	}
-	/* All balls have been played, end game */
-	player_up = num_players;
-	player_restore ();
-#endif
 	/* After the max balls per game have been played, go into
 	 * end game */
 	end_game ();

@@ -134,6 +134,7 @@ typedef struct
 	adjval_t no_bonus_flips; /* done */
 	adjval_t game_restart; /* done */
 	adjval_t allow_chase_ball;
+	adjval_t lowest_goes_next; /* done */
 
 	adjval_t family_mode;
 #ifdef MACHINE_LAUNCH_SWITCH

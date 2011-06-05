@@ -26,7 +26,6 @@ Lamp-Matrix-Height: 29
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
-define CONFIG_CLOSEST_TO_THE_PIN
 define MACHINE_TZ
 define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
@@ -154,7 +153,7 @@ define CONFIG_TZONE_IP y
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
 26: Trough Proximity, edge, noscore
-27: Shooter, edge, shooter, noscore, debounce(TIME_200MS)
+27: Shooter, shooter, noscore
 28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), noplay, lamp(LM_LEFT_JET)
 32: Right Jet, ingame, c_decl(sw_jet), noplay, lamp(LM_RIGHT_JET)
@@ -287,7 +286,7 @@ Bridge Open: driver(duty2),
 	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
 Shooter Div: driver(duty2),
-	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_700MS, duty_mask=DUTY_MASK_50
+	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_1S, duty_mask=DUTY_MASK_50
 
 Ramp Div: driver(duty2),
 	sol=SOL_RAMP_DIVERTOR, timeout=TIME_3S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
@@ -455,7 +454,7 @@ Auto SWAG:yes_no, NO
 Mag Throw:yes_no, YES
 
 # Dont allow cradling during multiball
-Dixon anti cradle:yes_no, NO
+Dixon anti cradle:yes_no, YES
 
 # Only allow one high score entry per player (Not working)
 One HS entry:yes_no, NO
