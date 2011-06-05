@@ -32,7 +32,6 @@ U8 score_ranks[MAX_PLAYERS];
  */
 U8 prev_rank;
 
-
 /**
  * For debugging.
  */
@@ -84,7 +83,7 @@ void score_rank_update (void)
  * Ensure that rankings are recalculated and correct at the start
  * of each ball, and at the end of the game.
  */
-CALLSET_ENTRY (score_rank, start_ball, end_game)
+CALLSET_ENTRY (score_rank, start_ball, update_ranks, end_game)
 {
 	score_rank_update ();
 	score_rank_dump ();

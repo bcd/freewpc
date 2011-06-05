@@ -26,6 +26,7 @@ Lamp-Matrix-Height: 29
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
+define CONFIG_CLOSEST_TO_THE_PIN
 define MACHINE_TZ
 define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1

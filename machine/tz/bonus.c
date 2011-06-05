@@ -77,7 +77,7 @@ extern U8 lucky_bounces;
  * returns player number - 1 for score purposes
  */
 
-static U8 find_player_ranked (U8 ranking)
+U8 find_player_ranked (U8 ranking)
 {
 	/* If out of range, return last place */
 	if (ranking > MAX_PLAYERS)
@@ -622,10 +622,12 @@ void bonus_deff (void)
 		sprintf_score (temp_score);
 	}
 
+#ifndef CONFIG_CLOSEST_TO_THE_PIN
 	if (check_if_last_ball_of_multiplayer_game ())
 	{
 		task_sleep_sec (2);
 	}
+	/* Check if last ball of game */
 	else if (num_players > 1 && player_up == num_players && ball_up != 1)
 	{
 		sound_send (SND_RABBLE_RABBLE);
@@ -681,7 +683,7 @@ void bonus_deff (void)
 		dmd_show_low ();
 		task_sleep_sec (5);
 	}
-	
+#endif       
 	/* Show final score */
 	dmd_alloc_low_clean ();
 	scores_draw ();
@@ -700,9 +702,11 @@ void bonus_deff (void)
 
 CALLSET_ENTRY (bonus, serve_ball)
 {
+#ifndef CONFIG_CLOSEST_TO_THE_PIN
 	if (check_if_last_ball_of_multiplayer_game ()
 		&& feature_config.adv_bonus_info == YES)
 		deff_start_sync (DEFF_SCORE_TO_BEAT);
+#endif
 }
 
 void score_to_beat_deff (void)
@@ -784,9 +788,11 @@ CALLSET_ENTRY (bonus, valid_playfield)
 CALLSET_ENTRY (bonus, rank_change)
 {
 	/* Don't do anything if the player up isn't now in first place */
-	if (!in_live_game && (score_ranks[player_up - 1] != 1))
+	if (!in_live_game || (score_ranks[player_up - 1] != 1))
 		return;
-	 
+#ifdef CONFIG_CLOSEST_TO_THE_PIN
+       return;
+#endif       
 	/* Check if last ball of game */
 	/* Don't count extra balls because we don't need to */
 	if (ball_up == system_config.balls_per_game 
