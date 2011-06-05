@@ -651,7 +651,7 @@ static void collect_extra_ball_task (void)
 
 CALLSET_ENTRY (mball, dev_lock_enter)
 {
-	task_create_anon (collect_extra_ball_task);
+	//task_create_anon (collect_extra_ball_task);
 	score (SC_50K);
 	sound_send (SND_ROBOT_FLICKS_GUN);
 	leff_start (LEFF_LOCK);
@@ -669,6 +669,7 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		deff_start (DEFF_JACKPOT_RELIT);
 	}
 	
+	collect_extra_ball ();
 	/* Check to see if mball_restart is running */
 	if (timed_mode_running_p (&mball_restart_mode))
 	{
