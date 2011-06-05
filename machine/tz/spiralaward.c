@@ -92,12 +92,15 @@ void spiralaward_collected_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	dmd_alloc_pair_clean ();
-	write_spiralaward_text ();
-	dmd_copy_low_to_high ();
-	callset_invoke (score_overlay);
-	dmd_show2 ();
-	task_sleep_sec (2);
+	for (fno = 0; fno < 20; fno++)
+	{
+		dmd_alloc_pair_clean ();
+		write_spiralaward_text ();
+		dmd_copy_low_to_high ();
+		callset_invoke (score_overlay);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 	deff_exit ();
 }
 
