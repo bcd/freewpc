@@ -28,6 +28,7 @@ extern void mball_start_3_ball (void);
 extern U8 unlit_shot_count;
 extern U8 jackpot_level;
 extern U8 mball_locks_lit;
+extern U8 mball_locks_made;
 extern U8 gumball_enable_count;
 extern U8 chaosmb_level;
 extern U8 chaosmb_hits_to_relight;
@@ -180,10 +181,10 @@ static void do_camera_award (void)
 {
 	magnet_disable_catch (MAG_RIGHT);
 	unlit_shot_count = 0;
+	/* Don't light the lock if unable to do so */
+	if (mball_locks_lit + mball_locks_made >= 2 && camera_award_count == CAMERA_AWARD_LIGHT_LOCK)
+		camera_award_count = CAMERA_AWARD_10_MILLION;
 	camera_award_count_stored = camera_award_count;
-	/* Don't light the lock if already lit */
-	if (mball_locks_lit == 2 && camera_award_count == CAMERA_AWARD_LIGHT_LOCK)
-		camera_award_count = CAMERA_AWARD_DOOR_PANEL;
 	deff_start (DEFF_CAMERA_AWARD);
 	switch (camera_award_count)
 	{
@@ -205,10 +206,9 @@ static void do_camera_award (void)
 			/* Quick Multiball */
 			task_create_anon (mball_start_2ball_task);
 			break;
+		default:
 		case CAMERA_AWARD_20_MILLION:
 			score (SC_20M);
-			break;
-		default:
 			break;
 	}
 	bounded_decrement (cameras_lit, 0);
