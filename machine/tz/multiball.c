@@ -504,7 +504,7 @@ CALLSET_ENTRY (mball, mball_start)
 		unlit_shot_count = 0;
 		global_flag_on (GLOBAL_FLAG_MULTIBALL_RUNNING);
 		global_flag_on (GLOBAL_FLAG_MB_JACKPOT_LIT);
-		music_refresh ();
+		music_update ();
 		kickout_lock (KLOCK_DEFF);
 		deff_start (DEFF_MB_START);
 		/* Set the jackpot higher if two balls were locked */
@@ -544,7 +544,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
 		lamp_tristate_off (LM_PIANO_JACKPOT);
-		music_refresh ();
+		music_update ();
 		/* If a jackpot wasn't collected, offer a restart */
 		if (mball_jackpot_uncollected && !mball_restart_collected)
 			mball_restart_start ();

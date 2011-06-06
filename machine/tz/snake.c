@@ -579,7 +579,7 @@ void snake_deff (void)
 	#endif
 	task_sleep (TIME_700MS);
 	
-	music_refresh ();
+	music_update ();
 	dmd_alloc_pair_clean ();
 	psprintf ("1 NYOM NYOM", "%d NYOM NYOMS", food_collected);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);

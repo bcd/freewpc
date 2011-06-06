@@ -169,7 +169,7 @@ CALLSET_ENTRY (bttz, single_ball_play)
 	lamplist_apply (LAMPLIST_DOOR_PANELS_AND_HANDLE, lamp_flash_off);
 	flag_on (FLAG_SLOT_DOOR_LIT);
 	callset_invoke (door_enable);
-	music_refresh ();
+	music_update ();
 }
 
 CALLSET_ENTRY (bttz, end_ball)

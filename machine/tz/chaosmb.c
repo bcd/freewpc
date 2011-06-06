@@ -253,7 +253,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off);
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_off);
 	deff_stop (DEFF_CHAOSMB_RUNNING);
-	music_refresh ();
+	music_update ();
 	tz_clock_reset ();
 }
 

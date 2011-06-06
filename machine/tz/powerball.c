@@ -215,7 +215,7 @@ void pb_clear_location (U8 location)
 		callset_invoke (powerball_absent);
 		/* TODO : music is not being stopped correctly if Powerball
 		drains during multiball and game doesn't know where it is. */
-		music_refresh ();
+		music_update ();
 #ifdef PB_DEBUG
 		deff_restart (DEFF_PB_DETECT);
 #else
@@ -301,7 +301,7 @@ void pb_announce (void)
 #else
 		deff_start (DEFF_PB_DETECT);
 #endif
-		music_refresh ();
+		music_update ();
 		pb_announce_needed = 0;
 	}
 }

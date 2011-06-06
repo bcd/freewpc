@@ -167,7 +167,7 @@ CALLSET_ENTRY (tnf, tnf_end)
 		tnf_increase_level ();
 
 	flipper_enable ();
-	music_refresh ();
+	music_update ();
 	magnet_enable_catch_and_throw (MAG_LEFT);
 }
 
