@@ -25,7 +25,7 @@
  * There's a few in loop.c
  * */
 
-/* CALLSET_SECTION (combo, __machine2__) */
+/* CALLSET_SECTION (combo, __machine3__) */
 
 
 #include <freewpc.h>
@@ -45,10 +45,17 @@ static void lucky_bounce (void)
 	bounded_increment (lucky_bounces, 99);
 }
 
-/* Left ramp, Right ramp, Piano combo */
+/* Left ramp, Right ramp, Piano combo and Left ramp, lock, camera combo */
 CALLSET_ENTRY (combo, sw_left_ramp_exit)
 {
 	event_can_follow (left_ramp, right_ramp, TIME_5S);
+	timer_restart_free (GID_L_RAMP_TO_LOCK, TIME_5S);
+}
+
+CALLSET_ENTRY (combo, dev_lock_enter)
+{
+	if (task_find_or_kill_gid (GID_L_RAMP_TO_LOCK))
+		timer_restart_free (GID_L_RAMP_TO_LOCK_TO_CAMERA, TIME_4S);
 }
 
 CALLSET_ENTRY (combo, sw_right_ramp)
@@ -107,7 +114,7 @@ CALLSET_ENTRY (combo, sw_standup_7)
 CALLSET_ENTRY (combo, sw_piano)
 {
 //TODO Hack to remove piano.c
-	device_switch_can_follow (piano, slot, TIME_3S + TIME_500MS);
+	device_switch_can_follow (piano, slot, TIME_3S + TIME_200MS);
 
 	if (event_did_follow (right_loop, piano))
 	{

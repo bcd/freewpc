@@ -69,6 +69,14 @@ inline static bool can_award_unlit_shot (U8 unlit_called_from)
 		return TRUE;
 }
 
+bool unlit_shots_lit (void)
+{
+	/*TODO Use a big if to check whether its actually possible to get
+	 * another unlit shot
+	 */
+	return TRUE;
+}
+
 void award_unlit_shot (U8 unlit_called_from)
 {
 	if (can_award_unlit_shot (unlit_called_from))
@@ -87,8 +95,9 @@ void award_unlit_shot (U8 unlit_called_from)
 		/* Reset if the player hits the same unlit shot twice */
 		if (unlit_called_from == unlit_called_from_stored)
 			unlit_shot_count = 0;	
-		if (unlit_shot_count == 4)
+		if (unlit_shot_count == 4 )
 		{
+			//TODO Check for unlit shots
 			/* Hint to the player that backdoor award is ready */
 			sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 		}
@@ -97,7 +106,14 @@ void award_unlit_shot (U8 unlit_called_from)
 	}
 }
 
-CALLSET_ENTRY (unlit, start_ball)
+CALLSET_ENTRY (unlit, serve_ball)
+{
+	unlit_shot_count = 0;
+	unlit_called_from_stored = 0;
+
+}
+
+CALLSET_ENTRY (unlit, start_game)
 {
 	unlit_shot_count = 0;
 	unlit_called_from_stored = 0;

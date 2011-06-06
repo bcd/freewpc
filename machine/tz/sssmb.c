@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,6 +24,7 @@ extern void maybe_ramp_divert (void);
 extern U8 autofire_request_count;
 extern bool mball_jackpot_uncollected;
 extern U8 unlit_shot_count;
+//extern bool autofire_busy;
 
 U8 sssmb_initial_ramps_to_divert;
 U8 sssmb_ramps_to_divert;
@@ -33,7 +34,8 @@ bool sssmb_can_divert_to_plunger (void)
 {
 	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
 		&& sssmb_ramps_to_divert == 0
-		&& !switch_poll_logical (SW_SHOOTER))
+		&& !switch_poll_logical (SW_SHOOTER)
+		&& !task_find_gid (GID_AUTOFIRE_HANDLER))
 		return TRUE;
 	else
 		return FALSE;
@@ -93,7 +95,7 @@ void sssmb_jackpot_lit_deff (void)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("JACKPOT IS %d,000,000", sssmb_jackpot_value);
-		font_render_string_center (&font_var5, 64, 24, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_100MS);
 	}
@@ -120,12 +122,17 @@ static void sssmb_relight_all_jackpots (void)
 	global_flag_on (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
 }
 
-
 static void sssmb_award_jackpot (void)
 {
+	if (!task_kill_gid (GID_SSSMB_JACKPOT_READY))
+		return;
+
 	mball_jackpot_uncollected = FALSE;
 	sssmb_initial_ramps_to_divert++;
+	if (feature_config.dixon_anti_cradle == YES)
+		sssmb_jackpot_value += 5;
 	score_1M (sssmb_jackpot_value);
+	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_SSSMB_JACKPOT_COLLECTED);
 	sound_send (SND_EXPLOSION_1);
@@ -173,7 +180,8 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 		callset_invoke (mball_restart_stop);
 		mball_jackpot_uncollected = TRUE;
 		unlit_shot_count = 0;
-		effect_update_request ();
+		deff_update ();
+		music_refresh ();
 		global_flag_on (GLOBAL_FLAG_SSSMB_RUNNING);
 		global_flag_on (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
 		global_flag_on (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
@@ -190,10 +198,14 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 
 void sssmb_stop (void)
 {
+	callset_invoke (sssmb_stop);
 	if (!global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 		return;	
 	if (mball_jackpot_uncollected == TRUE)
+	{
 		sound_send (SND_NOOOOOOOO);
+		callset_invoke (start_hurryup);
+	}
 
 	global_flag_off (GLOBAL_FLAG_SSSMB_RUNNING);
 	global_flag_off (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
@@ -203,7 +215,7 @@ void sssmb_stop (void)
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	deff_stop (DEFF_SSSMB_RUNNING);
 	lamp_tristate_off (LM_SUPER_SKILL);
-	effect_update_request ();
+	music_refresh ();
 }
 
 CALLSET_ENTRY (sssmb, lamp_update)
@@ -240,6 +252,11 @@ CALLSET_ENTRY (sssmb, single_ball_play)
 CALLSET_ENTRY (sssmb, end_ball)
 {
 	sssmb_stop ();
+}
+
+CALLSET_ENTRY (sssmb, skill_missed)
+{
+	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 }
 
 CALLSET_ENTRY (sssmb, skill_red)
@@ -298,10 +315,8 @@ CALLSET_ENTRY (sssmb, sw_shooter)
 		&& timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 	{
 		extern U8 skill_switch_reached;
-		/* It will always reach at least the fist switch */
+		/* It will always reach at least the first switch */
 		skill_switch_reached = 1;
-		/* TODO: handle case where red jackpot switch is tripped but
-		ball falls back to plunger lane */
 		task_create_gid1 (GID_SSSMB_JACKPOT_READY, sssmb_jackpot_ready_task);
 	}
 }

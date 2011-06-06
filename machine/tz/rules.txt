@@ -3,14 +3,30 @@ BACK TO THE ZONE RULES
 
 Author: Sonny_Jim <sonny_jim@hotmail.com>
 
+Attract Mode
+============
+Press Buyin button to display rules.
+Hold left flipper button to start Tournament mode.
+Hold right flipper button to show last scores.
+
 Skill Shot
 ==========
 Launch the ball and try to land in the yellow zone for maximum points.
+Skill shot awarded becomes the minimum score for the next skill shot.
+
+Super Duper Skill Shot
+======================
+When the ball is in the plunger just before the skill shot, hold down the
+right flipper button for 3 seconds to activate 'Super Duper Skill Shot'.  Now
+plunge the ball straight into the slot (ie miss the skill shot on purpose).
+When the ball comes out of the slot, shoot the left ramp for 10M, incrementing
+in 10M steps up to 50M each successful attempt.
 
 Inlanes
 =======
 These can be stepped left and right using the flipper buttons, complete a
-set of 3 rollovers for 1M on your score and 1M towards your bonus.
+set of 3 rollovers for 1M on your score and 1M towards your bonus.  4 complete
+rollover sets lights the camera.
 
 Spiralaward
 ===========
@@ -51,8 +67,8 @@ Gumball
 Loading the gumball with a steel ball awards 5M, going up by 5M each time
 capped at 30M.
 
-Loading with the powerball scores another 20M and starts 'Super Skill Shot Multiball' with the piano
-jackpot and Skill Shot jackpot available simultaenously.
+Loading with the powerball scores another 20M and randomly starts 'Super Skill
+Shot' or 'Clock Chaos' 3 ball multiball, with the piano jackpot lit also.
 
 Camera
 ======
@@ -70,7 +86,8 @@ Awards (in order)
 - 20 Million points
 - Quick Multiball
 
-Adds 10M to the jackpot, capped at 50M when MB jackpot is lit
+If collected during multiball when the jackpot is lit, it adds 10M to the jackpot, 
+ capped at 50M.  If the jackpot is not lit, 3 camera shots will relight it.
 
 Hitchhikers
 ===========
@@ -94,12 +111,15 @@ Multiball
 =========
 If no jackpot is scored and 2 balls drain, the player is offered a multiball
 restart.  This is collected by hitting the lock within 30 seconds of multiball
-ending.  Jackpots can be increased by hitting the camera, up to a maximum of
-50 Million.  Once collected, the jackpot is can be relit by hitting the lock.
+ending.  Jackpots can be increased by hitting the camera whilst the jackpot is
+lit, up to a maximum of 50 Million.  Once collected, the jackpot can be 
+relit by hitting the lock or 3 cameras.
 
 If 3 balls are in play when the jackpot is collected, 10M is added to the
 jackpot.  If the Powerball is used to collect the jackpot, the jackpot is
 doubled.
+
+If you play around midnight, strange things might happen.....
 
 Note: There is also 'Clock Chaos' and 'Super Skill' multiball modes, details
 in the 'Door Panels' section.
@@ -114,6 +134,15 @@ Slot Machine and Piano
 ======================
 Hit either when lit to award a Door panel.  If either are unlit when hit and
 you currently have less than 8 panels, both Slot and Piano will be lit.
+(phew, that nearly made sense)
+
+Oddchange
+=========
+Hitting any of the yellow standups adds a random amount to the oddchange pot,
+capped to 10M and reset at the start of each ball.  This randomness is
+adjustable in the test menu.
+
+Shoot either an unlit slot or piano to collect the oddchange pot.
 
 Door Panels
 ===========
@@ -128,7 +157,9 @@ Door panels cannot be collected during multiball modes.
 Door Panel: Super Skill Multiball
 =====================
 3 ball multiball mode.  Shoot a ball up the left ramp and hit the skill shot 
-to score a jackpot.  Shoot left ramps to relight the jackpot
+to score a jackpot.  Shoot left ramps to gain another chance and collect all
+jackpots (red, orange and yellow) to relight them.  5M points extra per jackpot
+if Dixon Anti-Cradle is activated.
 
 Door Panel: Clock Chaos Multiball
 =====================
@@ -145,6 +176,7 @@ jackpot is collected from moves each time it is collected:
 Door Panel : Greed
 ==================
 Hit the standup targets during the mode for 5M each.
+Hitting the clock target awards 500K and moves the targets around
 
 Door Panel : 10 Million
 =======================
@@ -201,11 +233,33 @@ Door Panel: Super Slot
 - 10 Million
 - 5 Million
 
+Hurry Up
+========
+If you 'fail' certain modes, you get 15 seconds to hit the Power Payoff to
+collect 10M, which counts down to 250K.
+
+Failure is defined as:
+- Failing to hit the clock more than 2 times in Clock Millions
+- Not collecting a jackpot during Fastlock, Clock Chaos or Super Skill MB
+- Failing to score more than 10M during greed
+- Draining out of the mini playfield
+- Failing to collect Super Slot award
+- Failing to shoot any loops during Spiral
+
+Video Mode: Snake
+=================
+Collect a Dead End to light Snake video mode and shoot the lock to
+start.  Flipper buttons steer snake left and right, eating food increases tail length,
+adds 1 second to the time remaining and awards the following scores:
+
+- 10 food or under awards 1M each
+- between 11 and 40 food awards 250K each
+- Over 40 food awards 5M each
 
 Bonus
 =====
 
-Press both flipper buttons in together to speed up the bonus animation.
+Press both flipper buttons in together to slow down the bonus animation.
 
 - Door panels	1M each
 - Loops		100K each
@@ -248,6 +302,23 @@ this option on if the autofire opto has failed.  Disabled by default.
 If the Gumball is lit, the machine won't try to grab the ball on the
 right magnet for the camera shot.  Disabled by default.
 
+- Advanced bonus info
+Shows advanced information such as highest 1-ball score, points this ball etc.
+Enabled by default.
+
+- Dixon Anti Cradle
+Stops the player from cradling the balls during multiball.  If either flipper is
+held up for longer than 5 seconds during multiball than the flippers are
+temporarily disabled.
+Disabled by default.
+
+Clock Test
+==========
+If you find the clock maniacally spinning backwards and forwards, enter clock
+test, set the hands back to 12:00 using volume up/down and then press the
+right flipper button to set to home.  If this does not stop the spinning, then
+you can disable the clock via feature adjustments in test.
+
 Combos and Lucky bounces
 ========================
 
@@ -256,9 +327,31 @@ There are 3 x 2 way combos:
 - Left loop -> Hitchhiker
 - Right loop -> Piano
 
-And a 3 way combo:
+And 2 x 3 way combos:
 - Leftramp -> Rightramp -> Piano
+- Leftramp -> Unlit lock -> Camera
 
 You get awarded a Lucky Bounce if the game thinks that skill wasn't involved
 :-p
 
+Magnet test
+===========
+
+Buttons:
+Vol +/-: 	Select magnet
+Flippers: 	Change magnet drop time
+Start:	 	toggle juggle ball
+Enter:		Autofire ball
+
+Clock test
+==========
+Right flipper:	Manually set 12:00
+Vol +/-:	Change clock speed
+
+Pause and alarm
+===============
+Press buyin to pause during a game, it will keep the flippers on hold power if
+they are activated and timeout after 15 minutes.  Press buyin to resume.
+
+Whilst paused you can press the left and right flipper buttons to set an alarm
+(no more burnt food!).

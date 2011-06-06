@@ -59,10 +59,8 @@ const lampnum_t spiralaward_lamps[] = {
 	LM_SPIRAL_10M,
 	LM_SPIRAL_EB
 };
-
-void spiralaward_collected_deff (void)
+static void write_spiralaward_text (void)
 {
-	dmd_alloc_low_clean ();
 	if (spiralawards_collected < 6)
 	{
 		font_render_string_center (&font_var5, 64, 20, spiralaward_names[spiralaward]);
@@ -74,9 +72,31 @@ void spiralaward_collected_deff (void)
 		sprintf ("20 MILLION");
 		font_render_string_center (&font_term6, 64, 15, sprintf_buffer);
 		font_render_string_center (&font_term6, 64, 25, spiralaward_names[spiralaward]);
-	
 	}
-	dmd_show_low ();
+}
+
+void spiralaward_collected_deff (void)
+{	
+	dmd_alloc_pair_clean ();
+	U16 fno;
+	for (fno = IMG_LOOP_END; fno >= IMG_LOOP_START; fno -= 2)
+	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		write_spiralaward_text ();
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		callset_invoke (score_overlay);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+	}
+	dmd_alloc_pair_clean ();
+	write_spiralaward_text ();
+	dmd_copy_low_to_high ();
+	callset_invoke (score_overlay);
+	dmd_show2 ();
 	task_sleep_sec (2);
 	deff_exit ();
 }
@@ -103,9 +123,15 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 		&& single_ball_play ())
 	{
 		timer_restart_free (GID_SPIRALAWARD, TIME_3S);
-		/* Allow the ball to pass through the loop */
-		magnet_disable_catch (MAG_RIGHT);
+		/* Allow the ball to pass through the loop,
+		 * but not if the pb is out to help detection 
+		 */
+		if (!global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY))
+			magnet_disable_catch (MAG_RIGHT);
 		leff_start (LEFF_SPIRALAWARD);
+		/* Only show the hint the first two times */
+		if (spiralawards_collected < 1 && !spiralaward_set_completed);
+			deff_start (DEFF_SHOOT_RIGHT_LOOP);
 		/* Created as a task so it doesn't lock the calling thread */
 		task_create_anon (spiralaward_magnet_disable_task);
 	}
@@ -113,7 +139,7 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 
 static void award_spiralaward (void)
 {	
-	spiralawards_collected++;
+	bounded_increment (spiralawards_collected, 6);
 	
 	/* Pick a random award, random_scaled returns N-1 */
 	spiralaward = random_scaled (6);

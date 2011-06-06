@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -48,14 +48,13 @@ void hitchhiker_deff (void)
 {
 	/* Start a timer so jets won't stop animation */
 	timer_restart_free (GID_HITCHHIKER, TIME_3S);
+	dmd_alloc_pair_clean ();
 	U16 fno;
 	for (fno = IMG_HITCHHIKER_START; fno <= IMG_HITCHHIKER_END; fno += 2)
 	{
-		dmd_alloc_pair_clean ();
-		frame_draw (fno);
-		/* text can only be printed to the low page so we flip them */
-		dmd_flip_low_high ();
-		
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+			
 		if (timed_mode_running_p (&hitch_mode))
 		{
 			sprintf("10M");
@@ -68,13 +67,15 @@ void hitchhiker_deff (void)
 			sprintf ("%d", hitch_count);
 			font_render_string_center (&font_fixed6, 99, 24, sprintf_buffer);
 		}	
-		/* Flip back again */
-		dmd_flip_low_high ();
-		
+	
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		//task_sleep (TIME_33MS);
 	}
-	task_sleep  (TIME_700MS);
+	task_sleep  (TIME_500MS);
 	/* Stop the timer so jets.c can show deffs again */
 	timer_kill_gid (GID_HITCHHIKER);
 	deff_exit ();
@@ -83,9 +84,11 @@ void hitchhiker_deff (void)
 
 void hitch_mode_deff (void)
 {
+	dmd_alloc_pair_clean ();
 	for (;;)
 	{
-		dmd_alloc_low_clean ();
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
 		font_render_string_center (&font_var5, 64, 5, "SHOOT HITCHHIKER");
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
@@ -93,7 +96,11 @@ void hitch_mode_deff (void)
 		sprintf ("%d", hitch_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-		dmd_show_low ();
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (IMG_HITCHHIKER_START);
+		dmd_overlay_outline ();
+		dmd_show2 ();
 		task_sleep (TIME_200MS);
 	}
 }

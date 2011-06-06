@@ -19,7 +19,7 @@
  */
 
 #include <freewpc.h>
-
+#include <sys/time.h>
 /* Various loop counts, reset at the start of each ball */
 U8 loops;
 U8 powerball_loops;
@@ -32,8 +32,8 @@ score_t loop_score;
 extern __local__ U8 gumball_enable_count;
 extern __local__ U8 thing_flips_enable_count;
 extern U8 balls_needed_to_load;
-
 extern void thing_flips (void);
+ 
 
 /* Functions to stop leffs/deffs during certain game situations */
 static inline bool can_show_loop_leff (void)
@@ -57,12 +57,14 @@ static inline void enter_loop (void)
 static void award_loop (void)
 {
 	/* loops includes powerball and spiral_loops */
-	loops++;
-	
+	bounded_increment (loops, 255);
+	event_can_follow (loop, ball_grab, TIME_400MS);
 	callset_invoke (award_spiral_loop);
+	if (fastlock_running ())
+		timer_restart_free (GID_FASTLOCK_LOOP_AWARDED, TIME_5S);	
 	if (global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 	{
-		powerball_loops++;
+		bounded_increment (powerball_loops, 3);
 
 		if (powerball_loops < 3)
 		{
@@ -111,15 +113,20 @@ static void award_loop (void)
 		fastlock_loop_completed ();
 
 		if (!task_find_gid (GID_SPIRALAWARD) || !task_find_gid (GID_GUMBALL))
+		{	
 			sound_send (SND_SPIRAL_AWARDED);
-		deff_start (DEFF_LOOP);
+			deff_start (DEFF_LOOP);
+		}
 	}
 }
 
 static inline void abort_loop (void)
 {
-	score (SC_1K);
-	sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
+	if (in_live_game)
+	{
+		score (SC_1K);
+		sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
+	}
 }
 
 CALLSET_ENTRY (loop, award_left_loop)
@@ -140,21 +147,96 @@ CALLSET_ENTRY (loop, award_right_loop)
 	award_loop ();
 }
 
-void loop_deff (void)
+void pb_loop_deff (void)
 {
-	U8 i;
-	for (i = 0; i < 6; i++)
+	dmd_alloc_pair_clean ();
+	U16 fno;
+	U8 x;
+	for (fno = IMG_LOOP_START; fno < IMG_LOOP_END; fno += 2)
 	{
-		dmd_alloc_low_clean ();
-		psprintf ("1 LOOP", "%d LOOPS", loops);
-		font_render_string_center (&font_fixed6, 64, i, sprintf_buffer);
-		
-		sprintf_score (loop_score);
-		font_render_string_center (&font_mono5, 64, 23 - i, sprintf_buffer);
-		dmd_show_low ();
+		/* How many steps before the end */
+		x = IMG_LOOP_END - fno;
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		sprintf ("POWERBALL LOOP");
+		font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+		sprintf_score (score_table[SC_10M]);
+		font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+	
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		callset_invoke (score_overlay);
+		dmd_overlay_outline ();
+		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
-	task_sleep_sec (1);
+	/* Get rid of the last dirty frame */
+	dmd_alloc_pair_clean ();
+	sprintf ("POWERBALL LOOP");
+	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	sprintf_score (score_table[SC_10M]);
+	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+	dmd_copy_low_to_high ();
+	callset_invoke (score_overlay);
+	dmd_show2 ();
+	task_sleep (TIME_600MS);
+	dmd_show_low ();
+	task_sleep (TIME_400MS);
+
+	deff_exit ();
+
+}
+
+
+void loop_deff (void)
+{
+	dmd_alloc_pair_clean ();
+	U16 fno;
+	U8 x;
+	for (fno = IMG_LOOP_START; fno < IMG_LOOP_END; fno += 2)
+	{
+		/* How many steps before the end */
+		x = IMG_LOOP_END - fno;
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+
+		psprintf ("1 LOOP", "%d LOOPS", loops);
+		if ( x > 3 )
+		{
+			font_render_string_center (&font_fixed6, 64, 6 + x, sprintf_buffer);
+			sprintf_score (loop_score);
+			font_render_string_center (&font_mono5, 64, 26 - x, sprintf_buffer);
+		}
+		else
+		{
+			font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+			sprintf_score (loop_score);
+			font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+
+		}
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		callset_invoke (score_overlay);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	/* Get rid of the last dirty frame */
+	dmd_alloc_pair_clean ();
+	psprintf ("1 LOOP", "%d LOOPS", loops);
+	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	sprintf_score (loop_score);
+	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+	dmd_copy_low_to_high ();
+	callset_invoke (score_overlay);
+	dmd_show2 ();
+//	task_sleep_sec (1);
+	task_sleep (TIME_600MS);
+	dmd_show_low ();
+	task_sleep (TIME_400MS);
+
 	deff_exit ();
 }
 
@@ -173,6 +255,11 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 	if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
 	{
 		/* Left loop aborted */
+		if (task_find_gid (GID_LEFT_TO_RIGHT_THROW))
+		{
+			callset_invoke (magnet_throw_left_same_side);
+		}
+
 		abort_loop ();
 	}
 	else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
@@ -197,20 +284,17 @@ CALLSET_ENTRY (loop, sw_upper_right_magnet)
 
 CALLSET_ENTRY (loop, sw_lower_right_magnet)
 {
-
+	deff_stop (DEFF_SHOOT_RIGHT_LOOP);
 	/* Inform gumball module that a ball may be approaching */
 	if (!task_find_gid (GID_LEFT_LOOP_ENTERED))
 		sw_gumball_right_loop_entered ();
-
-	if (event_did_follow (dev_lock_kick_attempt, right_loop))
+	if (timer_find_gid (GID_LOCK_KICKED))
 	{
 		/* Ball has just come out of lock, ignore */
-		//return;
 	}
 	else if (event_did_follow (autolaunch, right_loop))
 	{
 		/* Ignore right loop switch after an autolaunch */
-		enter_loop ();
 	}
 	else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
 	{

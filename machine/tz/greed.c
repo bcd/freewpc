@@ -19,7 +19,10 @@
  */
 /* TODO Change so hitting standups increases jackpot
  * jackpot is collected by hitting slot machine 
- * Suggested by litz */
+ * Suggested by litz 
+ *
+ * Hitting green clock target shifts the lit lamps one step to the left and wraps 
+ * */
 
 /* CALLSET_SECTION (greed, __machine3__) */
 #include <freewpc.h>
@@ -60,26 +63,49 @@ struct timed_mode_ops greed_mode = {
 	.deff_running = DEFF_GREED_MODE,
 	.deff_ending = DEFF_GREED_MODE_TOTAL,
 	.prio = PRI_GAME_MODE2,
-	.init_timer = 20,
+	.init_timer = 40,
 	.timer = &greed_mode_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
 };
 
+/* Note:  The oddchange_deff handles the hits during greed mode */
 void greed_mode_deff (void)
 {
+	dmd_alloc_pair_clean ();
+	U16 fno;
 	for (;;)
 	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed6, 64, 5, "GREED");
-		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 27, "SHOOT FLASHING STANDUPS");
-		sprintf ("%d", greed_mode_timer);
-		font_render_string (&font_var5, 2, 2, sprintf_buffer);
-		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		U8 i = 0;
+		for (fno = IMG_GREED_START; fno <= IMG_GREED_END; fno += 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			font_render_string_center (&font_fixed6, 64, 5, "GREED");
+			i++;
+			if (i > 1)
+			{
+				sprintf_score (greed_mode_total);
+				font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			}
+			
+			if (i > 2)
+			{
+				i = 0;
+			}
+			
+			font_render_string_center (&font_var5, 64, 27, "SHOOT FLASHING STANDUPS");
+			sprintf ("%d", greed_mode_timer);
+			font_render_string (&font_var5, 2, 2, sprintf_buffer);
+			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			callset_invoke (score_overlay);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
 	}
 }
 
@@ -94,6 +120,22 @@ void greed_mode_total_deff (void)
 	dmd_show_low ();
 	task_sleep_sec (4);
 	deff_exit ();
+}
+
+/* Award 500K for a clock hit during Greed and cycle lamps */
+
+static inline void rotate_greed_lamps (void)
+{
+	greed_set = (greed_set >> 1) | (greed_set << (7 - 1));
+}
+
+CALLSET_ENTRY (greed, sw_clock_target)
+{
+	if (timed_mode_running_p (&greed_mode))
+	{
+		score_add (greed_mode_total, score_table[SC_500K]);
+		rotate_greed_lamps ();
+	}
 }
 
 void standup_lamp_update1 (U8 mask, U8 lamp)
@@ -133,6 +175,10 @@ CALLSET_ENTRY (standup, lamp_update)
 /** target is given as a bitmask */
 void common_greed_handler (U8 target)
 {
+	/* Increase the odcchange pot, which also shows the deff */
+	if (in_live_game)
+		callset_invoke (grow_oddchange);
+
 	const U8 sw = task_get_arg ();
 	const U8 lamp = switch_lookup_lamp (sw);
 
@@ -172,6 +218,12 @@ void greed_mode_init (void)
 	standup_lamp_update ();
 	deff_start (DEFF_GREED_MODE);
 	score_zero (greed_mode_total);
+}
+
+void greed_mode_expire (void)
+{
+	if (score_compare (score_table[SC_10M], greed_mode_total) == 1)
+		callset_invoke (start_hurryup);
 }
 
 void greed_mode_exit (void)

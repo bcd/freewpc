@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -42,14 +42,6 @@
 #define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
 
 
-
-typedef enum {
-	PF_STEEL_DETECTED = 1,
-	PF_PB_DETECTED,
-	TROUGH_STEEL_DETECTED,
-	TROUGH_PB_DETECTED,
-	GUMBALL_PB_DETECTED,
-} pb_event_t;
 
 /** The general location of the powerball */
 U8 pb_location;
@@ -95,23 +87,32 @@ void pb_detect_deff (void)
 	/* Loop anim 6 times */
 	for (i = 0;i < 5;i++)
 	{
+		dmd_alloc_pair_clean ();
+		bool on = TRUE;
 		for (fno = IMG_POWERBALL_START; fno <= IMG_POWERBALL_END; fno += 2)
 		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			if (on)
+			{
+				//font_render_string_center (&font_var5, 64, 26, "POWERBALL");
+				font_render_string_center (&font_var5, 64, 16, "POWERBALL");
+				on = FALSE;
+			}
+			else
+			{
+				font_render_string_center (&font_fixed6, 64, 16, "POWERBALL");
+				on = TRUE;
+			}
+			dmd_text_outline ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
-			dmd_flip_low_high ();
-			font_render_string_center (&font_var5, 64, 25, "POWERBALL");
-			dmd_flip_low_high ();
+			dmd_overlay_outline ();
 			dmd_show2 ();
-			task_sleep (TIME_100MS);
+			task_sleep (TIME_66MS);
 		}
 	}
 	deff_exit ();
-}
-
-void pb_loop_deff (void)
-{
-	generic_deff ("POWERBALL LOOP", "10,000,000");
 }
 
 CALLSET_ENTRY (pb_detect, lamp_update)
@@ -214,7 +215,7 @@ void pb_clear_location (U8 location)
 		callset_invoke (powerball_absent);
 		/* TODO : music is not being stopped correctly if Powerball
 		drains during multiball and game doesn't know where it is. */
-		effect_update_request ();
+		music_refresh ();
 #ifdef PB_DEBUG
 		deff_restart (DEFF_PB_DETECT);
 #else
@@ -228,7 +229,7 @@ void pb_clear_location (U8 location)
  * Because proximity sensors trigger only when steel balls move over them
  * (assuming they are working correctly), we can trust an assertion of
  * steel ball a little more than one about the Powerball. */
-static void pb_detect_event (pb_event_t event)
+void pb_detect_event (pb_event_t event)
 {
 	last_pb_event = event;
 	switch (event)
@@ -292,6 +293,7 @@ only called at certain points when we want to announce this.
 The powerball may have been detected sometime earlier. */
 void pb_announce (void)
 {
+	task_kill_gid (GID_GUMBALL_MUSIC_BUG);
 	if (pb_announce_needed)
 	{
 #ifdef PB_DEBUG
@@ -299,7 +301,7 @@ void pb_announce (void)
 #else
 		deff_start (DEFF_PB_DETECT);
 #endif
-		effect_update_request ();
+		music_refresh ();
 		pb_announce_needed = 0;
 	}
 }
@@ -399,9 +401,22 @@ CALLSET_ENTRY (pb_detect, left_ball_grabbed, right_ball_grabbed)
 {
 	if (single_ball_play ())
 	{
+		task_kill_gid (GID_POWERBALL_MAG_DETECT);
 		pb_clear_location (PB_IN_PLAY);
 		pb_clear_location (PB_MAYBE_IN_PLAY);
 	}
+}
+
+/* Starts when a ball is detected on the magnet but is then killed by
+ * a successful grab */
+void powerball_magnet_detect_task (void)
+{
+	/* Wait a little while for the ball to be grabbed */
+	task_sleep (TIME_600MS);
+//	pb_set_location (PB_IN_PLAY, 0);
+//	pb_announce ();
+	pb_detect_event (PF_PB_DETECTED);
+	task_exit ();
 }
 
 CALLSET_ENTRY (pb_detect, music_refresh)
@@ -411,22 +426,19 @@ CALLSET_ENTRY (pb_detect, music_refresh)
 }
 
 /* Powerball slot proximity */
-CALLSET_ENTRY (pb_detect, sw_camera)
-{
-	event_can_follow (camera_or_piano, slot_prox, TIME_6S);
-}
-
-CALLSET_ENTRY (pb_detect, sw_piano)
-{
-	event_can_follow (camera_or_piano, slot_prox, TIME_6S);
-}
-
 CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 {
-	event_did_follow (camera_or_piano, slot_prox);
+
+	/* TODO If I could find out which GID was triggered more recently, I
+	 * could kill one and not the other, strengthing detection during
+	 * multiball.
+	 */
+	task_kill_gid (GID_CAMERA_SLOT_PROX_DETECT);
+	task_kill_gid (GID_PIANO_SLOT_PROX_DETECT);
+	pb_detect_event (PF_STEEL_DETECTED);
+	//event_did_follow (camera_or_piano, slot_prox);
 	/* TODO : if this switch triggers and we did not expect
 	 * a ball in the undertrough....??? */
-	pb_detect_event (PF_STEEL_DETECTED);
 }
 
 CALLSET_ENTRY (pb_detect, powerball_in_gumball)
@@ -434,14 +446,9 @@ CALLSET_ENTRY (pb_detect, powerball_in_gumball)
 	pb_detect_event (GUMBALL_PB_DETECTED);
 }
 
-CALLSET_ENTRY (pb_detect, dev_slot_enter)
+CALLSET_ENTRY (pb_detect, check_magnet_grab)
 {
-	if (event_did_follow (camera_or_piano, slot_prox))
-	{
-		/* Proximity sensor did not trip ; must be the powerball */
-		pb_detect_event (PF_PB_DETECTED);
-	}
-	pb_announce ();
+	task_recreate_gid (GID_POWERBALL_MAG_DETECT, powerball_magnet_detect_task);
 }
 
 CALLSET_ENTRY (pb_detect, dev_trough_enter)

@@ -53,7 +53,7 @@ struct {
 } tz_flipcodes[] = {
 	{ "BCD", "1234", "THE WIZARD"},
 	{ "FEK", "2345", "WELCOME BACK"},
-	{ "PUK", "3456", "EXTRA BALL LIT"},
+	{ "MAC", "3456", "EXTRA BALL LIT"},
 	{ "MET", "4567", "GET BACK TO IRC"},
 	{ "SAM", "5678", "MAX POWER"},
 	{ "SUN", "6789", "LIKE THE WEATHER"},
@@ -73,12 +73,17 @@ U8 strcmp (char *s1, char *s2)
 
 void tz_flipcode_entered_deff (void)
 {
-	dmd_alloc_pair ();
-	frame_draw (IMG_COW);
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+
 	sprintf ("HI %s", initials_data);
 	font_render_string_center (&font_times10, 40, 11, sprintf_buffer);
 	font_render_string_center (&font_var5, 40, 24, tz_flipcodes[tz_flipcode_number].text);
-	
+
+	dmd_text_outline ();
+	dmd_alloc_pair ();
+//	frame_draw (IMG_COW);
+	dmd_overlay_outline ();
 	dmd_show2 ();
 	task_sleep_sec (3);
 	deff_exit ();
@@ -86,10 +91,10 @@ void tz_flipcode_entered_deff (void)
 
 void tz_flipcode_entry_deff (void)
 {
-	dmd_alloc_pair_clean ();
+	dmd_alloc_low_clean ();
 	font_render_string_center (&font_var5, 40, 11, "THE POWER");
 	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
-	dmd_show2 ();
+	dmd_show_low ();
 	sound_send (SND_THUNDER1);
 	task_sleep_sec (2);
 	deff_exit ();
@@ -112,10 +117,14 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 				/* FEK */
 				case 1:
 				//	juggle_ball = TRUE;
-					callset_invoke (door_start_bttz);
-					sound_send (SND_TIME_IS_A_ONEWAY_STREET);
+				//	flag_on (FLAG_SNAKE_READY);
+				//	deff_start_sync (DEFF_SNAKE_READY);
+					//callset_invoke (door_start_clock_millions);
+					callset_invoke (mball_start);
+					callset_invoke (mball_start_3_ball);
+					//tz_clock_request_time (2, 30);
 					break;
-				/* PUK */
+				/* MAC */
 				case 2:
 					light_easy_extra_ball ();
 					sound_send (SND_YOU_UNLOCK_THIS_DOOR);

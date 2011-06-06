@@ -21,7 +21,9 @@
 /* CALLSET_SECTION (factoids, __machine3__) */
 
 #include <freewpc.h>
-#define NUM_FACTOIDS 20
+#include <amode.h>
+
+#define NUM_FACTOIDS 22
 
 const struct {
 	const char *line1;
@@ -49,7 +51,9 @@ const struct {
 	{ "DOLPHINS SLEEP", "WITH ONE EYE OPEN", "", "" },
 	{ "TWELVE OR MORE COWS", "ARE KNOWN AS", "A FLINK" },
 	{ "THE MAN FEATURED BY", "THE UPPER RIGHT FLIPPER", "IS BURGESS MEREDITH FROM", "THE ROCKY FILMS" },
-};
+	{ "FRANK MILLER STARTED", "HIS CAREER WORKING ON", "THE TWILIGHT ZONE", "COMIC BOOKS" },
+	{ "GBVQV", "AN FV", "XHEGFRG", "" },
+	};
 
 static void factoid_msg (U8 factoid)
 {
@@ -67,8 +71,8 @@ void show_random_factoid (void)
 	font_render_string_center (&font_fixed6, 64, 10, "RANDOM FACTOID");
 	show_text_on_stars ();
 	
-	dmd_alloc_pair_clean ();
+	dmd_alloc_low_clean ();
 	factoid_msg(random_scaled(NUM_FACTOIDS));
-	dmd_show2 ();
-	task_sleep_sec (6);
+	dmd_show_low ();
+	amode_sleep_sec (6);
 }

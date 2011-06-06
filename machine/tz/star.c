@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,6 +24,8 @@
 #define MAX_STARS 12
 
 #define MAX_STATE 4
+
+bool draw_bouncing_overlay;
 
 struct star_state
 {
@@ -79,17 +81,25 @@ void star_draw (void)
 	}
 }
 
+CALLSET_ENTRY (star, idle_every_ten_seconds)
+{
+	check_bitmap_overlay ();
+}
 
 CALLSET_ENTRY (star, score_deff_start)
 {
 	U8 n;
-	for (n=0; n < 8; n++)
+	for (n=0; n < MAX_STARS; n++)
 		star_states[n].time = 0;
+	check_bitmap_overlay ();
 }
 
 CALLSET_ENTRY (star, score_overlay)
 {
 	/* Don't draw any stars if paused */
-	if (!task_find_gid (GID_MUTE_AND_PAUSE))
-		star_draw ();
+	if (task_find_gid (GID_MUTE_AND_PAUSE))
+		return;
+	star_draw ();
+	if (draw_bouncing_overlay)
+		stardrop_overlay_draw ();
 }

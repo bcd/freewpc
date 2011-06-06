@@ -176,7 +176,6 @@ static void award_skill_switch (U8 sw)
 	/* Only trigger if skillshot or sssmb is enabled */
 	if (!skill_shot_enabled && !task_find_gid (GID_SSSMB_JACKPOT_READY))
 		return;
-	event_can_follow (skill_shot, slot, TIME_4S);
 	callset_invoke (any_skill_switch);
 	if (skill_switch_reached < sw)
 	{
@@ -216,6 +215,7 @@ CALLSET_ENTRY (skill, sw_skill_center)
 
 CALLSET_ENTRY (skill, sw_skill_top)
 {
+	device_switch_can_follow (skill_shot, slot, TIME_4S);
 	award_skill_switch (3);
 }
 

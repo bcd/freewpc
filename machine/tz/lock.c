@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,33 +18,23 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* CALLSET_SECTION (lock, __machine2__ ) */
+/* CALLSET_SECTION (lock, __machine3__ ) */
 
 /* More code for the lock is in Multiball.c */
 
 #include <freewpc.h>
 #include <eb.h>
 
-CALLSET_ENTRY (lock, dev_lock_enter)
-{
-	collect_extra_ball ();
-	score (SC_50K);
-	sound_send (SND_ROBOT_FLICKS_GUN);
-	leff_start (LEFF_LOCK);
-}
-
 
 CALLSET_ENTRY (lock, dev_lock_kick_attempt)
 {
-	while (timer_find_gid (GID_BALL_LAUNCH))
+	while (timer_find_gid (GID_AUTOFIRE_HANDLER))
 	{
 		task_sleep (TIME_100MS);
 	}
 
 	sound_send (SND_LOCK_KICKOUT);
-	event_can_follow (dev_lock_kick_attempt, right_loop, TIME_2S);
 	/* Used to disable camera magnet grab */
 	timer_restart_free (GID_LOCK_KICKED, TIME_3S);
 	magnet_disable_catch (MAG_RIGHT);
 }
-

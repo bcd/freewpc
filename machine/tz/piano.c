@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -29,5 +29,5 @@ CALLSET_ENTRY (piano, sw_piano)
 	during single-ball play.  It is currently used for 
 	pausing timers. */
 
-	device_switch_can_follow (piano, slot, TIME_3S + TIME_500MS);
+	device_switch_can_follow (piano, slot, TIME_3S + TIME_200MS);
 }

@@ -18,18 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* amode.c */
-bool amode_page_delay(U8 secs);
-void amode_flipper_sound_debounce_timer(void);
-void amode_flipper_sound(void);
-void amode_scroll(void);
-void amode_left_flipper(void);
-void amode_right_flipper(void);
-void amode_lamp_toggle_task(void);
-void amode_leff(void);
-void amode_show_design_credits(void);
-void amode_deff(void);
-__machine2__ void show_driver_animation(void);
+/* tz_amode.c */
 __machine2__ void show_text_on_stars(void);
 
 /* stars.c */
@@ -42,17 +31,20 @@ __machine__ void autofire_add_ball(void);
 /* ballsave.c */
 __common__ void ballsave_add_time(U8 secs);
 __common__ void ballsave_disable(void);
+__common__ void ballsave_launch(void);
 
 /* camera.c * */
-__machine__ void door_start_camera (void);
 __machine2__ bool can_award_camera (void);
 
 /* clock.c */
-void tz_dump_clock(void);
-void tz_clock_start_forward(void);
-void tz_clock_start_backward(void);
-void tz_clock_stop(void);
-
+__machine__ void tz_dump_clock(void);
+__machine__ void tz_clock_start_forward(void);
+__machine__ void tz_clock_start_backward(void);
+__machine__ void tz_clock_stop(void);
+__machine__ void tz_clock_reset(void);
+//__machine__ void tz_clock_show_time (U8 hours, U8 minutes);
+__machine__ void tz_clock_reverse_direction (void);
+__machine__ void tz_clock_set_speed (U8 speed);
 /* deffs.c */
 __machine__ void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
 __machine__ void printf_millions(U8 n);
@@ -69,6 +61,9 @@ __machine__ void shot_slot_machine (void);
 __machine__ void shot_piano (void);
 __machine__ void award_door_panel (void);
 __machine__ void award_door_panel_task (void);
+__machine__ bool can_award_door_panel (void);
+__machine__ bool check_relight_slot_or_piano (void);
+__machine__ void door_advance_flashing (void);
 
 /* gumball.c */
 __machine__ void gumball_diverter_open(void);
@@ -82,9 +77,11 @@ __machine__ void sw_gumball_right_loop_entered(void);
 /* mball.c */
 void mball_light_lock (void);
 void mball_check_light_lock (void);
-
+__machine__ bool can_lock_ball (void);
+__machine__ bool mball_restart_active (void);
 /* mpf.c */
 __machine__ void mpf_enable (void);
+__machine__ bool mpf_ready_p (void);
 
 /* rampdiv.c */
 void ramp_divert (void);
@@ -112,13 +109,27 @@ __machine2__ void tz_flipcode_default (void);
 /* fastlock.c */
 __machine__ void fastlock_loop_completed (void);
 __machine__ bool fastlock_running (void);
+__machine__ void fastlock_lock_entered (void);
 /* powerball.c */
 #define PB_IN_GUMBALL 0x4
 #define PB_MAYBE_IN_PLAY 0x10
 #define PB_IN_PLAY 0x8
+
+typedef enum {
+	PF_STEEL_DETECTED = 1,
+	PF_PB_DETECTED,
+	TROUGH_STEEL_DETECTED,
+	TROUGH_PB_DETECTED,
+	GUMBALL_PB_DETECTED,
+} pb_event_t;
+
+
 __machine__ void pb_clear_location (U8 location);
+__machine__ void powerball_magnet_detect_task (void);
 __machine__ bool pb_maybe_in_play (void);
 __machine__ bool pb_in_lock (void);
+__machine__ void pb_announce (void);
+__machine__ void pb_detect_event (pb_event_t event);
 /* thingfl.c */
 /* outhole.c */
 __common__ bool ballsave_test_active (void);
@@ -137,10 +148,10 @@ void magnet_enable_catch_and_throw (U8 magnet);
 void magnet_disable_catch (U8 magnet);
 void magnet_reset (void);
 
-/* maghelpers.c */
+/* maghelper.c */
 __machine3__ bool magnet_enabled (U8 magnet);
 __machine3__ bool magnet_busy (U8 magnet);
-
+__machine3__ void magnet_enable_monitor_task (void);
 __machine3__ void start_bttz_outhole_monitor (void);
 
 /* factoids.c */
@@ -149,3 +160,39 @@ __machine3__ void show_random_factoid (void);
 /* master.c */
 __machine3__ void loop_master_check (void);
 __machine3__ void combo_master_check (void);
+
+__machine3__ void snake_start (void);
+
+/* hurryup.c */
+__machine3__ bool hurryup_active (void);
+
+/* music.c */
+__machine2__ void slow_music_lin (U8 count, U8 delay);
+__machine2__ void slow_music_log (U8 count, U8 delay);
+__machine2__ void speed_up_music_lin (U8 count, U8 delay);
+
+/* oddchange.c */
+
+/* shots.c */
+__machine2__ bool task_find_or_kill_gid (free_timer_id_t gid);
+
+/* test_bitmap.c */
+__machine2__ void stardrop_overlay_draw (void);
+__machine2__ void check_bitmap_overlay (void);
+
+/* dollar.c */
+__machine4__ void dollar_overlay (void);
+__machine4__ void init_all_dollars (void);
+
+/* bar.c */
+
+struct progress_bar_ops 
+{
+	U8 x;
+	U8 y;
+	U8 *fill_level;
+	U8 *max_level;
+	U8 bar_width; //Needs to be a multiple of 5 + 
+};
+
+__machine4__ void draw_progress_bar (struct progress_bar_ops *ops);

@@ -1,3 +1,30 @@
+Tennis style scoring, player must be a certain amounts of points in front to
+win, or 2 balls past and the other play fails to retake the lead.
+
+tnf - Change rules:
+Only gain score if you reach the end bar, add on an extra 10 button pushes
+required each time till a certain point (3 times only?);
+also, use Jet progress bar
+
+show ZZzz's on skill shot if no one is playing
+
+
+put dmd_text_outline into score_deff.c
+
+Count balls going into slot tunnel for more accurate pb detection during
+multiball
+Wavy demo style text
+
+BUGS
+Autofire ballsave multiball drain bug
+sssmb, make 'easy' jackpot and fix existing code
+
+Make TZ challenge
+Grand champion gets to enter a PIN which is stored in the machine.  This means
+they can enter in their GC flipcode
+
+Jackpot Leff
+
 Use system time for some features
 	eg: 1200 midnight multiball
 Store a mode for use later (when Buyin is pressed)
@@ -23,10 +50,11 @@ what we do is:
 
 Show fuse list in test
 
-Alarm clock:
-
-Allow the player to set a time for the alarm to go off,
-either a specific time, or 10, 20 minutes etc.
+Magnet multiball:
+=================
+Grab a ball on the magnet, but hold it v. weakly.  Enough to hold it but not
+enough to stop another ball getting grabbed.  Then just wait for the opto to
+change when the ball hits it.
 
 Sharpe Shooter Mode:
 Alternative to BTTZ, Shooter pot starts with 50M, player must hit 2 lit shots,

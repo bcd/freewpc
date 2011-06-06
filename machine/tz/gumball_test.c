@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -48,6 +48,7 @@ const switch_monitor_t tz_gumball_test_switch_monitor[] = {
 	{ SW_GUMBALL_ENTER, "ENTER", SW_MON_COORD(45, 24), },
 	{ SW_GUMBALL_GENEVA, "GENEVA", SW_MON_COORD(90, 17), },
 	{ SW_GUMBALL_EXIT, "EXIT", SW_MON_COORD(90, 24), },
+	{ 0, NULL, SW_MON_COORD(0, 0), },
 };
 
 #define NUM_GUMBALL_SWITCHES	\
@@ -55,22 +56,25 @@ const switch_monitor_t tz_gumball_test_switch_monitor[] = {
 		sizeof (tz_gumball_test_switch_monitor[0]))
 
 
-void switch_monitor_draw (const switch_monitor_t *monitor, U8 count)
+void switch_monitor_prepare (const switch_monitor_t *monitor)
 {
-	while (count > 0)
+	while (monitor->name != NULL)
+	{
+		font_render_string_left (&font_var5, monitor->text_coord.x,
+			monitor->text_coord.y, monitor->name);
+		monitor++;
+	}
+}
+
+
+void switch_monitor_poll (const switch_monitor_t *monitor)
+{
+	while (monitor->name != NULL)
 	{
 		if (switch_poll_logical (monitor->sw))
-		{
 			bitmap_draw (monitor->box_coord, BM_X5);
-		}
 		else
-		{
 			bitmap_draw (monitor->box_coord, BM_BOX5);
-		}
-		font_render_string_left (&font_var5, 
-			monitor->text_coord.x, monitor->text_coord.y,
-			monitor->name);
-		count--;
 		monitor++;
 	}
 }
@@ -85,6 +89,8 @@ void tz_gumball_test_init (void)
 
 void tz_gumball_test_draw (void)
 {
+	extern U8 gumball_count;
+
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 2, "GUMBALL TEST");
 	switch (gumball_op)
@@ -94,10 +100,11 @@ void tz_gumball_test_draw (void)
 		case TEST_GUMBALL_RELEASE:
 			sprintf ("RELEASE"); break;
 	}
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_mono5, 32, 10, sprintf_buffer);
 
-	switch_monitor_draw (tz_gumball_test_switch_monitor, NUM_GUMBALL_SWITCHES);
-
+	sprintf ("%d", gumball_count);
+	font_render_string_center (&font_mono5, 96, 10, sprintf_buffer);
+	switch_monitor_prepare (tz_gumball_test_switch_monitor);
 	dmd_show_low ();
 }
 
@@ -106,8 +113,10 @@ void tz_gumball_test_thread (void)
 {
 	for (;;)
 	{
-		/* TODO - poll more frequently, and draw less often */
 		tz_gumball_test_draw ();
+		switch_monitor_poll (tz_gumball_test_switch_monitor);
+		task_sleep (TIME_33MS);
+		switch_monitor_poll (tz_gumball_test_switch_monitor);
 		task_sleep (TIME_33MS);
 	}
 }

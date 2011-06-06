@@ -24,11 +24,12 @@
 #include <freewpc.h>
 /* How many balls have drained in three seconds */
 U8 multidrain_count;
-bool multidrain_awarded;
 bool powerball_death;
 
 CALLSET_ENTRY (outhole, ball_search)
 {
+	if (device_recount (device_entry (DEVNO_LOCK)) + device_recount (device_entry (DEVNO_TROUGH)) == 3)
+		end_ball ();
 	while (switch_poll_logical (SW_OUTHOLE))
 	{
 		sol_request (SOL_OUTHOLE);
@@ -36,13 +37,40 @@ CALLSET_ENTRY (outhole, ball_search)
 	}
 }
 
-CALLSET_ENTRY (outhole, single_ball_play)
+CALLSET_ENTRY (outhole, mball_start)
 {
-	if (!timer_find_gid (GID_MULTIDRAIN))
-		multidrain_awarded = FALSE;
+	multidrain_count = 0;
+}
+
+static void multidrain_check (void)
+{
+		/* Start a timer to check if 3 balls drain quickly */
+		if (!timer_find_gid (GID_MULTIDRAIN) 
+			&& multi_ball_play ()
+			&& multidrain_count == 0)
+		{
+			timer_restart_free (GID_MULTIDRAIN, TIME_9S);
+		}
+		
+		if (timer_find_gid (GID_MULTIDRAIN))
+			/* There are 6 balls installed normally */
+			bounded_increment (multidrain_count, feature_config.installed_balls);
 }
 
 CALLSET_ENTRY (outhole, sw_outhole)
+{	
+	if (in_live_game && !timer_find_gid (GID_OUTHOLE_DEBOUNCE))
+	{
+		timer_start_free (GID_OUTHOLE_DEBOUNCE, TIME_500MS);
+		/* Whoops, lost the powerball before getting it in the gumball */
+		if (!multi_ball_play () && global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
+			powerball_death = TRUE;
+		deff_start (DEFF_BALL_EXPLODE);
+		leff_start (LEFF_STROBE_UP);
+	}
+}
+
+CALLSET_ENTRY (outhole, dev_trough_enter)
 {
 	if (in_live_game)
 	{
@@ -52,35 +80,8 @@ CALLSET_ENTRY (outhole, sw_outhole)
 			 * fired to help the player */
 			timer_restart_free (GID_BALL_LAUNCH_DEATH, TIME_6S);
 		}
-
-		
-		/* Start a timer to check if 3 balls drain quickly */
-		if (!timer_find_gid (GID_MULTIDRAIN) && !ballsave_test_active ())
-		{
-			multidrain_count = 0;
-			if (multi_ball_play ())
-				timer_restart_free (GID_MULTIDRAIN, TIME_7S);
-		}
-	
-		if (timer_find_gid (GID_MULTIDRAIN))
-		{
-			/* There are 6 balls installed normally */
-			bounded_increment (multidrain_count, 6);
-			if (multidrain_count >= 3)
-				multidrain_awarded = TRUE;
-		}
-		
-		/* Whoops, lost the powerball before getting it in the gumball */
-		if (!multi_ball_play () &&
-			 global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) &&
-			 !ballsave_test_active ())
-		{
-			sound_send (SND_NOOOOOOOO);
-			powerball_death = TRUE;
-			task_sleep (TIME_500MS);
-		}
-		deff_start (DEFF_BALL_EXPLODE);
-		leff_start (LEFF_STROBE_UP);
+		else
+			multidrain_check ();
 	}
 	
 }
@@ -94,6 +95,5 @@ CALLSET_ENTRY (outhole, serve_ball)
 {
 	powerball_death = FALSE;
 	multidrain_count = 0;
-	multidrain_awarded = FALSE;
 	timer_kill_gid (GID_MULTIDRAIN);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Ewan Meadows <sonny_jim@hotmail.com>
+ * Copyright 2011 by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,7 +20,7 @@
 
 #include <freewpc.h>
 
-/* CALLSET_SECTION (lanes, __machine2__) */
+/* CALLSET_SECTION (lanes, __machine3__) */
 
 /* How many times the rollovers have been completed */
 U8 rollover_count;
@@ -58,7 +58,7 @@ static void handle_outlane (void)
 		leff_start (LEFF_STROBE_DOWN);
 }
 
-bool rollover_completed (void)
+static bool rollover_completed (void)
 {
 	if (lamp_test (LM_LEFT_INLANE1)
 		&& lamp_test (LM_LEFT_INLANE2)
@@ -87,7 +87,7 @@ static inline void award_rollover_completed (void)
 	lamplist_apply (LAMPLIST_INLANES, lamp_flash_off);
 }
 
-void check_rollover (void)
+static void check_rollover (void)
 {
 	/* Check to see if rollover has been completed 
 	 * and start the spiralaward timer if a set has been
@@ -116,6 +116,7 @@ CALLSET_ENTRY (lanes, sw_right_button)
 /* 'Extra Ball' outlane */
 CALLSET_ENTRY (lanes, sw_left_outlane)
 {
+	timer_restart_free (GID_BALL_DRAIN_OUTLANE, TIME_5S);
 	score (SC_10K);
 	handle_outlane ();
 }
@@ -123,6 +124,7 @@ CALLSET_ENTRY (lanes, sw_left_outlane)
 /* 'Special' outlane */
 CALLSET_ENTRY (lanes, sw_right_outlane)
 {
+	timer_restart_free (GID_BALL_DRAIN_OUTLANE, TIME_5S);
 	score (SC_10K);
 	handle_outlane ();
 }
@@ -167,7 +169,7 @@ CALLSET_ENTRY (lanes, sw_right_inlane)
 	/* Light Dead end if not lit */
 	lamp_on (LM_DEAD_END);
 	timer_restart_free (GID_TNF_READY, TIME_4S);
-	event_can_follow (right_inlane, left_ramp, TIME_4S);
+	//event_can_follow (right_inlane, left_ramp, TIME_4S);
 }
 
 CALLSET_ENTRY (lanes, start_ball)
@@ -176,5 +178,3 @@ CALLSET_ENTRY (lanes, start_ball)
 	lamplist_apply (LAMPLIST_INLANES, lamp_off);
 	rollover_count = 0;
 }
-
-

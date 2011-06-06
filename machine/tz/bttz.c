@@ -64,11 +64,12 @@ void tbc_deff (void)
 	
 	font_render_string_center (&font_fixed6, 64, 4, "TO BE CONTINUED");
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep_sec (1);
 	font_render_string_center (&font_var5, 64, 12, "FOR NOW, HAVE 100M");
 	sound_send (SND_KACHING);
 	dmd_sched_transition (&trans_bitfade_slow);
 	dmd_show_low ();
+	task_sleep_sec (2);
 	deff_exit ();
 }
 	
@@ -97,7 +98,7 @@ void bttz_start_task (void)
 	
 	callset_invoke (empty_balls_test);
 	device_request_empty (device_entry (DEVNO_LOCK));
-	set_ball_count (6);
+	device_multiball_set (6);
 	balls_needed_to_load = 3;
 	task_exit ();
 }
@@ -107,6 +108,7 @@ CALLSET_ENTRY (bttz, door_start_bttz)
 	//task_create_anon (bttz_start_task);
 	deff_start (DEFF_TBC);
 	score (SC_100M);
+	callset_invoke (reset_door);
 }
 
 /* Once the ballsave has run out, start holding balls in the autofire */
@@ -167,7 +169,7 @@ CALLSET_ENTRY (bttz, single_ball_play)
 	lamplist_apply (LAMPLIST_DOOR_PANELS_AND_HANDLE, lamp_flash_off);
 	flag_on (FLAG_SLOT_DOOR_LIT);
 	callset_invoke (door_enable);
-	effect_update_request ();
+	music_refresh ();
 }
 
 CALLSET_ENTRY (bttz, end_ball)

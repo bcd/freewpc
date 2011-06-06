@@ -35,6 +35,7 @@ extern U8 loops;
 extern U8 combos;
 extern U8 lucky_bounces;
 extern char initials_data[3];
+extern bool amode_show_scores_long;
 
 void loop_master_entry_deff (void)
 {
@@ -120,15 +121,17 @@ CALLSET_ENTRY (master, start_game)
 
 CALLSET_ENTRY (master, factory_reset)
 {
-	loop_master_hi = 0;
-	combo_master_hi = 0;
+	loop_master_hi = 5;
+	combo_master_hi = 2;
 	//loop_master_initials = "FEK";
 	//combo_master_initials = "FEK";
-	spawny_get_hi = 0;
+	spawny_get_hi = 1;
 }
 
 CALLSET_ENTRY (master, amode_page)
 {
+	if (amode_show_scores_long)
+		return;
 	dmd_sched_transition (&trans_vstripe_left2right);
 	dmd_map_overlay ();
 	dmd_clean_page_high ();

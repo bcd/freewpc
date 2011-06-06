@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # TZ machine description for FreeWPC
-# (C) Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+# (C) Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
@@ -35,15 +35,16 @@ define MACHINE_MUSIC_GAME                 MUS_FASTLOCK_BANZAI_RUN
 define MACHINE_MUSIC_PLUNGER              MUS_MULTIBALL_LIT_PLUNGER
 define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
 define MACHINE_REPLAY_SCORE_CHOICES       10
-define MACHINE_REPLAY_START_CHOICE        8
-define MACHINE_AMODE_LEFF                 tz_amode_leff
-define MACHINE_AMODE_EFFECTS 		 
+define MACHINE_REPLAY_START_CHOICE        5
+define MACHINE_AMODE_EFFECTS
 define MACHINE_HAS_UPPER_LEFT_FLIPPER
 define MACHINE_HAS_UPPER_RIGHT_FLIPPER
 define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 define CONFIG_TZONE_IP y
+# Allow only one high score entry per player
+#define CONFIG_ONE_HS_PER_PLAYER 
 
-##########################################################################
+#########################################################################
 # Lamp Description
 # The key is given in column/row format.  The first parameter must be
 # the lamp name.  Optionally you can specify a color, and x() and y()
@@ -142,7 +143,7 @@ define CONFIG_TZONE_IP y
 [switches]
 11: Right Inlane, ingame, sound(SND_INSIDE_LEFT_INLANE)
 12: Right Outlane, ingame, sound(SND_DRAIN)
-13: Start Button, start-button, intest, debounce(TIME_100MS)
+13: Start Button, start-button, intest
 14: Tilt, tilt, ingame, noplay, cabinet
 15: Right Trough, noscore
 16: Center Trough, noscore
@@ -224,10 +225,10 @@ define CONFIG_TZONE_IP y
 H1: Slot, duty(SOL_DUTY_100), time(TIME_200MS)
 H2: Rocket Kicker, duty(SOL_DUTY_75), time(TIME_200MS)
 H3: Autofire, nosearch, launch, duty(SOL_DUTY_100), time(TIME_200MS)
-H4: Popper
+H4: Popper, time(TIME_100MS)
 H5: Right Ramp Div, duty(SOL_DUTY_50), time(TIME_100MS)
 H6: Gumball Div, duty(SOL_DUTY_50), time(TIME_133MS)
-H7: Knocker, knocker
+H7: Knocker, knocker, time(TIME_16MS)
 H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
 L1: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_133MS)
@@ -237,7 +238,7 @@ L4: Lower Jet, duty(SOL_DUTY_100)
 L5: Left Jet, duty(SOL_DUTY_100)
 L6: Right Jet, duty(SOL_DUTY_100)
 L7: Lock Release, duty(SOL_DUTY_75), time(TIME_133MS)
-L8: Shooter Div, nosearch, duty(SOL_DUTY_100)
+L8: Shooter Div, nosearch
 
 G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
@@ -268,23 +269,24 @@ X7: Clock Forward, motor, nosearch
 
 
 [templates]
-Left Sling: driver(sling), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
-Right Sling: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
-Left Jet: driver(jet), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
-Right Jet: driver(jet), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
-Lower Jet: driver(jet), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
-Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=3, offtime=16
-Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=3, offtime=16
+
+Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
+Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
+Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
+Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
+Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
+Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=3, offtime=3
+Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=3, offtime=3
 
 Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
 Bridge Open: driver(duty2),
-	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_33MS, duty_mask=DUTY_MASK_25
+	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
 Shooter Div: driver(duty2),
-	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_500MS, duty_mask=DUTY_MASK_12
+	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_700MS, duty_mask=DUTY_MASK_50
 
 Ramp Div: driver(duty2),
 	sol=SOL_RAMP_DIVERTOR, timeout=TIME_3S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
@@ -293,6 +295,17 @@ Gumball Div: driver(duty2),
 	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
 Outhole: driver(outhole), sol=SOL_OUTHOLE, swno=SW_OUTHOLE, swevent=sw_outhole
+
+### old duty driver ###
+#Ramp Div: driver(duty),
+#	sol=SOL_RAMP_DIVERTOR,
+#	ontime=TIME_33MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+#Shooter Div: driver(duty),
+#	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
+#Bridge Open: driver(duty),
+#	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_16MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
+#Gumball Div: driver(duty),
+#	sol=SOL_GUMBALL_DIV, timeout=TIME_3S, ontime=TIME_16MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
 
 ##########################################################################
 # Containers
@@ -308,13 +321,13 @@ Outhole: driver(outhole), sol=SOL_OUTHOLE, swno=SW_OUTHOLE, swevent=sw_outhole
 Trough: Ball Serve, trough, init_max_count(3), \
 	Left Trough, Center Trough, Right Trough
 
-Lock: Lock Release, init_max_count(0),\
+Lock: Lock Release, init_max_count(0), \
 	Lock Upper, Lock Center, Lock Lower
 
-Rocket: Rocket Kicker, \
+Rocket: Rocket Kicker, init_max_count(0), \
 	Rocket Kicker
 
-Slot: Slot, \
+Slot: Slot, init_max_count(0), \
 	Slot
 
 Popper: Popper, \
@@ -337,10 +350,11 @@ Popper: Popper, \
 # These are additional test items that should appear in the TESTS menu.
 ##########################################################################
 [tests]
-#tz_clock:
+tz_clock:
 tz_gumball:
 tz_magnet:
 tz_powerball:
+ac_detect:
 
 ##########################################################################
 # Lampsets
@@ -394,6 +408,8 @@ Unlit shots: Dead End, Slot Machine, Piano Panel, Ramp Battle, Camera
 Inlanes: Left Inlane1, Left Inlane2, Right Inlane
 Chaosmb Jackpots: Multiball, Ramp Battle, Piano Jackpot, Camera, Power Payoff, Dead End
 
+Select mode: Door Locks, Door Gumball, Spiral Awards, Lower Lanes, Jets, Powerfield Values, Left Spiral, Left Powerball, Left Ramp Awards, Ramp Battle, Lock Awards, Piano Awards, Right Spiral, Right Powerball, Greed Targets, Dead End, Slot Machine, Camera
+
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
 # machine.
@@ -407,25 +423,46 @@ Chaosmb Jackpots: Multiball, Ramp Battle, Piano Jackpot, Camera, Power Payoff, D
 Ball Saves: integer, 1
 Ball Save Time: integer, 7
 Installed Balls: integer, 6
-Disable Clock: yes_no, YES
+Disable Clock: yes_no, NO
 Disable Gumball: yes_no, NO
 Powerball Missing: yes_no, NO
 Have Third Magnet: yes_no, NO
 Mute/Pause: yes_no, YES
 TZ Flipcodes: yes_no, YES
 TZ Mag Helpers: yes_no, YES
+Snake Wrap:yes_no, YES
 
-# No lock needed to relight Gumball
-Easy Light Gumball: yes_no, YES
 
 # Hit Slot/Piano to relight if < 8 door_panels
-Easy Light Door panels: yes_no, YES
+Easy lite door: yes_no, YES
 
 # Used by the autofire, turn on if autofire opto fails 
-Fire when detected empty: yes_no, NO
+Fire empty: yes_no, NO
+
+# No lock needed to relight Gumball
+Easy Lite Gumball: yes_no, YES
 
 # Do not grab the ball on the right magnet if gumball is lit
-Gumball over Camera: yes_no, NO
+No grab gumball: yes_no, NO
+
+# Show advanced info during bonus
+Adv bonus info:yes_no, YES
+
+# Tweak the drop time for the throw automatically
+# Doesnt currenly work
+Auto SWAG:yes_no, NO
+
+# Dont allow throw, as the drag may cause damage to the table
+Mag Throw:yes_no, YES
+
+# Dont allow cradling during multiball
+Dixon anti cradle:yes_no, NO
+
+# Only allow one high score entry per player (Not working)
+One HS entry:yes_no, NO
+
+# Set the highest oddchange random award, 20 = 500K
+Oddchange Level:integer, 18
 
 ##########################################################################
 # Items for the Feature Audits menu.
@@ -494,6 +531,10 @@ Volume Change: MUS_SUPER_SLOT
 40M:
 50M:
 100M:
+200M:
+300M:
+400M:
+500M:
 
 ##########################################################################
 # The default high scores.  Use GC to indicate the grand champion.
@@ -512,10 +553,16 @@ GC: BCD, 500.000.000
 ##########################################################################
 # Bit flags.
 ##########################################################################
+
+# These should be player specific stuff
 [flags]
 PIANO_DOOR_LIT:
 SLOT_DOOR_LIT:
+SNAKE_READY:
+# Awarded for doing 88mph during fastlock
+MARTY_BONUS:
 
+# These are for non-player specific stuff
 [globalflags]
 POWERBALL_IN_PLAY:
 SSSMB_RED_JACKPOT:
@@ -529,6 +576,8 @@ MULTIBALL_RUNNING:
 SUPER_MB_RUNNING:
 BTTZ_RUNNING:
 Clock Working:
+Clock Home:
+Sharpe running:
 
 ##########################################################################
 # Display effects
@@ -543,20 +592,16 @@ Loop master Exit: page(MACHINE3_PAGE), PRI_HSENTRY
 Combo master Entry: page(MACHINE3_PAGE), PRI_HSENTRY
 Combo master Exit: page(MACHINE3_PAGE), PRI_HSENTRY
 
-#I prefer the Jackpot animation to be shown over the replay, hence the oddness
-Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
-Jackpot: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED
-Special: page(MACHINE_PAGE), PRI_SPECIAL
 Extra Ball: page(MACHINE_PAGE), PRI_EB, D_PAUSE+D_QUEUED
+Shoot Again: page(MACHINE3_PAGE), PRI_SHOOT_AGAIN, D_PAUSE+D_QUEUED
 
-Greed Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE3
-Greed Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED+D_PAUSE
+Greed Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE2, D_QUEUED+D_TIMEOUT
+Greed Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED+D_PAUSE+D_ABORTABLE
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5, D_QUEUED+D_TIMEOUT
-#Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 
 #These are in order of how they get triggered
 Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
-Rocket: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_PAUSE+D_QUEUED
+Rocket: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_PAUSE+D_QUEUED+D_TIMEOUT
 Hitchhiker: page(MACHINE2_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE+D_QUEUED+D_TIMEOUT
 Jets Hit: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE
 Jets Level Up: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT
@@ -568,84 +613,119 @@ SSSMB Jackpot Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_PAUSE+D_QUEUED+D_RESTAR
 SSlot Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 SSlot Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
 TSM Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
-TSM Mode total: page(MACHINE_PAGE), PRI_GAME_MODE4, D_QUEUED+D_PAUSE
+TSM Mode total: page(MACHINE_PAGE), PRI_GAME_MODE4, D_QUEUED+D_PAUSE+D_ABORTABLE
 Spiral Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE5
-Spiral Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE
+Spiral Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE+D_ABORTABLE
 Spiral Loop: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_SCORE+D_QUEUED
 Fastlock Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT
 Hitch Mode: page(MACHINE2_PAGE), runner, PRI_GAME_MODE3
 
 Clock Millions Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE3
-Clock Millions Hit: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_RESTARTABLE
+# D_PAUSE so it will stop the clock
+Clock Millions Hit: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_RESTARTABLE+D_PAUSE
 Clock Millions Explode: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_RESTARTABLE
-Clock Millions Mode Total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE
+Clock Millions Mode Total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE+D_ABORTABLE
 
-MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
+MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT+D_PAUSE
 MPF Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
-ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
-Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
+
 Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE2
 BG Flash: page(MACHINE_PAGE), PRI_GAME_MODE4
 Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Inlane lights Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
-Left ramp lights camera: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
+Left ramp lights camera: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_RESTARTABLE+D_TIMEOUT
 Shoot Hitch: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 
-Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
-Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
+Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED+D_PAUSE
+Select mode: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
 
 PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
-PB Loop: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
-Loop: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE+D_SCORE+D_TIMEOUT
+PB Loop: page(MACHINE_PAGE), PRI_GAME_LOW8, D_QUEUED+D_TIMEOUT
+Loop: page(MACHINE_PAGE), PRI_GAME_LOW4, D_RESTARTABLE+D_SCORE
 
 Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
+Ball From Lock: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+
+#Multiball deffs
 MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
 MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
-MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE2
+MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_LOW3, D_QUEUED+D_TIMEOUT
+MB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+MB Ten Million Added: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_RESTARTABLE
 
+#I prefer the Jackpot animation to be shown over the replay, hence the oddness
+Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
+Jackpot: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED
+Special: page(MACHINE_PAGE), PRI_SPECIAL
 
+ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
+Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
+
+TBC: page(MACHINE3_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 BTTZ Running: page(MACHINE3_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 BTTZ End: page(MACHINE3_PAGE), PRI_TILT, D_QUEUED
 
-Rollover Completed: page(MACHINE2_PAGE), PRI_GAME_QUICK3
+Rollover Completed: page(MACHINE3_PAGE), PRI_GAME_LOW3
 Ball Drain Outlane: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
 Ball Explode: page(MACHINE_PAGE), PRI_JACKPOT, D_RESTARTABLE
 TZ Ball Save: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
-MB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
-Two Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
-Three Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
+Two Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
+Three Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
 In the lead: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Home and Dry: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 PB Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 Lucky Bounce: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
-Shoot Camera: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT
-Shoot Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT
-Ball From Lock: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+Shoot Camera: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_RESTARTABLE
+Shoot Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT+D_QUEUED
 Button Masher: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
-Get ready to Doink: page(MACHINE_PAGE), PRI_JACKPOT, D_QUEUED+D_TIMEOUT
-MB Ten Million Added: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_RESTARTABLE
 
-Bonus: page(MACHINE2_PAGE), runner, PRI_BONUS
-Score to beat: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+Shoot Power Payoff: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT+D_QUEUED
+
+#Doink mode
+Get ready to Doink: page(MACHINE_PAGE), PRI_JACKPOT, D_QUEUED+D_TIMEOUT
+TNF: page(MACHINE4_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
+TNF exit: page(MACHINE4_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_PAUSE
+Shoot Right Loop: page(MACHINE_PAGE), PRI_GAME_QUICK3
+
+Bonus: page(MACHINE4_PAGE), runner, PRI_BONUS
+Score to beat: page(MACHINE4_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
-SpiralAward Collected: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
+Spiralaward Collected: page(MACHINE2_PAGE), PRI_GAME_LOW5, D_QUEUED+D_PAUSE+D_TIMEOUT
 Camera Award: page(MACHINE2_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
-TNF: page(MACHINE3_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
-TNF exit: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_PAUSE
-
-TBC: page(MACHINE3_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 
 Rules: page(MACHINE3_PAGE), PRI_EGG1
+
+Pinwheel: page(MACHINE_PAGE), PRI_GAME_QUICK3
+Snake: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
+Snake Ready: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
+Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
+Explosion: page(MACHINE_PAGE), PRI_EGG1
+
+Paused: page(MACHINE2_PAGE), PRI_STATUS, D_PAUSE+D_QUEUED
+Alarm: page(MACHINE2_PAGE), PRI_SLAMTILT, D_PAUSE+D_QUEUED
+Anti Cradle: page(MACHINE_PAGE), PRI_TILT, D_PAUSE+D_QUEUED
+
+Hurryup Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
+Hurryup awarded: page(MACHINE3_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+
+#Match loop: page(MACHINE3_PAGE), PRI_MATCH, D_PAUSE+D_QUEUED
+
+Oddchange grows: page(MACHINE2_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE
+Oddchange collected: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT+D_SCORE
+Bitmap test: page(MACHINE2_PAGE), PRI_GAME_QUICK5
+
+SDSS Ready: page(MACHINE4_PAGE), PRI_GAME_MODE6, D_PAUSE
+SDSS Awarded: page(MACHINE4_PAGE), PRI_JACKPOT, D_PAUSE
 
 ##########################################################################
 # Lamp effects
@@ -655,11 +735,14 @@ Rules: page(MACHINE3_PAGE), PRI_EGG1
 perlinclude machine/tz/leff.pl
 
 Bonus: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
+Select Mode: runner, PRI_LEFF7, LAMPS(SELECT_MODE), GI(ALL), page(MACHINE2_PAGE)
 GI Cycle: PRI_LEFF3, GI(ALL), page(MACHINE2_PAGE)
 Flasher Happy: shared, PRI_LEFF1, page(MACHINE2_PAGE)
 Left Ramp: shared, PRI_LEFF2, page(MACHINE2_PAGE)
 No GI: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
+Piano Jackpot Collected: PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 Flash GI: PRI_LEFF2, GI(ALL), page(MACHINE2_PAGE)
+Flash GI2: PRI_LEFF2, GI(ALL), page(MACHINE2_PAGE)
 Flash All: PRI_LEFF5, LAMPS(AMODE_ALL), page(MACHINE2_PAGE)
 Slot Kickout: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
 Gumball Strobe: PRI_LEFF2, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
@@ -690,6 +773,11 @@ Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 ##########################################################################
 [fonts]
 times10:
+twizone:
 steel:
-lithograph:
+
+[timers]
+Rocket Flipper:
+R Ramp to MPF:
+MPF Top to Camera:
 

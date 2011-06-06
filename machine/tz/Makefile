@@ -63,27 +63,33 @@ EXTRA_CFLAGS += -DCONFIG_MUTE_PAUSE
 # and leffs.  RTTs must go into GAME_OBJS.
 #
 
-GAME_OBJS = sling.o jets.o autofire.o gumball.o \
-	config.o loop.o rampdiv.o magnet.o \
-	maghelper.o
+SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h \
+	build/right_jet.h build/lower_jet.h build/left_mpf.h build/right_mpf.h
 
-GAME_TEST_OBJS = gumball_test.o powerball_test.o magtest.o
+GAME_OBJS = jets.o autofire.o gumball.o \
+	config.o loop.o rampdiv.o magnet.o \
+	maghelper.o clock.o
+
+GAME_TEST_OBJS = gumball_test.o powerball_test.o clocktest.o magtest.o ac_detect.o
 
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = leftramp.o rightramp.o skill.o \
-	fastlock.o door.o slot.o \
+	fastlock.o door.o slot.o sling.o \
 	mpf.o chaosmb.o powerball.o \
 	multiball.o sssmb.o deffs.o
 
-GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
-	bonus.o tz_amode.o star.o rocket.o \
-	outhole.o lock.o camera.o combo.o deadend.o \
-	hitch.o
+GAME2_OBJS = unlit.o spiralaward.o leffs.o star.o rocket.o tz_amode.o \
+	outhole.o camera.o deadend.o hitch.o birthday.o alarm.o dixon.o \
+	music.o oddchange.o shots.o mode_select.o bitmap_test.o
 
 GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
-	spiral.o tnf.o bttz.o factoids.o master.o
+	spiral.o bttz.o factoids.o master.o snake.o \
+	lock.o lanes.o combo.o deffs2.o hurryup.o
 
+GAME4_OBJS = bonus.o dollar.o bar.o tnf.o sdss.o
 
 IMAGE_MAP += $(M)/tz.ild
 
+SCHED_HEADERS += build/clock_mech.h build/bridge_open.h build/shooter_div.h \
+	build/ramp_div.h build/gumball_div.h

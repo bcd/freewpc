@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -48,28 +48,41 @@ struct timed_mode_ops spiral_mode = {
 
 void spiral_loop_deff (void)
 {
-
-	dmd_alloc_low_clean ();
-	psprintf ("1 SPIRAL", "%d SPIRALS", spiral_loops);
-	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
-	sprintf_score (spiral_mode_total);	
-	font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
+	U16 fno;
+	U8 i;
+	dmd_alloc_pair_clean ();
+	for (i=0; i < 3; i++)
+	{
+		for (fno = IMG_PINWHEEL_END; fno >= IMG_PINWHEEL_START; fno -= 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+	
+			psprintf ("1 SPIRAL", "%d SPIRALS", spiral_loops);
+			font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
+			sprintf_score (spiral_mode_total);	
+			font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
+			sprintf ("MODE TOTAL");
+			font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+			dmd_text_outline ();
+			
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_33MS);
+		}
+	}
 	deff_exit ();
 }
-
 
 CALLSET_ENTRY (spiral, award_spiral_loop)
 {
 	if (!timed_mode_running_p (&spiral_mode))
 		return;
-	if (spiral_loops > 2)
-		spiral_loops = 1;
-	else
-		spiral_loops++;
+	bounded_increment (spiral_loops, 50);
 	/* Score it */
-	if (spiral_loops < 2)
+	if (spiral_loops < 3)
 	{
 		sound_send (SND_SPIRAL_AWARDED);
 		score (SC_10M);
@@ -86,29 +99,48 @@ CALLSET_ENTRY (spiral, award_spiral_loop)
 
 void spiral_mode_deff (void)
 {
+	U16 fno;
+	dmd_alloc_pair_clean ();
+//	while (spiral_mode_timer > 0)
 	for (;;)
 	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL");
-		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 27, "SHOOT LOOPS FOR BIG POINTS");
-		sprintf ("%d", spiral_mode_timer);
-		font_render_string (&font_var5, 2, 2, sprintf_buffer);
-		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		for (fno = IMG_PINWHEEL_START; fno <= IMG_PINWHEEL_END; fno += 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+		
+			font_render_string_center (&font_fixed6, 64, 5, "SPIRAL");
+			sprintf_current_score ();
+			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_var5, 64, 27, "SHOOT LOOPS FOR BIG POINTS");
+			sprintf ("%d", spiral_mode_timer);
+			font_render_string (&font_var5, 2, 2, sprintf_buffer);
+			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
 	}
 }
 
 void spiral_mode_total_deff (void)
 {
-	dmd_alloc_low_clean ();
+	dmd_alloc_pair_clean ();
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed6, 64, 5, "SPIRAL OVER");
 	sprintf_score (spiral_mode_total);
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	font_render_string_center (&font_var5, 64, 27, "POINTS EARNED FROM MODE");
-	dmd_show_low ();
+	dmd_text_outline ();
+	dmd_alloc_pair ();
+	frame_draw (IMG_PINWHEEL_START);
+	dmd_overlay_outline ();
+	dmd_show2 ();
 	task_sleep_sec (4);
 	deff_exit ();
 }
@@ -120,6 +152,12 @@ void spiral_mode_init (void)
 	lamp_tristate_flash (LM_LEFT_SPIRAL);
 	score_zero (spiral_mode_total);	
 	magnet_reset ();
+}
+
+void spiral_mode_expire (void)
+{
+	if (spiral_loops == 0)
+		callset_invoke (start_hurryup);
 }
 
 void spiral_mode_exit (void)

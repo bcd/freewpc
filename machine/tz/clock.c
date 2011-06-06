@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,6 +18,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* Full rotation of the clock takes:
+ * 	
+ * 	Duty
+ * 	100% = ~12 seconds
+ * 	50% = ~25 seconds
+ * 	25% = ~55 seconds
+ */
+
+/* CALLSET_SECTION (clock, __machine__) */
 #include <freewpc.h>
 #include <clock_mech.h>
 #include <diag.h>
@@ -31,6 +40,10 @@ enum mech_clock_mode
 	CLOCK_RUNNING_FORWARD,
 	/** The clock should run backward */
 	CLOCK_RUNNING_BACKWARD,
+	/** The clock should run forward after being unpaused */
+	CLOCK_PAUSED_FORWARD,
+	/** The clock should run backward after being unpaused */
+	CLOCK_PAUSED_BACKWARD,
 	/** The clock should be calibrated */
 	CLOCK_CALIBRATING,
 	/** The clock is trying to find a particular location,
@@ -67,11 +80,6 @@ __fastram__ U8 clock_find_target;
  * switch transitions */
 __fastram__ U8 clock_last_sw;
 
-
-/** How long calibration will be allowed to continue, before
- * giving up. */
-U8 clock_calibration_time;
-
 /** The clock time "decoded" as the number of 15-minute intervals
 past 12:00, ranging from 0 to 47. */
 U8 clock_decode;
@@ -85,7 +93,12 @@ task_gid_t clock_owner;
 /** The current clock hour, as an integer from 0-11 */
 U8 clock_hour;
 
-static void check_tz_clock (void);
+U8 mech_speed_stored;
+extern struct timed_mode_ops mpf_mode;
+
+/* rtc hour and minute */
+extern U8 hour;
+extern U8 minute;
 
 void tz_dump_clock (void)
 {
@@ -168,8 +181,6 @@ U8 tz_clock_gettime (void)
 	return clock_decode;
 }
 
-
-
 /** The real-time task driver for the clock.
  * This function is called once every 8ms. */
 void tz_clock_switch_rtt (void)
@@ -184,7 +195,7 @@ void tz_clock_switch_rtt (void)
 	clock_switch_disable ();
 
 	/* Unless any switches change, there's nothing else to do */
-	if (unlikely (clock_sw != clock_last_sw))
+	if ((clock_sw != clock_last_sw))
 	{
 		/* Always remember the last minute opto seen.  The hour optos
 		can be read at any time, but the minute optos are only active
@@ -200,29 +211,30 @@ void tz_clock_switch_rtt (void)
 				clock_hour = tz_clock_opto_to_hour[clock_sw >> 4];
 			}
 			else if (clock_minute_sw == CLK_SW_MIN00 &&
+			//	CLK_SW_MIN (clock_last_sw) == CLK_SW_MIN45 &&
 				clock_mode == CLOCK_RUNNING_FORWARD)
 			{
 				clock_hour++;
 				if (clock_hour == 12)
 					clock_hour = 0;
 			}
+			else if (clock_minute_sw == CLK_SW_MIN00
+			&& clock_mode == CLOCK_RUNNING_BACKWARD)
+			{	
+				if (clock_hour)
+					clock_hour--;
+				else
+					clock_hour = 11;
+			}
 		}
-		else if (unlikely (CLK_SW_MIN (clock_last_sw) == CLK_SW_MIN45
-			&& clock_mode == CLOCK_RUNNING_BACKWARD))
-		{
-			if (clock_hour)
-				clock_hour--;
-			else
-				clock_hour = 11;
-		}
-
 		/* If searching for a specific target, see if we're there */
-		if (unlikely (clock_mode == CLOCK_FIND))
+		if ((clock_mode == CLOCK_FIND))
 		{
 			if (clock_sw == clock_find_target)
 			{
 				/* Yep, stop NOW! */
 				clock_mech_stop_from_interrupt ();
+				global_flag_on (GLOBAL_FLAG_CLOCK_HOME);
 			}
 			else if (CLK_SW_HOUR_EQUAL_P (clock_sw, clock_find_target)
 				&& (clock_mech_get_speed () < BIVAR_DUTY_25))
@@ -231,14 +243,20 @@ void tz_clock_switch_rtt (void)
 				clock_mech_set_speed (BIVAR_DUTY_25);
 			}
 			/* Otherwise, the clock keeps running as it was */
+			/* BUG workaround: Goes very slowly backwards when it's miles away from home */
+		//	if (clock_mech_get_speed () == BIVAR_DUTY_25
+		//		&& (clock_hour != 11 || clock_hour != 0))
+		//	{
+		//		clock_mech_set_speed (BIVAR_DUTY_100);
+		//	}
+
 		}
-		else if (unlikely (clock_mode == CLOCK_CALIBRATING))
+		else if ((clock_mode == CLOCK_CALIBRATING))
 		{
 			/* Update the active/inactive switch list for calibration */
-			clock_sw_seen_active |= clock_sw;
 			clock_sw_seen_inactive |= ~clock_sw;
+			clock_sw_seen_active |= clock_sw;
 		}
-		check_tz_clock ();
 	}
 }
 
@@ -248,7 +266,7 @@ void tz_clock_switch_rtt (void)
  */
 void tz_clock_clear_owner (void)
 {
-	clock_owner = 0;
+	clock_owner = NULL;
 }
 
 
@@ -259,7 +277,7 @@ bool tz_clock_alloc (task_gid_t owner)
 {
 	if (clock_owner == owner)
 		return TRUE;
-	if (clock_owner != 0)
+	if (clock_owner != NULL)
 		return FALSE;
 	clock_owner = owner;
 	return TRUE;
@@ -275,23 +293,115 @@ void tz_clock_free (task_gid_t owner)
 		tz_clock_clear_owner ();
 }
 
+void tz_clock_show_time (U8 hours, U8 minutes)
+{
+	if (hours > 12)
+		hours = 12;
+	else if (hours == 0)
+		hours = 12;
+	if (minutes > 59);
+		minutes = 59;
+	
+	if (minutes < 15)
+		clock_find_target = tz_clock_hour_to_opto[hours - 1] | CLK_SW_MIN00;
+	else if (minutes < 30)
+		clock_find_target = tz_clock_hour_to_opto[hours - 1] | CLK_SW_MIN15;
+	else if (minutes < 45)
+		clock_find_target = tz_clock_hour_to_opto[hours - 1] | CLK_SW_MIN30;
+	else if (minutes >= 45)
+		clock_find_target = tz_clock_hour_to_opto[hours - 1] | CLK_SW_MIN45;
+	clock_mode = CLOCK_FIND;
 
+}
+
+/**
+* Pause the clock and restart again
+*/
+bool clock_moving (void)
+{
+	if (clock_mode == CLOCK_RUNNING_FORWARD || clock_mode == CLOCK_RUNNING_BACKWARD)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+bool clock_paused (void)
+{
+	if (clock_mode == CLOCK_PAUSED_FORWARD || clock_mode == CLOCK_PAUSED_BACKWARD)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+bool should_pause_clock (void)
+{
+	if (kickout_locks > 0 || timed_mode_running_p (&mpf_mode))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+CALLSET_ENTRY (clock, idle_every_second)
+{
+	if (!in_live_game)
+		return;
+	if (should_pause_clock () && clock_moving ())
+	{
+		mech_speed_stored = clock_mech_get_speed ();
+		if (clock_mode == CLOCK_RUNNING_FORWARD)
+		{
+			clock_mode = CLOCK_PAUSED_FORWARD;
+		}
+		else
+		{
+			clock_mode = CLOCK_PAUSED_BACKWARD;
+		}
+		clock_mech_stop ();
+	}
+	else if (clock_paused () && !should_pause_clock ())
+	{
+		clock_mech_set_speed (mech_speed_stored);
+		if (clock_mode == CLOCK_PAUSED_FORWARD)
+		{
+			tz_clock_start_forward ();
+		}
+		else
+		{
+			tz_clock_start_backward ();
+		}
+	}
+}
 void tz_clock_start_forward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 	{
-		clock_mech_start_forward ();
+		global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
 		clock_mode = CLOCK_RUNNING_FORWARD;
+		clock_mech_start_forward ();
 	}
 }
-
 
 void tz_clock_start_backward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 	{
-		clock_mech_start_reverse ();
+		global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
 		clock_mode = CLOCK_RUNNING_BACKWARD;
+		clock_mech_start_reverse ();
+	}
+}
+
+void tz_clock_reverse_direction (void)
+{
+	if (clock_mode == CLOCK_RUNNING_FORWARD)
+	{
+		clock_mode = CLOCK_RUNNING_BACKWARD;
+		clock_mech_start_reverse ();
+	}
+	else if (clock_mode == CLOCK_RUNNING_BACKWARD)
+	{
+		clock_mode = CLOCK_RUNNING_FORWARD;
+		clock_mech_start_forward ();
 	}
 }
 
@@ -325,28 +435,40 @@ void tz_clock_reset (void)
 		dbprintf ("Clock resetting to home.\n");
 		/* See where the clock is and start it if it's not already home. */
 		clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
-		if (clock_sw != clock_find_target)
+		if (clock_sw != clock_find_target && !global_flag_test (GLOBAL_FLAG_CLOCK_HOME))
 		{
-			clock_mech_set_speed (BIVAR_DUTY_100);
 			if (clock_hour <= 6)
 				clock_mech_start_reverse ();
 			else
 				clock_mech_start_forward ();
+			timer_start_free (GID_CLOCK_FINDING, TIME_15S);
+			
+			if (clock_mode != CLOCK_FIND && clock_mode != CLOCK_CALIBRATING)
+				clock_mech_set_speed (BIVAR_DUTY_100);
 			clock_mode = CLOCK_FIND;
 		}
 	}
 }
 
+/* Manually set the clock to home */
+CALLSET_ENTRY (tz_clock, clock_at_home)
+{
+	tz_clock_stop ();
+	global_flag_on (GLOBAL_FLAG_CLOCK_HOME);
+	clock_hour = 0;
+	clock_sw_seen_active = 0xFF;
+	clock_sw_seen_inactive = 0xFF;
+}
 
 /**
  * A periodic, lower priority function that updates the
  * state machine depending on what has been seen recently.
  */
-static void check_tz_clock (void)
+CALLSET_ENTRY (tz_clock, idle_every_100ms)
 {
 	/* When calibrating, once all switches have been active and inactive
 	 * at least once, claim victory and go back to the home position. */
-	if (unlikely (clock_mode == CLOCK_CALIBRATING))
+	if (clock_mode == CLOCK_CALIBRATING)
 	{
 		if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
 		{
@@ -356,11 +478,16 @@ static void check_tz_clock (void)
 		}
 		/* If calibration doesn't succeed within a certain number
 		 * of iterations, give up. */
-		else if (--clock_calibration_time == 0)
+		if (!timer_find_gid (GID_CLOCK_CALIBRATING))
 		{
 			dbprintf ("Calibration aborted.\n");
 			tz_clock_error ();
 		}
+	}
+	else if (clock_mode == CLOCK_FIND && !timer_find_gid (GID_CLOCK_FINDING))
+	{
+		dbprintf ("Finding failed.\n");
+		tz_clock_stop ();
 	}
 }
 
@@ -370,6 +497,7 @@ static void check_tz_clock (void)
  */
 CALLSET_ENTRY (tz_clock, init)
 {
+	global_flag_off (GLOBAL_FLAG_CLOCK_HOME);
 	clock_mode = CLOCK_STOPPED;
 	clock_sw_seen_active = 0;
 	clock_sw_seen_inactive = 0;
@@ -378,6 +506,7 @@ CALLSET_ENTRY (tz_clock, init)
 	clock_hour = 0;
 	global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 	clock_mech_set_speed (BIVAR_DUTY_100);
+	mech_speed_stored = BIVAR_DUTY_100;
 	tz_clock_clear_owner ();
 }
 
@@ -390,32 +519,52 @@ CALLSET_ENTRY (tz_clock, amode_start)
 
 	/* If not all of the other clock switches have been seen in both
 	 * active and inactive states, start the clock. */
-	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
+	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF
+			&& !global_flag_test (GLOBAL_FLAG_CLOCK_HOME))
 	{
 		dbprintf ("Clock calibration started.\n");
-		clock_calibration_time = 11; /* 10 seconds ~ 1 rotations */
+		timer_restart_free (GID_CLOCK_CALIBRATING, TIME_15S);
 		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 		clock_mech_set_speed (BIVAR_DUTY_100);
 		clock_mode = CLOCK_CALIBRATING;
 		clock_mech_start_forward ();
 	}
-	else
-	{
+	else if (global_flag_test (GLOBAL_FLAG_CLOCK_HOME))
+		tz_clock_show_time (hour, minute);
+	else	
 		tz_clock_reset ();
-	}
 }
 
+void tz_clock_set_speed (U8 speed)
+{
+	if (speed > 3)
+		speed = 3;
+	switch (speed)
+	{	
+		default:
+		case 0:
+		case 1:
+			clock_mech_set_speed (BIVAR_DUTY_25);
+			break;
+		case 2:
+			clock_mech_set_speed (BIVAR_DUTY_50);
+			break;
+		case 3:
+			clock_mech_set_speed (BIVAR_DUTY_100);
+			break;
+			
+	}
+}
 
 CALLSET_ENTRY (tz_clock, diagnostic_check)
 {
 	if (feature_config.disable_clock)
-		diag_post_error ("CLOCK DISABLED\nBY ADJUSTMENT\n", MACHINE_PAGE);
+		diag_post_error ("CLOCK DISABLED\nBY ADJUSTMENT\n", PAGE);
 	while (unlikely (clock_mode == CLOCK_CALIBRATING))
 		task_sleep (TIME_100MS);
 	if (!global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
-		diag_post_error ("CLOCK IS\nNOT WORKING\n", MACHINE_PAGE);
+		diag_post_error ("CLOCK IS\nNOT WORKING\n", PAGE);
 }
-
 
 /**
  * Stop the clock when entering test mode
@@ -424,7 +573,6 @@ CALLSET_ENTRY (tz_clock, amode_stop, test_start)
 {
 	tz_clock_stop ();
 }
-
 
 /**
  * Reset the clock to the home position at the start of

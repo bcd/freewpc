@@ -46,7 +46,8 @@ static inline U8 decimal_to_bcd_byte (U8 decimal)
 
 void replay_code_to_score (score_t s, U8 val)
 {
-	s[1] = decimal_to_bcd_byte (val * 10);
+	
+		s[1] = decimal_to_bcd_byte (val * 10);
 }
 
 
@@ -122,7 +123,7 @@ CALLSET_ENTRY (config, start_ball)
 	balls_served = 0;
 }
 
-/* Reset the count so we can have a ballsave */
+/* Reset the count so we can have a ballsave on the next ball only */
 CALLSET_ENTRY (config, mball_start)
 {
 	balls_served = 1;
@@ -133,3 +134,4 @@ CALLSET_ENTRY (config, serve_ball)
 {
 	balls_served++;	
 }
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,20 +20,19 @@
 
 #include <freewpc.h>
 
-extern struct timed_mode_ops hitch_mode;
 
 void cow_deff (void)
 {
-	dmd_alloc_pair ();
-	frame_draw (IMG_COW);
+	dmd_alloc_pair_clean ();
+//	frame_draw (IMG_COW);
 	font_render_string_center (&font_var5, 40, 11, "THE POWER");
 	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
 	dmd_show2 ();
 	task_sleep_sec (2);
 	
 	sound_send (SND_POWER_GRUNT_1);
-	dmd_alloc_pair ();
-	frame_draw (IMG_COW);
+	dmd_alloc_pair_clean ();
+//	frame_draw (IMG_COW);
 	font_render_string_center (&font_fixed6, 40, 11, "MOO");
 	dmd_show2 ();
 	task_sleep_sec (4);
@@ -72,7 +71,7 @@ void extra_ball_deff (void)
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 	}
 	task_sleep_sec (2);
 	deff_exit ();
@@ -105,6 +104,12 @@ void printf_thousands (U8 n)
 	sprintf ("%d,000", n);
 }
 
+void anti_cradle_deff (void)
+{
+	sprintf ("ANTICRADLE");
+	flash_and_exit_deff (20, TIME_66MS);
+}
+
 void replay_deff (void)
 {
 	sprintf ("REPLAY");
@@ -120,6 +125,7 @@ void special_deff (void)
 
 void pb_jackpot_deff (void)
 {
+	sound_send (SND_POWERBALL_QUOTE);
 	sprintf ("PB JACKPOT");
 	flash_and_exit_deff (20, TIME_100MS);
 }
@@ -127,16 +133,6 @@ void pb_jackpot_deff (void)
 void two_way_combo_deff (void)
 {
 	sprintf ("2 WAY COMBO");
-	flash_and_exit_deff (15, TIME_66MS);
-}
-
-void shoot_camera_deff (void)
-{
-	sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
-	if (timed_mode_running_p (&hitch_mode))
-		sprintf ("SHOOT HITCH");
-	else
-		sprintf ("SHOOT CAMERA");
 	flash_and_exit_deff (15, TIME_66MS);
 }
 
@@ -160,6 +156,8 @@ void home_and_dry_deff (void)
 
 void in_the_lead_deff (void)
 {
+	if (in_bonus)
+		return;
 	sound_send (SND_GO_FOR_THE_HILL);
 	sprintf ("IN THE LEAD");
 	flash_small_deff (15, TIME_33MS);
@@ -197,9 +195,9 @@ void ball_from_lock_deff (void)
 void button_masher_deff (void)
 {
 	sprintf ("IS MIKE PLAYING");
-	flash_small_deff (10, TIME_66MS);
-	sprintf ("BUTTON MASHER");
 	flash_small_deff (20, TIME_33MS);
+	sprintf ("BUTTON MASHER");
+	flash_small_deff (10, TIME_66MS);
 	deff_exit ();
 }
 
@@ -218,32 +216,48 @@ void three_way_combo_deff (void)
 	flash_and_exit_deff (20, TIME_66MS);
 }
 
+void shoot_right_loop_deff (void)
+{
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed10, 64, 9, "SHOOT THE");
+	font_render_string_center (&font_fixed10, 64, 24, "RIGHT LOOP");
+	dmd_show_low ();
+	dmd_copy_low_to_high ();
+	dmd_invert_page (dmd_low_buffer);
+	deff_swap_low_high (25, TIME_100MS);
+	deff_exit ();
+}
+
 /* Jackpot animation contributed by highrise */
 void jackpot_deff (void)
 {
 	U16 fno;
 	U8 i;
 	sample_start (SND_JACKPOT_BACKGROUND, SL_1S);
-	/* Loop the start if the animation 3 times */
+	/* Loop the start of the animation 3 times */
 	for (i = 3; i > 0; --i)
 	{
-		for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 9; fno += 1)
+		for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 9; fno += 2)
 		{
 			//dmd_alloc_low_high ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
 			dmd_show2 ();
-			task_sleep (i);
+			if (i == 3)
+				task_sleep (TIME_100MS);
+			else
+				task_sleep (TIME_66MS);
 		}
 	}
 	/* Show once fully */
-	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 2; fno += 1)
+	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 2; fno += 2)
 	{
 			//dmd_alloc_low_high ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
 			dmd_show2 ();
-			task_sleep (TIME_16MS);
+			task_sleep (TIME_66MS);
 	}
 	/* Flash Jackpot */
 	dmd_alloc_pair ();
@@ -309,7 +323,6 @@ void tv_static_deff (void)
 	deff_exit ();
 }
 
-
 void text_color_flash_deff (void)
 {
 	U8 count = 8;
@@ -339,7 +352,6 @@ void text_color_flash_deff (void)
 	deff_exit ();	
 }
 
-
 void spell_test_deff (void)
 {
 	U8 count = 4;
@@ -355,7 +367,6 @@ void spell_test_deff (void)
 	task_sleep_sec (3);
 	deff_exit ();	
 }
-
 
 void two_color_flash_deff (void)
 {
@@ -375,7 +386,6 @@ void two_color_flash_deff (void)
 	}
 	deff_exit ();
 }
-
 
 void bg_flash_deff (void)
 {
@@ -410,9 +420,8 @@ void ball_drain_outlane_deff (void)
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 	}
-	dmd_sched_transition (&trans_scroll_down_fast);
 	deff_exit ();
 }
 
@@ -420,26 +429,27 @@ void ball_explode_deff (void)
 {
 	U16 fno;
 	extern bool powerball_death;
-	if (!multi_ball_play () && !ballsave_test_active ())
-		music_request (MUS_POWERFIELD, PRI_GAME_MODE1);
-
-	dmd_alloc_pair_clean ();
-	dmd_show2 ();
-	task_sleep (TIME_200MS);
+	
 
 	dmd_sched_transition (&trans_scroll_down_fast);
 	dmd_alloc_pair ();
 	frame_draw (IMG_BALLEXPLODE_START);
 	dmd_show2 ();
+	task_sleep (TIME_200MS);
+		
 	if (powerball_death == FALSE)	
 		sound_send (SND_EXPLOSION_3);
-	for (fno = IMG_BALLEXPLODE_START + 1; fno <= IMG_BALLEXPLODE_END; fno += 2)
+	for (fno = IMG_BALLEXPLODE_START; fno < IMG_BALLEXPLODE_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
+	/* Show a blank frame */
+	dmd_alloc_pair_clean ();
+	dmd_show2 ();
+	task_sleep (TIME_100MS);
 	/* Play in reverse if ballsave is active */
 	if (ballsave_test_active ())
 	{
@@ -451,7 +461,17 @@ void ball_explode_deff (void)
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
 		}
+		if (random_scaled (3) == 1)
+			sprintf ("TRY HARDER"); 
+		else
+			sprintf ("WHOOPSY DAISY");
+		flash_small_deff (15, TIME_66MS);
+		
 	}
+	/* This should stop the scores from showing just before the bonus screen */
+	dmd_alloc_pair_clean ();
+	dmd_show2 ();
+	task_sleep (TIME_500MS);
 	deff_exit ();
 }
 
@@ -469,3 +489,33 @@ void tz_ball_save_deff (void)
 	deff_exit ();
 }
 
+void pinwheel_deff (void)
+{
+	U16 fno;
+	for (;;)
+		for (fno = IMG_PINWHEEL_START; fno <= IMG_PINWHEEL_END; fno += 2)
+		{
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			// if (fno = mod(2)) dmd_flip_both_pages
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
+	deff_exit ();
+}
+
+void explosion_deff (void)
+{
+	U16 fno;
+	dmd_alloc_pair_clean ();
+	sound_send (SND_EXPLOSION_3);
+	for (fno = IMG_EXPLODE_START; fno <= IMG_EXPLODE_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+	}
+	task_sleep (TIME_700MS);
+	deff_exit ();
+}
