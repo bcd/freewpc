@@ -46,7 +46,7 @@ void amode_leff_subset_task (void)
 void amode_leff (void)
 {
 	U8 i;
-	triac_leff_enable (PINIO_GI_STRINGS);
+	gi_leff_enable (PINIO_GI_STRINGS);
 
 	for (;;)
 	{
