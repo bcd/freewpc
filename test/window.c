@@ -559,6 +559,7 @@ struct audit earnings_audits[] = {
 struct audit standard_audits[] = {
 	{ "GAMES STARTED", AUDIT_TYPE_INT, &system_audits.games_started },
 	{ "TOTAL PLAYS", AUDIT_TYPE_INT, &system_audits.total_plays },
+	{ "MINUTES ON", AUDIT_TYPE_INT, &system_audits.minutes_on },
 	{ "TOTAL FREE PLAYS", AUDIT_TYPE_INT, &system_audits.total_free_plays },
 	{ STR_PERCENT "FREEPLAY", AUDIT_TYPE_GAME_PERCENT, &system_audits.total_free_plays },
 	{ "REPLAY AWARDS", AUDIT_TYPE_INT, &system_audits.replays },
