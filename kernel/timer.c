@@ -90,6 +90,11 @@ bool system_timer_pause (void)
 	if (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER) && single_ball_play ())
 		return TRUE;
 
+#ifdef CONFIG_MUTE_AND_PAUSE
+	if (task_find_gid (GID_MUTE_AND_PAUSE))
+		return TRUE;
+#endif
+
 	if (global_flag_test (GLOBAL_FLAG_COIN_DOOR_OPENED))
 		return TRUE;
 
