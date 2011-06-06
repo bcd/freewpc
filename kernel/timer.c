@@ -125,7 +125,7 @@ bool system_timer_pause (void)
 		return TRUE;
 
 #ifdef MACHINE_TZ
-	if (mpf_active)
+	if (mpf_active || deff_get_active () == DEFF_SNAKE)
 		return TRUE;
 #endif
 
