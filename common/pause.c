@@ -26,6 +26,8 @@
 #error "CONFIG_MUTE_AND_PAUSE unsupported because no computer-controlled flippers"
 #endif
 
+U8 mute_and_pause_timeout;
+
 void mute_and_pause_stop (void)
 {
 	task_kill_gid (GID_MUTE_AND_PAUSE);
@@ -45,8 +47,8 @@ void mute_and_pause_monitor (void)
 	callset_invoke (machine_paused);
 
 	/* Timeout after 15 minutes */
-	U8 timeout = 180; /* = (60secs * 15)/5 */
-	while (--timeout != 0)
+	mute_and_pause_timeout = 180; /* = (60secs * 15)/5 */
+	while (--mute_and_pause_timeout != 0)
 	{
 		ball_search_timer_reset ();
 		task_sleep_sec (5);
