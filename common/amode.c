@@ -90,7 +90,10 @@ void amode_sleep_sec (U8 secs)
 	}
 }
 
-
+void amode_page_start (void)
+{
+	amode_page_changed = 0;
+}
 
 void amode_page_end (U8 secs)
 {
