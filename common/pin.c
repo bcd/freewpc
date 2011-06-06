@@ -143,7 +143,9 @@ void pin_running (void)
 	memset (pin_data, 0, sizeof (pin_data));
 	pin_index = 0;
 	pin_selection = 0;
+#ifdef DEFF_ENTER_PIN
 	deff_start (DEFF_ENTER_PIN);
+#endif
 
 #if 1
 	pin_enter_complete = null_function;
