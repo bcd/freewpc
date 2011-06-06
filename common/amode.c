@@ -33,6 +33,9 @@ U8 amode_page;
 
 U8 amode_page_changed;
 
+/* Used to show the scores for 2 mins after a right flipper hold */
+bool amode_show_scores_long;
+
 void amode_page_change (S8 delta);
 
 
@@ -103,8 +106,8 @@ void amode_score_page (void)
 	dmd_show_low ();
 
 	/* Hold the scores up for a while longer than usual
-	 * in tournament mode. */
-	if (system_config.tournament_mode == YES)
+	 * in tournament mode or when triggered by a right button hold */
+	if (system_config.tournament_mode == YES || amode_show_scores_long)
 		amode_page_end (120);
 	else
 		amode_page_end (5);
@@ -240,6 +243,12 @@ CALLSET_ENTRY (amode, sw_right_button)
 		if (amode_page_changed == 0)
 			amode_page_change (1);
 	}
+}
+
+
+CALLSET_ENTRY (amode, init, start_game)
+{
+	amode_show_scores_long = FALSE;
 }
 
 
