@@ -52,10 +52,10 @@ void rule_begin (void)
 static void rule_msg (const char *line1, const char *line2, const char *line3, const char *line4)
 {
 	dmd_alloc_pair_clean ();
-	font_render_string_left (&font_fixed6, 2, 2, line1)
-	font_render_string_center (&font_var5, 64, 15, line2)
-	font_render_string_center (&font_var5, 64, 22, line3)
-	font_render_string_center (&font_var5, 64, 29, line4)
+	font_render_string_left (&font_fixed6, 2, 2, line1);
+	font_render_string_center (&font_var5, 64, 15, line2);
+	font_render_string_center (&font_var5, 64, 22, line3);
+	font_render_string_center (&font_var5, 64, 29, line4);
 	dmd_sched_transition (&trans_sequential_boxfade);
 	dmd_show_low ();
 }
