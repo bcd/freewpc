@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -218,17 +218,6 @@ void end_game (void)
 CALLSET_ENTRY (game, start_player)
 {
 	player_ball_up = 1;
-}
-
-void switch_to_last_place (void)
-{
-	/* Make sure the ranks are up to date */
-	callset_invoke (update_ranks);
-	/* Find the player ranked lowest and switch to them */
-	U8 i = 0;
-	while (score_ranks[i] != num_players)
-		i++;
-	player_up = i + 1;
 }
 
 void switch_to_player_ranked (U8 ranking)
