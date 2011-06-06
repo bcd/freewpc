@@ -71,7 +71,7 @@ void rules_leff (void)
 
 void rules_rollover_leff (void)
 {
-	triac_disable (TRIAC_GI_MASK);
+	triac_disable (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		lamp_tristate_off (LM_RIGHT_INLANE);
@@ -88,7 +88,7 @@ void rules_rollover_leff (void)
 
 void rules_sssmb_leff (void)
 {
-	triac_disable (TRIAC_GI_MASK);
+	triac_disable (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		lamp_tristate_off (LM_BONUS_X);
@@ -299,7 +299,7 @@ void rules_deff (void)
 	leff_stop_all ();
 
 	rule_begin ();
-	triac_disable (TRIAC_GI_MASK);
+	triac_disable (PINIO_GI_STRINGS);
 	rule_msg ("BACK TO THE ZONE", "", "HOW TO PLAY", "");
 	rules_sleep_sec (5);
 	rule_complete ();

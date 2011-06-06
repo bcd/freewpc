@@ -19,7 +19,7 @@
  */
 
 #include <freewpc.h>
-#include <sys/time.h>
+
 /* Various loop counts, reset at the start of each ball */
 U8 loops;
 U8 powerball_loops;

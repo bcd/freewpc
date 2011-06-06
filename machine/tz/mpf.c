@@ -480,7 +480,7 @@ CALLSET_ENTRY (mpf, ball_search)
 
 void mpf_lamp_task (void)
 {
-	triac_disable (TRIAC_GI_MASK);
+	triac_disable (PINIO_GI_STRINGS);
 	triac_enable (GI_POWERFIELD);
 	while (mpf_active)
 	{
@@ -494,7 +494,7 @@ void mpf_lamp_task (void)
 		lamp_on (LM_MPF_1M);
 		task_sleep (TIME_100MS);
 	}
-	triac_enable (TRIAC_GI_MASK);
+	triac_enable (PINIO_GI_STRINGS);
 	lamp_off (LM_MPF_1M);
 	lamp_off (LM_MPF_750K);
 	lamp_off (LM_MPF_500K);
