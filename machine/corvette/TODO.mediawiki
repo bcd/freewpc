@@ -1,0 +1,43 @@
+= Todo list for Corvette =
+
+* Make engine shake for 2 seconds when it captures the first 2 balls.
+* Improve the engine shake
+
+
+= Game Ideas =
+
+== Competition Timed mode 1 ==
+
+1 ball, one player, no ball save.
+As soon as PF switch is hit fire another ball into the trough for player to launch.
+Both racetrack cars start at the start-line.
+
+All scoring advances the left car a little.
+Both cars advance based on the the current score, highest score and time elapsed so that it should be possible to tell if you're
+beating the high score just by looking at the position of the cars on the track.
+
+After allotted time (e.g. one minute) end the game.
+If there's a pinball missing at the end of the game then wait until it is found (player may have forgotten to launch second ball). 
+
+Scoring as follows:
+Rollovers, 1 point
+Slings & Jets, 2 point
+Targets, 3, points
+Left/right orbits, 5 points
+Left/right ramps, 10 points
+Skid Pad, 20 points
+Inner Orbit, 15 points
+
+Lighting:
+No GI.
+Flashers only.
+Everytime a switch is hit flash the nearest light.
+
+== Skillshot Menu ==
+
+At game start choose between rollover, skidpad, dragrace, and pink-slips.
+
+* rollover - use the rollover lanes, use flippers to change flashing lane, hit the flashing lane to get points
+* skidpad - use the upper left flipper to quickly hit the skidpad ramp to get more points
+* dragrace - quickly shoot the right ramp to start a dragrace that uses the racetrack, bash flippers to advance car, if you win you get a 2-ball multiball
+* pink-slips - only enabled once player has collected at least one car.  Shoot the right ramp within 10 seconds (maybe less) to lock the ball, animation for pink-slips starts, racetrack cars indicate who is in the lead, all shots advance blue car.  red car is computer car.  If the player's blue car wins the race, light one of the car lamps and release the locked ball.  If the player's blue car looses, disable the flippers and drain the ball and drain the captured ball and if they have a car lit it is un-lit.

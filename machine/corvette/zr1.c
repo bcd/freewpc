@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 by Dominic Clifton <me@dominicclifton.name>
+ * Copyright 2011 by Dominic Clifton <me@dominicclifton.name>
  *
  * This file is part of FreeWPC.
  *
@@ -21,7 +21,22 @@
 /**
  * Controls the ZR1 engine ball shaker
  *
- * @TODO add ball search functionality (another state?)
+ * TODO hook the shake into the system timer so that the new position value is calculated based on the speed and how long is was since the speed was set.
+ * DC: what I find is that when the cpu gets busy the shake is interrupted
+ *
+ * The goal is to fine 5 speeds that don't require much cpu usage to implement and that ideally donesn't require a table of values.
+ *
+ * With a schedule of 8 or 32ms, with a range divider of 5 or 10 i couldn't find a good set of speeds
+ *
+ * Working values at 16ms schedule:
+ * range: 2
+ * range divider: 5
+ * usable speed values: 5 - 10
+ *
+ * See ZR1_SHAKE_SPEED_* defines in zr1.h, we use speed values 6-10 to give us our 5 speeds
+ *
+ * The test menu can be used to try different values for range and speed.
+ *
  */
 #include <freewpc.h>
 #include <diag.h>
@@ -29,6 +44,16 @@
 
 #define ZR1_ENGINE_POS WPC_EXTBOARD2
 #define ZR1_ENGINE_CONTROL WPC_EXTBOARD3
+
+// the frequency of ZR1 RTT task calls in milliseconds, see corvette.sched:corvette_zr1_engine_rtt
+#define ZR1_SCHEDULE 16
+
+// Specifies how long it takes the engine to move the engine from ANY position to the center, and settle.
+#define ZR1_CENTER_TICKS (128 / ZR1_SCHEDULE)
+
+// Specifies how long to wait before adjusting the position in ball search mode
+#define ZR1_BALL_SEARCH_TICKS (2560 / ZR1_SCHEDULE)
+
 
 //
 // Calibration
@@ -38,25 +63,14 @@
 #define ZR1_ENGINE_RIGHT_MAX 0xFF
 #define ZR1_ENGINE_CENTER 0x7F
 
-// NOTE: 16 in the calculations below is the frequency of ZR1 RTT task calls in MS, see corvette.sched:corvette_zr1_engine_rtt
-
-// Specifies how long it takes the engine to move the engine from ANY position to the center, and settle.
-#define ZR1_CENTER_TICKS 8 // 16 * 8 = 128MS
-
-// Specifies how long it takes the engine to move from one side to the other at full speed using the default range.
-#define ZR1_SHAKE_TICKS 4 // 16 * 4 = 64MS
-
-// Specifies how long it takes the engine to move from one side to the other at full speed using the default range.
-#define ZR1_BALL_SEARCH_TICKS 8 // 16 * 8 = 128MS
-
 // Specifies how long the RTT should wait before changing the position of the engine during calibration.
-#define ZR1_CALIBRATE_MOVE_TICKS 5 // 16 * 5 = 80MS
+#define ZR1_CALIBRATE_MOVE_TICKS (64 / ZR1_SCHEDULE)
 
 U8 foundPos;
 U8 zr1_pos_center;
 __fastram__ U8 zr1_last_position;
 __fastram__ U8 zr1_shake_speed;
-__fastram__ U8 zr1_shake_range;
+U8 zr1_shake_range;
 __fastram__ U8 zr1_pos_shake_left;
 __fastram__ U8 zr1_pos_shake_right;
 U8 zr1_pos_full_left_opto_on;
@@ -86,7 +100,7 @@ __fastram__ enum mech_zr1_state zr1_previous_state;
 
 // RTT counters and flags
 __fastram__ U8 zr1_center_ticks_remaining;
-__fastram__ U8 zr1_shake_ticks_remaining;
+__fastram__ U8 zr1_search_ticks_remaining;
 __fastram__ U8 zr1_calibrate_move_ticks_remaining;
 
 enum mech_zr1_shake_direction {
@@ -113,11 +127,15 @@ __fastram__ enum mech_zr1_calibrate_state zr1_calibrate_state;
  *
  */
 
+/**
+ * brings the left and right limits used by the shake-mode code in a bit (i.e. narrow the arc by the range)
+ */
 void zr1_calculate_shake_range(void) {
-	zr1_pos_shake_left = zr1_pos_full_left_opto_off + (((zr1_pos_center - zr1_pos_full_left_opto_off) / 5) * zr1_shake_range);
-	zr1_pos_shake_right = zr1_pos_full_right_opto_off - (((zr1_pos_full_right_opto_off - zr1_pos_center) / 5) * zr1_shake_range);
+	U8 range = zr1_pos_full_right_opto_off - zr1_pos_full_left_opto_off;
+	U8 adjust_by = ((range / 2) / ZR1_RANGE_DIVIDER) * zr1_shake_range;
+	zr1_pos_shake_left = zr1_pos_full_left_opto_off + adjust_by;
+	zr1_pos_shake_right = zr1_pos_full_right_opto_off - adjust_by;
 }
-
 /**
  * Reset the engine position limits used during calibration
  */
@@ -244,7 +262,7 @@ void zr1_state_calibrate_enter(void) {
 	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
 	zr1_reset_limits();
 
-	if (switch_poll_logical (SW_ZR_1_FULL_LEFT) && switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
+	if (switch_poll_logical (SW_ZR1_FULL_LEFT) && switch_poll_logical (SW_ZR1_FULL_RIGHT)) {
 		// Both engine optos cannot be on at the same time, probably F111 fuse, switch matrix problem, or one or more dirty/faulty optos.
 		zr1_calibration_failed(CC_CHECK_F111);
 		return;
@@ -272,7 +290,7 @@ void zr1_state_calibrate_run(void) {
 
 	switch(zr1_calibrate_state) {
 		case ZR1_CALIBRATE_CENTER:
-			if (switch_poll_logical (SW_ZR_1_FULL_LEFT) || switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
+			if (switch_poll_logical (SW_ZR1_FULL_LEFT) || switch_poll_logical (SW_ZR1_FULL_RIGHT)) {
 				// If either of the optos is still on then the engine is not in the center, bail!
 				zr1_calibration_failed(CC_CHECK_ENGINE);
 				break;
@@ -284,7 +302,7 @@ void zr1_state_calibrate_run(void) {
 		case ZR1_CALIBRATE_LEFT:
 			// move from center to the left until either the limit is hit or the left opto activates
 
-			if (switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
+			if (switch_poll_logical (SW_ZR1_FULL_LEFT)) {
 				// the position we're at is where the opto turned on.
 				zr1_pos_full_left_opto_on = zr1_last_position;
 
@@ -307,12 +325,12 @@ void zr1_state_calibrate_run(void) {
 			// move from left to right until either the limit is hit or the right opto activates
 
 			// if we've not already recorded the position at which the left opto turns off do that now
-			if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
+			if (!foundPos && !switch_poll_logical (SW_ZR1_FULL_LEFT)) {
 				zr1_pos_full_left_opto_off = zr1_last_position;
 				foundPos = TRUE;
 			}
 
-			if (switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
+			if (switch_poll_logical (SW_ZR1_FULL_RIGHT)) {
 				// the position we're at is where the opto turned on.
 				zr1_pos_full_right_opto_on = zr1_last_position;
 
@@ -334,7 +352,7 @@ void zr1_state_calibrate_run(void) {
 			// move from right to the center
 
 			// if we've not already recorded the position at which the right opto turns off do that now
-			if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
+			if (!foundPos && !switch_poll_logical (SW_ZR1_FULL_RIGHT)) {
 				zr1_pos_full_right_opto_off = zr1_last_position;
 				foundPos = TRUE;
 
@@ -372,63 +390,56 @@ void zr1_state_float_run(void) {
 }
 
 void zr1_state_shake_enter(void) {
-	zr1_shake_ticks_remaining = ZR1_SHAKE_TICKS / 2; // we assume engine is in the center before shaking starts, that being the case it only has to travel half the distance when beginning the shake
-
-	// always begin by moving left
+	// always begin by moving left, but start from the center
 	zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
-	zr1_set_position(zr1_pos_shake_left);
+	zr1_set_position(zr1_pos_center);
 	zr1_enable_solenoids();
 }
 
 void zr1_state_shake_run(void) {
 	zr1_enable_solenoids();
 
-	if (zr1_shake_ticks_remaining > 0) {
-		zr1_shake_ticks_remaining--;
-		return;
-	}
-	// reset counter
-	zr1_shake_ticks_remaining = ZR1_SHAKE_TICKS * zr1_shake_speed;
-
-	// reverse direction
-	if (zr1_shake_direction == ZR1_SHAKE_DIRECTION_LEFT) {
-		zr1_shake_direction = ZR1_SHAKE_DIRECTION_RIGHT;
-		zr1_set_position(zr1_pos_shake_right);
-	} else {
-		zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
-		zr1_set_position(zr1_pos_shake_left);
+	switch (zr1_shake_direction) {
+		case ZR1_SHAKE_DIRECTION_LEFT:
+			if (zr1_last_position - zr1_shake_speed < zr1_pos_shake_left) {
+				zr1_shake_direction = ZR1_SHAKE_DIRECTION_RIGHT;
+				break;
+			}
+			zr1_set_position(zr1_last_position - zr1_shake_speed);
+		break;
+		case ZR1_SHAKE_DIRECTION_RIGHT:
+			if (zr1_last_position + zr1_shake_speed > zr1_pos_shake_right) {
+				zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
+				break;
+			}
+			zr1_set_position(zr1_last_position + zr1_shake_speed);
+		break;
 	}
 }
 
-// Ball searching reuses some of the shake variables to save space
-// zr1_shake_ticks_remaining, zr1_shake_direction
-
 void zr1_state_ball_search_enter(void) {
-	zr1_shake_ticks_remaining = ZR1_BALL_SEARCH_TICKS / 2; // we assume engine is in the center before searching starts, that being the case it only has to travel half the distance when beginning the search
-
-	// always begin by moving left
-	zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
-	zr1_set_position(zr1_pos_full_left_opto_on);
+	zr1_search_ticks_remaining = 0; // move now
+	zr1_set_position(zr1_pos_center);
 	zr1_enable_solenoids();
 }
 
 void zr1_state_ball_search_run(void) {
 	zr1_enable_solenoids();
 
-	if (zr1_shake_ticks_remaining > 0) {
-		zr1_shake_ticks_remaining--;
+	if (zr1_search_ticks_remaining > 0) {
+		zr1_search_ticks_remaining--;
 		return;
 	}
 	// reset counter
-	zr1_shake_ticks_remaining = (U8)ZR1_BALL_SEARCH_TICKS * (U8)ZR1_BALL_SEARCH_SPEED;
+	zr1_search_ticks_remaining = ZR1_BALL_SEARCH_TICKS;
 
-	// reverse direction
-	if (zr1_shake_direction == ZR1_SHAKE_DIRECTION_LEFT) {
-		zr1_shake_direction = ZR1_SHAKE_DIRECTION_RIGHT;
+	// center >> right >> left >> center >> right >> left >> center >> ...
+	if (zr1_last_position == zr1_pos_center) {
 		zr1_set_position(zr1_pos_full_right_opto_on);
-	} else {
-		zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
+	} else if (zr1_last_position == zr1_pos_full_right_opto_on) {
 		zr1_set_position(zr1_pos_full_left_opto_on);
+	} else if (zr1_last_position == zr1_pos_full_left_opto_on) {
+		zr1_set_position(zr1_pos_center);
 	}
 }
 
@@ -550,14 +561,10 @@ void zr1_start_ball_search(void) {
 }
 
 /**
- * Sets the shake speed
+ * Set the zr1 engine shake speed
  *
- * New speed is forced to between 1 and 10
- *
- * 1 = fast
- * 10 = slow
- *
- * The value is used as a multiplier
+ * Game code should use the ZR1_SHAKE_SPEED_* defines ONLY
+ * Test code can use any allowed value.
  */
 void zr1_set_shake_speed(U8 new_shake_speed) {
 	if (new_shake_speed > ZR1_SHAKE_SPEED_MAX) {
@@ -566,21 +573,21 @@ void zr1_set_shake_speed(U8 new_shake_speed) {
 	if (new_shake_speed < ZR1_SHAKE_SPEED_MIN) {
 		new_shake_speed = ZR1_SHAKE_SPEED_MIN;
 	}
+	if (zr1_shake_speed == new_shake_speed) {
+		return;
+	}
 	disable_interrupts();
 	zr1_shake_speed = new_shake_speed;
 	enable_interrupts();
 }
 
 /**
- * Sets the shake range
- *
- * New range is forced to between 1 and 5
- *
- * 1 = 1/5th of the maximum range (narrowest arc)
- * 5 = 5/5ths of the maximum range (widest arc)
- *
- * @see zr1_calculate_shake_range
- */
+* Sets the shake range
+*
+* To be used by test mode code ONLY.
+*
+* @see zr1_calculate_shake_range
+*/
 void zr1_set_shake_range(U8 new_shake_range) {
 	if (new_shake_range > ZR1_SHAKE_RANGE_MAX) {
 		new_shake_range = ZR1_SHAKE_RANGE_MAX;
@@ -588,11 +595,15 @@ void zr1_set_shake_range(U8 new_shake_range) {
 	if (new_shake_range < ZR1_SHAKE_RANGE_MIN) {
 		new_shake_range = ZR1_SHAKE_RANGE_MIN;
 	}
+	if (new_shake_range == zr1_shake_range) {
+		return;
+	}
 	disable_interrupts();
 	zr1_shake_range = new_shake_range;
 	zr1_calculate_shake_range();
 	enable_interrupts();
 }
+
 
 CALLSET_ENTRY (zr1, init)
 {
@@ -610,6 +621,7 @@ CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 
 void zr1_shake_2sec_task (void)
 {
+	zr1_set_shake_speed(ZR1_SHAKE_SPEED_MEDIUM);
 	zr1_shake();
 	task_sleep_sec (2);
 	zr1_center();
@@ -619,7 +631,7 @@ void zr1_shake_2sec_task (void)
 /**
  * Shake the engine at the start of a ball.
  */
-CALLSET_ENTRY (zr1, start_ball)
+CALLSET_ENTRY (zr1, shooter)
 {
 	task_create_gid1 (GID_ZR1_SHAKE, zr1_shake_2sec_task);
 }

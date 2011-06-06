@@ -31,6 +31,7 @@
 #ifndef _PRIORITY_H
 #define _PRIORITY_H
 
+//TODO do we need PRI_INGAME_MENU and/or maybe PRI_VIDEO_MODE priorities, they need to be quite high
 typedef enum _priority {
 	PRI_NULL=0,
 	PRI_VOLUME_CHANGE_MUSIC,
@@ -75,6 +76,7 @@ typedef enum _priority {
 	PRI_LEFF5, PRI_LEFF6, PRI_LEFF7, PRI_LEFF8,
 	PRI_SCORE_GOAL,
 	PRI_SCORES_IMPORTANT,
+	PRI_BALL_LAUNCH_MENU,
 	PRI_REPLAY,
 	PRI_SPECIAL,
 	PRI_BALL_SEARCH,

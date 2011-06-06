@@ -1,8 +1,4 @@
-= Todo list for Corvette =
-
-
-
-== Add LT5 engine support ==
+= LT5 engine support =
 
 See schematics at 3-25 and 3-24.
 
@@ -12,7 +8,7 @@ solenoids that move the LT5 engine.
 The AD7524 chip can be controlled by writing values to WPC_EXTBOARD2 (via the DIS1 line on J204/5) at 0x3FEC.
 
 The 74LS175 chip on the Motor Driver Master Board A-18532 at position U2 (incorrectly marked as a 74LS375 in the
-manual) on page 3-25 is used to enable or disable the ZR-1 solenoids completly.
+manual) on page 3-25 is used to enable or disable the ZR1 solenoids completly.
 
 The 74LS175 chip can be controlled by writing value to WPC_EXTBOARD3 (via the DIS2 line on J204/3) at 0x3FED.
 According to my electronics buddy he says that there's two pull-up resistors (R18/R19) which disable power to the
@@ -26,49 +22,51 @@ partly holds true.
 The Visual Pinball and VPinMame emulation of Corvette uses values in the range of 64 to 192.
 64 meaning far left, 127 meaning center, 192 meaning right.
 
+<code>
 468 		locals.enginePos = (int)wpc_data[WPC_EXTBOARD2];
+</code>
 
 http://pinmame.cvs.sourceforge.net/viewvc/pinmame/pinmame/src/wpc/sims/wpc/prelim/corv.c?revision=1.17&view=markup
 
-
 My real Corvette pinball machine gives values during a few calibration test runs:
-68 for left, 176 for right and 122 for center.
-75 for left, 170 for right and 121 for center.
-74 for left, 166 for right and 120 for center - 3 times
+
+* 68 for left, 176 for right and 122 for center.
+* 75 for left, 170 for right and 121 for center.
+* 74 for left, 166 for right and 120 for center - 3 times
 
 During the auto-run feature of the ZR1-LT5 engine test i noticed the when the engine shakes the left and right
 optos are not normally activated.
 
 === Calibration ===
 
-Set the value to 127.
-Slowly decrease the value until the "ZR-1 Full Left" opto is activated.
-Record the value and store as FULL LEFT OPTO ON.
-Slowly increase the value until the "ZR-1 Full Left" opto is de-activated.
-Record the value and store as FULL LEFT OPTO OFF.
-Slowly increase the value until the "ZR-1 Full Right" opto is activated.
-Record the value and store as FULL RIGHT OPTO ON.
-Slowly decrease the value until the "ZR-1 Full Right" opto is de-activated.
-Record the value and store as FULL RIGHT OPTO OFF.
+# Set the value to 127.
+# Slowly decrease the value until the "ZR1 Full Left" opto is activated.
+# Record the value and store as FULL LEFT OPTO ON.
+# Slowly increase the value until the "ZR1 Full Left" opto is de-activated.
+# Record the value and store as FULL LEFT OPTO OFF.
+# Slowly increase the value until the "ZR1 Full Right" opto is activated.
+# Record the value and store as FULL RIGHT OPTO ON.
+# Slowly decrease the value until the "ZR1 Full Right" opto is de-activated.
+# Record the value and store as FULL RIGHT OPTO OFF.
+# Calculate ENGINE CENTER 
+# Slowly decrease the value back to ENGINE CENTER.
+# Calibration done.
 
-Calculate ENGINE CENTER (example values take from a real machine)
+Example values take from a real machine
 
-127 - 74 (FULL LEFT OPTO OFF) = 53
-166 (FULL RIGHT OPTO OFF) - 127 = 39
-53 - 39 = 14
-14 / 2 = 7
-127 - 7 = 120 = ENGINE CENTER
-
-Slowly decrease the value back to ENGINE CENTER.
-Calibration done.
+ 127 - 74 (FULL LEFT OPTO OFF) = 53
+ 166 (FULL RIGHT OPTO OFF) - 127 = 39
+ 53 - 39 = 14
+ 14 / 2 = 7
+ 127 - 7 = 120 = ENGINE CENTER
 
 Another example of calculation using other values a real machine gave:
 
-127 - 68 (FULL LEFT OPTO OFF) = 59
-176 (FULL RIGHT OPTO OFF) - 127 = 49
-59 - 49 = 10
-10 / 2 = 5
-127 - 5 = 122
+ 127 - 68 (FULL LEFT OPTO OFF) = 59
+ 176 (FULL RIGHT OPTO OFF) - 127 = 49
+ 59 - 49 = 10
+ 10 / 2 = 5
+ 127 - 5 = 122
 
 === General Operation ===
 
@@ -76,6 +74,9 @@ The working range for the engine values should be: FULL LEFT OPTO OFF and FULL R
 
 Byte values of less than 64 or more than 192 should not be used.
 
-When the engine is not in use the drive should be disabled by setting values at WPC_EXTBOARD3 
+A suitable value (e.g. 127) should be set at WPC_EXTBOARD2 before enabling the solenoids.
 
-I'm thinking that a suitable value (e.g. 127) should be set at WPC_EXTBOARD2 before enabling the solenoids.
+When the engine is not in use the drive should be disabled by setting values at WPC_EXTBOARD3
+
+The engine does need to be held in a centered position during a game, the engine cannot be left
+to fail about otherwise balls get stuck under it and shots cannot be made.
