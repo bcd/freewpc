@@ -63,9 +63,6 @@ EXTRA_CFLAGS += -DCONFIG_MUTE_PAUSE
 # and leffs.  RTTs must go into GAME_OBJS.
 #
 
-SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h \
-	build/right_jet.h build/lower_jet.h build/left_mpf.h build/right_mpf.h
-
 GAME_OBJS = jets.o autofire.o gumball.o \
 	config.o loop.o rampdiv.o magnet.o \
 	maghelper.o clock.o
@@ -91,5 +88,3 @@ GAME4_OBJS = bonus.o dollar.o bar.o tnf.o sdss.o
 
 IMAGE_MAP += $(M)/tz.ild
 
-SCHED_HEADERS += build/clock_mech.h build/bridge_open.h build/shooter_div.h \
-	build/ramp_div.h build/gumball_div.h
