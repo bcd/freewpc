@@ -98,7 +98,7 @@ void bttz_start_task (void)
 	
 	callset_invoke (empty_balls_test);
 	device_request_empty (device_entry (DEVNO_LOCK));
-	device_multiball_set (6);
+	set_ball_count (6);
 	balls_needed_to_load = 3;
 	task_exit ();
 }

@@ -471,7 +471,7 @@ CALLSET_ENTRY (multiball, mball_start_3_ball)
 			break;
 	}
 	/* This should add in an extra ball if the above wasn't enough */
-	device_multiball_set (3);
+	set_ball_count (3);
 	
 }
 
@@ -492,7 +492,7 @@ CALLSET_ENTRY (multiball, mball_start_2_ball)
 			device_unlock_ball (device_entry (DEVNO_LOCK));
 			break;
 	}
-	device_multiball_set (2);
+	set_ball_count (2);
 }
 
 CALLSET_ENTRY (mball, mball_start)
