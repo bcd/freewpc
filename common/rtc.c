@@ -374,6 +374,7 @@ void rtc_show_date_time (struct date *d)
 void rtc_begin_modify (void)
 {
 	memcpy (&edit_date, &current_date, sizeof (struct date));
+	callset_invoke (time_modified);
 	rtc_edit_field = 0;
 }
 
