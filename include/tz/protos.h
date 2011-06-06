@@ -31,7 +31,6 @@ __machine__ void autofire_add_ball(void);
 /* ballsave.c */
 __common__ void ballsave_add_time(U8 secs);
 __common__ void ballsave_disable(void);
-__common__ void ballsave_launch(void);
 
 /* camera.c * */
 __machine2__ bool can_award_camera (void);
