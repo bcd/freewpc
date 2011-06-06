@@ -64,7 +64,6 @@
  */
 
 #include <freewpc.h>
-#include <coin.h>
 
 __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
 
@@ -93,8 +92,6 @@ __fastram__ U8 lamp_power_timer;
 U8 lamp_power_level;
 
 U16 lamp_power_idle_timer;
-
-#define NUM_LAMP_RTTS 4
 
 
 /** Initialize the lamp subsystem at startup. */
