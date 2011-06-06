@@ -61,6 +61,8 @@ static char font_var5x5_sep[][7] = {
 	/* asterisk */ { 5, 5, 21, 14, 31, 14, 21 },
 	/* left angle bracket */ { 4, 5, 3, 6, 12, 6, 3 },
 	/* right angle bracket */ { 4, 5, 12, 6, 3, 6, 12 },
+	/* hash */ { 5, 5, 10, 31, 10, 31, 10 },
+	/* question mark */ { 4, 5, 6, 9, 4, 0, 4 },
 };
 
 #define BASECHAR ' '
@@ -115,6 +117,8 @@ static char *var5_glyphs[] = {
 	['*' - BASECHAR] = font_var5x5_sep[10],
 	['<' - BASECHAR] = font_var5x5_sep[11],
 	['>' - BASECHAR] = font_var5x5_sep[12],
+	['#' - BASECHAR] = font_var5x5_sep[10],
+	['?' - BASECHAR] = font_var5x5_sep[11],
 };
 
 const font_t font_var5 = {
