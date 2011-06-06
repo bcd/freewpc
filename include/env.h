@@ -110,6 +110,8 @@
 #define __init__
 #define __machine2__
 #define __machine3__
+#define __machine4__
+#define __machine5__
 #define __deff__
 #define __leff__
 #endif
