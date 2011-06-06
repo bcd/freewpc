@@ -40,6 +40,7 @@
  * during other polling intervals.
  */
 __fastram__ U8 zc_timer;
+__fastram__ U8 zc_timer_stored;
 
 /**
  * The current status of the zerocross circuit.
@@ -77,6 +78,7 @@ void ac_rtt (void)
 		/* Read the zerocross register, unless broken.
 		 * If we are currently at a zero crossing,
 		 * reset the timer. */
+		zc_timer_stored = zc_timer;
 		zc_timer = 0;
 	}
 	else
@@ -93,8 +95,8 @@ void ac_rtt (void)
 			interrupt_dbprintf ("ZC failure?\n");
 			zc_timer = 0;
 
-#if 0
 			ac_zerocross_errors++;
+#if 0
 			if (ac_zerocross_errors < 5)
 			{
 				goto handle_zero_crossing;
@@ -114,6 +116,7 @@ void ac_rtt (void)
 void ac_init (void)
 {
 	zc_timer = 0;
+	zc_timer_stored = 0;
 	ac_zerocross_errors = 0;
 
 	/* Assume working AC/zerocross for now - TODO */

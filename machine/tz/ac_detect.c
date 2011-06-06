@@ -21,7 +21,7 @@
 #include <freewpc.h>
 #include <test.h>
 #include <window.h>
-#include <sys/ac.h>
+#include <system/ac.h>
 
 extern U8 ac_zerocross_errors;
 
