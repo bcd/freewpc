@@ -92,7 +92,7 @@ AREA_DECL(nvram)
 /** The maximum alloted size of each player's local variables.
  * 5x this amount is allocated, one for the "live" variables and
  * 4 for the player save buffers. */
-#define LOCAL_SIZE		0x40U
+#define LOCAL_SIZE		0x30U
 
 /** Returns the address of player P's save buffer. */
 #define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
