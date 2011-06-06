@@ -1905,7 +1905,7 @@ struct menu irqload_test_item = {
 
 /**********************************************************************/
 
-#define SCORE_TEST_PLAYERS 4
+#define SCORE_TEST_PLAYERS MAX_PLAYERS
 
 const score_t score_test_increment = { 0x00, 0x01, 0x23, 0x45, 0x60 };
 
