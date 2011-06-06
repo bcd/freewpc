@@ -405,7 +405,7 @@ void end_ball (void)
 	 */
 	if (config_timed_game == OFF)
 	{
-		if (system_config.lowest_goes_next == NO)
+		if (system_config.lowest_goes_next == NO || num_players == 1)
 			ball_up++;
 		if (ball_up <= system_config.balls_per_game)
 		{
