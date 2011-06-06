@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -17,18 +17,19 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 /*
- * Driver for Twilight Zone mini playfield magnets
+ * Driver for TZ mini-playfield magnets
+ * (derived from spsol.ct)
  *
  * The parameters are:
  * sw - the switch number that triggers it
  * sol - the solenoid/coil that gets fired automatically
- * ontime - how long the coil is kept on (16ms)
+ * ontime - how long the coil is kept on
  * offtime - how long the coil is kept off after it was fired, before
  * 	polling the switch again.  This prevents constant lock-on.
  */
 
-/* TODO Fix holding down the button */
 @@class mpfmag
 @@parameter sw
 @@parameter sol
@@ -44,9 +45,10 @@
 
 extern __fastram__ U8 @class_enables;
 extern __fastram__ U8 @class_running;
+extern bool mpf_active;
+
 #endif /* __@class_DRIVER_H */
 
-extern bool mpf_active;
 
 @@
 @@file @self.h
@@ -81,21 +83,32 @@ extern inline void @self_service (void)
 		/* Decrement the timer. */
 		@self_timer--;
 
-		if (@self_running_p ())
+		/* Check for expiry.  Handle accordingly */
+		if (@self_timer == 0)
 		{
-			/* If the timer expires in the ON phase, then
-			switch to the OFF phase.  Also, turn off the
-			solenoid now. */
-			if (@self_timer == 0)
+			if (@self_running_p ())
 			{
+				/* If the timer expires in the ON phase, then
+				switch to the OFF phase.  Also, turn off the
+				solenoid now. */
 				sol_disable (@sol);
 				@self_timer = @offtime;
 				@class_running &= ~INST_MASK;
 			}
+			else
+			{
+				/* When the timer expires in the OFF phase, poll the
+				switch to see that it cleared correctly.  If it hasn't,
+				extend the off phase again and continue to do so until
+				the switch is cleared. */
+				if (!rt_switch_poll (@sw))
+				{
+					@self_timer = @offtime;
+				}
+			}
 		}
 	}
-	/* Flipper switch is opto, so inverted */
-	else if (@self_enabled_p () && !rt_switch_poll (@sw) && (mpf_active))
+	else if (@self_enabled_p () && !rt_switch_poll (@sw) && mpf_active)
 	{
 		/* When the solenoid is not running, poll its switch
 		and see if it should be started. */
