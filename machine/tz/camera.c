@@ -36,6 +36,7 @@ extern U8 three_way_combos;
 extern U8 left_ramps;
 extern U8 mball_locks_lit;
 extern struct timed_mode_ops hitch_mode;
+extern __local__ door_panels_started;
 
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
@@ -197,6 +198,7 @@ static void do_camera_award (void)
 			score (SC_10M);	
 			/* Spot door panel if not lit */
 			lamp_on (LM_PANEL_10M);
+			door_panels_started++;
 			break;
 		case CAMERA_AWARD_DOOR_PANEL:
 			/* Spot Door Panel */

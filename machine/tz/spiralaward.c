@@ -41,6 +41,7 @@ U8 spiralaward;
 __local__ U8 spiralawards_collected; 
 __local__ bool spiralaward_set_completed; 
 extern __local__ U8 mpf_enable_count;
+extern __local__ U8 door_panels_started;
 
 const char *spiralaward_names[] = {
 	"2 MILLION",
@@ -175,6 +176,7 @@ static void award_spiralaward (void)
 			sound_send (SND_TEN_MILLION_POINTS);
 			/* Light the 10M door panel */
 			lamp_on (LM_PANEL_10M);
+			door_panels_started++;
 			score (SC_10M);
 			break;
 		case 5:
