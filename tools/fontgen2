@@ -2,15 +2,20 @@
 pointsize="$1"
 font="$2"
 #charlist=`echo . , \- \! \? \[ \] \% \< \> \( \) \# A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9 `
-charlist=`echo . $ , \- \! \? \[ \] \% \( \) \# A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9 `
+charlist=`echo . @ $ , + - \; : \& \! \? \[ \] \% \( \) \# A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9 `
 
 echo "#include <freewpc.h>"
 
 for char in ${charlist}; do
 	charstripped="${char//\./period}"
 	charstripped="${charstripped//\$/dollar}"
+	charstripped="${charstripped/@/atsign}"
 	charstripped="${charstripped/,/comma}"
+	charstripped="${charstripped/+/plus}"
 	charstripped="${charstripped/-/minus}"
+	charstripped="${charstripped//\;/semicolon}"
+	charstripped="${charstripped/:/colon}"
+	charstripped="${charstripped//\&/amp}"
 	charstripped="${charstripped//\!/bang}"
 	charstripped="${charstripped//\?/question}"
 	charstripped="${charstripped//\[/lbrace}"
@@ -30,8 +35,13 @@ echo "static char *${font}_glyphs[] = {"
 for char in ${charlist}; do
 	charstripped="${char//\./period}"
 	charstripped="${charstripped//\$/dollar}"
+	charstripped="${charstripped/@/atsign}"
 	charstripped="${charstripped/,/comma}"
+	charstripped="${charstripped/+/plus}"
 	charstripped="${charstripped/-/minus}"
+	charstripped="${charstripped//\;/semicolon}"
+	charstripped="${charstripped/:/colon}"
+	charstripped="${charstripped//\&/amp}"
 	charstripped="${charstripped//\!/bang}"
 	charstripped="${charstripped//\?/question}"
 	charstripped="${charstripped//\[/lbrace}"
