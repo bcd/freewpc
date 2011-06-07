@@ -1,4 +1,76 @@
 #include <freewpc.h>
+#define glyph_cowboy_period_width 2
+#define glyph_cowboy_period_height 2
+static char glyph_cowboy_period_bits[] = { glyph_cowboy_period_width, glyph_cowboy_period_height,
+  0x03, 0x03, };
+#define glyph_cowboy_atsign_width 13
+#define glyph_cowboy_atsign_height 9
+static char glyph_cowboy_atsign_bits[] = { glyph_cowboy_atsign_width, glyph_cowboy_atsign_height,
+  0xFC, 0x07, 0x02, 0x08, 0x01, 0x10, 0xF9, 0x13, 0x9D, 0x13, 0x79, 0x0F, 
+  0x01, 0x00, 0x02, 0x10, 0xFC, 0x0F, };
+#define glyph_cowboy_dollar_width 8
+#define glyph_cowboy_dollar_height 9
+static char glyph_cowboy_dollar_bits[] = { glyph_cowboy_dollar_width, glyph_cowboy_dollar_height,
+  0x18, 0x18, 0x7E, 0x07, 0x7E, 0xE0, 0x7F, 0x18, 0x18, };
+#define glyph_cowboy_comma_width 3
+#define glyph_cowboy_comma_height 3
+static char glyph_cowboy_comma_bits[] = { glyph_cowboy_comma_width, glyph_cowboy_comma_height,
+  0x06, 0x06, 0x03, };
+#define glyph_cowboy_plus_width 6
+#define glyph_cowboy_plus_height 7
+static char glyph_cowboy_plus_bits[] = { glyph_cowboy_plus_width, glyph_cowboy_plus_height,
+  0x0C, 0x0C, 0x0C, 0x3F, 0x0C, 0x0C, 0x0C, };
+#define glyph_cowboy_minus_width 7
+#define glyph_cowboy_minus_height 1
+static char glyph_cowboy_minus_bits[] = { glyph_cowboy_minus_width, glyph_cowboy_minus_height,
+  0x7F, };
+#define glyph_cowboy_semicolon_width 3
+#define glyph_cowboy_semicolon_height 6
+static char glyph_cowboy_semicolon_bits[] = { glyph_cowboy_semicolon_width, glyph_cowboy_semicolon_height,
+  0x06, 0x06, 0x00, 0x06, 0x06, 0x03, };
+#define glyph_cowboy_colon_width 2
+#define glyph_cowboy_colon_height 5
+static char glyph_cowboy_colon_bits[] = { glyph_cowboy_colon_width, glyph_cowboy_colon_height,
+  0x03, 0x03, 0x00, 0x03, 0x03, };
+#define glyph_cowboy_amp_width 11
+#define glyph_cowboy_amp_height 7
+static char glyph_cowboy_amp_bits[] = { glyph_cowboy_amp_width, glyph_cowboy_amp_height,
+  0x7E, 0x00, 0x67, 0x00, 0x0E, 0x04, 0xE7, 0x03, 0xD7, 0x01, 0xC7, 0x01, 
+  0xFE, 0x00, };
+#define glyph_cowboy_bang_width 3
+#define glyph_cowboy_bang_height 8
+static char glyph_cowboy_bang_bits[] = { glyph_cowboy_bang_width, glyph_cowboy_bang_height,
+  0x07, 0x07, 0x07, 0x07, 0x05, 0x02, 0x07, 0x02, };
+#define glyph_cowboy_question_width 7
+#define glyph_cowboy_question_height 8
+static char glyph_cowboy_question_bits[] = { glyph_cowboy_question_width, glyph_cowboy_question_height,
+  0x3E, 0x77, 0x70, 0x3E, 0x0A, 0x04, 0x0E, 0x04, };
+#define glyph_cowboy_lbrace_width 4
+#define glyph_cowboy_lbrace_height 9
+static char glyph_cowboy_lbrace_bits[] = { glyph_cowboy_lbrace_width, glyph_cowboy_lbrace_height,
+  0x0F, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x0F, };
+#define glyph_cowboy_rbrace_width 4
+#define glyph_cowboy_rbrace_height 9
+static char glyph_cowboy_rbrace_bits[] = { glyph_cowboy_rbrace_width, glyph_cowboy_rbrace_height,
+  0x0F, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0F, };
+#define glyph_cowboy_percent_width 12
+#define glyph_cowboy_percent_height 7
+static char glyph_cowboy_percent_bits[] = { glyph_cowboy_percent_width, glyph_cowboy_percent_height,
+  0x0E, 0x03, 0x9B, 0x01, 0xCE, 0x00, 0x60, 0x00, 0x30, 0x07, 0x98, 0x0D, 
+  0x0C, 0x07, };
+#define glyph_cowboy_lpar_width 4
+#define glyph_cowboy_lpar_height 9
+static char glyph_cowboy_lpar_bits[] = { glyph_cowboy_lpar_width, glyph_cowboy_lpar_height,
+  0x0C, 0x06, 0x06, 0x03, 0x03, 0x03, 0x06, 0x06, 0x0C, };
+#define glyph_cowboy_rpar_width 4
+#define glyph_cowboy_rpar_height 9
+static char glyph_cowboy_rpar_bits[] = { glyph_cowboy_rpar_width, glyph_cowboy_rpar_height,
+  0x03, 0x06, 0x06, 0x0C, 0x0C, 0x0C, 0x06, 0x06, 0x03, };
+#define glyph_cowboy_hash_width 13
+#define glyph_cowboy_hash_height 8
+static char glyph_cowboy_hash_bits[] = { glyph_cowboy_hash_width, glyph_cowboy_hash_height,
+  0x60, 0x06, 0x60, 0x06, 0xFC, 0x1F, 0x30, 0x03, 0x98, 0x01, 0xFF, 0x07, 
+  0xCC, 0x00, 0xCC, 0x00, };
 #define glyph_cowboy_A_width 9
 #define glyph_cowboy_A_height 7
 static char glyph_cowboy_A_bits[] = { glyph_cowboy_A_width, glyph_cowboy_A_height,
@@ -167,65 +239,24 @@ static char glyph_cowboy_8_bits[] = { glyph_cowboy_8_width, glyph_cowboy_8_heigh
 #define glyph_cowboy_9_height 7
 static char glyph_cowboy_9_bits[] = { glyph_cowboy_9_width, glyph_cowboy_9_height,
   0x7E, 0xE7, 0xE7, 0xFE, 0xE0, 0x70, 0x3E, };
-#define glyph_cowboy_period_width 2
-#define glyph_cowboy_period_height 2
-static char glyph_cowboy_period_bits[] = { glyph_cowboy_period_width, glyph_cowboy_period_height,
-  0x03, 0x03, };
-#define glyph_cowboy_comma_width 3
-#define glyph_cowboy_comma_height 3
-static char glyph_cowboy_comma_bits[] = { glyph_cowboy_comma_width, glyph_cowboy_comma_height,
-  0x06, 0x06, 0x03, };
-#define glyph_cowboy_minus_width 7
-#define glyph_cowboy_minus_height 1
-static char glyph_cowboy_minus_bits[] = { glyph_cowboy_minus_width, glyph_cowboy_minus_height,
-  0x7F, };
-#define glyph_cowboy_bang_width 3
-#define glyph_cowboy_bang_height 8
-static char glyph_cowboy_bang_bits[] = { glyph_cowboy_bang_width, glyph_cowboy_bang_height,
-  0x07, 0x07, 0x07, 0x07, 0x05, 0x02, 0x07, 0x02, };
-#define glyph_cowboy_question_width 7
-#define glyph_cowboy_question_height 8
-static char glyph_cowboy_question_bits[] = { glyph_cowboy_question_width, glyph_cowboy_question_height,
-  0x3E, 0x77, 0x70, 0x3E, 0x0A, 0x04, 0x0E, 0x04, };
-#define glyph_cowboy_lbrace_width 4
-#define glyph_cowboy_lbrace_height 9
-static char glyph_cowboy_lbrace_bits[] = { glyph_cowboy_lbrace_width, glyph_cowboy_lbrace_height,
-  0x0F, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x0F, };
-#define glyph_cowboy_rbrace_width 4
-#define glyph_cowboy_rbrace_height 9
-static char glyph_cowboy_rbrace_bits[] = { glyph_cowboy_rbrace_width, glyph_cowboy_rbrace_height,
-  0x0F, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0F, };
-#define glyph_cowboy_dollar_width 8
-#define glyph_cowboy_dollar_height 9
-static char glyph_cowboy_dollar_bits[] = { glyph_cowboy_dollar_width, glyph_cowboy_dollar_height,
-  0x18, 0x18, 0x7E, 0x07, 0x7E, 0xE0, 0x7F, 0x18, 0x18, };
-#define glyph_cowboy_percent_width 12
-#define glyph_cowboy_percent_height 7
-static char glyph_cowboy_percent_bits[] = { glyph_cowboy_percent_width, glyph_cowboy_percent_height,
-  0x0E, 0x03, 0x9B, 0x01, 0xCE, 0x00, 0x60, 0x00, 0x30, 0x07, 0x98, 0x0D, 
-  0x0C, 0x07, };
-#define glyph_cowboy_left_width 5
-#define glyph_cowboy_left_height 7
-static char glyph_cowboy_left_bits[] = { glyph_cowboy_left_width, glyph_cowboy_left_height,
-  0x18, 0x0C, 0x06, 0x03, 0x06, 0x0C, 0x18, };
-#define glyph_cowboy_right_width 5
-#define glyph_cowboy_right_height 7
-static char glyph_cowboy_right_bits[] = { glyph_cowboy_right_width, glyph_cowboy_right_height,
-  0x03, 0x06, 0x0C, 0x18, 0x0C, 0x06, 0x03, };
-#define glyph_cowboy_lpar_width 4
-#define glyph_cowboy_lpar_height 9
-static char glyph_cowboy_lpar_bits[] = { glyph_cowboy_lpar_width, glyph_cowboy_lpar_height,
-  0x0C, 0x06, 0x06, 0x03, 0x03, 0x03, 0x06, 0x06, 0x0C, };
-#define glyph_cowboy_rpar_width 4
-#define glyph_cowboy_rpar_height 9
-static char glyph_cowboy_rpar_bits[] = { glyph_cowboy_rpar_width, glyph_cowboy_rpar_height,
-  0x03, 0x06, 0x06, 0x0C, 0x0C, 0x0C, 0x06, 0x06, 0x03, };
-#define glyph_cowboy_hash_width 13
-#define glyph_cowboy_hash_height 8
-static char glyph_cowboy_hash_bits[] = { glyph_cowboy_hash_width, glyph_cowboy_hash_height,
-  0x60, 0x06, 0x60, 0x06, 0xFC, 0x1F, 0x30, 0x03, 0x98, 0x01, 0xFF, 0x07, 
-  0xCC, 0x00, 0xCC, 0x00, };
 static char *cowboy_glyphs[] = {
+	['.'] = glyph_cowboy_period_bits,
+	['@'] = glyph_cowboy_atsign_bits,
+	['$'] = glyph_cowboy_dollar_bits,
+	[','] = glyph_cowboy_comma_bits,
+	['+'] = glyph_cowboy_plus_bits,
+	['-'] = glyph_cowboy_minus_bits,
+	[';'] = glyph_cowboy_semicolon_bits,
+	[':'] = glyph_cowboy_colon_bits,
+	['&'] = glyph_cowboy_amp_bits,
+	['!'] = glyph_cowboy_bang_bits,
+	['?'] = glyph_cowboy_question_bits,
+	['['] = glyph_cowboy_lbrace_bits,
+	[']'] = glyph_cowboy_rbrace_bits,
+	['%'] = glyph_cowboy_percent_bits,
+	['('] = glyph_cowboy_lpar_bits,
+	[')'] = glyph_cowboy_rpar_bits,
+	['#'] = glyph_cowboy_hash_bits,
 	['A'] = glyph_cowboy_A_bits,
 	['B'] = glyph_cowboy_B_bits,
 	['C'] = glyph_cowboy_C_bits,
@@ -262,22 +293,8 @@ static char *cowboy_glyphs[] = {
 	['7'] = glyph_cowboy_7_bits,
 	['8'] = glyph_cowboy_8_bits,
 	['9'] = glyph_cowboy_9_bits,
-	['.'] = glyph_cowboy_period_bits,
-	[','] = glyph_cowboy_comma_bits,
-	['-'] = glyph_cowboy_minus_bits,
-	['!'] = glyph_cowboy_bang_bits,
-	['?'] = glyph_cowboy_question_bits,
-	['['] = glyph_cowboy_lbrace_bits,
-	[']'] = glyph_cowboy_rbrace_bits,
-	['$'] = glyph_cowboy_dollar_bits,
-	['%'] = glyph_cowboy_percent_bits,
-	['<'] = glyph_cowboy_left_bits,
-	['>'] = glyph_cowboy_right_bits,
-	['('] = glyph_cowboy_lpar_bits,
-	[')'] = glyph_cowboy_rpar_bits,
-	['#'] = glyph_cowboy_hash_bits,
 };
 const font_t font_cowboy = {
-	.height = 8 + 2,
+	.height = 8,
 	.glyphs = cowboy_glyphs,
 };
