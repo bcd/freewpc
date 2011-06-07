@@ -48,9 +48,8 @@ PINMAME_GAME_ROM = tzone9_2.rom
 
 PINMAME_OTHER_ROMS = tzu*.rom
 
-
-CONFIG_MUTE_PAUSE := y
-EXTRA_CFLAGS += -DCONFIG_MUTE_PAUSE
+# Enable optional features of the OS which we always want.
+$(eval $(call have,CONFIG_MUTE_PAUSE))
 
 
 #
