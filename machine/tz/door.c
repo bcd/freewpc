@@ -158,7 +158,7 @@ void door_advance_flashing (void)
 			new_door_index++;
 			if (new_door_index >= NUM_DOOR_PANELS)
 				new_door_index = 0;
-		} while (lamp_test (door_get_lamp (new_door_index)));
+		} while (lamp_test (door_get_lamp (new_door_index) && door_panels_started < NUM_DOOR_PANELS));
 	}
 	else
 		/* Light the door handle */
