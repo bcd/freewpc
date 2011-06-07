@@ -1012,8 +1012,8 @@ endif
 # Documentation (doxygen)
 #
 .PHONY : doxygen
-doxygen: Doxyfile
-	doxygen
+doxygen: doc/doxygen/Doxyfile
+	doxygen $<
 
 tex:
 	cd doc && makeinfo --no-split --no-headers --html -o freewpc.html freewpc.texi
