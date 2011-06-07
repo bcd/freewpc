@@ -1,0 +1,272 @@
+#include <freewpc.h>
+#define glyph_nayupixel_period_width 4
+#define glyph_nayupixel_period_height 3
+static char glyph_nayupixel_period_bits[] = { glyph_nayupixel_period_width, glyph_nayupixel_period_height,
+  0x06, 0x09, 0x06, };
+#define glyph_nayupixel_atsign_width 1
+#define glyph_nayupixel_atsign_height 1
+static char glyph_nayupixel_atsign_bits[] = { glyph_nayupixel_atsign_width, glyph_nayupixel_atsign_height,
+  0x00, };
+#define glyph_nayupixel_dollar_width 1
+#define glyph_nayupixel_dollar_height 1
+static char glyph_nayupixel_dollar_bits[] = { glyph_nayupixel_dollar_width, glyph_nayupixel_dollar_height,
+  0x00, };
+#define glyph_nayupixel_comma_width 3
+#define glyph_nayupixel_comma_height 3
+static char glyph_nayupixel_comma_bits[] = { glyph_nayupixel_comma_width, glyph_nayupixel_comma_height,
+  0x03, 0x04, 0x02, };
+#define glyph_nayupixel_plus_width 5
+#define glyph_nayupixel_plus_height 5
+static char glyph_nayupixel_plus_bits[] = { glyph_nayupixel_plus_width, glyph_nayupixel_plus_height,
+  0x04, 0x04, 0x1F, 0x04, 0x04, };
+#define glyph_nayupixel_minus_width 4
+#define glyph_nayupixel_minus_height 1
+static char glyph_nayupixel_minus_bits[] = { glyph_nayupixel_minus_width, glyph_nayupixel_minus_height,
+  0x0F, };
+#define glyph_nayupixel_semicolon_width 2
+#define glyph_nayupixel_semicolon_height 5
+static char glyph_nayupixel_semicolon_bits[] = { glyph_nayupixel_semicolon_width, glyph_nayupixel_semicolon_height,
+  0x02, 0x02, 0x00, 0x02, 0x03, };
+#define glyph_nayupixel_colon_width 1
+#define glyph_nayupixel_colon_height 1
+static char glyph_nayupixel_colon_bits[] = { glyph_nayupixel_colon_width, glyph_nayupixel_colon_height,
+  0x00, };
+#define glyph_nayupixel_amp_width 1
+#define glyph_nayupixel_amp_height 1
+static char glyph_nayupixel_amp_bits[] = { glyph_nayupixel_amp_width, glyph_nayupixel_amp_height,
+  0x00, };
+#define glyph_nayupixel_bang_width 3
+#define glyph_nayupixel_bang_height 8
+static char glyph_nayupixel_bang_bits[] = { glyph_nayupixel_bang_width, glyph_nayupixel_bang_height,
+  0x02, 0x02, 0x02, 0x02, 0x00, 0x02, 0x05, 0x02, };
+#define glyph_nayupixel_question_width 4
+#define glyph_nayupixel_question_height 7
+static char glyph_nayupixel_question_bits[] = { glyph_nayupixel_question_width, glyph_nayupixel_question_height,
+  0x06, 0x09, 0x08, 0x04, 0x02, 0x00, 0x02, };
+#define glyph_nayupixel_lbrace_width 3
+#define glyph_nayupixel_lbrace_height 8
+static char glyph_nayupixel_lbrace_bits[] = { glyph_nayupixel_lbrace_width, glyph_nayupixel_lbrace_height,
+  0x07, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x07, };
+#define glyph_nayupixel_rbrace_width 3
+#define glyph_nayupixel_rbrace_height 8
+static char glyph_nayupixel_rbrace_bits[] = { glyph_nayupixel_rbrace_width, glyph_nayupixel_rbrace_height,
+  0x07, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x07, };
+#define glyph_nayupixel_percent_width 8
+#define glyph_nayupixel_percent_height 6
+static char glyph_nayupixel_percent_bits[] = { glyph_nayupixel_percent_width, glyph_nayupixel_percent_height,
+  0x42, 0x25, 0x12, 0x48, 0xA4, 0x42, };
+#define glyph_nayupixel_lpar_width 3
+#define glyph_nayupixel_lpar_height 7
+static char glyph_nayupixel_lpar_bits[] = { glyph_nayupixel_lpar_width, glyph_nayupixel_lpar_height,
+  0x06, 0x01, 0x01, 0x01, 0x01, 0x01, 0x06, };
+#define glyph_nayupixel_rpar_width 3
+#define glyph_nayupixel_rpar_height 7
+static char glyph_nayupixel_rpar_bits[] = { glyph_nayupixel_rpar_width, glyph_nayupixel_rpar_height,
+  0x03, 0x04, 0x04, 0x04, 0x04, 0x04, 0x03, };
+#define glyph_nayupixel_hash_width 1
+#define glyph_nayupixel_hash_height 1
+static char glyph_nayupixel_hash_bits[] = { glyph_nayupixel_hash_width, glyph_nayupixel_hash_height,
+  0x00, };
+#define glyph_nayupixel_A_width 6
+#define glyph_nayupixel_A_height 5
+static char glyph_nayupixel_A_bits[] = { glyph_nayupixel_A_width, glyph_nayupixel_A_height,
+  0x0E, 0x11, 0x11, 0x11, 0x2E, };
+#define glyph_nayupixel_B_width 5
+#define glyph_nayupixel_B_height 7
+static char glyph_nayupixel_B_bits[] = { glyph_nayupixel_B_width, glyph_nayupixel_B_height,
+  0x01, 0x01, 0x0F, 0x11, 0x11, 0x11, 0x0F, };
+#define glyph_nayupixel_C_width 5
+#define glyph_nayupixel_C_height 5
+static char glyph_nayupixel_C_bits[] = { glyph_nayupixel_C_width, glyph_nayupixel_C_height,
+  0x0E, 0x11, 0x01, 0x11, 0x0E, };
+#define glyph_nayupixel_D_width 5
+#define glyph_nayupixel_D_height 7
+static char glyph_nayupixel_D_bits[] = { glyph_nayupixel_D_width, glyph_nayupixel_D_height,
+  0x10, 0x10, 0x1E, 0x11, 0x11, 0x11, 0x1E, };
+#define glyph_nayupixel_E_width 6
+#define glyph_nayupixel_E_height 6
+static char glyph_nayupixel_E_bits[] = { glyph_nayupixel_E_width, glyph_nayupixel_E_height,
+  0x0E, 0x11, 0x11, 0x0F, 0x21, 0x1E, };
+#define glyph_nayupixel_F_width 6
+#define glyph_nayupixel_F_height 6
+static char glyph_nayupixel_F_bits[] = { glyph_nayupixel_F_width, glyph_nayupixel_F_height,
+  0x1C, 0x24, 0x04, 0x1F, 0x04, 0x04, };
+#define glyph_nayupixel_G_width 5
+#define glyph_nayupixel_G_height 7
+static char glyph_nayupixel_G_bits[] = { glyph_nayupixel_G_width, glyph_nayupixel_G_height,
+  0x1E, 0x11, 0x11, 0x1E, 0x10, 0x11, 0x0E, };
+#define glyph_nayupixel_H_width 5
+#define glyph_nayupixel_H_height 6
+static char glyph_nayupixel_H_bits[] = { glyph_nayupixel_H_width, glyph_nayupixel_H_height,
+  0x01, 0x01, 0x0F, 0x11, 0x11, 0x11, };
+#define glyph_nayupixel_I_width 3
+#define glyph_nayupixel_I_height 8
+static char glyph_nayupixel_I_bits[] = { glyph_nayupixel_I_width, glyph_nayupixel_I_height,
+  0x02, 0x05, 0x02, 0x00, 0x02, 0x02, 0x02, 0x02, };
+#define glyph_nayupixel_J_width 5
+#define glyph_nayupixel_J_height 9
+static char glyph_nayupixel_J_bits[] = { glyph_nayupixel_J_width, glyph_nayupixel_J_height,
+  0x08, 0x14, 0x08, 0x00, 0x08, 0x08, 0x09, 0x09, 0x06, };
+#define glyph_nayupixel_K_width 4
+#define glyph_nayupixel_K_height 6
+static char glyph_nayupixel_K_bits[] = { glyph_nayupixel_K_width, glyph_nayupixel_K_height,
+  0x01, 0x09, 0x05, 0x03, 0x05, 0x09, };
+#define glyph_nayupixel_L_width 3
+#define glyph_nayupixel_L_height 6
+static char glyph_nayupixel_L_bits[] = { glyph_nayupixel_L_width, glyph_nayupixel_L_height,
+  0x01, 0x01, 0x01, 0x01, 0x01, 0x07, };
+#define glyph_nayupixel_M_width 7
+#define glyph_nayupixel_M_height 5
+static char glyph_nayupixel_M_bits[] = { glyph_nayupixel_M_width, glyph_nayupixel_M_height,
+  0x35, 0x4B, 0x49, 0x49, 0x41, };
+#define glyph_nayupixel_N_width 5
+#define glyph_nayupixel_N_height 5
+static char glyph_nayupixel_N_bits[] = { glyph_nayupixel_N_width, glyph_nayupixel_N_height,
+  0x0D, 0x13, 0x11, 0x11, 0x11, };
+#define glyph_nayupixel_O_width 5
+#define glyph_nayupixel_O_height 5
+static char glyph_nayupixel_O_bits[] = { glyph_nayupixel_O_width, glyph_nayupixel_O_height,
+  0x0E, 0x11, 0x11, 0x11, 0x0E, };
+#define glyph_nayupixel_P_width 5
+#define glyph_nayupixel_P_height 7
+static char glyph_nayupixel_P_bits[] = { glyph_nayupixel_P_width, glyph_nayupixel_P_height,
+  0x0F, 0x11, 0x11, 0x0F, 0x01, 0x01, 0x01, };
+#define glyph_nayupixel_Q_width 5
+#define glyph_nayupixel_Q_height 7
+static char glyph_nayupixel_Q_bits[] = { glyph_nayupixel_Q_width, glyph_nayupixel_Q_height,
+  0x1E, 0x11, 0x11, 0x1E, 0x10, 0x10, 0x10, };
+#define glyph_nayupixel_R_width 5
+#define glyph_nayupixel_R_height 5
+static char glyph_nayupixel_R_bits[] = { glyph_nayupixel_R_width, glyph_nayupixel_R_height,
+  0x0D, 0x13, 0x01, 0x01, 0x01, };
+#define glyph_nayupixel_S_width 4
+#define glyph_nayupixel_S_height 6
+static char glyph_nayupixel_S_bits[] = { glyph_nayupixel_S_width, glyph_nayupixel_S_height,
+  0x06, 0x09, 0x02, 0x04, 0x09, 0x06, };
+#define glyph_nayupixel_T_width 5
+#define glyph_nayupixel_T_height 7
+static char glyph_nayupixel_T_bits[] = { glyph_nayupixel_T_width, glyph_nayupixel_T_height,
+  0x04, 0x04, 0x04, 0x1F, 0x04, 0x14, 0x08, };
+#define glyph_nayupixel_U_width 5
+#define glyph_nayupixel_U_height 5
+static char glyph_nayupixel_U_bits[] = { glyph_nayupixel_U_width, glyph_nayupixel_U_height,
+  0x11, 0x11, 0x11, 0x11, 0x0E, };
+#define glyph_nayupixel_V_width 5
+#define glyph_nayupixel_V_height 5
+static char glyph_nayupixel_V_bits[] = { glyph_nayupixel_V_width, glyph_nayupixel_V_height,
+  0x11, 0x11, 0x11, 0x0A, 0x04, };
+#define glyph_nayupixel_W_width 7
+#define glyph_nayupixel_W_height 5
+static char glyph_nayupixel_W_bits[] = { glyph_nayupixel_W_width, glyph_nayupixel_W_height,
+  0x41, 0x49, 0x49, 0x49, 0x36, };
+#define glyph_nayupixel_X_width 5
+#define glyph_nayupixel_X_height 5
+static char glyph_nayupixel_X_bits[] = { glyph_nayupixel_X_width, glyph_nayupixel_X_height,
+  0x11, 0x0A, 0x04, 0x0A, 0x11, };
+#define glyph_nayupixel_Y_width 5
+#define glyph_nayupixel_Y_height 7
+static char glyph_nayupixel_Y_bits[] = { glyph_nayupixel_Y_width, glyph_nayupixel_Y_height,
+  0x11, 0x11, 0x11, 0x1E, 0x10, 0x11, 0x0E, };
+#define glyph_nayupixel_Z_width 5
+#define glyph_nayupixel_Z_height 5
+static char glyph_nayupixel_Z_bits[] = { glyph_nayupixel_Z_width, glyph_nayupixel_Z_height,
+  0x1F, 0x08, 0x04, 0x02, 0x1F, };
+#define glyph_nayupixel_0_width 4
+#define glyph_nayupixel_0_height 6
+static char glyph_nayupixel_0_bits[] = { glyph_nayupixel_0_width, glyph_nayupixel_0_height,
+  0x06, 0x09, 0x09, 0x09, 0x09, 0x06, };
+#define glyph_nayupixel_1_width 3
+#define glyph_nayupixel_1_height 6
+static char glyph_nayupixel_1_bits[] = { glyph_nayupixel_1_width, glyph_nayupixel_1_height,
+  0x04, 0x06, 0x05, 0x04, 0x04, 0x04, };
+#define glyph_nayupixel_2_width 4
+#define glyph_nayupixel_2_height 6
+static char glyph_nayupixel_2_bits[] = { glyph_nayupixel_2_width, glyph_nayupixel_2_height,
+  0x06, 0x09, 0x08, 0x04, 0x02, 0x0F, };
+#define glyph_nayupixel_3_width 4
+#define glyph_nayupixel_3_height 7
+static char glyph_nayupixel_3_bits[] = { glyph_nayupixel_3_width, glyph_nayupixel_3_height,
+  0x06, 0x09, 0x08, 0x04, 0x08, 0x09, 0x06, };
+#define glyph_nayupixel_4_width 4
+#define glyph_nayupixel_4_height 6
+static char glyph_nayupixel_4_bits[] = { glyph_nayupixel_4_width, glyph_nayupixel_4_height,
+  0x0C, 0x0A, 0x09, 0x0F, 0x08, 0x08, };
+#define glyph_nayupixel_5_width 4
+#define glyph_nayupixel_5_height 6
+static char glyph_nayupixel_5_bits[] = { glyph_nayupixel_5_width, glyph_nayupixel_5_height,
+  0x0F, 0x01, 0x07, 0x08, 0x08, 0x07, };
+#define glyph_nayupixel_6_width 5
+#define glyph_nayupixel_6_height 6
+static char glyph_nayupixel_6_bits[] = { glyph_nayupixel_6_width, glyph_nayupixel_6_height,
+  0x0E, 0x01, 0x0F, 0x11, 0x11, 0x0E, };
+#define glyph_nayupixel_7_width 4
+#define glyph_nayupixel_7_height 6
+static char glyph_nayupixel_7_bits[] = { glyph_nayupixel_7_width, glyph_nayupixel_7_height,
+  0x0F, 0x08, 0x04, 0x02, 0x01, 0x01, };
+#define glyph_nayupixel_8_width 4
+#define glyph_nayupixel_8_height 7
+static char glyph_nayupixel_8_bits[] = { glyph_nayupixel_8_width, glyph_nayupixel_8_height,
+  0x06, 0x09, 0x09, 0x06, 0x09, 0x09, 0x06, };
+#define glyph_nayupixel_9_width 5
+#define glyph_nayupixel_9_height 6
+static char glyph_nayupixel_9_bits[] = { glyph_nayupixel_9_width, glyph_nayupixel_9_height,
+  0x1E, 0x11, 0x11, 0x1E, 0x10, 0x10, };
+static char *nayupixel_glyphs[] = {
+	['.'] = glyph_nayupixel_period_bits,
+	['@'] = glyph_nayupixel_atsign_bits,
+	['$'] = glyph_nayupixel_dollar_bits,
+	[','] = glyph_nayupixel_comma_bits,
+	['+'] = glyph_nayupixel_plus_bits,
+	['-'] = glyph_nayupixel_minus_bits,
+	[';'] = glyph_nayupixel_semicolon_bits,
+	[':'] = glyph_nayupixel_colon_bits,
+	['&'] = glyph_nayupixel_amp_bits,
+	['!'] = glyph_nayupixel_bang_bits,
+	['?'] = glyph_nayupixel_question_bits,
+	['['] = glyph_nayupixel_lbrace_bits,
+	[']'] = glyph_nayupixel_rbrace_bits,
+	['%'] = glyph_nayupixel_percent_bits,
+	['('] = glyph_nayupixel_lpar_bits,
+	[')'] = glyph_nayupixel_rpar_bits,
+	['#'] = glyph_nayupixel_hash_bits,
+	['A'] = glyph_nayupixel_A_bits,
+	['B'] = glyph_nayupixel_B_bits,
+	['C'] = glyph_nayupixel_C_bits,
+	['D'] = glyph_nayupixel_D_bits,
+	['E'] = glyph_nayupixel_E_bits,
+	['F'] = glyph_nayupixel_F_bits,
+	['G'] = glyph_nayupixel_G_bits,
+	['H'] = glyph_nayupixel_H_bits,
+	['I'] = glyph_nayupixel_I_bits,
+	['J'] = glyph_nayupixel_J_bits,
+	['K'] = glyph_nayupixel_K_bits,
+	['L'] = glyph_nayupixel_L_bits,
+	['M'] = glyph_nayupixel_M_bits,
+	['N'] = glyph_nayupixel_N_bits,
+	['O'] = glyph_nayupixel_O_bits,
+	['P'] = glyph_nayupixel_P_bits,
+	['Q'] = glyph_nayupixel_Q_bits,
+	['R'] = glyph_nayupixel_R_bits,
+	['S'] = glyph_nayupixel_S_bits,
+	['T'] = glyph_nayupixel_T_bits,
+	['U'] = glyph_nayupixel_U_bits,
+	['V'] = glyph_nayupixel_V_bits,
+	['W'] = glyph_nayupixel_W_bits,
+	['X'] = glyph_nayupixel_X_bits,
+	['Y'] = glyph_nayupixel_Y_bits,
+	['Z'] = glyph_nayupixel_Z_bits,
+	['0'] = glyph_nayupixel_0_bits,
+	['1'] = glyph_nayupixel_1_bits,
+	['2'] = glyph_nayupixel_2_bits,
+	['3'] = glyph_nayupixel_3_bits,
+	['4'] = glyph_nayupixel_4_bits,
+	['5'] = glyph_nayupixel_5_bits,
+	['6'] = glyph_nayupixel_6_bits,
+	['7'] = glyph_nayupixel_7_bits,
+	['8'] = glyph_nayupixel_8_bits,
+	['9'] = glyph_nayupixel_9_bits,
+};
+const font_t font_nayupixel = {
+	.height = 10,
+	.glyphs = nayupixel_glyphs,
+};
