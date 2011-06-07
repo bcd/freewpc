@@ -62,7 +62,3 @@ FON_OBJS += $(if $(CONFIG_FON_ANTIQUA), fonts/free/antiqua.o)
 FON_OBJS += $(if $(CONFIG_FON_CELTICBIT8), fonts/free/celticbit8.o)
 FON_OBJS += $(if $(CONFIG_FON_SUPERCAR9), fonts/free/supercar9.o)
 FON_OBJS += $(if $(CONFIG_FON_RENEW8), fonts/free/renew8.o)
-<<<<<<< HEAD
-=======
-
->>>>>>> 2a346c7... Fonts: adding a nice 8 pixel heigh variable with font
