@@ -452,6 +452,10 @@ void switch_sched_task (void)
 	if (swinfo->fn)
 		callset_pointer_invoke (swinfo->fn);
 
+	/* Declare this as a hardware event that affects the random number
+	generator. */
+	random_hw_event ();
+
 	/* If a switch is marked SW_PLAYFIELD and we're in a game,
 	 * then call the global playfield switch handler and check for
 	 * valid playfield.  Also, reset the ball search timer so that
