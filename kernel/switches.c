@@ -146,51 +146,37 @@ void switch_short_detect (void)
 /* Before any switch data can be accessed on a WPC-S
  * or WPC95 machine, we need to poll the PIC and see
  * if the unlock code must be sent to it.   On pre-
- * security games, this function is a no-op. */
-void pic_rtt (void)
-{
+ * security games, this is not necessary.
+ *
+ * The function is split into two pieces, to eliminate the
+ * need for delaying between writing and reading back.
+ */
 #if (MACHINE_PIC == 1)
-	U8 unlocked;
+void pic_rtt_unlock (void)
+{
+	/* We need to unlock it again. */
+	extern U8 pic_unlock_code[3];
 
-	/* Until initialization is complete, the PIC is not ready
-	to receive unlock commands. */
-	if (sys_init_complete == 0)
-		return;
-
-	/* Read the status to see if the matrix is still unlocked. */
-	wpc_write_pic (WPC_PIC_COUNTER);
+	/* The unlock sequence is four bytes long, but we can't
+	write everything without some delay between bytes.
+	The 'null_function' calls are there just to delay for
+	a few tens of cycles.  Although this slows the IRQ down, we
+	can't read switches until this is done, and it happens
+	infrequently, so the overhead is minimal. */
+	wpc_write_pic (WPC_PIC_UNLOCK);
 	null_function ();
 	null_function ();
+	wpc_write_pic (pic_unlock_code[0]);
 	null_function ();
-	unlocked = wpc_read_pic ();
-	if (!unlocked)
-	{
-		/* We need to unlock it again. */
-		extern U8 pic_unlock_code[3];
-		extern bool pic_unlock_ready;
-
-		if (!pic_unlock_ready)
-			return;
-
-		/* The unlock sequence is four bytes long, but we can't
-		write everything without some delay between bytes.
-		The 'null_function' calls are there just to delay for
-		a few tens of cycles. */
-		wpc_write_pic (WPC_PIC_UNLOCK);
-		null_function ();
-		null_function ();
-		wpc_write_pic (pic_unlock_code[0]);
-		null_function ();
-		null_function ();
-		wpc_write_pic (pic_unlock_code[1]);
-		null_function ();
-		null_function ();
-		wpc_write_pic (pic_unlock_code[2]);
-		null_function ();
-		null_function ();
-	}
-#endif /* MACHINE_PIC */
+	null_function ();
+	wpc_write_pic (pic_unlock_code[1]);
+	null_function ();
+	null_function ();
+	wpc_write_pic (pic_unlock_code[2]);
+	null_function ();
+	null_function ();
 }
+#endif
 
 
 #if defined(CONFIG_PLATFORM_WPC) && defined(__m6809__)
