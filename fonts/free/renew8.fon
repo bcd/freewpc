@@ -1,0 +1,256 @@
+/*
+ * Generated from renew.ttf
+ *
+ * tools/fontgen2 renew 8 "-crop 8x10-4-0 -crop 0x0+0+3" > renew8.fon
+ * 
+ * some of the wider letters, M,W,V,X,Y,Z had to be generated using "-crop 9x10-4-0 -crop 0x0+0+3"
+ * and then merged by hand.
+ */
+#include <freewpc.h>
+#define glyph_renew8_period_width 4
+#define glyph_renew8_period_height 7
+static char glyph_renew8_period_bits[] = { glyph_renew8_period_width, glyph_renew8_period_height,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, };
+#define glyph_renew8_dollar_width 4
+#define glyph_renew8_dollar_height 7
+static char glyph_renew8_dollar_bits[] = { glyph_renew8_dollar_width, glyph_renew8_dollar_height,
+  0x0F, 0x05, 0x0F, 0x04, 0x0F, 0x04, 0x00, };
+#define glyph_renew8_comma_width 4
+#define glyph_renew8_comma_height 7
+static char glyph_renew8_comma_bits[] = { glyph_renew8_comma_width, glyph_renew8_comma_height,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, };
+#define glyph_renew8_minus_width 4
+#define glyph_renew8_minus_height 7
+static char glyph_renew8_minus_bits[] = { glyph_renew8_minus_width, glyph_renew8_minus_height,
+  0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x00, };
+#define glyph_renew8_bang_width 4
+#define glyph_renew8_bang_height 7
+static char glyph_renew8_bang_bits[] = { glyph_renew8_bang_width, glyph_renew8_bang_height,
+  0x01, 0x01, 0x01, 0x01, 0x00, 0x01, 0x00, };
+#define glyph_renew8_question_width 4
+#define glyph_renew8_question_height 7
+static char glyph_renew8_question_bits[] = { glyph_renew8_question_width, glyph_renew8_question_height,
+  0x07, 0x04, 0x06, 0x02, 0x00, 0x02, 0x00, };
+#define glyph_renew8_lbrace_width 4
+#define glyph_renew8_lbrace_height 7
+static char glyph_renew8_lbrace_bits[] = { glyph_renew8_lbrace_width, glyph_renew8_lbrace_height,
+  0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03, };
+#define glyph_renew8_rbrace_width 4
+#define glyph_renew8_rbrace_height 7
+static char glyph_renew8_rbrace_bits[] = { glyph_renew8_rbrace_width, glyph_renew8_rbrace_height,
+  0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, };
+#define glyph_renew8_percent_width 4
+#define glyph_renew8_percent_height 7
+static char glyph_renew8_percent_bits[] = { glyph_renew8_percent_width, glyph_renew8_percent_height,
+  0x00, 0x07, 0x05, 0x07, 0x00, 0x00, 0x00, };
+#define glyph_renew8_lpar_width 4
+#define glyph_renew8_lpar_height 7
+static char glyph_renew8_lpar_bits[] = { glyph_renew8_lpar_width, glyph_renew8_lpar_height,
+  0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, };
+#define glyph_renew8_rpar_width 4
+#define glyph_renew8_rpar_height 7
+static char glyph_renew8_rpar_bits[] = { glyph_renew8_rpar_width, glyph_renew8_rpar_height,
+  0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x01, };
+#define glyph_renew8_hash_width 4
+#define glyph_renew8_hash_height 7
+static char glyph_renew8_hash_bits[] = { glyph_renew8_hash_width, glyph_renew8_hash_height,
+  0x0A, 0x0F, 0x0A, 0x0F, 0x0A, 0x00, 0x00, };
+#define glyph_renew8_A_width 4
+#define glyph_renew8_A_height 7
+static char glyph_renew8_A_bits[] = { glyph_renew8_A_width, glyph_renew8_A_height,
+  0x0F, 0x09, 0x0F, 0x09, 0x09, 0x09, 0x00, };
+#define glyph_renew8_B_width 4
+#define glyph_renew8_B_height 7
+static char glyph_renew8_B_bits[] = { glyph_renew8_B_width, glyph_renew8_B_height,
+  0x07, 0x09, 0x0F, 0x09, 0x09, 0x0F, 0x00, };
+#define glyph_renew8_C_width 4
+#define glyph_renew8_C_height 7
+static char glyph_renew8_C_bits[] = { glyph_renew8_C_width, glyph_renew8_C_height,
+  0x0F, 0x01, 0x01, 0x01, 0x01, 0x0F, 0x00, };
+#define glyph_renew8_D_width 4
+#define glyph_renew8_D_height 7
+static char glyph_renew8_D_bits[] = { glyph_renew8_D_width, glyph_renew8_D_height,
+  0x07, 0x09, 0x09, 0x09, 0x09, 0x0F, 0x00, };
+#define glyph_renew8_E_width 4
+#define glyph_renew8_E_height 7
+static char glyph_renew8_E_bits[] = { glyph_renew8_E_width, glyph_renew8_E_height,
+  0x0F, 0x01, 0x07, 0x01, 0x01, 0x0F, 0x00, };
+#define glyph_renew8_F_width 4
+#define glyph_renew8_F_height 7
+static char glyph_renew8_F_bits[] = { glyph_renew8_F_width, glyph_renew8_F_height,
+  0x0F, 0x01, 0x07, 0x01, 0x01, 0x01, 0x00, };
+#define glyph_renew8_G_width 4
+#define glyph_renew8_G_height 7
+static char glyph_renew8_G_bits[] = { glyph_renew8_G_width, glyph_renew8_G_height,
+  0x0F, 0x01, 0x0D, 0x09, 0x09, 0x0F, 0x00, };
+#define glyph_renew8_H_width 4
+#define glyph_renew8_H_height 7
+static char glyph_renew8_H_bits[] = { glyph_renew8_H_width, glyph_renew8_H_height,
+  0x09, 0x09, 0x0F, 0x09, 0x09, 0x09, 0x00, };
+#define glyph_renew8_I_width 4
+#define glyph_renew8_I_height 7
+static char glyph_renew8_I_bits[] = { glyph_renew8_I_width, glyph_renew8_I_height,
+  0x0F, 0x04, 0x04, 0x04, 0x04, 0x0F, 0x00, };
+#define glyph_renew8_J_width 4
+#define glyph_renew8_J_height 7
+static char glyph_renew8_J_bits[] = { glyph_renew8_J_width, glyph_renew8_J_height,
+  0x0F, 0x04, 0x04, 0x04, 0x04, 0x07, 0x00, };
+#define glyph_renew8_K_width 4
+#define glyph_renew8_K_height 7
+static char glyph_renew8_K_bits[] = { glyph_renew8_K_width, glyph_renew8_K_height,
+  0x05, 0x05, 0x0F, 0x09, 0x09, 0x09, 0x00, };
+#define glyph_renew8_L_width 4
+#define glyph_renew8_L_height 7
+static char glyph_renew8_L_bits[] = { glyph_renew8_L_width, glyph_renew8_L_height,
+  0x01, 0x01, 0x01, 0x01, 0x01, 0x0F, 0x00, };
+#define glyph_renew8_M_width 5
+#define glyph_renew8_M_height 7
+static char glyph_renew8_M_bits[] = { glyph_renew8_M_width, glyph_renew8_M_height,
+  0x1F, 0x15, 0x11, 0x11, 0x11, 0x11, 0x00, };
+#define glyph_renew8_N_width 4
+#define glyph_renew8_N_height 7
+static char glyph_renew8_N_bits[] = { glyph_renew8_N_width, glyph_renew8_N_height,
+  0x09, 0x0B, 0x0D, 0x09, 0x09, 0x09, 0x00, };
+#define glyph_renew8_O_width 4
+#define glyph_renew8_O_height 7
+static char glyph_renew8_O_bits[] = { glyph_renew8_O_width, glyph_renew8_O_height,
+  0x0F, 0x09, 0x09, 0x09, 0x09, 0x0F, 0x00, };
+#define glyph_renew8_P_width 4
+#define glyph_renew8_P_height 7
+static char glyph_renew8_P_bits[] = { glyph_renew8_P_width, glyph_renew8_P_height,
+  0x0F, 0x09, 0x0F, 0x01, 0x01, 0x01, 0x00, };
+#define glyph_renew8_Q_width 4
+#define glyph_renew8_Q_height 7
+static char glyph_renew8_Q_bits[] = { glyph_renew8_Q_width, glyph_renew8_Q_height,
+  0x0F, 0x09, 0x09, 0x09, 0x09, 0x0F, 0x04, };
+#define glyph_renew8_R_width 4
+#define glyph_renew8_R_height 7
+static char glyph_renew8_R_bits[] = { glyph_renew8_R_width, glyph_renew8_R_height,
+  0x0F, 0x09, 0x0F, 0x05, 0x05, 0x05, 0x00, };
+#define glyph_renew8_S_width 4
+#define glyph_renew8_S_height 7
+static char glyph_renew8_S_bits[] = { glyph_renew8_S_width, glyph_renew8_S_height,
+  0x0F, 0x01, 0x0F, 0x08, 0x08, 0x0F, 0x00, };
+#define glyph_renew8_T_width 4
+#define glyph_renew8_T_height 7
+static char glyph_renew8_T_bits[] = { glyph_renew8_T_width, glyph_renew8_T_height,
+  0x0F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x00, };
+#define glyph_renew8_U_width 4
+#define glyph_renew8_U_height 7
+static char glyph_renew8_U_bits[] = { glyph_renew8_U_width, glyph_renew8_U_height,
+  0x09, 0x09, 0x09, 0x09, 0x09, 0x0F, 0x00, };
+#define glyph_renew8_V_width 5
+#define glyph_renew8_V_height 7
+static char glyph_renew8_V_bits[] = { glyph_renew8_V_width, glyph_renew8_V_height,
+  0x11, 0x11, 0x11, 0x11, 0x0A, 0x04, 0x00, };
+#define glyph_renew8_W_width 5
+#define glyph_renew8_W_height 7
+static char glyph_renew8_W_bits[] = { glyph_renew8_W_width, glyph_renew8_W_height,
+  0x11, 0x11, 0x11, 0x11, 0x15, 0x1F, 0x00, };
+#define glyph_renew8_X_width 5
+#define glyph_renew8_X_height 7
+static char glyph_renew8_X_bits[] = { glyph_renew8_X_width, glyph_renew8_X_height,
+  0x11, 0x0A, 0x04, 0x04, 0x0A, 0x11, 0x00, };
+#define glyph_renew8_Y_width 5
+#define glyph_renew8_Y_height 7
+static char glyph_renew8_Y_bits[] = { glyph_renew8_Y_width, glyph_renew8_Y_height,
+  0x11, 0x11, 0x1F, 0x04, 0x04, 0x04, 0x00, };
+#define glyph_renew8_Z_width 4
+#define glyph_renew8_Z_height 7
+static char glyph_renew8_Z_bits[] = { glyph_renew8_Z_width, glyph_renew8_Z_height,
+  0x0F, 0x08, 0x04, 0x02, 0x01, 0x0F, 0x00, };
+#define glyph_renew8_0_width 4
+#define glyph_renew8_0_height 7
+static char glyph_renew8_0_bits[] = { glyph_renew8_0_width, glyph_renew8_0_height,
+  0x00, 0x07, 0x05, 0x05, 0x05, 0x07, 0x00, };
+#define glyph_renew8_1_width 4
+#define glyph_renew8_1_height 7
+static char glyph_renew8_1_bits[] = { glyph_renew8_1_width, glyph_renew8_1_height,
+  0x00, 0x02, 0x03, 0x02, 0x02, 0x02, 0x00, };
+#define glyph_renew8_2_width 4
+#define glyph_renew8_2_height 7
+static char glyph_renew8_2_bits[] = { glyph_renew8_2_width, glyph_renew8_2_height,
+  0x00, 0x07, 0x04, 0x02, 0x01, 0x07, 0x00, };
+#define glyph_renew8_3_width 4
+#define glyph_renew8_3_height 7
+static char glyph_renew8_3_bits[] = { glyph_renew8_3_width, glyph_renew8_3_height,
+  0x00, 0x07, 0x04, 0x06, 0x04, 0x07, 0x00, };
+#define glyph_renew8_4_width 4
+#define glyph_renew8_4_height 7
+static char glyph_renew8_4_bits[] = { glyph_renew8_4_width, glyph_renew8_4_height,
+  0x00, 0x05, 0x05, 0x07, 0x04, 0x04, 0x00, };
+#define glyph_renew8_5_width 4
+#define glyph_renew8_5_height 7
+static char glyph_renew8_5_bits[] = { glyph_renew8_5_width, glyph_renew8_5_height,
+  0x00, 0x07, 0x01, 0x07, 0x04, 0x03, 0x00, };
+#define glyph_renew8_6_width 4
+#define glyph_renew8_6_height 7
+static char glyph_renew8_6_bits[] = { glyph_renew8_6_width, glyph_renew8_6_height,
+  0x00, 0x07, 0x01, 0x07, 0x05, 0x07, 0x00, };
+#define glyph_renew8_7_width 4
+#define glyph_renew8_7_height 7
+static char glyph_renew8_7_bits[] = { glyph_renew8_7_width, glyph_renew8_7_height,
+  0x00, 0x07, 0x04, 0x04, 0x04, 0x04, 0x00, };
+#define glyph_renew8_8_width 4
+#define glyph_renew8_8_height 7
+static char glyph_renew8_8_bits[] = { glyph_renew8_8_width, glyph_renew8_8_height,
+  0x00, 0x07, 0x05, 0x07, 0x05, 0x07, 0x00, };
+#define glyph_renew8_9_width 4
+#define glyph_renew8_9_height 7
+static char glyph_renew8_9_bits[] = { glyph_renew8_9_width, glyph_renew8_9_height,
+  0x00, 0x07, 0x05, 0x07, 0x04, 0x04, 0x00, };
+static char *renew8_glyphs[] = {
+	['.'] = glyph_renew8_period_bits,
+	['$'] = glyph_renew8_dollar_bits,
+	[','] = glyph_renew8_comma_bits,
+	['-'] = glyph_renew8_minus_bits,
+	['!'] = glyph_renew8_bang_bits,
+	['?'] = glyph_renew8_question_bits,
+	['['] = glyph_renew8_lbrace_bits,
+	[']'] = glyph_renew8_rbrace_bits,
+	['%'] = glyph_renew8_percent_bits,
+	['('] = glyph_renew8_lpar_bits,
+	[')'] = glyph_renew8_rpar_bits,
+	['#'] = glyph_renew8_hash_bits,
+	['A'] = glyph_renew8_A_bits,
+	['B'] = glyph_renew8_B_bits,
+	['C'] = glyph_renew8_C_bits,
+	['D'] = glyph_renew8_D_bits,
+	['E'] = glyph_renew8_E_bits,
+	['F'] = glyph_renew8_F_bits,
+	['G'] = glyph_renew8_G_bits,
+	['H'] = glyph_renew8_H_bits,
+	['I'] = glyph_renew8_I_bits,
+	['J'] = glyph_renew8_J_bits,
+	['K'] = glyph_renew8_K_bits,
+	['L'] = glyph_renew8_L_bits,
+	['M'] = glyph_renew8_M_bits,
+	['N'] = glyph_renew8_N_bits,
+	['O'] = glyph_renew8_O_bits,
+	['P'] = glyph_renew8_P_bits,
+	['Q'] = glyph_renew8_Q_bits,
+	['R'] = glyph_renew8_R_bits,
+	['S'] = glyph_renew8_S_bits,
+	['T'] = glyph_renew8_T_bits,
+	['U'] = glyph_renew8_U_bits,
+	['V'] = glyph_renew8_V_bits,
+	['W'] = glyph_renew8_W_bits,
+	['X'] = glyph_renew8_X_bits,
+	['Y'] = glyph_renew8_Y_bits,
+	['Z'] = glyph_renew8_Z_bits,
+	['0'] = glyph_renew8_0_bits,
+	['1'] = glyph_renew8_1_bits,
+	['2'] = glyph_renew8_2_bits,
+	['3'] = glyph_renew8_3_bits,
+	['4'] = glyph_renew8_4_bits,
+	['5'] = glyph_renew8_5_bits,
+	['6'] = glyph_renew8_6_bits,
+	['7'] = glyph_renew8_7_bits,
+	['8'] = glyph_renew8_8_bits,
+	['9'] = glyph_renew8_9_bits,
+};
+const font_t font_renew8 = {
+	.spacing = 1,
+	.height = 8,
+	.glyphs = renew8_glyphs,
+};
