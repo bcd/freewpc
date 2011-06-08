@@ -95,13 +95,12 @@ void pb_detect_deff (void)
 			dmd_clean_page_low ();
 			if (on)
 			{
-				//font_render_string_center (&font_var5, 64, 26, "POWERBALL");
-				font_render_string_center (&font_var5, 64, 16, "POWERBALL");
+				font_render_string_center (&font_fixed6, 64, 16, "POWERBALL");
 				on = FALSE;
 			}
 			else
 			{
-				font_render_string_center (&font_fixed6, 64, 16, "POWERBALL");
+				font_render_string_center (&font_fireball, 64, 16, "POWERBALL");
 				on = TRUE;
 			}
 			dmd_text_outline ();

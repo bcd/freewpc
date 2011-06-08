@@ -56,7 +56,7 @@ void tilt_warning_leff (void)
 void tilt_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_cu17, 64, 13, "TILT");
+	font_render_string_center (&font_fixed10, 64, 13, "TILT");
 	dmd_show_low ();
 	for (;;)
 		task_sleep_sec (10);

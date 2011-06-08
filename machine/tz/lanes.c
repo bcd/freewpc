@@ -32,14 +32,14 @@ void rollover_completed_deff (void)
 	dmd_alloc_low_clean ();
 	if (rollover_count % 4 == 0)
 	{
-		font_render_string_center (&font_fixed6, 64, 8, "CAMERA");
-		font_render_string_center (&font_fixed6, 64, 18, "LIT");
+		font_render_string_center (&font_cowboy, 64, 8, "CAMERA");
+		font_render_string_center (&font_cowboy, 64, 18, "LIT");
 		sound_send (SND_CAMERA_PICTURE_EJECT_2);
 	}
 	else
 	{
-		font_render_string_center (&font_fixed6, 64, 8, "ROLLOVER");
-		font_render_string_center (&font_fixed6, 64, 18, "COMPLETED");
+		font_render_string_center (&font_quadrit, 64, 8, "ROLLOVER");
+		font_render_string_center (&font_quadrit, 64, 18, "COMPLETED");
 		sound_send (SND_GLASS_BREAKS);
 	}
 	dmd_show_low ();

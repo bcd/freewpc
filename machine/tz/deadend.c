@@ -31,8 +31,8 @@ void inlane_lights_dead_end_deff (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_sched_transition (&trans_scroll_right);	
-	font_render_string_center (&font_fixed6, 64, 6, "RIGHT INLANE");
-	font_render_string_center (&font_fixed6, 64, 22, "LIGHTS DEAD END");
+	font_render_string_center (&font_quadrit, 64, 6, "RIGHT INLANE");
+	font_render_string_center (&font_quadrit, 64, 22, "LIGHTS DEAD END");
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();

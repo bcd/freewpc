@@ -174,14 +174,16 @@ void mpf_mode_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_var5, 64, 5, "BATTLE THE POWER");
+			font_render_string_center (&font_bitcube, 64, 5, "BATTLE THE POWER");
 			sprintf ("%d,000,000", (mpf_award * mpf_level));
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-			sprintf ("SHOOT TOP HOLE TO COLLECT");
-			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+			font_render_string_center (&font_antiqua, 64, 14, sprintf_buffer);
+			//sprintf ("SHOOT TOP HOLE TO COLLECT");
+			//font_render_string_center (&font_var5, 64, 4, sprintf_buffer);
 			sprintf ("%d", mpf_timer);
-			font_render_string (&font_var5, 2, 2, sprintf_buffer);
-			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			font_render_string (&font_var5, 13, 24, sprintf_buffer);
+			font_render_string_right (&font_var5, 115, 24, sprintf_buffer);
+			sprintf ("LEVEL %d", mpf_level - 1);
+			font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 			dmd_text_outline ();
 
 			dmd_alloc_pair ();
@@ -207,7 +209,7 @@ void mpf_award_deff (void)
 		if (fno > 4)
 		{
 			sprintf ("%d,000,000", (mpf_award * mpf_level));
-			font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+			font_render_string_center (&font_quadrit, 64, 10, sprintf_buffer);
 			font_render_string_center (&font_var5, 64, 20, "AND SPOT DOOR PANEL");
 		}
 		dmd_text_outline ();
@@ -219,7 +221,7 @@ void mpf_award_deff (void)
 	}
 	dmd_alloc_pair_clean ();
 	sprintf ("%d,000,000", (mpf_award * mpf_level));
-	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 10, sprintf_buffer);
 	font_render_string_center (&font_var5, 64, 20, "AND SPOT DOOR PANEL");
 	dmd_copy_low_to_high ();
 	dmd_show2 ();

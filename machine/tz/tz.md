@@ -635,10 +635,10 @@ Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D
 Inlane lights Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Left ramp lights camera: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_RESTARTABLE+D_TIMEOUT
 Shoot Hitch: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
-TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
-Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
-Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
-Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
+#TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
+#Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
+#Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
+#Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 
 Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED+D_PAUSE
 Select mode: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
@@ -703,11 +703,11 @@ Camera Award: page(MACHINE2_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 
 Rules: page(MACHINE3_PAGE), PRI_EGG1
 
-Pinwheel: page(MACHINE_PAGE), PRI_GAME_QUICK3
+#Pinwheel: page(MACHINE_PAGE), PRI_GAME_QUICK3
 Snake: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
 Snake Ready: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
 Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
-Explosion: page(MACHINE_PAGE), PRI_EGG1
+#Explosion: page(MACHINE_PAGE), PRI_EGG1
 
 Paused: page(MACHINE2_PAGE), PRI_STATUS, D_PAUSE+D_QUEUED
 Alarm: page(MACHINE2_PAGE), PRI_SLAMTILT, D_PAUSE+D_QUEUED
@@ -772,9 +772,17 @@ Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 # Fonts used in this game.
 ##########################################################################
 [fonts]
-times10:
-twizone:
+#times10:
 steel:
+quadrit:
+cowboy:
+fipps:
+bitoutline:
+bitcube:
+fireball:
+#nayupixel:
+#abstract:
+antiqua:
 
 [timers]
 Rocket Flipper:

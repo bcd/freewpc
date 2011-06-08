@@ -63,7 +63,7 @@ struct timed_mode_ops tsm_mode = {
 
 struct progress_bar_ops jets_progress_bar = {
 	.x = 8,
-	.y = 26,
+	.y = 27,
 	.fill_level = &jets_scored,
 	.max_level = &jets_for_bonus,
 	.bar_width = 106,
@@ -215,9 +215,9 @@ void jets_hit_deff (void)
 		dmd_clean_page_low ();
 
 		psprintf ("1 HIT", "%d HITS", jets_scored);
-		font_render_string_center (&font_fixed6, 62 + x, 7 + y, sprintf_buffer);
-		sprintf ("%d FOR LEVEL %d", (jets_for_bonus - jets_scored), jets_bonus_level + 1);
-		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+		font_render_string_center (&font_fireball, 62 + x, 8 + y, sprintf_buffer);
+		sprintf ("TOWNSQUARE LEVEL %d", jets_bonus_level + 1);
+		font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
@@ -233,9 +233,9 @@ void jets_hit_deff (void)
 		dmd_alloc_pair_clean ();
 		dmd_clean_page_low ();
 		psprintf ("1 HIT", "%d HITS", jets_scored);
-		font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
-		sprintf ("%d FOR LEVEL %d", (jets_for_bonus - jets_scored), jets_bonus_level + 1);
-		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+		font_render_string_center (&font_fireball, 64, 10, sprintf_buffer);
+		sprintf ("TOWNSQUARE LEVEL %d", jets_bonus_level + 1);
+		font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
 		/* Copy to the high page so it doesn't look dark */
 		dmd_copy_low_to_high ();
 		callset_invoke (score_overlay);
@@ -263,7 +263,7 @@ void jets_level_up_deff (void)
 			/* We don't use scoreget as it's likely another score
 			 * has been awarded */
 			sprintf("%d MILLION", jetscore);
-			font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+			font_render_string_center (&font_fireball, 64, 20, sprintf_buffer);
 		}
 		dmd_text_outline ();
 		dmd_alloc_pair ();
@@ -281,7 +281,7 @@ void jets_level_up_deff (void)
 		/* We don't use scoreget as it's likely another score
 		 * has been awarded */
 		sprintf("%d MILLION", jetscore);
-		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+		font_render_string_center (&font_fireball, 64, 20, sprintf_buffer);
 		dmd_copy_low_to_high ();
 		callset_invoke (score_overlay);
 		dmd_show2 ();	

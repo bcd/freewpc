@@ -56,12 +56,12 @@ void hurryup_mode_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_fixed10, 64, 8, "HURRY UP");
+			font_render_string_center (&font_fireball, 64, 8, "HURRY UP");
 			sprintf_score (hurryup_score);
-			font_render_string_center (&font_fixed6, 64, 19, sprintf_buffer);
+			font_render_string_center (&font_fixed6, 64, 20, sprintf_buffer);
 			if (on)
 			{
-				font_render_string_center (&font_var5, 64, 28, "SHOOT POWER PAYOFF");
+				font_render_string_center (&font_var5, 64, 29, "SHOOT POWER PAYOFF");
 				on = FALSE;
 			}
 			else
@@ -81,19 +81,19 @@ void hurryup_mode_deff (void)
 
 void hurryup_awarded_deff (void)
 {
-	dmd_alloc_pair_clean ();
 	U16 fno;
 	sound_send (SND_CLOCK_CHAOS_END_BOOM);
 	for (fno = IMG_EXPLODE_START; fno <= IMG_EXPLODE_END; fno += 2)
 	{
+		dmd_alloc_pair_clean ();
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 		
 		if (fno > 4)
 		{
-			font_render_string_center (&font_var5, 64, 5, "HURRY UP AWARDED");
+			font_render_string_center (&font_fireball, 64, 8, "HURRY UP");
 			sprintf_score (hurryup_score);
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_quadrit, 64, 24, sprintf_buffer);
 		}
 		dmd_text_outline ();
 		dmd_alloc_pair ();
@@ -103,9 +103,10 @@ void hurryup_awarded_deff (void)
 		task_sleep (TIME_33MS);
 	}
 	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_var5, 64, 5, "HURRY UP AWARDED");
+
+	font_render_string_center (&font_fireball, 64, 8, "HURRY UP");
 	sprintf_score (hurryup_score);
-	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 24, sprintf_buffer);
 	dmd_copy_low_to_high ();
 	dmd_show2 ();
 	task_sleep_sec (2);

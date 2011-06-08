@@ -66,7 +66,7 @@ static inline void left_ramp_speech_subtask (void)
 static void left_ramp_deff_subtask (void)
 {
 	psprintf ("1 LEFT RAMP", "%d LEFT RAMPS", left_ramps);
-	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
+	font_render_string_center (&font_bitoutline, 64, 7, sprintf_buffer);
 
 	if (left_ramps < 3)
 		sprintf ("CAMERA AT 3");
@@ -109,7 +109,7 @@ void left_ramp_deff (void)
 	{
 		dmd_alloc_pair_clean ();
 		left_ramp_deff_subtask ();
-		font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 23, sprintf_buffer);
 		dmd_copy_low_to_high ();
 		callset_invoke (score_overlay);
 		dmd_show2 ();

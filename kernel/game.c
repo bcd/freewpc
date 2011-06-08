@@ -403,7 +403,7 @@ void end_ball (void)
 		}
 	}
 
-	if (system_config.lowest_goes_next == YES)
+	if (system_config.lowest_goes_next == YES && num_players != 1)
 	{
 		/* Search through the lowest scores and check that 
 		 * each player has played all their balls

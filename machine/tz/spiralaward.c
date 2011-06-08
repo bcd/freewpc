@@ -64,8 +64,8 @@ static void write_spiralaward_text (void)
 {
 	if (spiralawards_collected < 6)
 	{
-		font_render_string_center (&font_var5, 64, 20, spiralaward_names[spiralaward]);
-		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL AWARD");
+		font_render_string_center (&font_quadrit, 64, 20, spiralaward_names[spiralaward]);
+		font_render_string_center (&font_bitcube, 64, 7, "SPIRAL AWARD");
 	}
 	else 
 	{
@@ -174,10 +174,13 @@ static void award_spiralaward (void)
 			break;
 		case 4:
 			sound_send (SND_TEN_MILLION_POINTS);
-			/* Light the 10M door panel */
-			lamp_on (LM_PANEL_10M);
-			door_panels_started++;
 			score (SC_10M);
+			/* Light the 10M door panel */
+			if (!lamp_test (LM_PANEL_10M))
+			{
+				lamp_on (LM_PANEL_10M);
+				door_panels_started++;
+			}
 			break;
 		case 5:
 			sound_send (SND_GET_THE_EXTRA_BALL);

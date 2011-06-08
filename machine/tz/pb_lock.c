@@ -37,8 +37,7 @@ void lock_powerball_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_fixed10, 64, 6, "LOCK BALL");
-			font_render_string_center (&font_mono5, 64, 17, "USE FLIPPER BUTTONS");
+			font_render_string_center (&font_fireball, 64, 9, "LOCK BALL");
 			font_render_string_left (&font_var5, 10, 24, "LEFT: NO");
 			font_render_string_right (&font_var5, 118, 24, "RIGHT: YES");
 			dmd_text_outline ();

@@ -158,7 +158,7 @@ void door_advance_flashing (void)
 			new_door_index++;
 			if (new_door_index >= NUM_DOOR_PANELS)
 				new_door_index = 0;
-		} while (lamp_test (door_get_lamp (new_door_index) && door_panels_started < NUM_DOOR_PANELS));
+		} while (lamp_test (door_get_lamp (new_door_index)));
 	}
 	else
 		/* Light the door handle */
@@ -284,7 +284,7 @@ void door_award_deff (void)
 	{
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
+		font_render_string_center (&font_fireball, 48, 9, "SHOOT");
 		if (on)
 		{
 			font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
@@ -304,7 +304,7 @@ void door_award_deff (void)
 	while (task_find_gid (GID_DOOR_DEFF))
 	{
 		dmd_alloc_pair_clean ();
-		font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
+		font_render_string_center (&font_fireball, 48, 9, "SHOOT");
 		font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
 		dmd_copy_low_to_high ();
 		callset_invoke (score_overlay);

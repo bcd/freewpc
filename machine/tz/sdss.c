@@ -56,13 +56,22 @@ static void flash_text_deff (U8 flash_count, task_ticks_t flash_delay)
 {
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_fireball, 64, 16, sprintf_buffer);
 	dmd_show_low ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
 	deff_swap_low_high (flash_count, flash_delay);
 }
-
+static void flash_score_deff (U8 flash_count, task_ticks_t flash_delay)
+{
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
+	dmd_show_low ();
+	dmd_copy_low_to_high ();
+	dmd_invert_page (dmd_low_buffer);
+	deff_swap_low_high (flash_count, flash_delay);
+}
 void sdss_ready_deff (void)
 {
 	sound_send (SND_SUPER_SKILL);
@@ -103,7 +112,7 @@ void usdss_awarded_deff (void)
 	
 	sprintf_score (sdss_score);
 	sound_send (SND_EXPLOSION_2);
-	flash_text_deff (10, TIME_200MS);
+	flash_score_deff (10, TIME_200MS);
 	deff_exit ();
 }
 
@@ -121,7 +130,7 @@ void sdss_awarded_deff (void)
 	
 	sound_send (SND_EXPLOSION_2);
 	sprintf_score (sdss_score);
-	flash_text_deff (10, TIME_200MS);
+	flash_score_deff (10, TIME_200MS);
 	deff_exit ();
 }
 
@@ -212,6 +221,7 @@ static bool sdss_ready_to_enable (void)
 {
 	if (skill_shot_enabled && !task_find_gid (GID_SKILL_SWITCH_TRIGGER) 
 		&& !sdss_enabled
+		&& in_live_game
 		&& !task_find_gid (GID_SDSS_LEFT_BUTTON))
 		return TRUE;
 	else

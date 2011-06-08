@@ -43,51 +43,53 @@ bool sssmb_can_divert_to_plunger (void)
 
 void sssmb_running_deff (void)
 {
+	U16 fno;
 	for (;;)
 	{
-		score_update_start ();
-		dmd_alloc_pair ();
-		dmd_clean_page_low ();
 
-		font_render_string_center (&font_term6, 64, 4, "SKILL MULTIBALL");
+		for (fno = IMG_BOLT_TESLA_START; fno <= IMG_BOLT_TESLA_END; fno += 2)
+		{
+			dmd_alloc_pair_clean ();
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
 
-		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-
-		dmd_copy_low_to_high ();
-
-		if (timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
-		{
-			sprintf ("SKILL SHOT SCORES JACKPOT");
-		}
-		else if (sssmb_ramps_to_divert == 0)
-		{
-			sprintf ("SHOOT LEFT RAMP NOW");
-		}
-		else if (sssmb_ramps_to_divert == 1)
-		{
-			sprintf ("1 RAMP FOR SKILL SHOT");
-		}
-		else
-		{
-			sprintf ("%d RAMPS FOR SKILL SHOT", sssmb_ramps_to_divert);
-		}
-		font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
-
-		dmd_show_low ();
-		while (!score_update_required ())
-		{
+			font_render_string_left (&font_bitoutline, 1, 1, "SKILL");
+			font_render_string_left (&font_quadrit, 52, 2, "MULTIBALL");
+			sprintf_current_score ();
+			font_render_string_center (&font_cowboy, 64, 16, sprintf_buffer);
+	
+			if (timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
+			{
+				sprintf ("SKILL SHOT SCORES JACKPOT");
+			}
+			else if (sssmb_ramps_to_divert == 0)
+			{
+				sprintf ("SHOOT LEFT RAMP NOW");
+				}
+			else if (sssmb_ramps_to_divert == 1)
+			{
+				sprintf ("1 RAMP FOR SKILL SHOT");
+			}
+			else
+			{
+				sprintf ("%d RAMPS FOR SKILL SHOT", sssmb_ramps_to_divert);
+			}
+			font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
 			task_sleep (TIME_66MS);
-			dmd_show_other ();
-		}
+		}	
 	}
 }
 
 void sssmb_jackpot_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 9, "GET THE");
-	font_render_string_center (&font_fixed10, 64, 22, "JACKPOT");
+	font_render_string_center (&font_quadrit, 64, 9, "GET THE");
+	font_render_string_center (&font_fireball, 64, 22, "JACKPOT");
 	dmd_show_low ();
 	sound_send (SND_SPIRAL_EB_LIT);
 	task_sleep_sec (2);

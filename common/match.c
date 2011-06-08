@@ -51,15 +51,23 @@ static void
 match_draw_scores (void)
 {
 	U8 n;
-
+	//TODO Dim any scores that aren't a winner
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_right (&font_fixed6, 126, 1, "MATCH");
 
 	for (n = 0; n < num_players; n++)
 	{
-		sprintf ("%2b", &scores[n][BYTES_PER_SCORE-1]);
-		font_render_string_left (&font_mono5, 0, 6*n, sprintf_buffer);
+		if (n < 5)
+		{
+			sprintf ("%2b", &scores[n][BYTES_PER_SCORE-1]);
+			font_render_string_left (&font_mono5, 0, 6*n, sprintf_buffer);
+		}
+		else if (n == 5)
+		{	/* Put player 6's score over to the right*/
+			sprintf ("%2b", &scores[n][BYTES_PER_SCORE-1]);
+			font_render_string_left (&font_mono5, 11, 1, sprintf_buffer);
+		}
 	}
 }
 

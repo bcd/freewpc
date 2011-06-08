@@ -1,12 +1,14 @@
 IMG_CITY: machine/tz/images/city.pgm
-IMG_EINSTEIN: images/einstein.pgm
-IMG_EINSTEIN2: images/einstein.pgm
 IMG_BCD: images/bcd.pgm
 IMG_SONNY_JIM: images/sonny_jim.pgm
 IMG_NEWCAR: !machine/tz/images/newcar.pgm
 IMG_BIRTHDAY: machine/tz/images/birthday.pgm
 IMG_SHARPE: machine/tz/images/sharpe.pgm
 
+IMG_ROCKET_LOAD_START: machine/tz/animation/rocket/rocketa.pgm
+machine/tz/animation/rocket/rocketb.pgm
+machine/tz/animation/rocket/rocketc.pgm
+IMG_ROCKET_LOAD_END: machine/tz/animation/rocket/rocketd.pgm
 
 IMG_BALLEXPLODE_START: machine/tz/animation/ballexplode/ballexplode03.pgm
 machine/tz/animation/ballexplode/ballexplode04.pgm
@@ -170,33 +172,35 @@ machine/tz/animation/explode/frame_0008.pgm
 machine/tz/animation/explode/frame_0009.pgm
 IMG_EXPLODE_END: machine/tz/animation/explode/frame_0010.pgm
 
+#I need these as 'padding' so they get compressed but never shown
+#This is due to a bug in the image codec
 IMG_CLOCK_START: !machine/tz/animation/clock/frame_0001.pgm
-!machine/tz/animation/clock/frame_0002.pgm
-#!machine/tz/animation/clock/frame_0003.pgm
-!machine/tz/animation/clock/frame_0004.pgm
-#!machine/tz/animation/clock/frame_0005.pgm
-!machine/tz/animation/clock/frame_0006.pgm
-#!machine/tz/animation/clock/frame_0007.pgm
-!machine/tz/animation/clock/frame_0008.pgm
-#!machine/tz/animation/clock/frame_0009.pgm
-!machine/tz/animation/clock/frame_0010.pgm
-#!machine/tz/animation/clock/frame_0011.pgm
-!machine/tz/animation/clock/frame_0012.pgm
-#!machine/tz/animation/clock/frame_0013.pgm
-!machine/tz/animation/clock/frame_0014.pgm
-#!machine/tz/animation/clock/frame_0015.pgm
-!machine/tz/animation/clock/frame_0016.pgm
-#!machine/tz/animation/clock/frame_0017.pgm
-!machine/tz/animation/clock/frame_0018.pgm
-#!machine/tz/animation/clock/frame_0019.pgm
-!machine/tz/animation/clock/frame_0020.pgm
-#!machine/tz/animation/clock/frame_0021.pgm
-!machine/tz/animation/clock/frame_0022.pgm
-#!machine/tz/animation/clock/frame_0023.pgm
-!machine/tz/animation/clock/frame_0024.pgm
-#!machine/tz/animation/clock/frame_0025.pgm
-!machine/tz/animation/clock/frame_0026.pgm
-#!machine/tz/animation/clock/frame_0027.pgm
+#!machine/tz/animation/clock/frame_0002.pgm
+!machine/tz/animation/clock/frame_0003.pgm
+#!machine/tz/animation/clock/frame_0004.pgm
+!machine/tz/animation/clock/frame_0005.pgm
+#!machine/tz/animation/clock/frame_0006.pgm
+!machine/tz/animation/clock/frame_0007.pgm
+#!machine/tz/animation/clock/frame_0008.pgm
+!machine/tz/animation/clock/frame_0009.pgm
+#!machine/tz/animation/clock/frame_0010.pgm
+!machine/tz/animation/clock/frame_0011.pgm
+#!machine/tz/animation/clock/frame_0012.pgm
+!machine/tz/animation/clock/frame_0013.pgm
+#!machine/tz/animation/clock/frame_0014.pgm
+!machine/tz/animation/clock/frame_0015.pgm
+#!machine/tz/animation/clock/frame_0016.pgm
+!machine/tz/animation/clock/frame_0017.pgm
+#!machine/tz/animation/clock/frame_0018.pgm
+!machine/tz/animation/clock/frame_0019.pgm
+#!machine/tz/animation/clock/frame_0020.pgm
+!machine/tz/animation/clock/frame_0021.pgm
+#!machine/tz/animation/clock/frame_0022.pgm
+!machine/tz/animation/clock/frame_0023.pgm
+#!machine/tz/animation/clock/frame_0024.pgm
+!machine/tz/animation/clock/frame_0025.pgm
+#!machine/tz/animation/clock/frame_0026.pgm
+!machine/tz/animation/clock/frame_0027.pgm
 IMG_CLOCK_END: !machine/tz/animation/clock/frame_0028.pgm
 
 IMG_SNAKE_START: !machine/tz/animation/snake/frame_0001.pgm
@@ -225,6 +229,7 @@ machine/tz/animation/greed/frame_0005.pgm
 machine/tz/animation/greed/frame_0006.pgm
 machine/tz/animation/greed/frame_0007.pgm
 IMG_GREED_END: machine/tz/animation/greed/frame_0008.pgm
+
 
 IMG_NEWROCKET_START: machine/tz/animation/rocket/newrocket01.pgm
 machine/tz/animation/rocket/newrocket02.pgm
@@ -255,46 +260,46 @@ machine/tz/animation/jackpot/jackpot13.pgm
 machine/tz/animation/jackpot/jackpot14.pgm
 IMG_JACKPOT_END: machine/tz/animation/jackpot/jackpot15.pgm
 
-#IMG_BTTZMELT_START: !machine/tz/animation/bttzmelt/bttzmelt_001.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_002.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_003.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_004.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_005.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_006.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_007.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_008.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_009.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_010.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_011.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_012.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_013.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_014.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_015.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_016.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_017.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_018.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_019.pgm
-#IMG_BTTZMELT_MIDDLE: !machine/tz/animation/bttzmelt/bttzmelt_020.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_021.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_022.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_023.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_024.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_025.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_026.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_027.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_028.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_029.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_030.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_031.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_032.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_033.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_034.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_035.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_036.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_037.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_038.pgm
-#!machine/tz/animation/bttzmelt/bttzmelt_039.pgm
-#IMG_BTTZMELT_END: !machine/tz/animation/bttzmelt/bttzmelt_040.pgm
+IMG_BTTZMELT_START: !machine/tz/animation/bttzmelt/bttzmelt_001.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_002.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_003.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_004.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_005.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_006.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_007.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_008.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_009.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_010.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_011.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_012.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_013.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_014.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_015.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_016.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_017.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_018.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_019.pgm
+IMG_BTTZMELT_MIDDLE: !machine/tz/animation/bttzmelt/bttzmelt_020.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_021.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_022.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_023.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_024.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_025.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_026.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_027.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_028.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_029.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_030.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_031.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_032.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_033.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_034.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_035.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_036.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_037.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_038.pgm
+!machine/tz/animation/bttzmelt/bttzmelt_039.pgm
+IMG_BTTZMELT_END: !machine/tz/animation/bttzmelt/bttzmelt_040.pgm
 
 IMG_REELSTRIP_START: machine/tz/animation/reelstrip/reelstrip_0001.pgm
 machine/tz/animation/reelstrip/reelstrip_0002.pgm
@@ -363,11 +368,6 @@ machine/tz/animation/silverball/frame_0030.pgm
 machine/tz/animation/silverball/frame_0031.pgm
 IMG_SILVERBALL_END: machine/tz/animation/silverball/frame_0032.pgm
 
-
-IMG_ROCKET_LOAD_START: machine/tz/animation/rocket/rocketa.pgm
-machine/tz/animation/rocket/rocketb.pgm
-machine/tz/animation/rocket/rocketc.pgm
-IMG_ROCKET_LOAD_END: machine/tz/animation/rocket/rocketd.pgm
 
 IMG_ARROW_START: machine/tz/animation/arrow/frame_0001.pgm
 #machine/tz/animation/arrow/frame_0002.pgm
@@ -446,5 +446,4 @@ machine/tz/animation/oddchange/frame_0007.pgm
 machine/tz/animation/oddchange/frame_0008.pgm
 machine/tz/animation/oddchange/frame_0009.pgm
 IMG_ODDCHANGE_END: machine/tz/animation/oddchange/frame_0010.pgm
-
 

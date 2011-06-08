@@ -206,7 +206,7 @@ CALLSET_ENTRY (mball, music_refresh)
 void lock_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 16, "LOCK IS LIT");
+	font_render_string_center (&font_fireball, 64, 16, "LOCK IS LIT");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -216,14 +216,16 @@ void mb_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("BALL %d LOCKED", mball_locks_made);
-	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 8, sprintf_buffer);
+	dmd_copy_low_to_high ();
 	if (multiball_ready ())
 	{
-		font_render_string_center (&font_mono5, 64, 20, "SHOOT LEFT RAMP");
-		font_render_string_center (&font_mono5, 64, 26, "FOR MULTIBALL");
+		font_render_string_center (&font_var5, 64, 17, "SHOOT LEFT RAMP FOR");
+		font_render_string_center (&font_fireball, 64, 24, "MULTIBALL");
 	}
-	dmd_show_low ();
-	task_sleep_sec (3);
+	dmd_copy_low_to_high ();
+	dmd_show2 ();
+	task_sleep_sec (4);
 	deff_exit ();
 }
 
@@ -247,11 +249,11 @@ void mb_start_deff (void)
 				j = 0;
 			if (j % 2 != 0)
 			{
-				font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
+				font_render_string_center (&font_fireball, 64, 16, "MULTIBALL");
 			}
 			else if (check_for_midnight ())
 			{
-				font_render_string_center (&font_fixed10, 64, 16, "MIDNIGHT");
+				font_render_string_center (&font_fireball, 64, 16, "MIDNIGHT");
 			}
 			else
 			{
@@ -277,7 +279,7 @@ void jackpot_relit_deff (void)
 {
 	sound_send (0xFD);
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 16, "JACKPOT RELIT");
+	font_render_string_center (&font_fireball, 64, 16, "JACKPOT RELIT");
 	dmd_show_low ();
 	flash_and_exit_deff (50, TIME_100MS);
 }
@@ -309,7 +311,7 @@ void mb_running_deff (void)
 				i = 0;
 			i++;
 			sprintf_current_score ();
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_cowboy, 64, 16, sprintf_buffer);
 			if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 			{
 				sprintf("SHOOT PIANO FOR %dM", (jackpot_level * 10));
@@ -320,13 +322,13 @@ void mb_running_deff (void)
 				font_render_string_center (&font_var5, 64, 27, "SHOOT LOCK TO RELIGHT");
 			}
 			
-			if (i % 2 != 0)
+			if (fno % 4 == 0)
 			{
-				font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
+				font_render_string_center (&font_quadrit, 64, 6, "MULTIBALL");
 			}
 			else if (check_for_midnight ())
 			{
-				font_render_string_center (&font_fixed6, 64, 4, "MIDNIGHT");
+				font_render_string_center (&font_quadrit, 64, 6, "MIDNIGHT");
 			}
 
 			dmd_text_outline ();

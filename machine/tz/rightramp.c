@@ -35,13 +35,13 @@ void shoot_hitch_deff (void)
 	dmd_sched_transition (&trans_scroll_left);	
 	if (hurryup_active ())
 	{
-		font_render_string_center (&font_fixed10, 64, 6, "SHOOT");
-		font_render_string_center (&font_fixed10, 64, 22, "POWER PAYOFF");
+		font_render_string_center (&font_fireball, 64, 8, "SHOOT");
+		font_render_string_center (&font_quadrit, 64, 22, "POWER PAYOFF");
 	}
 	else
 	{
-		font_render_string_center (&font_mono5, 64, 6, "SHOOT HITCHHIKER");
-		font_render_string_center (&font_mono5, 64, 22, "TO UNLOCK POWER");
+		font_render_string_center (&font_quadrit, 64, 6, "SHOOT HITCHHIKER");
+		font_render_string_center (&font_quadrit, 64, 22, "TO UNLOCK POWER");
 	}
 	dmd_show_low ();
 	task_sleep_sec (1);
