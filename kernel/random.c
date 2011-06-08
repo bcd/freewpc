@@ -48,8 +48,7 @@ __permanent__ U16 random_cong_seed;
 /**
  * Return a new random number from 0-255.
  */
-U8
-random (void)
+__attribute__((noinline)) U8 random (void)
 {
 	register U16 r = random_cong_seed * 33 + 1;
 	random_cong_seed = r;
