@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -26,11 +26,17 @@
  * This generator does not satisfy the properties required for a really
  * good generator, but is adequate for what pinball machines need.
  *
- * There are 2 independent components to each random number:
- * 1. a linear congruential component, derived from the relation
+ * It is a linear congruential generator, derived from the relation
  * Xn+1 = (A(Xn) + C) mod M, where A=33, C=1, and M=255.  This is
- * fairly easy to do with shifts and adds.
- * 2. a timing component, based on the number of FIRQs asserted
+ * fairly easy to do with shifts and adds.  This produces a sequence that
+ * has a full period, i.e. it won't repeat until all 65536 values have been
+ * produced.  The most variance is in the upper 8-bits, so that is all that
+ * is returned to the caller.
+ *
+ * To add an element of true randomness, we will periodically drain 1
+ * random number from the sequence according to some external, unpredictable
+ * event.  These events do not need to be frequent, but should sufficiently
+ * vary.
  */
 
 
@@ -45,12 +51,8 @@ __permanent__ U16 random_cong_seed;
 U8
 random (void)
 {
-	register U16 r;
-	extern U8 firq_count;
-
-	r = random_cong_seed * 33 + 1;
+	register U16 r = random_cong_seed * 33 + 1;
 	random_cong_seed = r;
-	r ^= firq_count;
 	return (r >> 8);
 }
 

@@ -20,9 +20,6 @@
 
 #include <freewpc.h>
 
-/** The number of FIRQs asserted */
-__fastram__ U8 firq_count;
-
 
 /**
  * do_firq is the entry point from the FIRQ vector.  This interrupt
@@ -69,7 +66,6 @@ void do_firq (void)
 		/* It is a DMD interrupt. */
 		dmd_rtt ();
 	}
-	firq_count++;
 
 #ifdef __m6809__
 	m6809_firq_restore_regs ();
