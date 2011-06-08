@@ -212,6 +212,31 @@ when a button is first pressed and continually as it is held.
 	} while (0)
 
 
+#if (MACHINE_PIC == 1)
+extern inline void pic_rtt_start (void)
+{
+	/* Write the command to retrieve the unlock counter */
+	wpc_write_pic (WPC_PIC_COUNTER);
+}
+
+extern inline void pic_rtt_finish (void)
+{
+	/* Read back the unlock counter.  If nonzero, nothing
+	to do. */
+	if (likely (wpc_read_pic ()))
+		return;
+
+	/* Stop if the PIC did not initialize correctly. */
+	extern U8 pic_unlock_ready;
+	if (unlikely (!pic_unlock_ready))
+		return;
+
+	/* Unlock is required */
+	VOIDCALL (pic_rtt_unlock);
+}
+#endif /* MACHINE_PIC */
+
+
 void switch_init (void);
 void switch_rtt (void);
 void switch_periodic (void);
@@ -232,6 +257,5 @@ extern bool pic_invalid;
 #else
 #define switch_scanning_ok() TRUE
 #endif
-
 
 #endif /* _SYS_SWITCH_H */

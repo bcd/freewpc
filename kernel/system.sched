@@ -43,11 +43,17 @@ fliptronic_rtt?CONFIG_FLIPTRONIC   4       250c
 # Update the triacs
 triac_rtt?CONFIG_TRIAC 1       60c
 
+# Unlock the PIC if necessary; keep before switch polling
+!pic_rtt_start?CONFIG_PIC    2       6c
+
+# Update the lamps
+lamp_rtt              2       90c
+
+# Finish unlocking the PIC
+!pic_rtt_finish?CONFIG_PIC    2       8c
+
 # Read the regular switch matrix and coin door
 switch_rtt/2          1       280c
-
-# Update the PIC on security games
-pic_rtt?CONFIG_PIC    32      200c  # guess?
 
 # Resynchronize to the AC zero cross point.
 ac_rtt                1       50c
@@ -58,9 +64,6 @@ sol_update_rtt/2      2       60c
 
 # Update one-at-a-time solenoid pulses.
 sol_req_rtt           4       12c
-
-# Update the lamps
-lamp_rtt              2       90c
 
 # Toggle the CPU board LED
 !pinio_active_led_toggle 64   14c
