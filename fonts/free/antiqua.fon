@@ -272,5 +272,6 @@ static char *antiqua_glyphs[] = {
 };
 const font_t font_antiqua = {
 	.height = 12,
+	.spacing = 1,
 	.glyphs = antiqua_glyphs,
 };

@@ -296,5 +296,6 @@ static char *cowboy_glyphs[] = {
 };
 const font_t font_cowboy = {
 	.height = 8,
+	.spacing = 1,
 	.glyphs = cowboy_glyphs,
 };

@@ -275,5 +275,6 @@ static char *quadrit_glyphs[] = {
 };
 const font_t font_quadrit = {
 	.height = 10,
+	.spacing = 1,
 	.glyphs = quadrit_glyphs,
 };

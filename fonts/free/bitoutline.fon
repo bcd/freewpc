@@ -308,5 +308,6 @@ static char *bitoutline_glyphs[] = {
 };
 const font_t font_bitoutline = {
 	.height = 11,
+	.spacing = 1,
 	.glyphs = bitoutline_glyphs,
 };

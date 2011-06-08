@@ -277,5 +277,6 @@ static char *fipps_glyphs[] = {
 };
 const font_t font_fipps = {
 	.height = 8,
+	.spacing = 1,
 	.glyphs = fipps_glyphs,
 };
