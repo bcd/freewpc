@@ -196,7 +196,7 @@ static char *font_8x8_glyphs[] = {
 	[95 - BASECHAR] = glyph_8x8font_95_bits,
 };
 const font_t font_bitmap8 = {
-	.spacing = 2,
+	.spacing = 0,
 	.height = 8,
 	.glyphs = font_8x8_glyphs,
 	.basechar = BASECHAR,

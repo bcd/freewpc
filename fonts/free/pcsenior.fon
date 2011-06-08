@@ -254,6 +254,7 @@ static char *pcsenior_glyphs[] = {
 	['9'] = glyph_pcsenior_9_bits,
 };
 const font_t font_pcsenior = {
+	.spacing = 1,
 	.height = 13,
 	.glyphs = pcsenior_glyphs,
 };
