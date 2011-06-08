@@ -249,6 +249,6 @@ static char *nayupixel10_glyphs[] = {
 };
 const font_t font_nayupixel10 = {
 	.height = 10,
-	.spacing = 1,
+	.spacing = -2,
 	.glyphs = nayupixel10_glyphs,
 };
