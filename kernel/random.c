@@ -43,6 +43,8 @@
 /** The seed for the linear congruential component of the random numbers. */
 __permanent__ U16 random_cong_seed;
 
+/** A count of true random events */
+U8 random_entropy;
 
 
 /**
@@ -67,21 +69,28 @@ random_scaled (U8 N)
 
 
 /**
- * Tweak the random number seed slightly.
+ * Drain entropy from the sequence every second.
+ * The frequency is chosen long because random numbers are not drawn
+ * very often.
  */
-void
-random_reseed (void)
+CALLSET_ENTRY (random, idle_every_second)
 {
-	random_cong_seed++;
+	random_entropy %= 8;
+	while (random_entropy)
+	{
+		(void)random ();
+		random_entropy--;
+	}
 }
 
 
 /**
- * Reseed the random number generator during system idle time.
+ * Assert a random hardware evnt occurred to stir the random
+ * number sequence later.
  */
-CALLSET_ENTRY (random, idle_every_second)
+void random_hw_event (void)
 {
-	random_reseed ();
+	random_entropy++;
 }
 
 
@@ -91,5 +100,6 @@ CALLSET_ENTRY (random, idle_every_second)
 CALLSET_ENTRY (random, init)
 {
 	random_cong_seed = 0x1745;
+	random_entropy = 0;
 }
 
