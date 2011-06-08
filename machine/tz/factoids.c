@@ -69,7 +69,7 @@ void show_random_factoid (void)
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_bitoutline, 64, 8, "RANDOM");
-	font_render_string_center (&font_bitoutline, 64, 18, "RANDOM FACTOID");
+	font_render_string_center (&font_bitoutline, 64, 18, "FACTOID");
 	show_text_on_stars ();
 	
 	dmd_alloc_low_clean ();

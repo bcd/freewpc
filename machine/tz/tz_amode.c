@@ -424,21 +424,21 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	
 	map_and_clean ();
 	font_render_string_center (&font_cowboy, 64, 10, "HYDRA");
-	font_render_string_center (&font_bitcube, 64, 23, "FREEWPC CORVETTE");
+	font_render_string_center (&font_bitcube10, 64, 23, "FREEWPC CORVETTE");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
 	font_render_string_center (&font_cowboy, 64, 10, "METALLIK");
-	font_render_string_center (&font_bitcube, 64, 23, "HARDWARE TESTING");
+	font_render_string_center (&font_bitcube10, 64, 23, "HARDWARE TESTING");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
 	font_render_string_center (&font_cowboy, 64, 10, "LITZ");
-	font_render_string_center (&font_bitcube, 64, 23, "RULES AND IDEAS");
+	font_render_string_center (&font_bitcube10, 64, 23, "RULES AND IDEAS");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
@@ -451,21 +451,21 @@ CALLSET_ENTRY (tz_amode, amode_page)
 		return;
 	
 	map_and_clean ();
-	font_render_string_center (&font_bitcube, 64, 7, "BUYIN BUTTON");
+	font_render_string_center (&font_bitcube10, 64, 7, "BUYIN BUTTON");
 	font_render_string_center (&font_mono5, 64, 20, "TO DISPLAY RULES");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 
 	map_and_clean ();
-	font_render_string_center (&font_bitcube, 64, 7, "HOLD LEFT FLIPPER");
+	font_render_string_center (&font_bitcube10, 64, 7, "HOLD LEFT FLIPPER");
 	font_render_string_center (&font_mono5, 64, 20, "FOR TOURNAMENT");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
-	font_render_string_center (&font_bitcube, 64, 7, "HOLD RIGHT FLIPPER");
+	font_render_string_center (&font_bitcube10, 64, 7, "HOLD RIGHT FLIPPER");
 	font_render_string_center (&font_mono5, 64, 20, "TO SHOW LAST SCORES");
 	show_text_on_stars ();
 	if (amode_show_scores_long)

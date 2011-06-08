@@ -56,7 +56,7 @@ void oddchange_collected_deff (void)
 		dmd_alloc_pair_clean ();
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_bitcube, 64, y, "ODDCHANGE AWARD");
+		font_render_string_center (&font_bitcube10, 64, y, "ODDCHANGE AWARD");
 		sprintf_score (oddchange_score);
 		font_render_string_center (&font_antiqua, 64, 8, sprintf_buffer);
 		dmd_text_outline ();
@@ -82,7 +82,7 @@ void oddchange_grows_deff (void)
 		i++;
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_bitcube, 64, y, "ODDCHANGE GROWS");
+		font_render_string_center (&font_bitcube10, 64, y, "ODDCHANGE GROWS");
 		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
@@ -96,7 +96,7 @@ void oddchange_grows_deff (void)
 	{
 		dmd_alloc_pair_clean ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_bitcube, 64, y, "ODDCHANGE GROWS");
+		font_render_string_center (&font_bitcube10, 64, y, "ODDCHANGE GROWS");
 		sprintf_score (oddchange_score);
 		font_render_string_center (&font_antiqua, 64, 9, sprintf_buffer);
 		dmd_copy_low_to_high ();
@@ -157,8 +157,8 @@ CALLSET_ENTRY (oddchange, grow_oddchange)
 CALLSET_ENTRY (oddchange, status_report)
 {
 	status_page_init ();
-	font_render_string_center (&font_bitcube, 64, 10, "ODDCHANGE POT");
+	font_render_string_center (&font_bitcube10, 64, 10, "ODDCHANGE POT");
 	sprintf_score (oddchange_score);
-	font_render_string_center (&font_bitcube, 64, 18, sprintf_buffer);
+	font_render_string_center (&font_bitcube10, 64, 18, sprintf_buffer);
 	status_page_complete ();
 }

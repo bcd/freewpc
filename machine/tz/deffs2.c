@@ -56,7 +56,7 @@ void shoot_again_deff (void)
 	dmd_clean_page_low ();
 	font_render_string_center (&font_bitoutline, 64, 10, "SHOOT AGAIN");
 	sprintf ("PLAYER %d", player_up);
-	font_render_string_center (&font_bitcube, 64, 22, sprintf_buffer);
+	font_render_string_center (&font_bitcube10, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);

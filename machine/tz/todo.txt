@@ -14,9 +14,13 @@ Count balls going into slot tunnel for more accurate pb detection during
 multiball
 Wavy demo style text
 
+lamp_tristate_flash speeds
+
 BUGS
 Autofire ballsave multiball drain bug
 sssmb, make 'easy' jackpot and fix existing code
+Door handle lit crash!  Gaah!
+
 
 Make TZ challenge
 Grand champion gets to enter a PIN which is stored in the machine.  This means

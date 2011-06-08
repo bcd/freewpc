@@ -778,11 +778,12 @@ quadrit:
 cowboy:
 fipps:
 bitoutline:
-bitcube:
+bitcube10:
 fireball:
 #nayupixel:
 #abstract:
 antiqua:
+celticbit8:
 
 [timers]
 Rocket Flipper:

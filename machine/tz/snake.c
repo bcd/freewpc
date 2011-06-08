@@ -498,7 +498,7 @@ void snake_ready_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_bitcube, 64, 4, "VIDEO MODE READY");
+			font_render_string_center (&font_bitcube10, 64, 4, "VIDEO MODE READY");
 			if (fno % 5 == 0 || fno >= IMG_SNAKE_END)
 			{
 				sound_send (0x54);
@@ -531,7 +531,7 @@ void snake_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_bitcube, 64, 4, "VIDEO MODE");
+			font_render_string_center (&font_bitcube10, 64, 4, "VIDEO MODE");
 			font_render_string_right (&font_var5, 128, 10, "EAT X");
 			font_render_string_right (&font_var5, 128, 20, "AVOID TAIL");
 			dmd_text_outline ();

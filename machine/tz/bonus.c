@@ -238,7 +238,7 @@ static void draw_taunts (void)
 	{
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_bitoutline, 64, 11, "BAD SHOW");
-		font_render_string_center (&font_bitcube, 64, 22, "UNFAIR DEATH");
+		font_render_string_center (&font_bitcube10, 64, 22, "UNFAIR DEATH");
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_HAHA_POWERFIELD_EXIT);

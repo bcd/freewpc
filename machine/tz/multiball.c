@@ -216,12 +216,12 @@ void mb_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("BALL %d LOCKED", mball_locks_made);
-	font_render_string_center (&font_quadrit, 64, 8, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 6, sprintf_buffer);
 	dmd_copy_low_to_high ();
 	if (multiball_ready ())
 	{
-		font_render_string_center (&font_var5, 64, 17, "SHOOT LEFT RAMP FOR");
-		font_render_string_center (&font_fireball, 64, 24, "MULTIBALL");
+		font_render_string_center (&font_var5, 64, 16, "SHOOT LEFT RAMP FOR");
+		font_render_string_center (&font_quadrit, 64, 26, "MULTIBALL");
 	}
 	dmd_copy_low_to_high ();
 	dmd_show2 ();
