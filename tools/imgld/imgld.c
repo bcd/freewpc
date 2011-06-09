@@ -133,12 +133,6 @@ struct frame
 	int cost;
 
 	/*
-	 * The starting address for this frame, as an offset from the
-	 * start of the image area.
-	 */
-	unsigned long addr;
-
-	/*
 	 * Nonzero if this frame has already been scanned and cannot be
 	 * considered for further compression.
 	 */
@@ -353,27 +347,6 @@ void compress_frames (void)
 
 
 /**
- * Assign a linear start address to each frame.
- */
-void assign_addresses (void)
-{
-	struct frame *frame;
-	int i;
-	unsigned int addr;
-
-	/* The address of the first image start just beyond the image table header */
-	addr = (frame_count+1) * 3;
-	for (frame = frame_array, i = 0; i < frame_count; i++, frame++)
-	{
-		unsigned int len = frame_length_with_header (frame->curbuf);
-		frame->addr = round_up_to_page (addr, len);
-		//printf ("Frame %d addr = %05lX\n", i, frame->addr);
-		addr = frame->addr + len;
-	}
-}
-
-
-/**
  * Add a new frame.
  */
 void add_frame (const char *label, struct buffer *buf)
@@ -392,7 +365,6 @@ void add_frame (const char *label, struct buffer *buf)
 	frame->type = 0;
 	frame->name = NULL;
 	frame->cost = 0;
-	frame->addr = 0;
 	frame->already_scanned = 0;
 	frame_count++;
 }
@@ -663,8 +635,7 @@ int main (int argc, char *argv[])
 		}
 	}
 
-	/* Finalize all output */
-	assign_addresses ();
+	/* Try to compress frames if necessary */
 	compress_frames ();
 
 	/* Write the image table */
