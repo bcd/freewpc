@@ -196,14 +196,6 @@ foreach $src (@srclist) {
 				print "warning: $src:$lineno: ignoring invocation of '$1'\n";
 			}
 		}
-		#elsif (/CALLSET_SECTION[ \t]*\((.*)\)/) {
-		#	my $callset_section_args = $1;
-		#	if ($modulesection{$module}) {
-		#		print "warning: builtin section $section overriden by '$callset_section_args'\n";
-		#	}
-		#	my ($module, $section) = split /, */, $callset_section_args;
-		#	$modulesection{$module} = $section;
-		#}
 	}
 	close FH;
 }
