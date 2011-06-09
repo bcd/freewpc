@@ -51,7 +51,6 @@ GCC_VERSION := 4.3.4
 
 # If you have special flags to pass to the compiler, define them here.
 #EXTRA_CFLAGS += -save-temps
-#EXTRA_CFLAGS += -DFASTBOOT
 #EXTRA_CFLAGS += -DCONFIG_DEBUG_STACK
 #EXTRA_CFLAGS += -DCONFIG_PARALLEL_DEBUG
 #EXTRA_CFLAGS += -DFREE_ONLY

@@ -144,10 +144,6 @@ a switch closure occurs.
 Enables builtin debug messages throughout the code.  These are only
 printed in native mode, or under PinMAME when using the debugger add-on.
 
-@item	FASTBOOT
-
-Disables the ROM checksum calculation.
-
 @item	FREE_ONLY
 
 Enables Free Play all the time.
