@@ -3,6 +3,18 @@
 #define glyph_nayupixel10_period_height 9
 static char glyph_nayupixel10_period_bits[] = { glyph_nayupixel10_period_width, glyph_nayupixel10_period_height,
   0x00, 0x00, 0x00, 0x00, 0x06, 0x09, 0x06, 0x00, 0x00, };
+#define glyph_nayupixel10_colon_width 4
+#define glyph_nayupixel10_colon_height 9
+static char glyph_nayupixel10_colon_bits[] = { glyph_nayupixel10_colon_width, glyph_nayupixel10_colon_height,
+  0x00, 0x00, 0x01, 0x01, 0x00, 0x01, 0x01, 0x00, 0x00, };
+#define glyph_nayupixel10_semicolon_width 5
+#define glyph_nayupixel10_semicolon_height 9
+static char glyph_nayupixel10_semicolon_bits[] = { glyph_nayupixel10_semicolon_width, glyph_nayupixel10_semicolon_height,
+  0x00, 0x00, 0x02, 0x02, 0x00, 0x02, 0x03, 0x00, 0x00, };
+#define glyph_nayupixel10_quote_width 4
+#define glyph_nayupixel10_quote_height 9
+static char glyph_nayupixel10_quote_bits[] = { glyph_nayupixel10_quote_width, glyph_nayupixel10_quote_height,
+  0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
 #define glyph_nayupixel10_dollar_width 6
 #define glyph_nayupixel10_dollar_height 9
 static char glyph_nayupixel10_dollar_bits[] = { glyph_nayupixel10_dollar_width, glyph_nayupixel10_dollar_height,
@@ -199,6 +211,9 @@ static char glyph_nayupixel10_9_bits[] = { glyph_nayupixel10_9_width, glyph_nayu
   0x00, 0x1E, 0x11, 0x11, 0x1E, 0x10, 0x10, 0x00, 0x00, };
 static char *nayupixel10_glyphs[] = {
 	['.'] = glyph_nayupixel10_period_bits,
+	[':'] = glyph_nayupixel10_colon_bits,
+	[';'] = glyph_nayupixel10_semicolon_bits,
+	['\''] = glyph_nayupixel10_quote_bits,
 	['$'] = glyph_nayupixel10_dollar_bits,
 	[','] = glyph_nayupixel10_comma_bits,
 	['-'] = glyph_nayupixel10_minus_bits,
