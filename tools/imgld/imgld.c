@@ -285,15 +285,15 @@ void compress_frames (void)
 	struct buffer *newbuf;
 
 	/* Calculate the total size of ROM space needed.
-		We are conservative in our estimate here.  Allow 4 bytes per pointer
-		because of alignment.  Add an extra 64 bytes per frame to estimate
+		We are conservative in our estimate here.
+		Add an extra 64 bytes per frame to estimate
 		cases where an image has to be pushed to the next page to keep all
 		the data together. */
 	total_size = (frame_count+1) * 3;
 	for (frame = frame_array, i = 0; i < frame_count; i++, frame++)
 		total_size += frame->curbuf->len + 1 + 64;
 
-	/* Compress until everything fits: */
+	/* Compress until everything fits */
 	while (total_size > max_rom_size)
 	{
 		//printf ("Total size = %05X, ROM holds %05X\n", total_size, max_rom_size);
@@ -337,6 +337,7 @@ void compress_frames (void)
 			}
 			else
 			{
+				/* This method is not better, so just discard it. */
 				//printf ("Encoder %d gave %d bytes, ignoring\n", i, newbuf->len);
 				buffer_free (newbuf);
 			}
@@ -656,6 +657,8 @@ int main (int argc, char *argv[])
 		}
 		else
 		{
+			/* Any non-option argument is treated as a config file, which is loaded
+			and parsed.  Any images named in these files are loaded. */
 			parse_config (arg);
 		}
 	}
@@ -663,6 +666,8 @@ int main (int argc, char *argv[])
 	/* Finalize all output */
 	assign_addresses ();
 	compress_frames ();
+
+	/* Write the image table */
 	write_output (outfilename);
 
 	fprintf (lblfile, "\n#define MAX_IMAGE_NUMBER %d\n", frame_count);
