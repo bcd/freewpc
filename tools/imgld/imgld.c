@@ -110,11 +110,6 @@ struct frame
 	struct buffer *curbuf;
 
 	/*
-	 * The image type for curbuf.
-	 */
-	U8 type;
-
-	/*
 	 * The optional label name assigned to this frame.
 	 */
    const char *name;
@@ -295,21 +290,23 @@ void compress_frames (void)
 		/* Find the uncompressed frame with lowest cost */
 		aframe = NULL;
 		for (frame = frame_array, i = 0; i < frame_count; i++, frame++)
-			if (frame->type == 0 &&
-				 !frame->already_scanned &&
+			if (!frame->already_scanned &&
 				!(frame->curbuf->type & TYPE_BITMAP) &&
 				(frame->cost < (aframe ? aframe->cost : 999)))
 			{
 				aframe = frame;
 			}
-		//printf ("Will try to compress frame #%d\n", aframe - frame_array);
 
 		/* If everything has been compressed already, and we don't fit still, then
 		just give up */
 		if (aframe == NULL)
 			error ("out of space after compression");
 
-		/* Mark this frame as checked, so we don't try again later */
+		//printf ("Will try to compress frame #%d\n", aframe - frame_array);
+
+		/* Mark this frame as checked, so we don't try again later.  This
+		is important in case all compression algorithms produce larger files
+		than what we started with. */
 		aframe->already_scanned = 1;
 
 		/* Try all compression methods.  Take the best one, or none at all
@@ -324,7 +321,6 @@ void compress_frames (void)
 				/* printf ("Encoder %d reduces size from %d to %d\n", i,
 					aframe->curbuf->len, newbuf->len); */
 				newbuf->type |= aframe->rawbuf->type;
-				aframe->type = i+1;
 				if (aframe->curbuf != aframe->rawbuf)
 					buffer_free (aframe->curbuf);
 				aframe->curbuf = newbuf;
@@ -362,7 +358,6 @@ void add_frame (const char *label, struct buffer *buf)
 	frame = &frame_array[frame_count];
 	frame->rawbuf = buf;
 	frame->curbuf = buf;
-	frame->type = 0;
 	frame->name = NULL;
 	frame->cost = 0;
 	frame->already_scanned = 0;
