@@ -51,6 +51,18 @@ static void autofire_ball_catch_wait (void)
 	}
 }
 
+static void autofire_ball_launch_wait (void)
+{
+	/* Give the ball time to settle and things to start */
+	task_sleep (TIME_300MS);
+	while (kickout_locks || task_find_gid (GID_LOCK_KICKED) 
+			|| deff_get_active () == DEFF_MB_START 
+			|| !switch_poll_logical (SW_AUTOFIRE2))
+	{
+		task_sleep (TIME_100MS);
+	}
+}
+
 static void autofire_launch (void)
 {
 	sol_request (SOL_AUTOFIRE);
@@ -96,10 +108,8 @@ void autofire_monitor (void)
 	}
 	
 	/* Wait until allowed to kickout */
-	task_sleep (TIME_300MS);
-	while (kickout_locks || task_find_gid (GID_LOCK_KICKED) || deff_get_active () == DEFF_MB_START)
-		task_sleep (TIME_200MS);
 	
+	autofire_ball_launch_wait ();	
 	/* Open diverter again */
 	shooter_div_start ();
 	
