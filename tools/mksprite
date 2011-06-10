@@ -1,0 +1,40 @@
+#!/bin/bash
+# generates C source code using imagemagick
+# Usage: mksprite sprite.png sprite > sprite.h
+
+filename=$1
+name=$2
+fuzz="20%"
+
+#### Seperate into 3 planes, one per colour
+
+convert ${filename} -matte -fuzz ${fuzz} +transparent black -flatten \
+	png:test_black.png
+#	xbm:- \
+#	| sed -e "s/-/${name}_one/" \
+#	| sed -e "s/{/{ ${name}_one_width, ${name}_one_height,/"
+
+convert ${filename} -matte -fuzz ${fuzz} +transparent red -flatten -monochrome \
+	png:test_red.png
+#	xbm:- \
+#	| sed -e "s/-/${name}_two/" \
+#	| sed -e "s/{/{ ${name}_two_width, ${name}_two_height,/" \
+
+convert ${filename} -matte -fuzz ${fuzz} +transparent white \
+	-background black -flatten -negate \
+	png:test_white.png
+#	xbm:- \
+#	| sed -e "s/-/${name}_three/" \
+#	| sed -e "s/{/{ ${name}_three_width, ${name}_three_height,/"
+
+#Add together low bits and high bits
+composite -compose Multiply test_white.png test_black.png \
+	xbm:- \
+	| sed -e "s/-/${name}_low/" \
+	| sed -e "s/{/{ ${name}_low_width, ${name}_low_height,/"
+
+composite -compose Multiply test_white.png test_red.png \
+	xbm:- \
+	| sed -e "s/-/${name}_high/" \
+	| sed -e "s/{/{ ${name}_high_width, ${name}_high_height,/"
+
