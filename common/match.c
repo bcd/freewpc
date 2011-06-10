@@ -66,7 +66,7 @@ match_draw_scores (void)
 		else if (n == 5)
 		{	/* Put player 6's score over to the right*/
 			sprintf ("%2b", &scores[n][BYTES_PER_SCORE-1]);
-			font_render_string_left (&font_mono5, 11, 1, sprintf_buffer);
+			font_render_string_left (&font_mono5, 13, 0, sprintf_buffer);
 		}
 	}
 }
