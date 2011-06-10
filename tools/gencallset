@@ -255,7 +255,7 @@ foreach $set (keys %functionhash) {
 		print FH "   callset_debug ($idx);\n";
 		$debug_id++;
 		if ($rettype eq $bool_type) {
-			print FH "   if (!${module}_$set ()) return FALSE;\n";
+			print FH "   if (!${module}_$primary ()) return FALSE;\n";
 		}
 		else {
 			print FH "   ${module}_$primary (); /* $modulehash{$module} */\n";
