@@ -79,7 +79,7 @@ void paused_deff (void)
 	{
 		dmd_alloc_pair_clean ();
 		
-		font_render_string_center (&font_fireball, 64, 10, "PAUSED");
+		font_render_string_center (&font_fireball, 64, 8, "PAUSED");
 		if (alarm_time >= ALARM_DISABLED)
 		{
 			/* mute_and_pause_timeout is stored as 5 second chunks, to save
