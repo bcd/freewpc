@@ -34,74 +34,73 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 # Finally, I subtracted 4 from each horizontal value to normalize the horizontal values so that the left most lamps
 # values had a horizontal value of 1.
  
-# NOTE: y is horizontal, x is vertical due to a bug in genmachine
 [lamps]
-11: Left Rollover, green , x(1), y(9)
-12: Middle Rollover, green, x(1), y(11)
-13: Right Rollover, green , x(1), y(13)
-14: Skid Pad Arrow, amber, x(23), y(10)
-15: Sticky Tires, blue, x(24), y(9)
-16: Skid Pad Jackpot, red, x(25), y(8) # torque jackpot
-17: Route 66 Arrow, amber, x(29), y(11)
-18: Race Today, amber, x(31), y(11)
-21: Inner Loop Arrow, amber, x(19), y(12)
-22: Fuelie, green, x(20), y(11)
-23: Nitrous, blue, x(21), y(10)
-24: Inner Loop Jackpot, red, x(22), y(9) # horsepower jackpot
-25: Right Outer Loop Arrow, amber, x(24), y(16)
-26: Z07 Suspension, blue, x(25), y(16)
-27: Big Brakes, blue, x(26), y(15)
-28: Super Charger, blue, x(27), y(15)
-31: Left Outer Loop Arrow, amber, x(27), y(4)
-32: Lite Lock, amber, x(28), y(5)
-33: Qualify, amber, x(29), y(6)
-34: Big Block, blue, x(30), y(7)
-35: ZR1 Ramp Lock, green, x(28), y(7)
-36: 6 Speed Trans, blue, x(27), y(7)
-37: Hi Lift Cams, blue, x(26), y(7)
-38: ZR1 Ramp Arrow, amber, x(25), y(7)
-41: Corvette 6, yellow, x(35), y(13)
-42: Corvette 3, yellow, x(36), y(11)
-43: Corvette 1, yellow, x(37), y(9)
-44: Corvette 2, yellow, x(36), y(7)
-45: Corvette 4, yellow, x(35), y(5)
-46: Left Standup 3, amber, x(30), y(4) # Light
-47: Left Standup 2, amber, x(31), y(4) # Turbo
-48: Left Standup 1, amber, x(32), y(4) # Boost
-51: Corvette 9, yellow, x(33), y(9)
-52: Corvette 8, yellow, x(34), y(11)
-53: Pit Stop, red, x(16), y(7)
-54: Corvette 7, yellow, x(34), y(7)
-55: Corvette 5, yellow, x(35), y(9)
-56: Pit Stop Arrow, amber, x(18), y(9)
-57: Spinner Arrow, amber, x(17), y(11)
-58: Drive Again, red, x(45), y(9)
-61: Left Outer Tail, red, x(40), y(6) # Bonus X2
-62: Left Inner Tail, red, x(40), y(5) # Bonus X4
-63: Catch Me, white, x(41), y(9)
-64: Right Inner Tail, red, x(40), y(11) # Bonus X6
-65: Right Outer Tail, red, x(40), y(12) # Bonus X8
-66: Right Standup Arrow, yellow, x(31), y(15)
-67: Lite Kickback, yellow, x(32), y(14)
-68: Start Challenge, green, x(16), y(7)
-71: Kickback Arrow, yellow, x(38), y(1)
-72: Left Return Lane, white, x(37), y(2) # Extra Ball
-73: Right Return Lane, white, x(37), y(15) # Extra Ball
-74: Right Out Lane, white, x(38), y(16) # Extra Ball
-75: Million Standup, blue, x(23), y(5)
-76: Side Pipe 1, red, x(25), y(1)
-77: Side Pipe 2, red, x(23), y(1)
-78: Side Pipe 3, red, x(21), y(1)
+11: Left Rollover, green , y(1), x(9)
+12: Middle Rollover, green, y(1), x(11)
+13: Right Rollover, green , y(1), x(13)
+14: Skid Pad Arrow, amber, y(23), x(10)
+15: Sticky Tires, blue, y(24), x(9)
+16: Skid Pad Jackpot, red, y(25), x(8) # torque jackpot
+17: Route 66 Arrow, amber, y(29), x(11)
+18: Race Today, amber, y(31), x(11)
+21: Inner Loop Arrow, amber, y(19), x(12)
+22: Fuelie, green, y(20), x(11)
+23: Nitrous, blue, y(21), x(10)
+24: Inner Loop Jackpot, red, y(22), x(9) # horsepower jackpot
+25: Right Outer Loop Arrow, amber, y(24), x(16)
+26: Z07 Suspension, blue, y(25), x(16)
+27: Big Brakes, blue, y(26), x(15)
+28: Super Charger, blue, y(27), x(15)
+31: Left Outer Loop Arrow, amber, y(27), x(4)
+32: Lite Lock, amber, y(28), x(5)
+33: Qualify, amber, y(29), x(6)
+34: Big Block, blue, y(30), x(7)
+35: ZR1 Ramp Lock, green, y(28), x(7)
+36: 6 Speed Trans, blue, y(27), x(7)
+37: Hi Lift Cams, blue, y(26), x(7)
+38: ZR1 Ramp Arrow, amber, y(25), x(7)
+41: Corvette 6, yellow, y(35), x(13)
+42: Corvette 3, yellow, y(36), x(11)
+43: Corvette 1, yellow, y(37), x(9)
+44: Corvette 2, yellow, y(36), x(7)
+45: Corvette 4, yellow, y(35), x(5)
+46: Left Standup 3, amber, y(30), x(4) # Light
+47: Left Standup 2, amber, y(31), x(4) # Turbo
+48: Left Standup 1, amber, y(32), x(4) # Boost
+51: Corvette 9, yellow, y(33), x(9)
+52: Corvette 8, yellow, y(34), x(11)
+53: Pit Stop, red, y(16), x(7)
+54: Corvette 7, yellow, y(34), x(7)
+55: Corvette 5, yellow, y(35), x(9)
+56: Pit Stop Arrow, amber, y(18), x(9)
+57: Spinner Arrow, amber, y(17), x(11)
+58: Drive Again, red, y(45), x(9)
+61: Left Outer Tail, red, y(40), x(6) # Bonus X2
+62: Left Inner Tail, red, y(40), x(5) # Bonus X4
+63: Catch Me, white, y(41), x(9)
+64: Right Inner Tail, red, y(40), x(11) # Bonus X6
+65: Right Outer Tail, red, y(40), x(12) # Bonus X8
+66: Right Standup Arrow, yellow, y(31), x(15)
+67: Lite Kickback, yellow, y(32), x(14)
+68: Start Challenge, green, y(16), x(7)
+71: Kickback Arrow, yellow, y(38), x(1)
+72: Left Return Lane, white, y(37), x(2) # Extra Ball
+73: Right Return Lane, white, y(37), x(15) # Extra Ball
+74: Right Out Lane, white, y(38), x(16) # Extra Ball
+75: Million Standup, blue, y(23), x(5)
+76: Side Pipe 1, red, y(25), x(1)
+77: Side Pipe 2, red, y(23), x(1)
+78: Side Pipe 3, red, y(21), x(1)
 # TODO verify if the left and right tree values are wrong in the manual or wrong in the visual pinball table
 # the original rom matches up to the manual, so i think the VPINMAME table is wrong
-81: Right Tree Red, red, x(39), y(17)
-82: Left Tree Red, red, x(39), y(17)
-83: Tree Bottom Yellow, yellow, x(37), y(17)
-84: Tree Top Yellow, yellow, x(36), y(17)
-85: Right Tree Green, green, x(38), y(17)
-86: Left Tree Green, green, x(38), y(17)
-87: Buy In, green, buyin, cabinet, x(50), y(17)
-88: Start Button, red, start, cabinet, x(50), y(3)
+81: Right Tree Red, red, y(39), x(17)
+82: Left Tree Red, red, y(39), x(17)
+83: Tree Bottom Yellow, yellow, y(37), x(17)
+84: Tree Top Yellow, yellow, y(36), x(17)
+85: Right Tree Green, green, y(38), x(17)
+86: Left Tree Green, green, y(38), x(17)
+87: Buy In, green, buyin, cabinet, y(50), x(17)
+88: Start Button, red, start, cabinet, y(50), x(3)
 
 [switches]
 11: Kickback, ingame # actually "Left Out Lane"

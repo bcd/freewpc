@@ -1167,28 +1167,28 @@ sub machine_lamp_get_name {
 
 
 sub lamp_sort_bottom_to_top {
-	return -($a->{'x'} <=> $b->{'x'});
-}
-
-sub lamp_sort_top_to_bottom {
-	return ($a->{'x'} <=> $b->{'x'});
-}
-
-sub lamp_sort_left_to_right {
-	return ($a->{'y'} <=> $b->{'y'});
-}
-
-sub lamp_sort_right_to_left {
 	return -($a->{'y'} <=> $b->{'y'});
 }
 
+sub lamp_sort_top_to_bottom {
+	return ($a->{'y'} <=> $b->{'y'});
+}
+
+sub lamp_sort_left_to_right {
+	return ($a->{'x'} <=> $b->{'x'});
+}
+
+sub lamp_sort_right_to_left {
+	return -($a->{'x'} <=> $b->{'x'});
+}
+
 sub lamp_sort_circle_out {
-	my $xcenter = 23;
-	my $ycenter = 12;
+	my $ycenter = 23;
+	my $xcenter = 12;
 	return 
-	int sqrt (((($a->{'x'} - $xcenter) ** 2) + (($a->{'y'} - $ycenter) ** 2)))
+	int sqrt (((($a->{'y'} - $ycenter) ** 2) + (($a->{'x'} - $xcenter) ** 2)))
 	<=>
-	int sqrt (((($b->{'x'} - $xcenter) ** 2) + (($b->{'y'} - $ycenter) ** 2)));
+	int sqrt (((($b->{'y'} - $ycenter) ** 2) + (($b->{'x'} - $xcenter) ** 2)));
 }
 
 
@@ -1210,9 +1210,9 @@ sub pf_lamps {
 	my $lamplist = "";
 	for $lamp (unique ($m->{"lamps"})) {
 		push @lamps, $lamp if (!defined $lamp->{'cabinet'});
-		if (!defined $lamp->{'x'}) {
-			$lamp->{'x'} = rand (40);
-			$lamp->{'y'} = rand (30);
+		if (!defined $lamp->{'y'}) {
+			$lamp->{'y'} = rand (40);
+			$lamp->{'x'} = rand (30);
 		}
 	}
 
