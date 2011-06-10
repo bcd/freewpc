@@ -344,5 +344,6 @@ static char *fireball_glyphs[] = {
 };
 const font_t font_fireball = {
 	.height = 14,
+	.spacing = 0,
 	.glyphs = fireball_glyphs,
 };
