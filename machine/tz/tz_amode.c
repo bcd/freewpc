@@ -300,7 +300,7 @@ static inline void scroll_text (void)
 	font_render_string_center (&font_var5, 64, 19, "RELEASED UNDER THE GNU");
 	font_render_string_center (&font_var5, 64, 26, "GENERAL PUBLIC LICENSE.");
 	
-	dmd_sched_transition (&trans_scroll_up_slow);
+	dmd_sched_transition (&trans_scroll_up_slower);
 	if (amode_show_scores_long || amode_page_changed)
 		return;
 	dmd_show_low ();
@@ -309,7 +309,7 @@ static inline void scroll_text (void)
 	font_render_string_center (&font_var5, 64, 5, "VISIT WWW.ODDCHANGE.COM");
 	font_render_string_center (&font_var5, 64, 12, "FOR MORE INFORMATION.");
 	
-	dmd_sched_transition (&trans_scroll_up_slow);
+	dmd_sched_transition (&trans_scroll_up_slower);
 	if (amode_show_scores_long || amode_page_changed)
 		return;
 	dmd_show_low ();
@@ -377,22 +377,22 @@ CALLSET_ENTRY (tz_amode, amode_page)
 		return;
 
 	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 7, "SOFTWARE BY");
-	font_render_string_center (&font_cowboy, 64, 21, "BCD");
+	font_render_string_center (&font_nayupixel10, 64, 7, "SOFTWARE BY");
+	font_render_string_center (&font_bitoutline, 64, 21, "BCD");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 7, "AND");
-	font_render_string_center (&font_cowboy, 64, 20, "SONNY JIM");
+	font_render_string_center (&font_nayupixel10, 64, 7, "AND");
+	font_render_string_center (&font_bitoutline, 64, 20, "SONNY JIM");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
-	font_render_string_center (&font_var5, 64, 7, "ARTWORK AND");
-	font_render_string_center (&font_var5, 64, 20, "ANIMATIONS BY");
+	font_render_string_center (&font_nayupixel10, 64, 7, "ARTWORK AND");
+	font_render_string_center (&font_nayupixel10, 64, 20, "ANIMATIONS BY");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
@@ -410,63 +410,62 @@ CALLSET_ENTRY (tz_amode, amode_page)
 		return;
 	
 	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 7, "AND");
-	font_render_string_center (&font_steel, 64,20, "POW STUDIOS");
+	font_render_string_center (&font_steel, 64,16, "POW STUDIOS");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
-	font_render_string_center (&font_var5, 64, 16, "THANKS GO TO");
+	font_render_string_center (&font_nayupixel10, 64, 16, "THANKS GO TO");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
 	font_render_string_center (&font_cowboy, 64, 10, "HYDRA");
-	font_render_string_center (&font_bitcube10, 64, 23, "FREEWPC CORVETTE");
+	font_render_string_center (&font_nayupixel10, 64, 23, "(FREEWPC CORVETTE)");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
 	font_render_string_center (&font_cowboy, 64, 10, "METALLIK");
-	font_render_string_center (&font_bitcube10, 64, 23, "HARDWARE TESTING");
+	font_render_string_center (&font_nayupixel10, 64, 23, "(HARDWARE TESTING)");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
 	font_render_string_center (&font_cowboy, 64, 10, "LITZ");
-	font_render_string_center (&font_bitcube10, 64, 23, "RULES AND IDEAS");
+	font_render_string_center (&font_nayupixel10, 64, 23, "(RULES AND IDEAS)");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
-	font_render_string_center (&font_steel, 64, 7, "AND");
-	font_render_string_center (&font_quadrit, 64, 20, "#PINBALL");
+	font_render_string_center (&font_nayupixel10, 64, 7, "AND EVERYBODY IN");
+	font_render_string_center (&font_fireball, 64, 20, "#PINBALL");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
-	font_render_string_center (&font_bitcube10, 64, 7, "BUYIN BUTTON");
-	font_render_string_center (&font_mono5, 64, 20, "TO DISPLAY RULES");
+	font_render_string_center (&font_bitcube10, 64, 7, "PRESS BUYIN BUTTON");
+	font_render_string_center (&font_bitcube10, 64, 20, "TO DISPLAY RULES");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 
 	map_and_clean ();
 	font_render_string_center (&font_bitcube10, 64, 7, "HOLD LEFT FLIPPER");
-	font_render_string_center (&font_mono5, 64, 20, "FOR TOURNAMENT");
+	font_render_string_center (&font_bitcube10, 64, 20, "FOR TOURNAMENT");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
 	
 	map_and_clean ();
 	font_render_string_center (&font_bitcube10, 64, 7, "HOLD RIGHT FLIPPER");
-	font_render_string_center (&font_mono5, 64, 20, "TO SHOW LAST SCORES");
+	font_render_string_center (&font_bitcube10, 64, 20, "TO SHOW LAST SCORES");
 	show_text_on_stars ();
 	if (amode_show_scores_long)
 		return;
