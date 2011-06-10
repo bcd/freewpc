@@ -113,11 +113,11 @@ void bonus_button_monitor (void)
 static void bonus_pause (void)
 {
 	if (buttons_held)
-		task_sleep_sec (1);
+		task_sleep_sec (3);
 	else
 		task_sleep (TIME_100MS);
 }
-
+#if 0
 static void countup_pause (void)
 {
 	if (buttons_held)
@@ -134,7 +134,7 @@ static void countup_pause (void)
 	else
 		task_sleep (TIME_33MS);
 }
-
+#endif
 /* Function so we can call two different transistions
  * depending on whether the buttons were pressed */
 static inline void bonus_sched_transition (void)
@@ -228,7 +228,7 @@ static void draw_taunts (void)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("MULTIDRAIN");
-		font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_bitoutline, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
@@ -238,7 +238,7 @@ static void draw_taunts (void)
 	{
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_bitoutline, 64, 11, "BAD SHOW");
-		font_render_string_center (&font_bitcube10, 64, 22, "UNFAIR DEATH");
+		font_render_string_center (&font_nayupixel10, 64, 22, "UNFAIR DEATH");
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_HAHA_POWERFIELD_EXIT);
@@ -250,7 +250,7 @@ static void draw_taunts (void)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("SDTM DEATH");
-		font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_bitoutline, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
@@ -408,17 +408,17 @@ void bonus_deff (void)
 	/* Start a task to monitor the buttons */
 	task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor);
 	
-	if (door_panels_started)
+	if (door_panels_started > 0)
 	{
 		calc_and_draw_bonus (SC_1M, door_panels_started);
-		font_render_string_center (&font_mono5, 64, 4, "DOOR PANELS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "DOOR PANELS");
 		trans_and_show ();
 	}
 	
-	if (loops)
+	if (loops > 0)
 	{
 		calc_and_draw_bonus (SC_1M, loops);
-		font_render_string_center (&font_mono5, 64, 4, "LOOPS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "LOOPS");
 		trans_and_show ();
 		if (loops > loop_master_hi)
 		{
@@ -445,58 +445,57 @@ void bonus_deff (void)
 		bonus_add_up_jets ();
 		font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 		sprintf ("TOWNSQUARE JETS");
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+		font_render_string_center (&font_nayupixel10, 64, 4, sprintf_buffer);
 		trans_and_show ();
 	}
 	
-	if (left_ramps)
+	if (left_ramps > 0)
 	{
 		calc_and_draw_bonus (SC_100K, left_ramps);
-		font_render_string_center (&font_mono5, 64, 4, "LEFT RAMPS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "LEFT RAMPS");
 		trans_and_show ();
 	}
 	
-	if (gumball_collected_count)
+	if (gumball_collected_count > 0)
 	{
 		calc_and_draw_bonus (SC_1M, gumball_collected_count);
-		font_render_string_center (&font_mono5, 64, 4, "GUMBALLS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "GUMBALLS");
 		trans_and_show ();
 	}
 
-	if (spiralawards_collected)
+	if (spiralawards_collected > 0)
 	{
 		calc_and_draw_bonus (SC_1M, spiralawards_collected);
-		font_render_string_center (&font_mono5, 64, 4, "SPIRALAWARDS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "SPIRALAWARDS");
 		trans_and_show ();
 	}	
 	
-	if (dead_end_count)
+	if (dead_end_count > 0)
 	{
 		calc_and_draw_bonus (SC_1M, dead_end_count);
-		font_render_string_center (&font_mono5, 64, 4, "DEAD ENDS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "DEAD ENDS");
 		trans_and_show ();
-
 	}
 
 	if (hitch_count > 0)
 	{
 		calc_and_draw_bonus (SC_1M, hitch_count);
-		font_render_string_center (&font_mono5, 64, 4, "HITCHHIKERS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "HITCHHIKERS");
 		trans_and_show ();
 
 	}
 	
-	if (rollover_count)
+	if (rollover_count > 0)
 	{
 		calc_and_draw_bonus (SC_1M, rollover_count);
-		font_render_string_center (&font_mono5, 64, 4, "ROLLOVERS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "ROLLOVERS");
 		trans_and_show ();
 		if (rollover_count > 9)
 		{
 			task_sleep_sec (2);
 			dmd_alloc_low_clean ();
-			font_render_string_center (&font_mono5, 64, 10, "KEEPING THOSE");
-			font_render_string_center (&font_mono5, 64, 20, "BUTTONS BUSY");
+			font_render_string_center (&font_nayupixel10, 64, 10, "KEEPING THOSE");
+			font_render_string_center (&font_nayupixel10, 64, 20, "BUTTONS BUSY");
 			dmd_sched_transition (&trans_sequential_boxfade);
 			dmd_show_low ();
 			sound_send (SND_GLASS_BREAKS);
@@ -507,7 +506,7 @@ void bonus_deff (void)
 	if (two_way_combos + three_way_combos)
 	{
 		calc_and_draw_bonus (SC_5M, two_way_combos + three_way_combos);
-		font_render_string_center (&font_mono5, 64, 4, "COMBOS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "COMBOS");
 		trans_and_show ();
 		if (two_way_combos + three_way_combos > combo_master_hi)
 		{
@@ -532,7 +531,7 @@ void bonus_deff (void)
 	if (lucky_bounces)
 	{
 		calc_and_draw_bonus (SC_5M, lucky_bounces);
-		font_render_string_center (&font_mono5, 64, 4, "LUCKY BOUNCES");
+		font_render_string_center (&font_nayupixel10, 64, 4, "LUCKY BOUNCES");
 		trans_and_show ();
 		
 		if (lucky_bounces > 4 && lucky_bounces < spawny_get_hi)
@@ -563,7 +562,7 @@ void bonus_deff (void)
 		dmd_alloc_low_clean ();
 		score_add (total_bonus, score_table[SC_20M]);
 		sprintf ("BACKDOOR AWARD");
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+		font_render_string_center (&font_nayupixel10, 64, 4, sprintf_buffer);
 		sprintf ("20 MILLION");
 		font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_fast);
