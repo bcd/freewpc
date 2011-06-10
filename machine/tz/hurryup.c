@@ -51,9 +51,9 @@ void hurryup_mode_deff (void)
 	{
 
 		U16 fno;
-		dmd_alloc_pair_clean ();
 		for (fno = IMG_BOLT_TESLA_START; fno < IMG_BOLT_TESLA_END; fno += 2)
 		{
+			dmd_alloc_pair_clean ();
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
 			font_render_string_center (&font_fireball, 64, 8, "HURRY UP");

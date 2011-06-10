@@ -628,8 +628,6 @@ Clock Millions Mode Total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE
 MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT+D_PAUSE
 MPF Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 
-Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE2
-BG Flash: page(MACHINE_PAGE), PRI_GAME_MODE4
 Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Inlane lights Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
@@ -727,6 +725,8 @@ SDSS Awarded: page(MACHINE4_PAGE), PRI_MULTIBALL, D_PAUSE+D_QUEUED
 USDSS Awarded: page(MACHINE4_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Lock Powerball: page(MACHINE4_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
 
+Random Factoid: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
+
 ##########################################################################
 # Lamp effects
 ##########################################################################
@@ -780,10 +780,10 @@ fipps:
 bitoutline:
 bitcube10:
 fireball:
-#nayupixel:
+nayupixel10:
 #abstract:
 antiqua:
-celticbit8:
+#celticbit8:
 
 [timers]
 Rocket Flipper:

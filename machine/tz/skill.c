@@ -56,23 +56,23 @@ void skill_shot_ready_deff (void)
 	flash_deff_begin_static ();
 
 	sprintf ("PLAYER %d", player_up);
-	font_render_string_left (&font_var5, 1, 2, sprintf_buffer);
+	font_render_string_left (&font_nayupixel10, 1, 0, sprintf_buffer);
 
 	sprintf_current_score ();
 	font_render_string_right (&font_mono5, 127, 2, sprintf_buffer);
 
-	font_render_string (&font_mono5, 16, 10, "YELLOW");
-	font_render_string (&font_mono5, 16, 16, "ORANGE");
-	font_render_string (&font_mono5, 16, 22, "RED");
+	font_render_string (&font_mono5, 16, 11, "YELLOW");
+	font_render_string (&font_mono5, 16, 17, "ORANGE");
+	font_render_string (&font_mono5, 16, 23, "RED");
 
 	flash_deff_begin_flashing ();
 
 	sprintf ("%d,000,000", skill_min_value+3);
-	font_render_string_right (&font_mono5, 110, 10, sprintf_buffer);
+	font_render_string_right (&font_mono5, 110, 11, sprintf_buffer);
 	sprintf ("%d,000,000", skill_min_value+1);
-	font_render_string_right (&font_mono5, 110, 16, sprintf_buffer);
+	font_render_string_right (&font_mono5, 110, 17, sprintf_buffer);
 	sprintf ("%d,000,000", skill_min_value);
-	font_render_string_right (&font_mono5, 110, 22, sprintf_buffer);
+	font_render_string_right (&font_mono5, 110, 23, sprintf_buffer);
 
 	flash_deff_run ();
 }

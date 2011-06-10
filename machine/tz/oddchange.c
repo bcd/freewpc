@@ -91,7 +91,7 @@ void oddchange_grows_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	timer_restart_free (GID_ODDCHANGE_DEFF, TIME_2S);
+	timer_restart_free (GID_ODDCHANGE_DEFF, TIME_1S);
 	while (task_find_gid (GID_ODDCHANGE_DEFF))
 	{
 		dmd_alloc_pair_clean ();

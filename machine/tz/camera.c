@@ -186,7 +186,7 @@ static void do_camera_award (void)
 	if (mball_locks_lit + mball_locks_made >= 2 && camera_award_count == CAMERA_AWARD_LIGHT_LOCK)
 		camera_award_count = CAMERA_AWARD_10_MILLION;
 	camera_award_count_stored = camera_award_count;
-	deff_start (DEFF_CAMERA_AWARD);
+	deff_start_sync (DEFF_CAMERA_AWARD);
 	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:

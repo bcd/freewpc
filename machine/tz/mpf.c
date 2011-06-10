@@ -76,9 +76,9 @@ extern U8 unlit_shot_count;
 
 static void mpf_countdown_score_task (void)
 {
-	while (mpf_award > 5)
+	while (mpf_award > 5 && task_find_gid (GID_MPF_MODE_RUNNING))
 	{
-		bounded_decrement (mpf_award, 0);
+		bounded_decrement (mpf_award, 1);
 		task_sleep_sec (1);
 	}
 	task_exit ();
@@ -165,7 +165,6 @@ void lightning_overlay (void)
 
 void mpf_mode_deff (void)
 {
-	//TODO Move this somewhere?
 	U16 fno;
 	dmd_alloc_pair_clean ();
 	for (;;)
@@ -174,16 +173,14 @@ void mpf_mode_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_bitcube10, 64, 2, "BATTLE THE POWER");
+			font_render_string_center_ytop (&font_bitcube10, 64, 0, "BATTLE THE POWER");
 			sprintf ("%d,000,000", (mpf_award * mpf_level));
-			font_render_string_center (&font_antiqua, 64, 12, sprintf_buffer);
-			//sprintf ("SHOOT TOP HOLE TO COLLECT");
-			//font_render_string_center (&font_var5, 64, 4, sprintf_buffer);
+			font_render_string_center (&font_antiqua, 64, 14, sprintf_buffer);
 			sprintf ("%d", mpf_timer);
-			font_render_string (&font_var5, 15, 26, sprintf_buffer);
-			font_render_string_right (&font_var5, 113, 26, sprintf_buffer);
-			sprintf ("LEVEL %d", mpf_level - 1);
-			font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+			font_render_string (&font_mono5, 4, 26, sprintf_buffer);
+			font_render_string_right (&font_mono5, 122, 26, sprintf_buffer);
+			sprintf ("LEVEL %d", mpf_level);
+			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 			dmd_text_outline ();
 
 			dmd_alloc_pair ();
@@ -393,12 +390,12 @@ CALLSET_ENTRY (mpf, mpf_entered)
 	mpf_award = 10;
 	/* Increment the amount of balls in the mpf */
 	bounded_increment (mpf_ball_count, feature_config.installed_balls);
-	task_recreate_gid (GID_MPF_COUNTDOWN_SCORE_TASK, mpf_countdown_score_task);
 	/* Add on 10 seconds for each extra ball */
 //	if (mpf_ball_count > 1)
 //		mpf_timer += 10;
 	bounded_increment (mpf_level, 10);
 	bounded_decrement (mpf_enable_count, 0);
+	task_recreate_gid (GID_MPF_COUNTDOWN_SCORE_TASK, mpf_countdown_score_task);
 	
 	if ((mpf_ball_count = 1))
 	{	
@@ -475,7 +472,7 @@ CALLSET_ENTRY (mpf, sw_mpf_right)
 CALLSET_ENTRY (mpf, start_player)
 {
 	mpf_enable_count = 1;
-	mpf_level = 1;
+	mpf_level = 0;
 	mpf_active = FALSE;
 }
 

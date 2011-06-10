@@ -65,7 +65,7 @@ static void write_spiralaward_text (void)
 	if (spiralawards_collected < 6)
 	{
 		font_render_string_center (&font_quadrit, 64, 20, spiralaward_names[spiralaward]);
-		font_render_string_center (&font_bitcube10, 64, 7, "SPIRAL AWARD");
+		font_render_string_center_ytop (&font_bitcube10, 64, 1, "SPIRAL AWARD");
 	}
 	else 
 	{

@@ -74,8 +74,8 @@ const char *door_panel_names_line2[] = {
 
 static void door_award_draw_text (U8 award)
 {
-	font_render_string_left (&font_mono5, 3, 3, door_panel_names_line1[award]);
-	font_render_string_left (&font_mono5, 3, 16, door_panel_names_line2[award]);
+	font_render_string_left (&font_nayupixel10, 3, 3, door_panel_names_line1[award]);
+	font_render_string_left (&font_nayupixel10, 3, 16, door_panel_names_line2[award]);
 }
 
 const char *door_award_goals[] = {
@@ -88,7 +88,7 @@ const char *door_award_goals[] = {
 	"ANYTHING",
 	"YELLOW TARGETS",
 	"THE CAMERA",
-	"BELOW THE CAMERA",
+	"THE HITCHHIKER",
 	"CLOCK TARGET",
 	"LEFT RAMP",
 	"LOCK LANE",
@@ -287,7 +287,7 @@ void door_award_deff (void)
 		font_render_string_center (&font_fireball, 48, 9, "SHOOT");
 		if (on)
 		{
-			font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
+			font_render_string_center (&font_nayupixel10, 48, 22, door_award_goals[index]);
 			on = FALSE;
 		}
 		else
@@ -305,14 +305,13 @@ void door_award_deff (void)
 	{
 		dmd_alloc_pair_clean ();
 		font_render_string_center (&font_fireball, 48, 9, "SHOOT");
-		font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
+		font_render_string_center (&font_nayupixel10, 48, 22, door_award_goals[index]);
 		dmd_copy_low_to_high ();
 		callset_invoke (score_overlay);
 		dmd_show2 ();
 		
 		task_sleep (TIME_100MS);
 	}
-//	task_sleep_sec (2);
 	deff_exit ();
 }
 

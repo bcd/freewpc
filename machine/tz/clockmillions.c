@@ -152,9 +152,9 @@ void clock_millions_mode_deff (void)
 	//		dmd_map_overlay ();
 	//		dmd_clean_page_low ();
 	
-			font_render_string_center (&font_var5, 64, 5, "CLOCK MILLIONS");
+			font_render_string_center (&font_nayupixel10, 64, 5, "CLOCK MILLIONS");
 			sprintf_current_score ();
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 			psprintf ("SHOOT CLOCK 1 MORE TIME", "SHOOT CLOCK %d MORE TIMES", 6 - clock_mode_hits);
 			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 			sprintf ("%d", clock_millions_mode_timer);

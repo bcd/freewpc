@@ -54,7 +54,7 @@ void sssmb_running_deff (void)
 			dmd_clean_page_low ();
 
 			font_render_string_left (&font_bitoutline, 1, 1, "SKILL");
-			font_render_string_left (&font_quadrit, 52, 2, "MULTIBALL");
+			font_render_string_left (&font_quadrit, 54, 2, "MULTIBALL");
 			sprintf_current_score ();
 			font_render_string_center (&font_cowboy, 64, 16, sprintf_buffer);
 	

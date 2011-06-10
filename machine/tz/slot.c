@@ -74,7 +74,6 @@ void sslot_mode_deff (void)
 {
 	U16 fno;
 	dmd_alloc_pair_clean ();
-	//while (timed_mode_running_p (&sslot_mode))
 	for (;;)
 	{
 		for (fno = IMG_REELSTRIP_START; fno <= IMG_REELSTRIP_END; fno += 2)
@@ -82,7 +81,7 @@ void sslot_mode_deff (void)
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
 		
-			font_render_string_center (&font_var5, 64, 5, "SHOOT SLOT MACHINE");
+			font_render_string_center (&font_nayupixel10, 64, 5, "SHOOT SLOT MACHINE");
 			sprintf_current_score ();
 			font_render_string_center (&font_cowboy, 64, 14, sprintf_buffer);
 			font_render_string_center (&font_bitcube10, 64, 25, sslot_award_names[sslot_award_index]);
@@ -106,7 +105,6 @@ void sslot_award_deff (void)
 {
 	sprintf_score (score_deff_get ());
 	U16 fno;
-	sound_send (SND_ODD_CHANGE_BEGIN);
 	U8 y = 20;
 	for (fno = IMG_ODDCHANGE_START; fno < IMG_ODDCHANGE_END; fno += 2)
 	{
