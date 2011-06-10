@@ -188,7 +188,7 @@ define CONFIG_TZONE_IP y
 67: Standup 6, standup, ingame, lamp(LM_MR2_5M)
 68: Standup 7, standup, ingame, lamp(LM_LR_5M)
 71: Autofire1, opto, noplay, ingame
-72: Autofire2, opto, noplay, ingame
+72: Autofire2, opto, noplay, ingame, debounce (TIME_66MS)
 73: Right Ramp, opto, ingame
 74: Gumball Popper, opto, intest
 75: MPF Top, opto, ingame
@@ -292,7 +292,7 @@ Ramp Div: driver(duty2),
 	sol=SOL_RAMP_DIVERTOR, timeout=TIME_3S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
 Gumball Div: driver(duty2),
-	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
+	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_400MS, duty_mask=DUTY_MASK_50
 
 ### old duty driver ###
 #Ramp Div: driver(duty),
@@ -628,7 +628,7 @@ Clock Millions Mode Total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE
 MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT+D_PAUSE
 MPF Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 
-Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
+Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Inlane lights Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Left ramp lights camera: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_RESTARTABLE+D_TIMEOUT
