@@ -144,3 +144,5 @@ CALLSET_ENTRY (deffs2, amode_page)
 	font_render_string_center (&font_nayupixel10, 64, 16, sprintf_buffer);
 	show_text_on_stars ();
 }
+
+

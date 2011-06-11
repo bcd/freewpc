@@ -143,7 +143,7 @@ void clock_millions_hit_deff (void)
 
 void clock_millions_mode_deff (void)
 {
-	U16 fno;
+	//U16 fno;
 	for (;;)
 	{
 //		for (fno = IMG_CLOCK_START; fno <= IMG_CLOCK_END; fno += 2)

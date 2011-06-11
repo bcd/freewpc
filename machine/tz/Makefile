@@ -87,7 +87,7 @@ GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
 	spiral.o bttz.o factoids.o master.o snake.o \
 	lock.o lanes.o combo.o deffs2.o hurryup.o
 
-GAME4_OBJS = bonus.o dollar.o bar.o tnf.o sdss.o pb_lock.o
+GAME4_OBJS = bonus.o dollar.o bar.o tnf.o sdss.o pb_lock.o wheelie.o
 
 IMAGE_MAP += $(M)/tz.ild
 

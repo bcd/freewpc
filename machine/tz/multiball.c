@@ -205,10 +205,16 @@ CALLSET_ENTRY (mball, music_refresh)
 
 void lock_lit_deff (void)
 {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fireball, 64, 16, "LOCK IS LIT");
-	dmd_show_low ();
-	task_sleep_sec (2);
+	U8 i;
+	for (i = 0; i < 20; i++)
+	{
+		dmd_alloc_pair_clean ();
+		font_render_string_center (&font_fireball, 64, 16, "LOCK IS LIT");
+		dmd_copy_low_to_high ();
+		callset_invoke (score_overlay);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 	deff_exit ();
 }
 

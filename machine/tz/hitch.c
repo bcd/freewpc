@@ -91,7 +91,7 @@ void hitch_mode_deff (void)
 		dmd_clean_page_low ();
 		font_render_string_center (&font_nayupixel10, 64, 5, "SHOOT HITCHHIKER");
 		sprintf_current_score ();
-		font_render_string_center (&font_antiqua, 64, 14, sprintf_buffer);
+		font_render_string_center (&font_antiqua, 64, 13, sprintf_buffer);
 		font_render_string_center (&font_nayupixel10, 64, 27, "FOR 10M");
 		sprintf ("%d", hitch_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);

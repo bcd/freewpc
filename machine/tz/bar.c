@@ -18,7 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//TODO Add support  different sized segments
+//TODO Add support for different sized segments and a fill level more than
+// max_width
 
 /* CALLSET_SECTION (bar, __machine4__) */
 #include <freewpc.h>

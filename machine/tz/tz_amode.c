@@ -221,6 +221,7 @@ void show_text_on_stars (void)
 	U8 n;
 	for (n = 0; n < 40; n++)
 	{
+		dmd_map_overlay ();
 		dmd_dup_mapped ();
 		dmd_overlay_onto_color ();
 		star_draw ();
@@ -228,7 +229,6 @@ void show_text_on_stars (void)
 		if (amode_page_changed)
 			break;
 		task_sleep (TIME_100MS);
-		dmd_map_overlay ();
 	}
 }
 
