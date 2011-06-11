@@ -119,12 +119,12 @@ static char wheelie6_high_bits[] = { wheelie6_high_width, wheelie6_high_height,
   0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
   };
 
-static char wheelie_arrow_bits{} = {
-	6,5,1,2,4,2,1,
-	6,5,2,4,8,4,2,
-	6,5,4,8,16,8,4
-	6,5,8,16,32,16,8,
-	6,5,16,32,1,16,32
+static const U8 wheelie_arrow_bits[] = {
 	6,5,32,1,2,1,32,
+	6,5,16,32,1,32,16,
+	6,5,8,16,32,16,8,
+	6,5,4,8,16,8,4,
+	6,5,2,4,8,4,2,
+	6,5,1,2,4,2,1,
 };
 	

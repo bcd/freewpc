@@ -23,13 +23,15 @@
 #include "wheelie.h"
 
 #define JUMP_HEIGHT 6
-#define BIKE_YPOS 25 - wheelie1_low_height
+#define BIKE_YPOS 32 - wheelie1_low_height
 
 U8 wheelie_ypos;
 U8 wheelie_xpos;
 U8 wheelie_speed;
 U8 wheelie_speed_calc;
 U8 wheelie_buttons_pressed;
+U8 wheelie_arrow_offset;
+
 const U8 wheelie_max_level = 88;
 
 enum wheelie_states {
@@ -44,47 +46,56 @@ enum wheelie_states {
 	WHEELIE_DOWN1,
 } wheelie_state;
 
+enum wheelie_game_states {
+	WHEELIE_GAME_INTRO,
+	WHEELIE_GAME_SPEED,
+	WHEELIE_GAME_PREJUMP,
+	WHEELIE_GAME_JUMP,
+	WHEELIE_GAME_JUMPING,
+	WHEELIE_GAME_END,
+} wheelie_game_state;
+
 static void draw_wheelie1 (U8 x, U8 y)
 {
-	bitmap_blit (&wheelie1_low_bits, x, y);
+	bitmap_blit (wheelie1_low_bits, x, y);
 	dmd_flip_low_high ();
-	bitmap_blit (&wheelie1_high_bits, x, y);
+	bitmap_blit (wheelie1_high_bits, x, y);
 	dmd_flip_low_high ();
 }
 
 static void draw_wheelie2 (U8 x, U8 y)
 {
-	bitmap_blit (&wheelie2_low_bits, x, y);
+	bitmap_blit (wheelie2_low_bits, x, y);
 	dmd_flip_low_high ();
-	bitmap_blit (&wheelie2_high_bits, x, y);
+	bitmap_blit (wheelie2_high_bits, x, y);
 	dmd_flip_low_high ();
 }
 static void draw_wheelie3 (U8 x, U8 y)
 {
-	bitmap_blit (&wheelie3_low_bits, x, y);
+	bitmap_blit (wheelie3_low_bits, x, y);
 	dmd_flip_low_high ();
-	bitmap_blit (&wheelie3_high_bits, x, y);
+	bitmap_blit (wheelie3_high_bits, x, y);
 	dmd_flip_low_high ();
 }
 static void draw_wheelie4 (U8 x, U8 y)
 {
-	bitmap_blit (&wheelie4_low_bits, x, y);
+	bitmap_blit (wheelie4_low_bits, x, y);
 	dmd_flip_low_high ();
-	bitmap_blit (&wheelie4_high_bits, x, y);
+	bitmap_blit (wheelie4_high_bits, x, y);
 	dmd_flip_low_high ();
 }
 static void draw_wheelie5 (U8 x, U8 y)
 {
-	bitmap_blit (&wheelie5_low_bits, x, y);
+	bitmap_blit (wheelie5_low_bits, x, y);
 	dmd_flip_low_high ();
-	bitmap_blit (&wheelie5_high_bits, x, y);
+	bitmap_blit (wheelie5_high_bits, x, y);
 	dmd_flip_low_high ();
 }
 static void draw_wheelie6 (U8 x, U8 y)
 {
-	bitmap_blit (&wheelie6_low_bits, x, y);
+	bitmap_blit (wheelie6_low_bits, x, y);
 	dmd_flip_low_high ();
-	bitmap_blit (&wheelie6_high_bits, x, y);
+	bitmap_blit (wheelie6_high_bits, x, y);
 	dmd_flip_low_high ();
 }
 
@@ -139,12 +150,30 @@ static void start_jump (void)
 	}
 }
 
-static void draw_background (void)
+#define BITMAP_SIZE 7
+#define BITMAP_WIDTH 6
+static void draw_arrows (void)
 {
+	return;
+	U8 i;
+	for (i=0; i <= 128 - BITMAP_WIDTH - 4; i += BITMAP_WIDTH)
+	{
+		bitmap_blit (wheelie_arrow_bits + wheelie_arrow_offset * BITMAP_SIZE, 4 + i, 26);
+	}
+	if (wheelie_game_state == WHEELIE_GAME_INTRO)
+		return;
+	if (++wheelie_arrow_offset >= 6)
+		wheelie_arrow_offset = 0;
 }
 
 static void draw_wheelie (U8 xpos)
 {
+	if (wheelie_game_state == WHEELIE_GAME_INTRO)
+	{
+		draw_wheelie1 (xpos, BIKE_YPOS - wheelie_ypos);
+		return;
+	}
+
 	switch (wheelie_state)
 	{
 		case WHEELIE_FLAT:
@@ -168,6 +197,7 @@ static void draw_wheelie (U8 xpos)
 			wheelie_state = WHEELIE_JUMP;
 			break;
 		case WHEELIE_JUMP:
+
 			draw_wheelie6 (xpos, BIKE_YPOS - wheelie_ypos);
 			break;
 		case WHEELIE_DOWN3:
@@ -246,23 +276,72 @@ static void wheelie_button_press (void)
 
 static void wheelie_start (void)
 {
+	wheelie_game_state = WHEELIE_GAME_INTRO;
+	wheelie_state = WHEELIE_FLAT;
 	wheelie_xpos = 2;
 	wheelie_ypos = 0;
 	wheelie_speed = 0;
 	wheelie_speed_calc = 1;
 	wheelie_buttons_pressed = 1;
+	wheelie_arrow_offset = 0;
+}
+
+static void show_intro_screen (void)
+{
+	dmd_alloc_pair_clean ();
+	font_render_string_center_ytop (&font_cowboy, 64, 0, "WHEELIE!");
+	dmd_copy_low_to_high ();
+	//draw_arrows ();
+	font_render_string_center (&font_nayupixel10, 64, 12, "BASH FLIPPER BUTTONS");
+	font_render_string_center (&font_nayupixel10, 64, 20, "TO BUILD UP SPEED");
+	dmd_show2 ();
+	sound_send (SND_WELCOME_RACE_FANS);
+	task_sleep_sec (4);
+	
+	dmd_alloc_pair_clean ();
+	font_render_string_center_ytop (&font_cowboy, 64, 0, "WHEELIE!");
+	dmd_copy_low_to_high ();
+	draw_wheelie (wheelie_xpos);
+	draw_arrows ();
+	font_render_string_center (&font_bitoutline, 64, 16, "3");
+	sound_send (SND_THREE);
+	dmd_show2 ();
+	task_sleep_sec (1);
+
+	dmd_alloc_pair_clean ();
+	font_render_string_center_ytop (&font_cowboy, 64, 0, "WHEELIE!");
+	dmd_copy_low_to_high ();
+	draw_wheelie (wheelie_xpos);
+	draw_arrows ();
+	font_render_string_center (&font_bitoutline, 64, 16, "2");
+	sound_send (SND_TWO);
+	dmd_show2 ();
+	task_sleep_sec (1);
+
+	dmd_alloc_pair_clean ();
+	font_render_string_center_ytop (&font_cowboy, 64, 0, "WHEELIE!");
+	dmd_copy_low_to_high ();
+	draw_wheelie (wheelie_xpos);
+	draw_arrows ();
+	font_render_string_center (&font_bitoutline, 64, 16, "1");
+	sound_send (SND_ONE);
+	dmd_show2 ();
+	task_sleep_sec (1);
+	sound_send (SND_CLOCK_GONG);
 }
 
 void wheelie_deff (void)
 {
 	U8 i;
 	wheelie_start ();
+	show_intro_screen ();
+	wheelie_game_state = WHEELIE_GAME_SPEED;
 	//for (wheelie_xpos = 2; wheelie_xpos < 128 - wheelie1_low_width; wheelie_xpos += wheelie_speed)
-	for (;;)
+	timer_restart_free (GID_WHEELIE_GAME_SPEED, TIME_4S);
+	while (task_find_gid (GID_WHEELIE_GAME_SPEED))
 	{
-		//calculate_jump ();
 		dmd_alloc_pair_clean ();
-		draw_background ();
+		draw_arrows ();
 		wheelie_draw_speed ();
 		draw_wheelie (wheelie_xpos);
 		if (!check_for_marty ())
@@ -271,11 +350,38 @@ void wheelie_deff (void)
 		dmd_show2 ();
 		wheelie_sleep ();
 	}
+	wheelie_game_state = WHEELIE_GAME_JUMP;
+	//Move the bike slowly to the center
+	for (i = 0; i < 20; i++)
+	{
+		dmd_alloc_pair_clean ();
+		draw_arrows ();
+		wheelie_draw_speed ();
+		wheelie_xpos++;
+		draw_wheelie (wheelie_xpos);
+		sound_send (0x54);
+		dmd_show2 ();
+		wheelie_sleep ();
+	}
+	start_jump ();
+	wheelie_game_state = WHEELIE_GAME_JUMPING;
+	timer_restart_free (GID_WHEELIE_GAME_SPEED, TIME_10S);
+	while (task_find_gid (GID_WHEELIE_GAME_SPEED))
+	{
+		calculate_jump ();
+		dmd_alloc_pair_clean ();
+		draw_arrows ();
+		draw_wheelie (wheelie_xpos);
+		sound_send (0x54);
+		dmd_show2 ();
+		wheelie_sleep ();
+	}
+	wheelie_game_state = WHEELIE_GAME_END;
 	deff_exit ();
 }
 
 CALLSET_ENTRY (wheelie, sw_right_button, sw_left_button)
 {
-	if (deff_get_active () == DEFF_WHEELIE)
+	if (deff_get_active () == DEFF_WHEELIE && wheelie_game_state == WHEELIE_GAME_SPEED)
 		wheelie_button_press ();
 }
