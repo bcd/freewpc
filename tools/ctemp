@@ -161,6 +161,8 @@ sub parse {
 		}
 
 		# @@weakdefine <name> <value>
+		# A weakdefine provides a default value, but won't
+		# clobber one that already exists.
 		# ----------------------------------------------------
 		elsif (/^\@\@weakdefine ([a-z]*) (.*)$/) {
 			if (!defined $macrotab{$1}) {
@@ -186,14 +188,15 @@ sub parse {
 #
 # Main program.
 #
-GetOptions ("D=s" => sub {
-								my ($var, $value) = split /=/, $_[1];
-								define ($var, $value);
-							},
-				"i=s" => sub { define ("instance", $_[1]); },
-				"s=s" => sub { define ("self", $_[1]); define ("SELF", uc($_[1])); },
-				"o=s" => \$outdir
-				) or die "Invalid options";
+GetOptions (
+	"D=s" => sub {
+		my ($var, $value) = split /=/, $_[1];
+		define ($var, $value);
+	},
+	"i=s" => sub { define ("instance", $_[1]); },
+	"s=s" => sub { define ("self", $_[1]); define ("SELF", uc($_[1])); },
+	"o=s" => \$outdir
+) or die "Invalid options";
 
 parse ($ARGV[0]);
 chfile (undef);
