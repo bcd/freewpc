@@ -722,6 +722,8 @@ extern inline void pinio_write_gi (U8 val)
 /* Solenoids                                */
 /********************************************/
 
+#define PINIO_NUM_SOLS 48
+
 extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 {
 	switch (set)

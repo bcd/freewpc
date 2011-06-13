@@ -23,9 +23,11 @@
 
 typedef U8 solnum_t;
 
-#define SOL_COUNT 48
+#ifndef PINIO_NUM_SOLS
+#error "SOL_COUNT renamed to PINIO_NUM_SOLS"
+#endif
 
-#define SOL_REG_COUNT (SOL_COUNT / 8)
+#define SOL_REG_COUNT (PINIO_NUM_SOLS / 8)
 
 /* TODO - these are WPC specific */
 #define SOL_BASE_HIGH 0

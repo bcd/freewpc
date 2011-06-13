@@ -110,7 +110,7 @@ void flasher_randomize (task_ticks_t delay, U16 duration)
 	while (duration > 0)
 	{
 		do {
-			id = random_scaled (SOL_COUNT);
+			id = random_scaled (PINIO_NUM_SOLS);
 		} while (!MACHINE_SOL_FLASHERP (id));
 		flasher_pulse (id);
 		task_sleep (delay);

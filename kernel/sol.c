@@ -52,13 +52,13 @@
 
 /** Per flasher timers.  When this value is nonzero, the flasher
 is enabled.  Each tick here corresponds to 4ms. */
-__fastram__ U8 sol_timers[SOL_COUNT - SOL_MIN_FLASHER];
+__fastram__ U8 sol_timers[PINIO_NUM_SOLS - SOL_MIN_FLASHER];
 
 /** Per flasher duty-cycle mask.  This is an 8-bit value where a '1'
 bit means to turn it on, and a '0' means to turn it off, during the next 4ms.
 When the timer is enabled, this allows the flasher to be dimmed.
 Use the SOL_DUTY values here. */
-U8 sol_duty_state[SOL_COUNT - SOL_MIN_FLASHER];
+U8 sol_duty_state[PINIO_NUM_SOLS - SOL_MIN_FLASHER];
 
 /** The current bit of the duty cycle masks to be examined.  After servicing
 all devices, this mask is shifted.  At most one bit is ever set here at a time. */
@@ -479,7 +479,7 @@ sol_init (void)
 
 	/* Initialize the duty state of all solenoids to their nominal
 	 * values. */
-	for (sol = SOL_MIN_FLASHER; sol < SOL_COUNT; sol++)
+	for (sol = SOL_MIN_FLASHER; sol < PINIO_NUM_SOLS; sol++)
 	{
 		sol_duty_state[sol - SOL_MIN_FLASHER] = sol_get_duty (sol);
 	}

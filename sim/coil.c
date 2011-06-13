@@ -101,7 +101,7 @@ struct sim_coil_state
 /**
  * The global array of coil states
  */
-struct sim_coil_state coil_states[SOL_COUNT];
+struct sim_coil_state coil_states[PINIO_NUM_SOLS];
 
 
 void device_coil_at_max (struct sim_coil_state *c)
@@ -321,7 +321,7 @@ void sim_coil_init (void)
 	int sol;
 
 	/* Initialize everything to zero first */
-	for (sol = 0; sol < SOL_COUNT; sol++)
+	for (sol = 0; sol < PINIO_NUM_SOLS; sol++)
 	{
 		char item_name[32];
 		struct sim_coil_state *c = coil_states + sol;

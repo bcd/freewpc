@@ -42,7 +42,7 @@ struct wpc_debug_port
 
 
 /** The simulated solenoid outputs */
-static U8 sim_sols[SOL_COUNT / 8];
+static U8 sim_sols[PINIO_NUM_SOLS / 8];
 
 /** Pointer to the current switch matrix element */
 static U8 *sim_switch_data_ptr;
@@ -226,7 +226,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 	{
 		unsigned int solno = index+n;
 
-		if (solno < SOL_COUNT)
+		if (solno < PINIO_NUM_SOLS)
 			sim_coil_change (solno, val & (1 << n));
 	}
 
