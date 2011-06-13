@@ -1,11 +1,30 @@
+/*
+ * Copyright 2010-2011 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #ifndef __SERVE_H
 #define __SERVE_H
 
-void serve_ball (void);
-void launch_ball (void);
-void serve_ball_auto (void);
-void set_ball_count (U8 count);
-void add_ball_count (U8 count);
+__common__ void serve_ball (void);
+__common__ void launch_ball (void);
+__common__ void serve_ball_auto (void);
+__common__ void set_ball_count (U8 count);
+__common__ void add_ball_count (U8 count);
 
 #endif /* __SERVE_H */
