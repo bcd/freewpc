@@ -1219,13 +1219,13 @@ sub pf_lamps {
 	if ($sortfn ne "all") {
 		@lamps = sort $sortfn @lamps;
 	}
-	$lamplist .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
+	$lamplist .= "/* break */ LAMP_BREAK,\n   ";
 	foreach $lamp (@lamps) {
 		if (defined $lastlamp) {
 			$a = $lastlamp;
 			$b = $lamp;
 			if (($sortfn ne "all") && (&$sortfn() != 0)) {
-				$lamplist .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
+				$lamplist .= "/* break */ LAMP_BREAK,\n   ";
 			}
 		}
 		$lamplist .= $lamp->{'c_ident'} . ",\n   ";

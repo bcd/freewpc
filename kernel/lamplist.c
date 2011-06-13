@@ -37,7 +37,9 @@
  * Lamplists themselves are declared in the machine configuration file,
  * which is compiled to produce mach-lamplists.c.  Internally, each
  * lamplist is just an array of lamp IDs, terminated by the special
- * value LAMP_END.
+ * value LAMP_END.  Within a lamplist you can also encode "breaks",
+ * which separate one lamplist into multiple sections.  This allows
+ * an additional delay to be applied.
  */
 
 #include <freewpc.h>
@@ -58,9 +60,11 @@ static inline bool leff_caller_p (void)
 
 /** Returns true if the given lamp ID value is not an actual lamp,
 but a macro. */
-static inline bool lamplist_macro_entry (lampnum_t entry)
+static inline bool lamp_macro (lampnum_t entry)
 {
-	return (entry == LAMP_MACRO_SLEEP_OP) ? TRUE : FALSE;
+	if (entry == LAMP_BREAK)
+		return TRUE;
+	return FALSE;
 }
 
 
@@ -96,8 +100,8 @@ lampnum_t lamplist_index (lamplist_id_t id, U8 n)
 const lampnum_t *lamplist_first_entry (lamplist_id_t id)
 {
 	register const lampnum_t *entry = lamplist_table[id];
-	while (lamplist_macro_entry (*entry))
-		entry++;
+	/* We don't check for LAMP_BREAK here, because it is illegal to
+	start a list with a break. */
 	return entry;
 }
 
@@ -107,7 +111,7 @@ const lampnum_t *lamplist_last_entry (lamplist_id_t id)
 	register const lampnum_t *entry = lamplist_table[id];
 	while (entry[1] != LAMP_END)
 		entry++;
-	while (lamplist_macro_entry (*entry))
+	while (lamp_macro (*entry))
 		entry--;
 	return entry;
 }
@@ -118,7 +122,7 @@ lamplist_previous_entry (lamplist_id_t id, const lampnum_t *entry)
 {
 	do {
 		entry--;
-	} while (lamplist_macro_entry (*entry));
+	} while (lamp_macro (*entry));
 	return entry;
 }
 
@@ -128,7 +132,7 @@ lamplist_next_entry (lamplist_id_t id, const lampnum_t *entry)
 {
 	do {
 		entry++;
-	} while (lamplist_macro_entry (*entry));
+	} while (lamp_macro (*entry));
 	return entry;
 }
 
@@ -147,7 +151,7 @@ void lamplist_apply_nomacro (lamplist_id_t id, lamp_operator_t op)
 	register const lampnum_t *entry;
 	page_push (MD_PAGE);
 	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
-		if (!lamplist_macro_entry (*entry))
+		if (!lamp_macro (*entry))
 			(*op) (*entry);
 	page_pop ();
 }
@@ -166,7 +170,7 @@ void lamplist_apply (lamplist_id_t id, lamp_operator_t op)
 	{
 		switch (*entry)
 		{
-			case LAMP_MACRO_SLEEP_OP:
+			case LAMP_BREAK:
 				if (leff_caller_p () && (lamplist_apply_delay != 0))
 				{
 					lamplist_apply_delay1 = lamplist_apply_delay;
@@ -199,7 +203,7 @@ static const lampnum_t *lamplist_find (lamplist_id_t id,
 
 	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 	{
-		if (lamplist_macro_entry (*entry))
+		if (lamp_macro (*entry))
 			continue;
 		if (op (*entry))
 			break;
@@ -221,7 +225,7 @@ bool lamplist_test_all (lamplist_id_t id, lamp_boolean_operator_t op)
 
 	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 	{
-		if (lamplist_macro_entry (*entry))
+		if (lamp_macro (*entry))
 			continue;
 		if (!op (*entry))
 		{
@@ -247,7 +251,7 @@ bool lamplist_test_any (lamplist_id_t id, lamp_boolean_operator_t op)
 
 	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 	{
-		if (lamplist_macro_entry (*entry))
+		if (lamp_macro (*entry))
 			continue;
 		if (op (*entry))
 		{
@@ -372,7 +376,7 @@ void lamplist_build_increment (lamplist_id_t set, bitset matrix)
 	page_push (MD_PAGE);
 	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
-		if (lamplist_macro_entry (*entry))
+		if (lamp_macro (*entry))
 			continue;
 		if (!((matrix_test_operator (matrix)) (*entry)))
 		{
@@ -394,7 +398,7 @@ void lamplist_build_decrement (lamplist_id_t set, bitset matrix)
 		entry >= lamplist_first_entry (set);
 		entry--)
 	{
-		if (lamplist_macro_entry (*entry))
+		if (lamp_macro (*entry))
 			continue;
 		if (((matrix_test_operator (matrix)) (*entry)))
 		{
@@ -431,7 +435,7 @@ void lamplist_rotate_next (lamplist_id_t set, bitset matrix)
 	state = test (*(lamplist_last_entry (set)));
 	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
-		if (lamplist_macro_entry (*entry))
+		if (lamp_macro (*entry))
 			continue;
 		newstate = test (*entry);
 		(state ? bit_on : bit_off) (matrix, *entry);
@@ -460,7 +464,7 @@ void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 	first = test (*(lamplist_first_entry (set)));
 	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
-		if (lamplist_macro_entry (*entry))
+		if (lamp_macro (*entry))
 			continue;
 		if (prev_entry)
 		{

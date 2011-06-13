@@ -70,19 +70,15 @@ typedef enum
 } lamp_matrix_id_t;
 
 /**
- * Lamp macros are lamplist members which calculate actual
- * lamp values at runtime.
- *
- * Macro values start above the range of acutal lamp numbers.
- * These macros will be deprecated and replaced by a compile-time
- * mechanism to construct new lamplists.
+ * Special lamp numbers that don't refer to real lamps, but
+ * to lamplist operations.
  */
 
 /** Indicates the end of a lamplist */
-#define LAMP_END						(PINIO_NUM_LAMPS + 2)
+#define LAMP_END (PINIO_NUM_LAMPS + 2)
 
 /** Indicates a time delay within a lamplist */
-#define LAMP_MACRO_SLEEP_OP		(PINIO_NUM_LAMPS + 3)
+#define LAMP_BREAK (PINIO_NUM_LAMPS + 3)
 
 
 void lamp_init (void);
