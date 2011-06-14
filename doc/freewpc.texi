@@ -2292,6 +2292,8 @@ others can hold many.
 * Events::                     Which events are generated
 * The Trough Device::          How the trough device is special
 * Virtual Balls::              How to manipulate ball counts manually
+* Locking Balls::              Keeping a ball within a device
+* Multiball::                  How to handle multiball correctly
 @end menu
 
 @node Device Status
@@ -2417,6 +2419,52 @@ When it knows that a ball has exited the device, it calls
 @code{device_remove_virtual}.  This decrements the virtual ball counter.
 This behaves exactly like when a real ball is kicked out, so the
 @code{kick_success} event is thrown and the live ball count goes up.
+
+@node Locking Balls
+@section Locking Balls
+
+Normally, when a ball enters a playfield device, it will be kicked out
+automatically because the desired count of the device is zero.  From
+within the @code{enter} event, you can call @code{device_lock_ball}
+to increment that count, which will result in the ball not being
+released.
+
+In the simplest scenario, the physical ball count is used to determine
+progress towards multiball.  A more fair method is to keep the
+count of locked balls per player, so that they can't be "stolen".
+In that case, declare your own per-player lock count variable for each
+device.  You'll need to write your own logic to deal with this; the
+OS at present only supports tracking physical lock counts.
+
+If a ball is physically locked, then another one will need to be
+put into play.  The system tries to do this for you automatically.
+If there is a ball in the trough, it will be chosen.  Otherwise,
+it will need to come another playfield device.  By default, it
+will release the ball from the same device that was just entered
+(after all, it must have a ball in it).  The @code{empty_trough_kick}
+event is thrown to give machines a chance to override this and
+choose a different device.  This is only needed for games that
+have multiple multi-ball devices; for example, you could give
+priority to one device, or alternate between them.
+
+@node Multiball
+@section Multiball
+
+To start a multiball, there are two steps.  First, unlock or release
+all of the balls in non-trough devices.
+Use @code{device_unlock_ball} or @code{device_request_empty} to do
+this.
+
+Second, add additional balls into play from the trough using
+@code{set_ball_count}.  The system will then add balls into play
+from the trough to get to the desired count.  This will even work
+on manual plungers, if you guarantee that at most one ball gets
+served this way.  The system will never try to put two balls at
+the plunger.
+
+You can also use @code{add_ball_count} instead to force a
+specific number of balls to be added.  This is always useful
+during the multiball to "add-a-ball".
 
 @c ======================================================
 @node Test Mode
