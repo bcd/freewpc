@@ -104,6 +104,9 @@ _bcd_string_sub:
 	puls	u,pc
 
 
+/* The multiplication functions below are not used now */
+#if 0
+
 bcd_temp1:
 	.blkb	6
 bcd_temp2:
@@ -187,3 +190,4 @@ _bcd_string_mul10:
 	; RESTORE_REG(x, y, d, pc)
 	puls	y,pc
 
+#endif
