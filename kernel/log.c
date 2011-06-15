@@ -20,6 +20,12 @@
 
 #include <freewpc.h>
 
+/** The last CALLSET_ENTRY that was invoked */
+__permanent__ U16 log_callset;
+__permanent__ U16 prev_log_callset;
+
+#ifdef DEBUG_LOG
+
 /** The offset in the buffer of the next event to be read */
 U8 log_head;
 
@@ -28,12 +34,6 @@ U8 log_tail;
 
 /** An array of log entries */
 struct log_event log_entry[MAX_LOG_EVENTS];
-
-/** The last CALLSET_ENTRY that was invoked */
-__permanent__ U16 log_callset;
-__permanent__ U16 prev_log_callset;
-
-#ifdef DEBUG_LOG
 
 char *log_module_names[] = {
 	[MOD_DEFF] = "Deff",
@@ -136,7 +136,9 @@ void log_event1 (U16 module_event, U8 arg)
 /** Initialize the event log. */
 void log_init (void)
 {
+#ifdef CONFIG_LOG
 	log_head = log_tail = 0;
+#endif
 
 	/* Save the last event logged from the previous run. */
 	prev_log_callset = log_callset;
