@@ -322,6 +322,9 @@ CALLSET_ENTRY (task_chunk, amode_start, end_ball)
 
 
 /** Free a dynamic block of memory. */
+#ifndef CONFIG_MALLOC
+static
+#endif
 void block_free (task_t *tp)
 {
 	tp->state = BLOCK_FREE;

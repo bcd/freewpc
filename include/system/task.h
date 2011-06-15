@@ -197,8 +197,10 @@ typedef task_t *task_pid_t;
 
 #ifndef CONFIG_NATIVE
 task_t *block_allocate (void);
-void block_free (task_t *tp);
 void malloc_chunk_dump (task_t *task);
+#endif
+#ifdef CONFIG_MALLOC
+void block_free (task_t *tp);
 #endif
 
 void task_dump (void);
