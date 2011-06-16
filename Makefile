@@ -1,22 +1,17 @@
 #
-# FreeWPC makefile
+# Top-level makefile for building FreeWPC
 #
-# (C) Copyright 2005-2010 by Brian Dominy.
+# (C) Copyright 2005-2011 by Brian Dominy.
 #
 # This Makefile can be used to build an entire, FreeWPC game ROM
 # from source code.
 #
-# To build the product, just type "make".
-#
-# To customize the build, create a file named .config.
+# To configure the build, create a file named .config.
 # See config.example for an example of how this should look.
 # The settings in .config override any defaults given below.
 #
-# By default, make will also install your game ROM into your pinmame
-# ROMs directory.  The original MAME zip file will be saved into
-# a file with the .original extension appended.  You can do a
-# "make uninstall" to delete the FreeWPC zip and rename the original
-# zip, so that things are back to the way that they started.
+# To compile, just type "make".  Output goes to the 'build'
+# subdirectory, which must exist.
 #
 
 SHELL := /bin/bash
