@@ -110,6 +110,7 @@ CALLSET_ENTRY (service, sw_down)
 		return;
 	else if (!in_test)
 		button_invoke (SW_VOLUME_DOWN, volume_down, TIME_500MS, TIME_100MS);
+		/* callset_invoke (volume_down) */
 	else	
 		test_down_button ();
 }
@@ -120,6 +121,7 @@ CALLSET_ENTRY (service, sw_up)
 		return;
 	else if (!in_test)
 		button_invoke (SW_VOLUME_UP, volume_up, TIME_500MS, TIME_100MS);
+		/* callset_invoke (volume_up) */
 	else
 		test_up_button ();
 }
