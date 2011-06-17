@@ -85,7 +85,7 @@ extern const font_t font_bitmap_common;
  */
 U8 *font_lookup (const font_t *font, char c)
 {
-	if (unlikely (c == ' '))
+	if (unlikely (c == ' ') || (c >= 'a'))
 	{
 		/* Fonts are not required to provide their own 'space' character,
 		 * since it is trivial to draw.  The width of the space is taken
