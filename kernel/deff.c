@@ -489,7 +489,7 @@ void deff_update (void)
 	/* Recalculate which display effect should run in the
 	background */
 	previous = deff_running;
-	deff_prio = 0;
+	deff_prio = PRI_NULL;
 	deff_background = DEFF_NULL;
 	if (!in_test)
 		callset_invoke (display_update);
