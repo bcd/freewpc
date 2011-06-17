@@ -403,7 +403,7 @@ CALLSET_ENTRY (mpf, sw_right_button)
 	mpf_button_masher_handler ();
 }
 
-CALLSET_ENTRY (mpf, enter_test)
+CALLSET_ENTRY (mpf, stop_game)
 {
 	mpf_active = FALSE;
 }
