@@ -113,6 +113,12 @@ bool system_timer_pause (void)
 	if (timer_find_gid (GID_BALLSAVE_EXTENDED))
 		return TRUE;
 
+	/* Machines can extend the meaning of timer pause by defining an
+	'allow timers' event.  It should return FALSE if timers should be
+	paused for some reason. */
+	if (!callset_invoke_boolean (allow_timers))
+		return TRUE;
+
 #ifdef MACHINE_TZ
 	if (mpf_active)
 		return TRUE;
