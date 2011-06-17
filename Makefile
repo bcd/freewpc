@@ -995,9 +995,6 @@ areainfo:
 	@true $(foreach area,$(AREA_LIST),&& echo $(area) $(AREASIZE_$(area)))
 	@true $(foreach page,$(PAGED_SECTIONS),&& echo $(page) 0x4000 $($(page)_SECTIONS))
 
-callset.in :
-	cat $(C_OBJS:.o=.c) | $(CC) -E $(CFLAGS) -DGENCALLSET - > callset.in
-
 
 #
 # 'make clean' does what you think.
