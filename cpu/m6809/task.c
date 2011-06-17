@@ -538,11 +538,6 @@ void task_exit (void)
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count--;
 #endif
-	/* TODO: on entry to the next function, it is expected that 'X' has
-	 * the current task pointer.  There is actually nothing that
-	 * guarantees this though.  The call to task_free() above
-	 * typically takes care of it, since X is needed for the
-	 * function argument. */
 	task_dispatcher (task_current);
 }
 
