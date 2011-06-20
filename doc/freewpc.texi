@@ -261,6 +261,8 @@ like replay, match, and dot-matrix effects.
 
 The machine-specific files.  Every machine has its own directory of files that are
 specific to it.  Each file may or may not be placed into a bank switched region.
+Generally, you should put game code outside the fixed page as rules are not important
+enough to keep in system ROM.  Custom device drivers must go into system ROM though.
 
 @item platform/@var{platform}/
 
@@ -269,10 +271,9 @@ Every new pinball hardware platform must define some files here.
 
 @item cpu/@var{cpu}/
 
-The CPU-specific files.  These are mostly assembly language files.
-
-The @file{native} directory here is used in simulation, to obtain support
-that is based on portable POSIX support.
+The CPU-specific files.  For the 6809, these are mostly assembly language files
+which are optimized for high performance.  There are also native versions here
+when compiling in simulation mode.
 
 @item fonts/
 
@@ -289,6 +290,11 @@ shared across all machines.
 @item include/
 
 All of the include files are kept in here or one of its subdirectories.
+
+@item build/
+
+Most output files which are not under source control, but generated during the
+build process, appear here.
 
 @end table
 
@@ -1321,7 +1327,8 @@ Says that this switch is on the playfield, and can be activated by a ball,
 as opposed to cabinet buttons, motor optos, etc.  A playfield switch
 event will normally set the valid playfield flag.  It will also cause the
 @code{any_pf_switch} event to be thrown, which is normally used to score
-during "frenzy" modes.
+during "frenzy" modes.  These switches also reset the ball search timer
+to prevent a search from starting.
 
 This is the default; use the @code{noplay} tag to indicate that a switch
 is not playfield scoring.
