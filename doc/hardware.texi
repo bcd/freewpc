@@ -2,9 +2,6 @@
 This appendix provides an overview of the WPC hardware, in terms of its
 capabilities and how software is able to control everything in the machine.
 
-A much more thorough guide to the WPC and other pinball architectures
-can be found at @url{http://www.pinrepair.com/wpc/index.htm}.
-
 @section Overview
 
 WPC pinball machines contain a number of circuit boards, some that are
