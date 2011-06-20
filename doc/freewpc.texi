@@ -53,8 +53,8 @@ Also, knowledge of WPC pinball machines is very helpful.
 * Test Mode::               Differences in the service menu.
 * Common Pinball Library::  Other common functions that are implemented.
 * Fonts and Graphics::      More info on the display APIs.
-* Platform APIs::           How to define a new hardware platform.
 * System Initialization::   The sequence of events that happen at startup.
+* Platform APIs::           How to define a new hardware platform.
 * Native Mode::             Running the software directly on your PC.
 * Debugging::               How to debug problems.
 * The WPC Hardware::        A primer on the WPC platform.
@@ -522,14 +522,14 @@ FreeWPC implements a runtime, round-robin, non-preemptive task scheduler.
 The system manages multiple tasks, each of which has its own call stack.  You
 can create a new task when you want to run some code in parallel with the current
 thread of execution.  The current task has complete control of the CPU and will
-continue to run until it explicit exits or sleeps (waiting for a certain amount
+continue to run until it explicitly exits or sleeps (waiting for a certain amount
 of time).  The minimum sleep time is defined by IRQS_PER_TICK and is currently 16ms.
 
-(Contrast this with desktop operating systems, which use timeslicing and preemption to
+Contrast this with desktop operating systems, which use timeslicing and preemption to
 allow multiple threads to run in parallel.  There, the OS switches between the tasks.
 In FreeWPC task switches only happen explicitly; this provides for more deterministic
 behavior, it requires less overhead, and it eliminates the need for mutexes (locks)
-between two tasks.
+between two tasks because task switches cannot happen at arbitrary times.
 
 If a task does not give up control, either by sleeping, exiting, or yielding
 after a certain amount of time, the fatal error @code{ERR_FCFS_LOCKUP} will be asserted.
@@ -685,7 +685,7 @@ system IRQ tick, which is 1ms on WPC.  Presently, this value can range from 1 to
 It must also be a power of 2.
 
 @var{duration} says how long this function takes to run, in the worst case.  The
-schedule tries to reserve enough CPU cycles for all RTTs and to arrange the order in
+scheduler tries to reserve enough CPU cycles for all RTTs and to arrange the order in
 which they are called so that tasks are balanced.  The duration is also given in milliseconds
 and should be less than 1ms.  It can also be specified in CPU cycles by appending the 'c'
 suffix.  It is not critical if the value is not exact, but a reasonable approximation
@@ -746,16 +746,25 @@ Used for variables that are used frequently.  GCC6809 will generate faster
 code when accessing these.  However, you are limited to about 250 bytes of
 fastram variables total.  These are mostly used by RTTs for performance.
 
-Do not use fastram unless you are working in the core.
+Do not use fastram unless you are working in the core system, or writing
+a device driver that runs more than once every 4ms or so.
+
+The performance gain is just 1 CPU cycle faster and 1 fewer byte of code
+per read or write access.
+
 
 @item __permanent__
 
 Used for variables that should be persistent across reboots.  These variables
 should be initialized inside of a @code{factory_reset} event, because factory
 reset should restore everything to a sane state.  GCC6809 places these variables
-at an address that is not automatically cleared by the startup code.
+at an address that is not automatically cleaned by the startup code during the
+memory test.
 
-The @code{init} or @code{init_complete}
+The @code{init} or @code{init_complete} handlers should test these values for
+sanity, since they may become corrupted due to software bugs.  If this is
+detected, they should be restored to sane values for non-fatal cases if possible,
+otherwise a factory reset should be forced.
 
 @item __nvram__
 
@@ -1243,8 +1252,7 @@ portable to all pinball hardware platforms and all machines.
 However, the underlying implementation may vary.
 
 These functions do not access the hardware directly, but instead, they
-call into a device driver which may be platform-specific.  See the
-section on Platform APIs for information on drivers perform the actual I/O.
+call into a device driver which may be platform-specific (@pxref{Platform APIs}).
 
 These APIs are intended to be called from the application layer (what other
 operating systems might refer to as "user space").
@@ -1393,7 +1401,7 @@ single output value, and send that to the underlying hardware.
 Every lamp has a @dfn{basic state}, which is either @emph{on},
 @emph{off}, or @emph{flashing}.  The basic state of a lamp is
 a per-player value and is automatically saved and restored as players
-change in a multiplayer game.  They are controlled by the following APIs:
+change in a multiplayer game.  It is managed by the following APIs:
 
 @table @code
 @item lamp_on
@@ -1422,12 +1430,12 @@ Ensure the lamp is flashing.
 
 The basic state may be temporarily overriden via a @dfn{lamp effect}.
 An effect can allocate a lamp, thereby overriding its basic value.
-When the effect finishes, the lamp shows its basic state again.
-See Lamp Effects.
+When the effect finishes, it frees the lamp, causing the basic state to
+be shown again (@pxref{Lamp Effects}).
 
 In the machine description, you can attach a color and coordinates
 to each lamp.  These are not used by the core OS, but they can be used
-by lamp effects that manipulate the lamps in certain patterns.
+to construct nice looking lamp effects that manipulate them in certain patterns.
 
 @node Solenoids
 @section Solenoids
@@ -1698,7 +1706,7 @@ Sends a command to the sound board.  The command may be 8-bit or 16-bit.
 The meaning of the command argument varies widely.
 @end table
 
-See also the section on Sound Effects for other APIs that can be used.
+@pxref{Sound and Music Effects} for other APIs that can be used.
 
 
 @node General Illumination
@@ -1741,14 +1749,24 @@ will cause a compiler error.
 On machines with a realtime clock, these APIs let you set and get
 the current time of day.  At present, only WPC is supported.
 
-The chip provides three registers for counting minutes, hours, and days.
+The WPC ASIC provides three registers for counting minutes, hours, and days.
 FreeWPC keeps the calendar time in persistent memory.
 About once per minute, it polls the RTC and updates the calendar time to reflect
-any changes.
+any changes.  The battery provides power to the ASIC even when the game is off
+so the real-time clock remains updated.
+
+Game code does not need to call the following APIs.  The current date and time
+can simply be read from memory.
 
 @table @code
 @item rtc_read
+
+Update memory based on the current value of the RTC registers.
+
 @item rtc_write
+
+Update the RTC chip.
+
 @end table
 
 @node Debug Port
@@ -2549,10 +2567,10 @@ to determine if tournament is in effect.
 
 Machines don't need to do much to produce a working ball search function.
 The common code knows how to pulse all of the regular solenoids.
-It also knows which @emph{not} to fire anything marked as a @code{motor}
+It also knows @emph{not} to fire anything marked as a @code{motor}
 or @code{flasher}.
 You can mark a solenoid in the machine description with @code{nosearch}
-to ignore other solenoids.
+to ignore other solenoids as well.
 
 Machines that need to handle a particular power driver in a non-standard
 way (by using a template driver) should implement a @code{ball_search}
@@ -2564,7 +2582,8 @@ pulsing.
 For example, on Funhouse, the Rudy saucer eject needs to make sure that
 the mouth is open before kicking.
 
-Solenoids associated with ball devices are also skipped unless they are empty.
+Solenoids associated with ball devices will be skipped unless they are empty,
+except after several ball searches have failed.
 
 Game code can call @code{ball_search_timeout_set} to set the amount of
 idle time that must expire before a ball search will occur.  The default
@@ -2589,7 +2608,8 @@ can be checked by just reading the variable; there is no special API to do so.
 Audits are 16-bit variables kept in the non-volatile area of memory.  They
 are generally incremented via the @code{audit_increment} API, which adds 1.
 They can also be incremented by an arbitrary value, via @code{audit_add}; or
-they can be assigned via @code{audit_assign}.
+they can be assigned via @code{audit_assign}.  They will not overflow if the
+maximum value is reached, but instead will just stop counting up.
 
 @section Scoring
 
@@ -2639,6 +2659,25 @@ Awards score without any multipliers.
 The third group of APIs, called the @dfn{ladder APIs}, add score according
 to some rule.
 
+A @dfn{fixed ladder rule} tracks the current value of a shot, and defines a
+base value, an increment, and a maximum value.
+
+@table @code
+@item fixed_ladder_reset
+Reset the value of the rule to its base.
+@item fixed_ladder_advance
+Advance the value of the rule by the increment.  The new value is checked to
+make sure that it does not exceed the defined maximum.
+@item fixed_ladder_score
+Add the current value of the rule to the player's score.
+@item fixed_ladder_scorex
+Add the current value of the rule, multiplied by some constant, to the player's score.
+@item fixed_ladder_score_and_advance
+Add the rule value to the player and advance it by one step.
+@item fixed_ladder_scorex_and_advance
+Add the rule value multiplied to the player and advance it by one step.
+@end table
+
 @section Lamp Timers
 
 A lamp timer is a countdown timer which is tied to a playfield lamp.
@@ -2648,7 +2687,8 @@ the timer reaches zero, the effect stops.
 You declare a structure of type @code{struct lamptimer_args}, which
 names the lamp and the initial timer value, in seconds.
 
-The lamp is modified as part of an internally generated lamp effect; thus,
+The lamp is modified as part of an internally generated lamp effect (meaning
+that it behaves just like a leff, but it does not have a lamp effect ID); thus,
 the basic state of the lamp is retained.  While the lamp timer runs, the
 basic state is overriden by the effect.
 
@@ -2662,8 +2702,9 @@ basic state is overriden by the effect.
 
 @section Score Rank
 
-The score rank module is optional.  When enabled for a game, the system will
-monitor the relative changes in player's scores over the course of a multi-
+The score rank module is optional, based on the value of @code{CONFIG_SCORE_RANK}.
+When enabled, the system will
+monitor the relative changes in players' scores over the course of a multi-
 player game, and throw a @code{rank_change} event whenever the current player
 moves into a new place.  It is up to each game to decide how to handle it.
 
@@ -2693,6 +2734,9 @@ Use @code{null_false_function} if the mode should not pause at all.  You can
 supply your own function if you need custom behavior.
 @end itemize
 
+You must make sure that the structure and all of the functions that it references
+are in the same .c file, otherwise ROM paging will not work.
+
 Second, handle several system events which affect the mode's operation:
 
 @table @code
@@ -2707,10 +2751,25 @@ your mode.  The mode ops struct is part of the public interface.
 
 @table @code
 @item timed_mode_begin
+Starts a timed mode.
 @item timed_mode_end
+Ends a timed mode immediately.
+@item timed_mode_reset.
+Resets the timer to its initial value.
+@item timed_mode_add.
+Adds to the timer.
+@item timed_mode_get_timer.
+Gets the current timer value.  This should only be used by display effects.
+Note that timer can be zero and the mode is still running!
 @item timed_mode_running_p
 Returns true if the mode is running, for the purposes of scoring.  This returns
 TRUE while the mode is in its grace period.
+@item timed_mode_effect_running_p
+Returns true if the mode is running, for the purposes of display and lamp effects.
+This return FALSE while in grace period.
+@item timed_mode_device_running_p
+Similarly, but should be used when updating devices from a @code{device_update}
+function.
 @end table
 
 @section Ball Savers
@@ -2765,6 +2824,8 @@ then pressing buytin during a game will hold the flippers,
 disable ball kickouts, and turn off the background music.  To
 continue, press the button again.  It will also timeout automatically
 after 15 minutes.
+
+@section Status Report
 
 @c ======================================================
 @node Fonts and Graphics
@@ -3172,7 +3233,7 @@ Cygwin systems.
 There are two major differences in a simulation build.  First, certain
 low-level OS and CPU specific features must be replaced by new components that
 work under your native operating system environment.  In particular, 6809
-assembly languages are not used at all in this mode.  We use either
+assembly language functions are not used at all in this mode.  We use either
 portable C versions of these functions, or comparable functions that are
 provided by the host OS.
 
@@ -3191,9 +3252,9 @@ Instead of a ROM, you'll get an executable that can be run directly.
 
 @menu
 * Thread Model::           How tasks and interrupts work in simulation
-* Persistent Memory::
-* Input and Output::
-* GDB Debugging::
+* Persistent Memory::      How to simulate persistent variables
+* Input and Output::       How the hardware I/O is emulated
+* GDB Debugging::          Debugging the program using GDB
 * Interrupt Tracing::
 * Platform Emulation::
 * Timing::
@@ -3212,12 +3273,11 @@ to scheduling.
 
 First, normal multitasking (the task_xxx APIs) is accomplished using
 the @emph{pth} library, an
-open source, nonpreemptive thread library.  A thin wrapper is provided which
-has the same APIs as in 6809 mode, but which calls pth functions for the
-implementation.
+open source, nonpreemptive thread library.  A thin wrapper maps the core
+task APIs to their pth equivalents.
 
-Periodic functions must be called occasionally from a special thread, since FreeWPC
-no longer provides the scheduler.
+Periodic functions are called occasionally from a special thread instead of
+the FreeWPC scheduler.
 
 Interrupts are also simulated from an ordinary thread.  The native operating
 system probably does not allow threads to sleep for as little as 1ms; on
@@ -3264,7 +3324,8 @@ implemented at the moment.
 You can use GDB to debug the native mode program.
 
 Because the program uses curses to draw, it is easiest to run gdb from a separate
-terminal and @emph{attach} to the running program.  See the gdb manual for more
+terminal and @emph{attach} to the running program.
+See the gdb manual (@url{http://sourceware.org/gdb/current/onlinedocs/gdb/}) for more
 information on how this works.  Basically, you only need to know its process ID.
 
 If you are in the FreeWPC source tree, you can run @code{make attach} to do this

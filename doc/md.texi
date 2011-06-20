@@ -143,7 +143,7 @@ By convention, the @emph{machine-specific} file includes the
 The WPC platform provides different files for the different hardware
 generations, one per variation and one that is common for all.
 
-All includes files are read and parsed before any of the output is generated.
+All include files are read and parsed before any of the output is generated.
 It is thus possible to override definitions that were seen in an earlier
 include.  The default WPC md file provides names
 for all of the switches and lamps, so if you omit one from the machine file,
@@ -255,11 +255,17 @@ The trough container should be marked with the attribute @code{trough}.
 
 @item templates
 
-Lists the template instantiations.
+Lists the template instantiations.  The key gives a name to the instance.
+The first property should be the name of the common @code{driver} that
+implements it.  The remaining properties give values to all of the driver's
+parameters.
 
 @item tests
 
 Defines additional hardware tests that are put into the Tests menu.
+The name of the item corresponds to the name of the test item.  These should
+be defined in a separate C file from the rest of the machine code, and linked
+into the TEST_OBJS section with the rest of the test module.
 
 @item deffs
 
@@ -281,7 +287,13 @@ Defines feature audit variables.
 
 @item system_sounds
 
+Gives the machine-specific sound codes that are to be used for certain
+system events, like coin insertion and tilt.
+
 @item system_music
+
+Likewise but for the default background music to be used in well-known
+situations.
 
 @item highscores
 
@@ -290,15 +302,16 @@ Defines the default high scores.
 @item flags
 
 Declares bit flags.  These are handled similarly to lamps; they are
-per-player.  All flags are zero at the start of game.
+per-player.  All flags are zero at the start of each player's game.
 
 @item globalflags
 
-Like @samp{flags}, except these are global and not per-player.
+Like @samp{flags}, except these are global and not per-player.  These
+must be initialized explicitly.
 
 @item scores
 
-Declares the score table, which associate a short 8-bit ID to a binary-coded
+Declares the score table, which associates a short 8-bit ID to a binary-coded
 decimal score value.  Some of the scoring APIs use IDs instead of the
 expanded values for space efficiency.
 
@@ -309,10 +322,6 @@ Declares which fonts should be included in this game.
 @item timers
 
 Declares the freerunning timers that are needed.
-
-@item templates
-
-Declares instantiations of template drivers.
 
 @end table
 

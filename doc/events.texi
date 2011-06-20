@@ -73,6 +73,8 @@ for a while.
 
 @item dev_@var{foo}_kick_success
 A kick from device "foo" succeeded (its count went down by 1).
+If more than 1 ball is released at the same time, then more than one
+of these will be thrown.
 
 @item dev_@var{foo}_surprise_release
 The count of a device went down by 1 when a release was not initiated
@@ -80,7 +82,8 @@ by software; the ball fell out of the device by other means.
 
 @item device_update
 Called periodically to update any mechanical devices whose state
-changes frequently depending on a variety of factors.
+changes frequently depending on a variety of factors.  Unlike other
+periodic update functions, this will not be called during a ball search.
 
 @item diagnostic_check
 Called after init_complete to perform further diagnostic checks.  Note
