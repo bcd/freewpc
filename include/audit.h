@@ -89,6 +89,13 @@ typedef struct
 	timestamp_t total_game_time; /* done */
 } std_audits_t;
 
+
+typedef struct
+{
+MACHINE_FEATURE_AUDIT_MEMBERS
+} feature_audits_t;
+
+
 extern __nvram__ std_audits_t system_audits;
 extern __nvram__ feature_audits_t feature_audits;
 

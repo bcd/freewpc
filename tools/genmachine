@@ -793,14 +793,14 @@ sub machine_write_defines {
 	print "\n\n";
 
 	# Print feature_audit_t and MACHINE_FEATURE_AUDITS.
-	print "typedef struct {\n";
+	print "#define MACHINE_FEATURE_AUDIT_MEMBERS \\\n";
 	foreach $feature (unique ($m->{"audits"})) {
 		my $ident = $feature->{'c_decl'};
 		$ident =~ s/^fau_//;
 		$ident =~ s/^([0-9])/_$1/;
-		print "   U16 $ident;\n";
+		print "   audit_t $ident; \\\n";
 	}
-	print "} feature_audits_t;\n\n";
+	print "\n";
 
 	print "#define MACHINE_FEATURE_AUDITS \\\n";
 	foreach $feature (unique ($m->{"audits"})) {
