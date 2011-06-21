@@ -193,6 +193,8 @@ struct deff_queue_entry *deff_queue_find_priority (void)
 
 			if (time_reached_p (dq->timeout))
 			{
+				/* This queued effect already expired, so we will
+				ignore it and free it. */
 				dq->id = dq->timeout = 0;
 			}
 			else
@@ -223,7 +225,8 @@ void deff_queue_add (U8 id, U16 timeout)
 	if (dq)
 		return;
 
-	/* Find and initialize a free entry */
+	/* Find and initialize a free entry.  If the queue is full, then
+	the effect just won't ever happen. */
 	dq = deff_queue_find (DEFF_NULL);
 	if (dq)
 	{
@@ -478,7 +481,7 @@ void deff_start_bg (deffnum_t dn, enum _priority prio)
  */
 void deff_update (void)
 {
-	U8 previous;
+	deffnum_t previous;
 
 	/* If there is a transient effect running, then
 	don't try anything.  We'll update the background automatically
