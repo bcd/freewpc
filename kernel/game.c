@@ -216,7 +216,7 @@ void end_ball (void)
 
 	/* Here, we are committed to ending the ball.
 	Do not sleep from here on out, except while in_bonus = TRUE (below).
-	This flag protects the function from being reentranted due to
+	This flag protects the function from being re-entered due to
 	spurious switch activity while endball is running. */
 
 	/* Change the running task group, so that we are no longer in
@@ -318,7 +318,7 @@ void end_ball (void)
 		}
 	}
 
-	/* If all players have had a turn, then increment the
+	/* Once all players have had a turn, then increment the
 	 * current ball number.
 	 * In timed game, this step is skipped, as the game is
 	 * automatically over at the end of the "first ball".
