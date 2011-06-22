@@ -208,8 +208,8 @@ void pricing_mode_render (U8 val)
 		case PRICE_CUSTOM: sprintf ("CUSTOM"); break;
 		case PRICE_USA_25CENT: sprintf ("USA $0.25"); break;
 		case PRICE_USA_50CENT: sprintf ("USA $0.50"); break;
-		case PRICE_UK: sprintf ("U.K. 4/1{"); break;
-		case PRICE_EURO: sprintf ("EUROPE 2/e"); break;
+		case PRICE_UK: sprintf ("U.K. 4/1["); break;
+		case PRICE_EURO: sprintf ("EUROPE 2/<"); break;
 		default: sprintf ("MODE %d", val); break;
 	}
 }
@@ -307,9 +307,9 @@ const struct currency_info
 	[CUR_PESETA] = { "P", 25, 4, FALSE },
 	[CUR_YEN] = { "Y", 25, 4, FALSE },
 	[CUR_DM] = { "DM", 25, 4, FALSE },
-	[CUR_GBP] = { "{", 1, 100, TRUE },
+	[CUR_GBP] = { "[", 1, 100, TRUE },
 	[CUR_TOKEN] = { "TOK.", 1, 100, FALSE },
-	[CUR_EURO] = { "e", 1, 100, TRUE },
+	[CUR_EURO] = { "<", 1, 100, TRUE },
 };
 
 

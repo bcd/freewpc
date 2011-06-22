@@ -106,8 +106,8 @@ static char *mono5_glyphs[] = {
    ['-' - BASECHAR] = font_5x5_sep[4],
    ['%' - BASECHAR] = font_5x5_sep[5],
    ['$' - BASECHAR] = font_5x5_sep[6],
-   ['{' - BASECHAR] = font_5x5_sep[7],
-   ['e' - BASECHAR] = font_5x5_sep[8],
+   ['[' - BASECHAR] = font_5x5_sep[7],
+   ['<' - BASECHAR] = font_5x5_sep[8],
 };
 
 const font_t font_mono5 = {
