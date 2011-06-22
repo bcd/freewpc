@@ -64,6 +64,7 @@ Also, knowledge of WPC pinball machines is very helpful.
 * Dot-Matrix Performance::  Thoughts on optimization of the display.
 * Historical Notes::        Random observations from past experience.
 * Design Principles::       Common practices for creating new game modules.
+* Concept Index::
 @end menu
 
 @ignore
@@ -170,6 +171,7 @@ of the game code and dot matrix text/graphics.  In particular, sounds and
 music are NOT included in this device, so FreeWPC games use the
 same sounds as the real machines.
 
+@cindex Legalese
 FreeWPC is 100% Williams-free code, written from scratch.  It is not a hack on existing
 ROMs and does not contain any software extracted from real games.
 Most of the code is written mostly in the C programming language.  (Actual WPC games
@@ -177,6 +179,7 @@ were programmed in assembly language).  FreeWPC uses the freely available GCC680
 compiler.  There are some assembly language routines for really low-level, or high
 performance parts of the program.
 
+@cindex WPC generations
 All generations of WPC are supported.  FreeWPC is also architected into a number of
 distinct layers which makes it highly portable to other
 types of pinball machines than just WPC games, including new custom hardware.  The
@@ -184,6 +187,7 @@ types of pinball machines than just WPC games, including new custom hardware.  T
 the microprocessor, and can be shared between platforms (WPC and WhiteStar both use
 a 6809).  The @emph{machine} files are unique to a particular game.
 
+@cindex Cygwin
 Development requires a UNIX-like environment, such as Linux or Cygwin for Microsoft Windows
 users.  Many common UNIX tools like @command{bc} and @command{perl} are required.
 
@@ -221,6 +225,7 @@ Binary packages are available as @file{.zip} files, which contain
 on the CPU board).  If you want to test in a real machine, you need
 to burn a real EPROM from this file.
 
+@cindex PinMAME
 If you want to test under PinMAME, you need to copy the ROM file into
 your PinMAME @file{roms} directory; where this is
 depends on how you installed PinMAME.  These directories typically contain
@@ -235,6 +240,7 @@ The following is a partial list of other programs which are used during the
 build process: gcc6809, dd, bc, zip, unzip, bash, Perl.
 
 @section Directory Layout
+@cindex Directory structure
 
 The FreeWPC source code tree is organized into the following directories:
 
@@ -302,6 +308,7 @@ build process, appear here.
 @chapter Compiling
 
 @section Configuration
+@cindex Configuration
 
 FreeWPC can be compiled in many different ways with lots of optional features.
 You cannot just type @command{make} at the top of the directory tree without
@@ -524,6 +531,7 @@ describes the key features of the FreeWPC programming environment.
 @node Multitasking
 @section Multitasking
 
+@cindex Task scheduler
 FreeWPC implements a runtime, round-robin, non-preemptive task scheduler.
 The system manages multiple tasks, each of which has its own call stack.  You
 can create a new task when you want to run some code in parallel with the current
@@ -544,6 +552,8 @@ When a new task is created, it does not begin running immediately; control alway
 continues with the task that started it.  This allows you to configure the new task
 before it can run.
 
+@cindex Process IDs
+@cindex Group IDs
 Each task is identified by a @dfn{process ID}, or @dfn{pid}.  The PID for a task
 is assigned by the system when it is created.  A task also has a @dfn{group ID},
 or @dfn{gid}.  The GID is assigned by the programmer, and multiple tasks can share
@@ -560,6 +570,7 @@ For Windows programmers, this threading model is very similar to what Win32 call
 @emph{fibers}.
 
 @subsection Periodic Functions
+@cindex Periodic functions
 
 After all tasks have been given a chance to run in a 16ms timeslice,
 the system runs the @dfn{periodic functions}.  These have equal priority
@@ -658,6 +669,7 @@ about 35-40% of the 6809 is spent in realtime tasks; the actual value
 depends on the machine and the number of device drivers needed.
 
 @subsection Overview
+@cindex Real time tasks
 
 Real-time tasks are scheduled at @emph{compile-time}.  When you write an RTT, you
 must also add an entry to the @dfn{schedule file}, either @file{kernel/system.sched}
@@ -675,6 +687,7 @@ the interrupt handler code which calls all of the RTTs at the correct frequency.
 can be seen in @file{build/sched_irq.c}.
 
 @subsection Schedule File Syntax
+@cindex Schedule files
 
 Each line in the schedule file is formatted as follows:
 
@@ -760,6 +773,7 @@ per read or write access.
 
 
 @item __permanent__
+@cindex Permanent variables
 
 Used for variables that should be persistent across reboots.  These variables
 should be initialized inside of a @code{factory_reset} event, because factory
@@ -773,6 +787,7 @@ detected, they should be restored to sane values for non-fatal cases if possible
 otherwise a factory reset should be forced.
 
 @item __nvram__
+@cindex Non-volatile variables
 
 Like __permanent__, but for variables that are also write-protected by default.
 To modify such a variable, you must first call @code{pinio_nvram_unlock()}, change
@@ -791,6 +806,7 @@ This feature works even in native mode; the __nvram__ variables are saved
 to a file when you exit the program.
 
 @item __local__
+@cindex Per-player variables
 
 Used for variables that are maintained separately for different players
 in a multiplayer game.  The system software will transparently reload
@@ -838,6 +854,8 @@ Tests a bit flag.
 
 @node Event Handling
 @section Event Handling
+@cindex Callsets
+@cindex Events
 
 FreeWPC is mostly an @dfn{event-driven} system, which only acts when there are new
 inputs to the system.  This section describes the basic interface to the
@@ -944,6 +962,7 @@ function instead.
 
 @node Template Drivers
 @section Template Drivers
+@cindex Templates
 
 A @dfn{template} is a crude implementation of a reusable code block, similar in
 purpose to C++ templates but much more limited.  Were FreeWPC written in C++,
@@ -1060,6 +1079,11 @@ Currently there are device drivers for all of the following:
 @itemize @bullet
 
 @item Special Solenoids (@code{spsol.ct})
+@cindex Special solenoids
+@cindex Slingshots
+@cindex Jet bumpers
+@cindex Pop bumpers
+@cindex Kickbacks
 
 These are switch-activated coils, like slingshots, jet bumpers, or
 kickbacks.  When the switch activates, the associated coil is fired.
@@ -1068,6 +1092,7 @@ as defining the length of the coil pulse.  The switch is also briefly
 ignored afterwards to prevent rapid-fire action.
 
 @item Spinners (@code{spinner.ct})
+@cindex Spinners
 
 The driver is useful because it handles the fact that spinner switches
 activate very fast.  It polls the spinner switch at a fast rate and
@@ -1089,6 +1114,7 @@ Used by the Twilight Zone clock and the World Cup Soccer ball.
 For when there are two inputs to the motor to control direction.
 
 @item Drop Targets (@code{drop.ct})
+@cindex Drop targets
 
 A generic, single drop target driver.  Handles software knockdown when
 capable, and retry functions.
@@ -1097,6 +1123,7 @@ capable, and retry functions.
 
 @node Fault Detection
 @section Fault Detection
+@cindex Fault detection
 
 Fatal errors when detected will cause the system to reboot.  The system
 API @code{fatal()} can be used to cause a fatal error at any time.
@@ -1143,6 +1170,7 @@ from outside task context.
 
 @node Timers
 @section Timers
+@cindex Timers
 
 There are a number of ways to implement timers.  There are slight
 differences between them all.
@@ -1188,6 +1216,10 @@ a certain amount of time, say 1 second apart.
 
 @node Bank Switching
 @section Bank Switching
+@cindex Bank switching
+@cindex ROM banks
+@cindex Paging
+@cindex ROM paging
 
 The 6809 processor does not allow all of the ROM image to be accessible at once.
 32KB of the ROM (the uppermost portion) is fixed and can be accessed at all times.
@@ -1284,6 +1316,7 @@ normal task context at any time.
 
 @node Switches
 @section Switches
+@cindex Switches
 
 Switches are present in all pinball games to receive input from the ball
 and the player.
@@ -1395,6 +1428,7 @@ drivers must invert for optos.
 
 @node Lamps
 @section Lamps
+@cindex Lamps
 
 Controlled lamps are used to highlight shots on the playfield and to keep
 track of the progress of scoring features.  Unlike general illumination,
@@ -1446,6 +1480,7 @@ to construct nice looking lamp effects that manipulate them in certain patterns.
 
 @node Solenoids
 @section Solenoids
+@cindex Solenoids
 
 Solenoid outputs are used for many purposes.  We use the term 'solenoid'
 or 'coil' generically to refer to any writable, high power output.
@@ -1458,6 +1493,7 @@ turns it on for a short period of time (and the system turns it back off
 for you), or you use a custom driver to control it.
 
 @subsection Pulsing
+@cindex Pulsing solenoids
 
 @dfn{Pulsing} is used for solenoids that are operated infrequently,
 and only for short durations at a time.
@@ -1505,6 +1541,7 @@ to allow you to try different settings to see how they behave.
 @end table
 
 @subsection Flashers
+@cindex Flashers
 
 The flashlamp APIs are similar to the solenoid pulse APIs.
 A flashlamp pulse is always with a 100% duty cycle, but for a much shorter
@@ -1718,6 +1755,9 @@ The meaning of the command argument varies widely.
 
 @node General Illumination
 @section General Illumination
+@cindex General illumination (G.I.)
+@cindex Triacs
+@cindex Lamp dimming
 
 General illumination allows for additional lighting that is managed in
 groups of lamps, which are all enabled and disabled at the same time.
@@ -1752,6 +1792,8 @@ will cause a compiler error.
 
 @node Real-Time Clock
 @section Real-Time Clock
+@cindex Clock time
+@cindex Real time clock
 
 On machines with a realtime clock, these APIs let you set and get
 the current time of day.  At present, only WPC is supported.
@@ -1782,6 +1824,8 @@ Update the RTC chip.
 @c ======================================================
 @node Effects
 @chapter Effects
+@cindex Effects
+@cindex Choreography
 
 Effect processing is a layer above the hardware which provides
 controlled access to the lamps, display, flashers, and general
@@ -1904,6 +1948,9 @@ is really an optional call, and only forces the update to happen faster.
 
 @node Display Effects
 @section Display Effects
+@cindex Display effects
+@cindex Aborting display effects
+@cindex Kickout locks
 
 Display effects are defined in the @code{[deffs]} section of the machine
 configuration file.  Both foreground and background deffs are defined here.
@@ -1974,6 +2021,8 @@ Update the background display effect.
 
 @node Lamp Effects
 @section Lamp Effects
+@cindex Lamp effects
+@cindex Light shows
 
 Lamp effects are defined in the @code{[leffs]} section of the machine
 configuration file.  Each lamp effect defines a function that executes
@@ -2105,6 +2154,7 @@ reenabled automatically once the time expires.
 
 @node Lamplists
 @section Lamplists
+@cindex Lamp lists
 
 Typically, groups of lamps are often used for a similar purpose.
 A lamplist is an ordered array of lamps that are often controlled together.
@@ -2189,8 +2239,9 @@ Rotate the lamp states backward.
 
 @node DMD Transitions
 @section DMD Transitions
+@cindex Transitions
 
-A transition is an interim effect that runs between the end of one display
+A @dfn{transition} is an interim effect that runs between the end of one display
 effect and the beginning of another.  By default, a new effect will simply
 kill the old one and overwrite it with a new image.
 
@@ -2237,6 +2288,9 @@ pinball.
 @c ======================================================
 @node Ball Tracking
 @chapter Ball Tracking
+@cindex Containers
+@cindex Ball devices
+@cindex Ball tracking
 
 The ball tracking module manages the locations of all of the pinballs in
 the machine.  It is implemented in @file{common/device.c} and uses
@@ -2294,6 +2348,8 @@ the current count on either type of transition.
 @node Global Status
 @section Global Status
 
+@cindex Missing balls
+@cindex Balls missing
 The ball tracker also maintains a count of the number of balls in play,
 which is the total number of balls installed, minus the number of balls
 that are seen in devices, minus the number of balls declared "missing".
@@ -2331,10 +2387,13 @@ thrown when an attempts fails repeatedly and the device is abandoned.
 
 @node The Trough Device
 @section The Trough Device
+@cindex Trough device
 
 The trough device is special; every game must have one.  The system
 completely handles the device events generated for the ball trough.
 
+@cindex Live count
+@cindex Balls in play
 The function @code{device_add_live} is called whenever a new ball
 is successfully served.  The @dfn{live count} of the machine is the
 number of balls in play for the purposes of game code (i.e. not counting
@@ -2571,6 +2630,7 @@ Software should check the @code{tournament_mode_enabled} boolean variable
 to determine if tournament is in effect.
 
 @section Ball Search
+@cindex Ball searching
 
 Machines don't need to do much to produce a working ball search function.
 The common code knows how to pulse all of the regular solenoids.
@@ -2716,6 +2776,7 @@ player game, and throw a @code{rank_change} event whenever the current player
 moves into a new place.  It is up to each game to decide how to handle it.
 
 @section Timed Modes
+@cindex Timed modes
 
 To write a timed mode, you need to do two things:
 
@@ -2780,8 +2841,10 @@ function.
 @end table
 
 @section Ball Savers
+@cindex Ball save
 
 @section Ball Serve
+@cindex Ball serve
 
 The ball serve module is the preferred API for adding balls to play.
 It uses the ball tracking APIs to program the ball trough, but adds
@@ -2819,6 +2882,7 @@ will ever be placed in the shooter at a time.
 @end table
 
 @section Multiball Modes
+@cindex Multiball
 
 @section Mute and Pause Mode
 
@@ -2837,6 +2901,9 @@ after 15 minutes.
 @c ======================================================
 @node Fonts and Graphics
 @chapter Fonts and Graphics
+@cindex Fonts
+@cindex Graphics
+@cindex Frames
 
 This chapter explains in detail how FreeWPC fonts and graphics work.
 
@@ -2905,6 +2972,8 @@ Trying to display any characters not included in the font will generally
 cause a system crash, as there is not much error checking.
 
 @section Printing Text
+@cindex Text formatting
+@cindex Printing text
 
 The @code{font_render_string} family of APIs is used to draw text to
 the display.  The arguments are a font object, the x and y coordinates
@@ -2993,6 +3062,9 @@ The formatter is not particularly efficient for printing large decimal
 values, as the 6809 is not very good at long division.
 
 @section Frame List
+@cindex Image map
+@cindex Frame list
+@cindex Image linker
 
 The list of all frames compiled in the ROM is defined in an
 @dfn{image map}.  This is a machine-specific file that says which
@@ -3030,6 +3102,7 @@ uncompressed.
 
 @node System Initialization
 @chapter System Initialization
+@cindex Initialization sequence
 
 Game developers do not generally need to understand all the details of
 initialization.  However, this may be of interest to system developers.
@@ -3059,6 +3132,7 @@ here, so any new subsystems added just need to catch this event to initialize
 themselves.  It is important that modules do not interact with each other during
 this phase, because the order of init calls is not guaranteed.
 @item Periodic functions are enabled.
+@cindex Power-up message
 @item The system powerup display effect is started.
 @item The @code{init_ok} event is thrown to allow modules to perform a final
 initialization, which may require interaction with each other.  Modules can
@@ -3073,6 +3147,8 @@ ready.
 
 @node Platform APIs
 @chapter Platform APIs
+@cindex Platforms
+@cindex Hardware platforms
 
 The platform APIs define how the hardware is accessed on a particular
 platform.  They only need to be written once, and then all games on that
@@ -3231,6 +3307,8 @@ Reads the value of a bank switching register.
 @c ======================================================
 @node Native Mode
 @chapter Native Mode
+@cindex Native mode
+@cindex Simulation
 
 Native mode lets you run FreeWPC directly on your host build machine.
 It is a form of emulation, like PinMAME, except the emulator is
@@ -3557,6 +3635,8 @@ Here is a list of all of the standard events that the system generates.
 @appendix Build Tools
 
 @section csum : ROM Checksum Tool
+@cindex Checksumming
+@cindex ROM checksum
 
 The checksum tool works on FreeWPC ROMs as well as the original
 Williams factory ROMs.  It can verify and update the checksum
@@ -3572,6 +3652,7 @@ checksum word is itself included when calculating and verifying it.
 checksum match.
 
 @section srec2bin : S-Record Converter
+@cindex S-records
 
 The gcc6809 linker produces S-record files by default.  This
 tool converts S-records to raw binary format.
@@ -3600,6 +3681,7 @@ to balance all of the functions to be scheduled using performance
 data in the schedule file.
 
 @section fontgen2 : TrueType Font Generator
+@cindex Font conversion
 
 This is a short Perl script which can transform a TrueType
 font file (@file{.ttf}) into FreeWPC source code.  It requires
@@ -3629,3 +3711,6 @@ resolved within only a few hours.
 @appendix Design Principles
 @include howto.texi
 
+@node Concept Index
+@unnumbered Concept Index
+@printindex cp
