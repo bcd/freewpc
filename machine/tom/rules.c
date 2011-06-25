@@ -125,7 +125,7 @@ bool finale_qualified (void)
 }
 
 bool finale_can_be_started (void)
-
+{
 	return finale_qualified () && !any_mb_running ();
 }
 
@@ -1239,7 +1239,7 @@ void clock_display_task (void)
 	if (clock_hour <= 6)
 		sound_send (SPCH_1PM + clock_hour - 1);
 	else
-		sound_send (SPCH_7PM + clock_hour - 1);
+		; /* sound_send (SPCH_7PM + clock_hour - 1); */
 	deff_start (DEFF_CLOCK_UPDATE);
 	task_exit ();
 }
