@@ -144,7 +144,7 @@ I8 score_compare (const score_t s1, const score_t s2)
 /** Adds to the current score.  The input score is given as a BCD-string. */
 static void score_award (const bcd_t *s)
 {
-	if (in_tilt)
+	if (in_tilt || in_test)
 		return;
 	if (!in_game)
 	{
@@ -164,9 +164,9 @@ void score_award_compact (U8 offset, bcd_t val)
 {
 	U8 mult;
 
-	if (in_tilt)
+	if (in_tilt || in_test)
 		return;
-	if (!in_live_game)
+	if (!in_game)
 	{
 		nonfatal (ERR_SCORE_NOT_IN_GAME);
 		return;

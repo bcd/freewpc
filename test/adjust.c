@@ -281,6 +281,17 @@ struct adjustment debug_adjustments[] = {
 };
 #endif
 
+extern U8 tilt_warnings;
+extern U8 extra_balls;
+struct adjustment modify_game_adjustments[] = {
+	{ "BALL NUMBER", &balls_per_game_value, 1, &ball_up }, /* dynamic range restrict */
+	{ "PLAYER UP", &players_per_game_value, 1, &player_up }, /* dynamic range restrict */
+	{ "NUM. PLAYERS", &players_per_game_value, 1, &num_players }, /* dynamic range restrict */
+	{ "TILT WARNINGS", &integer_value, 0, &tilt_warnings }, /* dynamic range restrict */
+	{ "EXTRA BALLS", &integer_value, 0, &extra_balls }, /* dynamic range restrict */
+	{ NULL, NULL, 0, NULL },
+};
+
 struct adjustment empty_adjustments[] = {
 	{ "EMPTY ADJ. SET", &integer_value, 0, NULL },
 	{ NULL, NULL, 0, NULL },

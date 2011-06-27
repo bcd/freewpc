@@ -131,6 +131,7 @@ extern struct adjustment pricing_adjustments[];
 extern struct adjustment hstd_adjustments[];
 extern struct adjustment printer_adjustments[];
 extern struct adjustment debug_adjustments[];
+extern struct adjustment modify_game_adjustments[];
 extern struct adjustment empty_adjustments[];
 
 __test2__ const struct adjustment *adj_get (U8 num);

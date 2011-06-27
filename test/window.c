@@ -72,7 +72,6 @@
 #include <preset.h>
 #include <text.h>
 
-#undef CONFIG_TEST_DURING_GAME
 //#define CONFIG_FIXED_TEST_FONT
 
 #define MAX_WIN_STACK 6
@@ -93,22 +92,23 @@ __fastram__ enum test_mode in_test;
 struct window win_stack[MAX_WIN_STACK];
 
 
-/** Push the first window onto the stack.  This ends any game in progress
- * marks 'in test'.  It also resets sound, display, and lamps. */
+/** Push the first window onto the stack.  This does not end a game
+ * if it is in progress, but instead pauses it. */
 void window_push_first (void)
 {
 	set_test_mode (TEST_DEFAULT);
-#ifdef CONFIG_TEST_DURING_GAME
-	if (!switch_poll_logical (SW_LEFT_BUTTON))
-#endif
-	{
-		end_game ();
-	}
+	task_setgid (GID_TEST_MODE_STARTING);
 
-	/* Reset sound, but delay a little to allow the reset
+	timer_lock ();
+	deff_stop_all ();
+#ifdef LEFF_AMODE
+	leff_stop (LEFF_AMODE);
+#endif
+	sound_reset ();
+
+	/* After resetting sound, delay a little to allow the reset
 	 * to finish before we attempt to play the 'enter' sound
 	 * later. */
-	sound_reset ();
 	task_sleep (TIME_100MS);
 	callset_invoke (test_start);
 }
@@ -124,13 +124,12 @@ void window_pop_first (void)
 	 * exiting test mode; this keeps extra presses
 	 * of the escape button from adding service credits. */
 	task_sleep_sec (1);
-#ifdef CONFIG_TEST_DURING_GAME
-	if (!switch_poll_logical (SW_LEFT_BUTTON))
-#endif
-	{
+	callset_invoke (test_exit);
+	if (!in_game)
 		amode_start ();
-	}
+	timer_unlock ();
 	set_test_mode (NO_TEST);
+	/* In a game, effects will be refreshed once test flag is cleared */
 }
 
 /** Starts the window's thread function, if it exists. */
@@ -805,9 +804,7 @@ static U8 count_submenus (struct menu *m)
 
 void menu_init (void)
 {
-	struct menu *m = win_top->w_class.priv;
-
-	win_top->w_class.menu.self = m;
+	win_top->w_class.menu.self = (struct menu *)win_top->w_class.priv;
 	win_top->w_class.menu.parent = NULL;
 	menu_selection = 0;
 }
@@ -3727,7 +3724,23 @@ struct menu test_menu = {
 	.var = { .submenus = test_menu_items, },
 };
 
+/**********************************************************/
+
+/* TODO - modifying game state requires some post-processing.
+   Tilt warnings and extra balls can be reset arbitrarily.
+	Does num players make sense?
+	Ball number/player up?  Better modeled as forward/backward?
+ */
+struct menu game_menu = {
+	.name = "MODIFY GAME",
+	.flags = M_ITEM | M_LETTER_PREFIX,
+	.var = { .subwindow = { &adj_browser_window, modify_game_adjustments } },
+};
+
+/**********************************************************/
+
 struct menu *main_menu_items[] = {
+	&game_menu,
 	&bookkeeping_menu,
 	&adjustments_menu,
 	&test_menu,
@@ -3737,11 +3750,13 @@ struct menu *main_menu_items[] = {
 	NULL,
 };
 
-struct menu main_menu = {
+struct menu main_menu_template = {
 	.name = "MAIN MENU",
 	.flags = M_MENU,
 	.var = { .submenus = main_menu_items, },
 };
+
+struct menu main_menu;
 
 /**********************************************************/
 
@@ -3893,6 +3908,9 @@ scroller_item sysinfo_scroller[] = {
 
 void sysinfo_enter (void)
 {
+	memcpy (&main_menu, &main_menu_template, sizeof (struct menu));
+	if (!in_game)
+		main_menu.var.submenus++;
 	window_push (&menu_window, &main_menu);
 }
 

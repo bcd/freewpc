@@ -102,3 +102,19 @@ void player_restore (void)
 	memcpy (LOCAL_BASE, save_area->local_vars, AREA_SIZE(local));
 }
 
+/**
+ * When entering/exiting test while a game is running, preserve player
+ * local variables, especially default playfield lamps.
+ */
+CALLSET_ENTRY (player, test_start)
+{
+	if (in_game)
+		player_save ();
+}
+
+CALLSET_ENTRY (player, test_exit)
+{
+	if (in_game)
+		player_restore ();
+}
+
