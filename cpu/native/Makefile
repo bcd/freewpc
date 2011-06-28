@@ -47,6 +47,11 @@ CFLAGS += -DCONFIG_UI -DCONFIG_UI_CONSOLE
 NATIVE_OBJS += $(D)/ui_console.o
 endif
 
+ifeq ($(CONFIG_UI), remote)
+CFLAGS += -DCONFIG_UI -DCONFIG_UI_REMOTE
+NATIVE_OBJS += $(D)/ui_remote.o
+endif
+
 ifeq ($(CONFIG_SOFT_REALTIME), y)
 NATIVE_OBJS += $(C)/realtime.o
 endif

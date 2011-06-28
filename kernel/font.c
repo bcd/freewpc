@@ -222,7 +222,7 @@ static void fontargs_render_string (void)
 
 	dmd_base = ((U8 *)dmd_low_buffer) + args->coord.y * DMD_BYTE_WIDTH;
 	s = sprintf_buffer;
-#ifdef CONFIG_UI_CONSOLE
+#if defined(CONFIG_UI_CONSOLE) || defined(CONFIG_UI_REMOTE)
 	ui_console_render_string (s);
 #endif
 
