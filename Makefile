@@ -97,11 +97,6 @@ CONFIG_WPC95 := $(call md_config,WPC95)
 $(eval $(call require,PLATFORM))
 PLATFORM_DIR = platform/$(PLATFORM)
 
-# Replaced the NATIVE keyword with CONFIG_SIM.
-ifdef NATIVE
-$(eval $(call have,CONFIG_SIM))
-endif
-
 #######################################################################
 ###	Set Default Target
 #######################################################################
