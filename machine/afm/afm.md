@@ -12,7 +12,6 @@ Pinmame-Zip: afm_113b.zip
 Pinmame-ROM: afm_113b.bin
 
 define MACHINE_NUMBER 541
-define MACHINE_SOL_EXTBOARD1
 define MACHINE_CUSTOM_AMODE
 define MACHINE_BALL_SAVE_LAMP LM_RETURN_TO_BATTLE
 

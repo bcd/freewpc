@@ -1064,6 +1064,14 @@ sub machine_write_makefile {
 	#	}
 	#}
 
+	# Output special globals.  This syntax needs to be more regular.
+	print "\$(eval \$(call have,CONFIG_DMD))\n" if ($m->{'DMD'}->{name} =~ /[yY]es/);
+	print "\$(eval \$(call have,CONFIG_ALPHA))\n" if ($m->{'Alphanumeric'}->{name} =~ /[yY]es/);
+	print "\$(eval \$(call have,CONFIG_PIC))\n" if ($m->{'PIC'}->{name} =~ /[yY]es/);
+	print "\$(eval \$(call have,CONFIG_FLIPTRONIC))\n" if ($m->{'Fliptronic'}->{name} =~ /[yY]es/);
+	print "\$(eval \$(call have,CONFIG_DCS))\n" if ($m->{'DCS'}->{name} =~ /[yY]es/);
+	print "\$(eval \$(call have,CONFIG_WPC95))\n" if ($m->{'WPC95'}->{name} =~ /[yY]es/);
+
 	# Enable the desired fonts
 	for $font (unique ($m->{'fonts'})) {
 		print "CONFIG_" . $font->{'c_ident'} . " := y\n";

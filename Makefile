@@ -32,10 +32,6 @@ define require
 $(if $($1),,$(error $1 is not defined : $($1)))
 endef
 
-define md_config
-$(if $(shell grep ^$1:.*Yes $(PLATFORM_DESC)),y,)
-endef
-
 define have
 $1 := y
 AUTO_CFLAGS += -D$1
@@ -84,12 +80,6 @@ include $(MMAKEFILE)
 # grep it to set additional configuration variables.
 $(eval $(call require,MACHINE_FILE))
 PLATFORM ?= wpc
-CONFIG_DMD := $(call md_config,DMD)
-CONFIG_ALPHA := $(call md_config,Alphanumeric)
-CONFIG_PIC := $(call md_config,PIC)
-CONFIG_FLIPTRONIC := $(call md_config,Fliptronic)
-CONFIG_DCS := $(call md_config,DCS)
-CONFIG_WPC95 := $(call md_config,WPC95)
 
 # PLATFORM says which hardware platform is targeted.  Valid values
 # are 'wpc' and 'whitestar'.  The MACHINE Makefile should have
@@ -298,19 +288,6 @@ CFLAGS += $(EXTRA_CFLAGS) $(AUTO_CFLAGS)
 
 SCHED_HEADERS := include/freewpc.h include/interrupt.h $(SCHED_HEADERS)
 SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS)))
-ifeq ($(CONFIG_DMD),y)
-SCHED_FLAGS += -D CONFIG_DMD
-endif
-ifeq ($(CONFIG_ALPHA),y)
-SCHED_FLAGS += -D CONFIG_SEG
-endif
-ifeq ($(CONFIG_PIC),y)
-SCHED_FLAGS += -D CONFIG_PIC
-endif
-ifeq ($(CONFIG_FLIPTRONIC),y)
-SCHED_FLAGS += -D CONFIG_FLIPTRONIC
-endif
-
 
 # Fix up names based on machine definitions
 ifdef GAME_ROM_PREFIX
@@ -1032,9 +1009,6 @@ info:
 	$(Q)echo "REQUIRED = $(REQUIRED)"
 	$(Q)echo "PATH_REQUIRED = $(PATH_REQUIRED)"
 	$(Q)echo "NUM_BLANK_PAGES = $(NUM_BLANK_PAGES)"
-	$(Q)echo "CONFIG_DMD = $(CONFIG_DMD)"
-	$(Q)echo "CONFIG_PIC = $(CONFIG_PIC)"
-	$(Q)echo "CONFIG_FONT = $(CONFIG_FONT)"
 	$(Q)echo "MACH_DESC = $(MACH_DESC)"
 	$(Q)echo "HOST_OBJS = $(HOST_OBJS)"
 	$(Q)echo "SCHED_FLAGS = $(SCHED_FLAGS)"
