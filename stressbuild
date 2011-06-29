@@ -7,7 +7,7 @@ typeset -i count
 typeset -i mincount
 
 machines="funhouse t2 tz wcs afm corvette tester"
-native_options="n y"
+sim_options="n y"
 gcc_options="4.3.4"
 debugger_options="n y"
 mincount=1
@@ -15,15 +15,15 @@ mincount=1
 while [ "x$1" != "x" ]; do
 option=$1; shift
 case $option in
-	--native)
-		native_options="y"
+	--sim)
+		sim_options="y"
 		;;
 	--6809)
-		native_options="n"
+		sim_options="n"
 		;;
 	--fast)
 		machines="funhouse t2 tz wcs afm"
-		native_options="n"
+		sim_options="n"
 		debugger_options="y"
 		gcc_options="4.3.4"
 		;;
@@ -38,18 +38,15 @@ done
 
 count=0
 rm -f stressbuild.log
-for native in $native_options; do
-	if [ "$native" = "y" ]; then
-		NATIVE=y
+for sim in $sim_options; do
+	if [ "$sim" = "y" ]; then
+		CONFIG_SIM=y
 	else
-		unset NATIVE
+		unset CONFIG_SIM
 	fi
 	for mach in ${machines}; do
-		if [ "$native:$mach" = "y:tzsound" ]; then
-			continue
-		fi
 		for debugger in $debugger_options; do
-			if [ "$native" = "n" ]; then
+			if [ "$sim" = "n" ]; then
 				gcctargets=${gcc_options}
 			else
 				gcctargets=`echo nop`;
@@ -60,13 +57,13 @@ for native in $native_options; do
 				if [ "$count" -lt "$mincount" ]; then continue; fi
 				for target in `echo clean default_target`; do
 
-					cfg="NATIVE=$NATIVE MACHINE=$mach FREEWPC_DEBUGGER=$debugger GCC_VERSION=$gcc target=$target"
+					cfg="CONFIG_SIM=$NATIVE MACHINE=$mach FREEWPC_DEBUGGER=$debugger GCC_VERSION=$gcc target=$target"
 					echo "Begin: ($count) $cfg" | tee -a stressbuild.log
 
 					export MACHINE=$mach
 					export FREEWPC_DEBUGGER=$debugger
 					export GCC_VERSION=$gcc
-					export NATIVE
+					export CONFIG_SIM
 					make -j3 DOTCONFIG="" $target 2>&1 > /dev/null
 					rc="$?"
 
