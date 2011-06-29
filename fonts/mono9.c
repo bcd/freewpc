@@ -1,6 +1,7 @@
 
 #include <freewpc.h>
 
+#ifdef CONFIG_MONO9_ALPHA
 static char font_9x6_alpha_cap[][11] = {
 	{ 6, 9, 4, 4, 10, 10, 31, 31, 17, 17, 17 },
 	{ 6, 9, 7, 7, 9, 9, 7, 9, 9, 7, 7 },
@@ -33,7 +34,7 @@ static char font_9x6_alpha_cap[][11] = {
 	{ 6, 9, 17, 17, 17, 10, 10, 4, 4, 4, 4 },
 	{ 6, 9, 31, 31, 8, 8, 4, 2, 2, 31, 31 },
 };
-
+#endif
 
 static char font_9x6_digit[][11] = {
 	{ 6, 9, 12, 30, 51, 51, 51, 51, 51, 30, 12 },
@@ -50,58 +51,62 @@ static char font_9x6_digit[][11] = {
 
 
 static char font_9x6_sep[][11] = {
-	{ 6, 9, 0, 0, 0, 0, 0, 0, 0, 0, 2 },
-	{ 6, 9, 0, 0, 0, 0, 0, 0, 2, 2, 1 },
-	{ 6, 9, 16, 16, 8, 8, 4, 4, 2, 2, 0 },
+	/* period */ { 3, 9, 0, 0, 0, 0, 0, 0, 0, 0, 2 },
+	/* comma */ { 3, 9, 0, 0, 0, 0, 0, 0, 2, 2, 1 },
+	/* slash */ { 6, 9, 16, 16, 8, 8, 4, 4, 2, 2, 0 },
 };
 
+#define BASECHAR ' '
 
 static char *mono9_glyphs[] = {
-   ['A'] = font_9x6_alpha_cap[0],
-   ['B'] = font_9x6_alpha_cap[1],
-   ['C'] = font_9x6_alpha_cap[2],
-   ['D'] = font_9x6_alpha_cap[3],
-   ['E'] = font_9x6_alpha_cap[4],
-   ['F'] = font_9x6_alpha_cap[5],
-   ['G'] = font_9x6_alpha_cap[6],
-   ['H'] = font_9x6_alpha_cap[7],
-   ['I'] = font_9x6_alpha_cap[8],
-   ['J'] = font_9x6_alpha_cap[9],
-   ['K'] = font_9x6_alpha_cap[10],
-   ['L'] = font_9x6_alpha_cap[11],
-   ['M'] = font_9x6_alpha_cap[12],
-   ['N'] = font_9x6_alpha_cap[13],
-   ['O'] = font_9x6_alpha_cap[14],
-   ['P'] = font_9x6_alpha_cap[15],
-   ['Q'] = font_9x6_alpha_cap[16],
-   ['R'] = font_9x6_alpha_cap[17],
-   ['S'] = font_9x6_alpha_cap[18],
-   ['T'] = font_9x6_alpha_cap[19],
-   ['U'] = font_9x6_alpha_cap[20],
-   ['V'] = font_9x6_alpha_cap[21],
-   ['W'] = font_9x6_alpha_cap[22],
-   ['X'] = font_9x6_alpha_cap[23],
-   ['Y'] = font_9x6_alpha_cap[24],
-   ['Z'] = font_9x6_alpha_cap[25],
-   ['0'] = font_9x6_digit[0],
-   ['1'] = font_9x6_digit[1],
-   ['2'] = font_9x6_digit[2],
-   ['3'] = font_9x6_digit[3],
-   ['4'] = font_9x6_digit[4],
-   ['5'] = font_9x6_digit[5],
-   ['6'] = font_9x6_digit[6],
-   ['7'] = font_9x6_digit[7],
-   ['8'] = font_9x6_digit[8],
-   ['9'] = font_9x6_digit[9],
-   ['.'] = font_9x6_sep[0],
-   [','] = font_9x6_sep[1],
-   ['/'] = font_9x6_sep[2],
+#ifdef CONFIG_MONO9_ALPHA
+   ['A' - BASECHAR] = font_9x6_alpha_cap[0],
+   ['B' - BASECHAR] = font_9x6_alpha_cap[1],
+   ['C' - BASECHAR] = font_9x6_alpha_cap[2],
+   ['D' - BASECHAR] = font_9x6_alpha_cap[3],
+   ['E' - BASECHAR] = font_9x6_alpha_cap[4],
+   ['F' - BASECHAR] = font_9x6_alpha_cap[5],
+   ['G' - BASECHAR] = font_9x6_alpha_cap[6],
+   ['H' - BASECHAR] = font_9x6_alpha_cap[7],
+   ['I' - BASECHAR] = font_9x6_alpha_cap[8],
+   ['J' - BASECHAR] = font_9x6_alpha_cap[9],
+   ['K' - BASECHAR] = font_9x6_alpha_cap[10],
+   ['L' - BASECHAR] = font_9x6_alpha_cap[11],
+   ['M' - BASECHAR] = font_9x6_alpha_cap[12],
+   ['N' - BASECHAR] = font_9x6_alpha_cap[13],
+   ['O' - BASECHAR] = font_9x6_alpha_cap[14],
+   ['P' - BASECHAR] = font_9x6_alpha_cap[15],
+   ['Q' - BASECHAR] = font_9x6_alpha_cap[16],
+   ['R' - BASECHAR] = font_9x6_alpha_cap[17],
+   ['S' - BASECHAR] = font_9x6_alpha_cap[18],
+   ['T' - BASECHAR] = font_9x6_alpha_cap[19],
+   ['U' - BASECHAR] = font_9x6_alpha_cap[20],
+   ['V' - BASECHAR] = font_9x6_alpha_cap[21],
+   ['W' - BASECHAR] = font_9x6_alpha_cap[22],
+   ['X' - BASECHAR] = font_9x6_alpha_cap[23],
+   ['Y' - BASECHAR] = font_9x6_alpha_cap[24],
+   ['Z' - BASECHAR] = font_9x6_alpha_cap[25],
+#endif
+   ['0' - BASECHAR] = font_9x6_digit[0],
+   ['1' - BASECHAR] = font_9x6_digit[1],
+   ['2' - BASECHAR] = font_9x6_digit[2],
+   ['3' - BASECHAR] = font_9x6_digit[3],
+   ['4' - BASECHAR] = font_9x6_digit[4],
+   ['5' - BASECHAR] = font_9x6_digit[5],
+   ['6' - BASECHAR] = font_9x6_digit[6],
+   ['7' - BASECHAR] = font_9x6_digit[7],
+   ['8' - BASECHAR] = font_9x6_digit[8],
+   ['9' - BASECHAR] = font_9x6_digit[9],
+   ['.' - BASECHAR] = font_9x6_sep[0],
+   [',' - BASECHAR] = font_9x6_sep[1],
+   ['/' - BASECHAR] = font_9x6_sep[2],
 };
 
 const font_t font_mono9 = {
 	.spacing = 2,
 	.height = 9, 
 	.glyphs = mono9_glyphs,
+	.basechar = BASECHAR,
 };
 
 

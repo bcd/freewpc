@@ -112,6 +112,7 @@ Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE), page(COMMON_PAGE)
 
 [fonts]
 mono5:
+mono9:
 num5x7:
 lucida9:
 tinynum:
