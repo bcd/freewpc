@@ -53,7 +53,8 @@ void score_rank_dump (void)
  */
 void score_rank_update (void)
 {
-	U8 i, j, highest;
+	U8 i, j;
+	S8 highest;
 
 	/* Recompute score_ranks.
 	I is the rank we are trying to find, starting from first place
