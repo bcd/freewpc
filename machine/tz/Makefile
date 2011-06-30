@@ -63,7 +63,7 @@ EXTRA_CFLAGS += -DCONFIG_MUTE_PAUSE
 # and leffs.  RTTs must go into GAME_OBJS.
 #
 
-GAME_OBJS = sling.o jets.o autofire.o gumball.o \
+GAME_OBJS = sling.o autofire.o gumball.o \
 	config.o loop.o rampdiv.o magnet.o \
 	maghelper.o
 
@@ -83,6 +83,8 @@ GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
 
 GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
 	spiral.o tnf.o bttz.o factoids.o master.o
+
+GAME4_OBJS = jets.o
 
 
 IMAGE_MAP += $(M)/tz.ild

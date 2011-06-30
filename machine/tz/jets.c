@@ -103,7 +103,7 @@ sound_code_t super_jet_sounds[] = {
 	SND_TSM_HIT_1, SND_TSM_HIT_2, SND_TSM_HIT_3
 };
 
-void sw_jet_sound (void)
+static void sw_jet_sound (void)
 {
 	if (!in_live_game)
 		return;
