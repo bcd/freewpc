@@ -50,6 +50,7 @@ enum wheelie_game_states {
 	WHEELIE_GAME_INTRO,
 	WHEELIE_GAME_SPEED,
 	WHEELIE_GAME_PREJUMP,
+	WHEELIE_GAME_ANGLE,
 	WHEELIE_GAME_JUMP,
 	WHEELIE_GAME_JUMPING,
 	WHEELIE_GAME_END,
@@ -128,7 +129,6 @@ static void calculate_jump (void)
 {
 	if (wheelie_state > WHEELIE_UP1 && wheelie_state < WHEELIE_DOWN3)
 		wheelie_xpos += 2;
-
 	if (wheelie_going_up ())
 	{	
 		if (wheelie_ypos < JUMP_HEIGHT)
@@ -136,9 +136,12 @@ static void calculate_jump (void)
 		else if (wheelie_ypos == JUMP_HEIGHT)
 			wheelie_state = WHEELIE_DOWN3;
 	}
-	else if (wheelie_ypos > 0)
+	else if (wheelie_state > WHEELIE_JUMP)
+	{
+		bounded_decrement (wheelie_speed, 0);
+		if (wheelie_ypos > 0 && wheelie_speed == 0)
 		wheelie_ypos--;
-
+	}
 }
 
 static void start_jump (void)
@@ -154,7 +157,6 @@ static void start_jump (void)
 #define BITMAP_WIDTH 6
 static void draw_arrows (void)
 {
-	return;
 	U8 i;
 	for (i=0; i <= 128 - BITMAP_WIDTH - 4; i += BITMAP_WIDTH)
 	{
@@ -302,7 +304,7 @@ static void show_intro_screen (void)
 	font_render_string_center_ytop (&font_cowboy, 64, 0, "WHEELIE!");
 	dmd_copy_low_to_high ();
 	draw_wheelie (wheelie_xpos);
-	draw_arrows ();
+	//draw_arrows ();
 	font_render_string_center (&font_bitoutline, 64, 16, "3");
 	sound_send (SND_THREE);
 	dmd_show2 ();
@@ -312,7 +314,7 @@ static void show_intro_screen (void)
 	font_render_string_center_ytop (&font_cowboy, 64, 0, "WHEELIE!");
 	dmd_copy_low_to_high ();
 	draw_wheelie (wheelie_xpos);
-	draw_arrows ();
+	//draw_arrows ();
 	font_render_string_center (&font_bitoutline, 64, 16, "2");
 	sound_send (SND_TWO);
 	dmd_show2 ();
@@ -322,7 +324,7 @@ static void show_intro_screen (void)
 	font_render_string_center_ytop (&font_cowboy, 64, 0, "WHEELIE!");
 	dmd_copy_low_to_high ();
 	draw_wheelie (wheelie_xpos);
-	draw_arrows ();
+	//draw_arrows ();
 	font_render_string_center (&font_bitoutline, 64, 16, "1");
 	sound_send (SND_ONE);
 	dmd_show2 ();
@@ -337,15 +339,17 @@ void wheelie_deff (void)
 	show_intro_screen ();
 	wheelie_game_state = WHEELIE_GAME_SPEED;
 	//for (wheelie_xpos = 2; wheelie_xpos < 128 - wheelie1_low_width; wheelie_xpos += wheelie_speed)
-	timer_restart_free (GID_WHEELIE_GAME_SPEED, TIME_4S);
-	while (task_find_gid (GID_WHEELIE_GAME_SPEED))
+	timer_restart_free (GID_WHEELIE_GAME_TIMER, TIME_10S);
+	while (task_find_gid (GID_WHEELIE_GAME_TIMER))
 	{
+		dmd_map_overlay ();
+		frame_draw (IMG_CITY);
 		dmd_alloc_pair_clean ();
-		draw_arrows ();
 		wheelie_draw_speed ();
 		draw_wheelie (wheelie_xpos);
 		if (!check_for_marty ())
 			draw_progress_bar (&wheelie_progress_bar);
+		dmd_overlay_color ();
 		sound_send (0x54);
 		dmd_show2 ();
 		wheelie_sleep ();
@@ -354,24 +358,34 @@ void wheelie_deff (void)
 	//Move the bike slowly to the center
 	for (i = 0; i < 20; i++)
 	{
-		dmd_alloc_pair_clean ();
-		draw_arrows ();
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		dmd_clean_page_high ();
 		wheelie_draw_speed ();
 		wheelie_xpos++;
 		draw_wheelie (wheelie_xpos);
+		//dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (IMG_CITY);
+		dmd_overlay_color ();
 		sound_send (0x54);
 		dmd_show2 ();
 		wheelie_sleep ();
 	}
 	start_jump ();
 	wheelie_game_state = WHEELIE_GAME_JUMPING;
-	timer_restart_free (GID_WHEELIE_GAME_SPEED, TIME_10S);
-	while (task_find_gid (GID_WHEELIE_GAME_SPEED))
+	timer_restart_free (GID_WHEELIE_GAME_TIMER, TIME_10S);
+	while (task_find_gid (GID_WHEELIE_GAME_TIMER))
 	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		dmd_clean_page_high ();
 		calculate_jump ();
-		dmd_alloc_pair_clean ();
-		draw_arrows ();
 		draw_wheelie (wheelie_xpos);
+		//dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (IMG_CITY);
+		dmd_overlay_color ();
 		sound_send (0x54);
 		dmd_show2 ();
 		wheelie_sleep ();

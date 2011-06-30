@@ -196,3 +196,6 @@ struct progress_bar_ops
 };
 
 __machine4__ void draw_progress_bar (struct progress_bar_ops *ops);
+
+/* wpctris.c */
+

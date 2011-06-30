@@ -727,6 +727,7 @@ Lock Powerball: page(MACHINE4_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
 
 Random Factoid: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
 Wheelie: page(MACHINE4_PAGE), PRI_GAME_VMODE
+WPCTris: page(MACHINE4_PAGE), PRI_GAME_VMODE
 
 ##########################################################################
 # Lamp effects

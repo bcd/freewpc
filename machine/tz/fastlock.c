@@ -106,7 +106,7 @@ void fastlock_award_deff (void)
 		callset_invoke (score_overlay);
 		font_render_string_center (&font_bitoutline, 64, 3, "FASTLOCK");
 		sprintf("%d MILLION", fastlock_award_stored);
-		font_render_string_center (&font_quadrit, 64, 22, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 24, sprintf_buffer);
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_fireball, 64, 10, "JACKPOT");
 		dmd_show2 ();

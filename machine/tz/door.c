@@ -449,9 +449,3 @@ CALLSET_ENTRY(door, machine_unpaused, start_door_rotate)
 	/* Start the door lamps rotating again */
 	door_award_enable ();
 }
-
-CALLSET_ENTRY(door, sw_buyin)
-{
-	//TODO TESTING
-	callset_invoke (door_start_spiral);
-}

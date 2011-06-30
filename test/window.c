@@ -157,6 +157,7 @@ void window_stop_thread (void)
 /** Redraws the current window. */
 void window_redraw (void)
 {
+	//TODO Don't redraw if running a deff test
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	window_call_op (win_top, draw);

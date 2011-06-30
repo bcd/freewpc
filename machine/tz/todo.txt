@@ -1,3 +1,5 @@
+SSSMB - Kill ballsaver when activated.
+
 Tennis style scoring, player must be a certain amounts of points in front to
 win, or 2 balls past and the other play fails to retake the lead.
 
