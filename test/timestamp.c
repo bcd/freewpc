@@ -47,7 +47,7 @@ extern const struct area_csum audit_csum_info;
 /**
  * Format a timestamp as text in the common buffer.
  */
-void timestamp_format (timestamp_t *t)
+void time_audit_format (time_audit_t *t)
 {
 	sprintf ("%ld:%02d:%02d", t->hr, t->min, t->sec);
 }
@@ -56,7 +56,7 @@ void timestamp_format (timestamp_t *t)
 /**
  * Reset a timestamp to 00:00:00.
  */
-void timestamp_clear (timestamp_t *t)
+void time_audit_clear (time_audit_t *t)
 {
 	t->hr = t->min = t->sec = 0;
 }
@@ -65,7 +65,7 @@ void timestamp_clear (timestamp_t *t)
 /**
  * Verify that a timestamp is sane.
  */
-bool timestamp_validate (timestamp_t *t)
+bool time_audit_validate (time_audit_t *t)
 {
 	if (t->hr >= MAX_TS_HOUR)
 		return FALSE;
@@ -82,7 +82,7 @@ bool timestamp_validate (timestamp_t *t)
  * are out of range are corrected, by carrying the excess into the
  * next field.
  */
-static void timestamp_normalize (timestamp_t *t)
+static void time_audit_normalize (time_audit_t *t)
 {
 	if (t->sec >= MAX_TS_SEC)
 	{
@@ -106,19 +106,19 @@ static void timestamp_normalize (timestamp_t *t)
 /**
  * Add one timestamp into another.
  */
-void timestamp_add (timestamp_t *dst, const timestamp_t *src)
+void time_audit_add (time_audit_t *dst, const time_audit_t *src)
 {
 	dst->hr += src->hr;
 	dst->min += src->min;
 	dst->sec += src->sec;
-	timestamp_normalize (dst);
+	time_audit_normalize (dst);
 }
 
 
 /**
  * Increment a timestamp audit by the given number of seconds.
  */
-void timestamp_add_sec (timestamp_t *t, volatile U16 seconds)
+void time_audit_add_sec (time_audit_t *t, volatile U16 seconds)
 {
 	while (seconds >= MAX_SECS_PER_HOUR)
 	{
@@ -131,14 +131,14 @@ void timestamp_add_sec (timestamp_t *t, volatile U16 seconds)
 		t->min++;
 	}
 	t->sec += seconds;
-	timestamp_normalize (t);
+	time_audit_normalize (t);
 }
 
 
 /**
  * Copy one timestamp to another.
  */
-void timestamp_copy (timestamp_t *dst, const timestamp_t *src)
+void time_audit_copy (time_audit_t *dst, const time_audit_t *src)
 {
 	dst->hr = src->hr;
 	dst->min = src->min;
@@ -152,14 +152,14 @@ void timestamp_copy (timestamp_t *dst, const timestamp_t *src)
  * This is going to be ugly.
  *
  */
-void timestamp_divide (timestamp_t *t, volatile U16 n)
+void time_audit_divide (time_audit_t *t, volatile U16 n)
 {
 	U16 dividend;
 
 	/* Catch divide by zero errors, and just make the result zero. */
 	if (n == 0)
 	{
-		timestamp_clear (t);
+		time_audit_clear (t);
 		return;
 	}
 
@@ -202,20 +202,20 @@ void timestamp_divide (timestamp_t *t, volatile U16 n)
 	}
 }
 
-void timestamp_format_per_ball (const timestamp_t *t)
+void time_audit_format_per_ball (const time_audit_t *t)
 {
-	timestamp_t per_ball;
-	timestamp_copy (&per_ball, t);
-	timestamp_divide (&per_ball, system_audits.balls_played);
-	timestamp_format (&per_ball);
+	time_audit_t per_ball;
+	time_audit_copy (&per_ball, t);
+	time_audit_divide (&per_ball, system_audits.balls_played);
+	time_audit_format (&per_ball);
 }
 
-void timestamp_format_per_credit (const timestamp_t *t)
+void time_audit_format_per_credit (const time_audit_t *t)
 {
-	timestamp_t per_credit;
-	timestamp_copy (&per_credit, t);
-	timestamp_divide (&per_credit, system_audits.total_plays);
-	timestamp_format (&per_credit);
+	time_audit_t per_credit;
+	time_audit_copy (&per_credit, t);
+	time_audit_divide (&per_credit, system_audits.total_plays);
+	time_audit_format (&per_credit);
 }
 
 
@@ -230,7 +230,7 @@ CALLSET_ENTRY (timestamp, end_player)
 	/* TODO - don't do this if the player's game was
 	 * aborted early */
 	pinio_nvram_unlock ();
-	timestamp_add_sec (&system_audits.total_game_time, game_time);
+	time_audit_add_sec (&system_audits.total_game_time, game_time);
 	csum_area_update (&audit_csum_info);
 	pinio_nvram_lock ();
 }

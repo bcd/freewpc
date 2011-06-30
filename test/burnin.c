@@ -20,9 +20,9 @@
 
 #include <freewpc.h>
 
-timestamp_t burnin_duration;
+time_audit_t burnin_duration;
 
-__nvram__ timestamp_t burnin_total_duration;
+__nvram__ time_audit_t burnin_total_duration;
 
 void burnin_sound_thread (void)
 {
@@ -104,15 +104,15 @@ void burnin_flipper_thread (void)
 
 void burnin_draw (void)
 {
-	timestamp_format (&burnin_duration);
+	time_audit_format (&burnin_duration);
 	font_render_string_left (&font_mono5, 4, 20, sprintf_buffer);
 }
 
-void burnin_timestamp_thread (void)
+void burnin_time_audit_thread (void)
 {
 	for (;;)
 	{
-		timestamp_add_sec (&burnin_duration, 1);
+		time_audit_add_sec (&burnin_duration, 1);
 		SECTION_VOIDCALL (__test__, window_redraw);
 		task_sleep_sec (1);
 	}
@@ -129,7 +129,7 @@ void burnin_thread (void)
 #endif
 		task_create_peer (burnin_flasher_thread);
 		//task_create_peer (burnin_sol_thread);
-		task_create_peer (burnin_timestamp_thread);
+		task_create_peer (burnin_time_audit_thread);
 #if (MACHINE_FLIPTRONIC == 1)
 		task_create_peer (burnin_flipper_thread);
 #endif
@@ -140,14 +140,14 @@ void burnin_thread (void)
 
 void burnin_init (void)
 {
-	timestamp_clear (&burnin_duration);
+	time_audit_clear (&burnin_duration);
 	task_create_gid (GID_WINDOW_THREAD, burnin_thread);
 	flipper_enable ();
 }
 
 void burnin_exit (void)
 {
-	timestamp_add (&burnin_total_duration, &burnin_duration);
+	time_audit_add (&burnin_total_duration, &burnin_duration);
 	lamp_all_off ();
 	sound_reset ();
 #ifdef CONFIG_GI
@@ -158,6 +158,6 @@ void burnin_exit (void)
 
 CALLSET_ENTRY (burnin, factory_reset)
 {
-	timestamp_clear (&burnin_total_duration);
+	time_audit_clear (&burnin_total_duration);
 }
 

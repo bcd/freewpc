@@ -440,10 +440,10 @@ void render_audit (audit_t val, audit_format_type_t type)
 	/* Timestamp audits are broken in native mode because we are using
 	a 16-bit as a pointer, which only works on the 6809. */
 		case AUDIT_TYPE_TIME_PER_BALL:
-			timestamp_format_per_ball ((timestamp_t *)val);
+			time_audit_format_per_ball ((time_audit_t *)val);
 			break;
 		case AUDIT_TYPE_TIME_PER_CREDIT:
-			timestamp_format_per_credit ((timestamp_t *)val);
+			time_audit_format_per_credit ((time_audit_t *)val);
 			break;
 #endif
 		default:

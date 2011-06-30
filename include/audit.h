@@ -45,7 +45,7 @@ typedef struct
 	U16 hr;
 	U8 min;
 	U8 sec;
-} timestamp_t;
+} time_audit_t;
 
 
 /**
@@ -86,7 +86,7 @@ typedef struct
 	audit_t exec_lockups; /* done */
 	audit_t trough_rescues;
 	audit_t chase_balls;
-	timestamp_t total_game_time; /* done */
+	time_audit_t total_game_time; /* done */
 } std_audits_t;
 
 
@@ -104,14 +104,14 @@ void audit_increment (audit_t *aud);
 void audit_add (audit_t *aud, U8 val);
 void audit_assign (audit_t *aud, audit_t val);
 
-__test2__ void timestamp_format (timestamp_t *t);
-__test2__ void timestamp_clear (timestamp_t *t);
-__test2__ bool timestamp_validate (timestamp_t *t);
-__test2__ void timestamp_add (timestamp_t *dst, const timestamp_t *src);
-__test2__ void timestamp_add_sec (timestamp_t *t, U16 seconds);
-__test2__ void timestamp_copy (timestamp_t *dst, const timestamp_t *src);
-__test2__ void timestamp_divide (timestamp_t *t, U16 n);
-__test2__ void timestamp_format_per_ball (const timestamp_t *t);
-__test2__ void timestamp_format_per_credit (const timestamp_t *t);
+__test2__ void time_audit_format (time_audit_t *t);
+__test2__ void time_audit_clear (time_audit_t *t);
+__test2__ bool time_audit_validate (time_audit_t *t);
+__test2__ void time_audit_add (time_audit_t *dst, const time_audit_t *src);
+__test2__ void time_audit_add_sec (time_audit_t *t, U16 seconds);
+__test2__ void time_audit_copy (time_audit_t *dst, const time_audit_t *src);
+__test2__ void time_audit_divide (time_audit_t *t, U16 n);
+__test2__ void time_audit_format_per_ball (const time_audit_t *t);
+__test2__ void time_audit_format_per_credit (const time_audit_t *t);
 
 #endif /* _STDADJ_H */
