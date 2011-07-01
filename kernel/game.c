@@ -89,10 +89,6 @@ U8 timed_game_timer;
 
 U8 timed_game_suspend_count;
 
-#ifdef MACHINE_TZ
-extern void loop_master_check (void);
-extern void combo_master_check (void);
-#endif
 void start_ball (void);
 
 
@@ -161,11 +157,7 @@ void end_game (void)
 		{
 			deff_start_sync (DEFF_SCORES_IMPORTANT);
 			high_score_check ();
-//TODO Could do with something modular/per machine here
-#ifdef MACHINE_TZ
-//			loop_master_check ();
-//			combo_master_check ();
-#endif
+			callset_invoke (extra_initials_check);
 			match_start ();
 			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);
 			callset_invoke (end_game);
