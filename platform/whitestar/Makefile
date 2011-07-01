@@ -16,6 +16,13 @@ $(eval $(call have,CONFIG_MMIO))
 $(eval $(call have,CONFIG_GI))
 $(eval $(call nohave,CONFIG_AC))
 
+# ROM bank switching
+CONFIG_ROM_BANK_SIZE := 16
+CONFIG_FIXED_PAGE_COUNT := 2
+CONFIG_MAX_ROM_PAGES := 8
+CONFIG_CODE_PAGE_LIST := 56 57 58 59 60 61
+CONFIG_SYSTEM_CODE_PAGE := 62
+
 # Additional CFLAGS required on the WPC platform
 CFLAGS += -mdirect -DCONFIG_PLATFORM_WHITESTAR -fno-builtin -DCONFIG_PINMAME -mcode-section=.text -mdata-section=.text -mbss-section=ram
 EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WHITESTAR

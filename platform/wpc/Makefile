@@ -26,6 +26,20 @@ $(eval $(call have,CONFIG_BUYIN))
 CONFIG_ANIMATION ?= $(CONFIG_DMD)
 CONFIG_SCORE_RANK := y
 
+# ROM bank switching
+CONFIG_ROM_BANK_SIZE := 16
+CONFIG_FIXED_PAGE_COUNT := 2
+CONFIG_MAX_ROM_PAGES := 64
+# Alphanumeric games like Funhouse are restricted to 128KB total,
+# so only 6 non-system pages.  DMD games are allowed to use more.
+ifeq ($(CONFIG_DMD),y)
+CONFIG_CODE_PAGE_LIST := 52 53 54 55
+else
+CONFIG_CODE_PAGE_LIST :=
+endif
+CONFIG_CODE_PAGE_LIST += 56 57 58 59 60 61
+CONFIG_SYSTEM_CODE_PAGE := 62
+
 # The default CFLAGS required on the WPC platform
 # A few notes:
 # 1. -Wno-format is to not check format strings, because we define those
@@ -62,10 +76,6 @@ ifeq ($(CONFIG_DMD),y)
 IMAGE_MAP += $(P)/wpc.ild
 endif
 
-BOTTOM_BANK=$(shell echo $$((62 - $(NUM_PAGED_SECTIONS) )))
-
-FIRST_BANK=$(shell echo $$((64 - $(ROM_PAGE_COUNT) )))
-
 # The math code must be compiled in 16-bit mode, since it interfaces
 # to the system libraries which expect this.
 $(P)/math.o : INT_CFLAGS=-mint16
@@ -74,4 +84,4 @@ $(P)/math.o : INT_CFLAGS=-mint16
 # to checksum.  The pages between BOTTOM_BANK and TOP_BANK are paged in
 # and contribute to the total checksum.  TOP_BANK is fixed but
 # BOTTOM_BANK varies according to the machine-specific ROM usage.
-$(P)/start.o : EXTRA_ASFLAGS += -DTOP_BANK=61 -DBOTTOM_BANK=$(BOTTOM_BANK)
+$(P)/start.o : EXTRA_ASFLAGS += -DTOP_BANK=$(TOP_BANK) -DBOTTOM_BANK=$(BOTTOM_BANK)
