@@ -3,6 +3,7 @@
 CPU := native
 C := cpu/$(CPU)
 
+GCC_VERSION = NATIVE
 CFLAGS =
 
 # TODO : don't define CONFIG_LITTLE_ENDIAN on sparc, etc.

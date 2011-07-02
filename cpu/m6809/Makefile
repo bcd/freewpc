@@ -3,6 +3,13 @@
 CPU := m6809
 C := cpu/$(CPU)
 
+# Path to the compiler
+GCC_ROOT ?= /usr/local/bin
+CC := $(GCC_ROOT)/m6809-unknown-none-gcc-$(GCC_VERSION)
+AS := $(CC) -xassembler-with-cpp
+LD := $(GCC_ROOT)/m6809-unknown-none-ld
+REQUIRED += $(CC) $(LD)
+
 CFLAGS =
 
 # Soft register support is enabled by -msoft-reg-count.
