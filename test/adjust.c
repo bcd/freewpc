@@ -96,7 +96,6 @@ struct adjustment_value power_saver_level_value = { 4, 7, 1, brightness_render }
 
 struct adjustment standard_adjustments[] = {
 	{ "BALLS PER GAME", &balls_per_game_value, 3, &system_config.balls_per_game },
-	{ "MAX PLAYERS", &players_per_game_value, MAX_PLAYERS, &system_config.max_players },
 	{ "TILT WARNINGS", &balls_per_game_value, 3, &system_config.tilt_warnings },
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
 	{ "MAX E.B. PER B.I.P.", &max_eb_value, 4, &system_config.max_ebs_per_bip },
@@ -131,6 +130,7 @@ struct adjustment standard_adjustments[] = {
 	{ "GAME RESTART", &game_restart_value, GAME_RESTART_SLOW, &system_config.game_restart },
 	{ "CHASE BALL", &yes_no_value, NO, &system_config.allow_chase_ball },
 	{ "COIN DOOR SAVER", &yes_no_value, NO, &system_config.coin_door_ball_save },
+	{ "MAX PLAYERS", &players_per_game_value, MAX_PLAYERS, &system_config.max_players },
 	{ NULL, NULL, 0, NULL },
 };
 
