@@ -432,9 +432,10 @@ bool adj_current_hidden_p (void)
 		return TRUE;
 
 	/* When the replay system is set to FIXED, do not allow
-	configuration of the start and percentaging options. */
+	configuration of the start, percentage, and level count options. */
 	if (system_config.replay_system == REPLAY_FIXED &&
-		(std_adj_p (replay_percent) || std_adj_p (replay_start)))
+		(std_adj_p (replay_percent) || std_adj_p (replay_start) ||
+			std_adj_p (replay_levels)))
 		return TRUE;
 
 	/* Allow other things to be added too.  Machines or other
