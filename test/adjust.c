@@ -90,6 +90,7 @@ struct adjustment_value replay_score_value = {
 	0, MACHINE_REPLAY_SCORE_CHOICES, 1, replay_score_render
 };
 
+struct adjustment_value replay_level_count_value = { 1, 4, 1, decimal_render };
 struct adjustment_value replay_percent_value = { 5, 50, 1, percent_render };
 
 struct adjustment_value max_tickets_value = { 0, 100, 1, decimal_render };
@@ -104,7 +105,7 @@ struct adjustment standard_adjustments[] = {
 	{ "REPLAY SYSTEM", &replay_system_value, REPLAY_FIXED, &system_config.replay_system },
 	{ "REPLAY PERCENT", &replay_percent_value, 7, &system_config.replay_percent },
 	{ "REPLAY START", &replay_score_value, MACHINE_REPLAY_START_CHOICE, &system_config.replay_start },
-	{ "REPLAY LEVELS", &integer_value, 1, &system_config.replay_levels },
+	{ "REPLAY LEVELS", &replay_level_count_value, 1, &system_config.replay_levels },
 	{ "REPLAY 1 " STR_LEVEL, &replay_score_value, MACHINE_REPLAY_START_CHOICE, &system_config.replay_level[0] },
 	{ "REPLAY 2 " STR_LEVEL, &replay_score_value, 0, &system_config.replay_level[1] },
 	{ "REPLAY 3 " STR_LEVEL, &replay_score_value, 0, &system_config.replay_level[2] },
