@@ -90,6 +90,8 @@ struct adjustment_value replay_score_value = {
 	0, MACHINE_REPLAY_SCORE_CHOICES, 1, replay_score_render
 };
 
+struct adjustment_value replay_percent_value = { 5, 50, 1, percent_render };
+
 struct adjustment_value max_tickets_value = { 0, 100, 1, decimal_render };
 struct adjustment_value gi_power_saver_value = { 0, 60, 1, minutes_render };
 struct adjustment_value power_saver_level_value = { 4, 7, 1, brightness_render };
@@ -100,7 +102,7 @@ struct adjustment standard_adjustments[] = {
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
 	{ "MAX E.B. PER B.I.P.", &max_eb_value, 4, &system_config.max_ebs_per_bip },
 	{ "REPLAY SYSTEM", &replay_system_value, REPLAY_FIXED, &system_config.replay_system },
-	{ "REPLAY PERCENT", &percent_value, 7, &system_config.replay_percent },
+	{ "REPLAY PERCENT", &replay_percent_value, 7, &system_config.replay_percent },
 	{ "REPLAY START", &replay_score_value, MACHINE_REPLAY_START_CHOICE, &system_config.replay_start },
 	{ "REPLAY LEVELS", &integer_value, 1, &system_config.replay_levels },
 	{ "REPLAY 1 " STR_LEVEL, &replay_score_value, MACHINE_REPLAY_START_CHOICE, &system_config.replay_level[0] },
