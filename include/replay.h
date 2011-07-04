@@ -21,6 +21,8 @@
 #ifndef _REPLAY_H
 #define _REPLAY_H
 
+#define NUM_REPLAY_LEVELS 4
+
 __common__ void replay_draw (void);
 __common__ void replay_award (void);
 __common__ void replay_check_current (void);

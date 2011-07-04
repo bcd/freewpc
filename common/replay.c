@@ -29,9 +29,8 @@
 #include <coin.h>
 #include <eb.h>
 
-/** The current replay score */
-__nvram__ U8 replay_score[BYTES_PER_SCORE];
-
+/** The current replay scores */
+__nvram__ U8 replay_score_array[NUM_REPLAY_LEVELS][BYTES_PER_SCORE];
 
 /** The default replay score.  This is only used if the machine does not
 define a method for taking replay scores from the standard adjustment. */
@@ -42,17 +41,32 @@ const score_t default_replay_score = { 0x00, 0x50, 0x00, 0x00, 0x00 };
 const struct area_csum replay_csum_info = {
 	.type = FT_REPLAY,
 	.version = 1,
-	.area = replay_score,
+	.area = replay_score_array,
 	.length = BYTES_PER_SCORE,
 	.reset = replay_reset,
 };
 
 
 /** The number of replays already awarded to the current player
-during this game.  This is also an index into the replay_levels
-adjustment data, zero-based, which says what the next replay
-level to be awarded is */
+during this game.  This is also an index into the replay_score_array,
+zero-based, which says what the next replay level to be awarded is */
 __local__ U8 replay_award_count;
+
+/* The first replay score, used in attract mode */
+#define first_replay_score replay_score_array[0]
+
+/* The next replay score, used during a game - this is per-player */
+#define next_replay_score replay_score_array[replay_award_count]
+
+
+#ifdef MACHINE_REPLAY_CODE_INCREMENT
+void replay_code_convert (score_t score, U8 code)
+{
+#if (MACHINE_REPLAY_CODE_INCREMENT == REPLAY_CODE_MILLION)
+	score_add_byte (score, 4, code);
+#endif
+}
+#endif
 
 
 /** Draw the replay screen, as used in attract mode */
@@ -74,8 +88,8 @@ void replay_draw (void)
 		default:
 			return;
 	}
-	sprintf_score (replay_score);
-	font_render_string_center (&font_times8, 64, 22, sprintf_buffer);
+	sprintf_score (first_replay_score);
+	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 }
 
@@ -116,7 +130,7 @@ void replay_check_current (void)
 {
 	if (system_config.replay_award != FREE_AWARD_OFF
 		&& replay_award_count == 0
-		&& score_compare (replay_score, current_score) <= 0)
+		&& score_compare (next_replay_score, current_score) <= 0)
 	{
 		replay_award ();
 	}
@@ -139,10 +153,10 @@ void replay_reset (void)
 
 	replay_code = system_config.replay_start;
 #ifdef MACHINE_REPLAY_CODE_TO_SCORE
-	score_zero (replay_score);
-	MACHINE_REPLAY_CODE_TO_SCORE (replay_score, replay_code);
+	score_zero (first_replay_score);
+	MACHINE_REPLAY_CODE_TO_SCORE (first_replay_score, replay_code);
 #else
-	memcpy (replay_score, default_replay_score, sizeof (score_t));
+	memcpy (first_replay_score, default_replay_score, sizeof (score_t));
 #endif
 }
 
