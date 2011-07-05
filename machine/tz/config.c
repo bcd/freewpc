@@ -29,23 +29,6 @@ bool faster_quote_given;
  * Machine-specific miscellaneous functions.
  */
 
-static inline U8 decimal_to_bcd_byte (U8 decimal)
-{
-#ifdef __m6809__
-	U8 quot, rem;
-	DIV10 (decimal, quot, rem);
-	return (quot << 4) + rem;
-#else
-	return ((decimal / 10) << 4) + (decimal % 10);
-#endif
-}
-
-
-void replay_code_to_score (score_t s, U8 val)
-{
-	s[1] = decimal_to_bcd_byte (val * 10);
-}
-
 
 CALLSET_ENTRY (tz, start_ball)
 {
