@@ -167,15 +167,6 @@ CALLSET_ENTRY (replay, start_player)
 }
 
 
-CALLSET_ENTRY (replay, end_game)
-{
-	/* Add the scores from this game to the score histograms */
-
-	/* After so many games, auto-adjust the replay score if
-	necessary */
-}
-
-
 CALLSET_ENTRY (replay, init)
 {
 	/* Initialize the replay score from the menu adjustment. */
