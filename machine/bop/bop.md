@@ -30,7 +30,6 @@ include platform/wpc/wpc89.md
 #define MACHINE_MUSIC_PLUNGER
 #define MACHINE_REPLAY_SCORE_CHOICES       10
 #define MACHINE_REPLAY_START_CHOICE        5
-#define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
 #define MACHINE_DEBUGGER_HOOK
 #define MACHINE_OUTHOLE_KICK_HOOK
 define MACHINE_BALL_SAVE_TIME             0
