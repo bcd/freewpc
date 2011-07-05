@@ -86,6 +86,11 @@ struct adjustment_value replay_score_value = {
 	1, replay_score_render
 };
 
+struct adjustment_value replay_boost_value = {
+	REPLAY_BOOST_TYPE_MIN, REPLAY_BOOST_TYPE_MAX-1,
+	1, replay_boost_render
+};
+
 struct adjustment_value replay_level_count_value = { 1, 4, 1, decimal_render };
 struct adjustment_value replay_percent_value = { 5, 50, 1, percent_render };
 
@@ -106,7 +111,11 @@ struct adjustment standard_adjustments[] = {
 	{ "REPLAY 2 " STR_LEVEL, &replay_score_value, 0, &system_config.replay_level[1] },
 	{ "REPLAY 3 " STR_LEVEL, &replay_score_value, 0, &system_config.replay_level[2] },
 	{ "REPLAY 4 " STR_LEVEL, &replay_score_value, 0, &system_config.replay_level[3] },
-	{ "REPLAY BOOST", &yes_no_value, NO, &system_config.replay_boost },
+#ifdef CONFIG_REPLAY_BOOST_BOOLEAN
+	{ "REPLAY BOOST", &on_off_value, ON, &system_config.replay_boost },
+#else
+	{ "REPLAY BOOST", &replay_boost_value, REPLAY_BOOST_TYPE_DEFAULT, &system_config.replay_boost },
+#endif
 	{ "REPLAY AWARD", &free_award_value, FREE_AWARD_CREDIT, &system_config.replay_award },
 	{ "SPECIAL AWARD", &free_award_value, FREE_AWARD_CREDIT, &system_config.special_award },
 	{ "MATCH AWARD", &free_award_value, FREE_AWARD_CREDIT, &system_config.match_award },

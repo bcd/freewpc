@@ -115,6 +115,21 @@ void replay_code_to_score (score_t score, U8 code)
 	default_replay_code_convert (score, code, &replay_score_code_info);
 #endif
 }
+
+
+#ifndef CONFIG_REPLAY_BOOST_BOOLEAN
+struct replay_code_info replay_boost_code_info = {
+	.min = REPLAY_BOOST_MIN,
+	.step = REPLAY_BOOST_STEP,
+	.max = REPLAY_BOOST_MAX,
+	.deflt = REPLAY_BOOST_DEFAULT,
+	.step10 = REPLAY_BOOST_STEP << 4,
+};
+
+void replay_code_to_boost (score_t score, U8 code)
+{
+	default_replay_code_convert (score, code, &replay_boost_code_info);
+}
 #endif
 
 
@@ -248,5 +263,15 @@ CALLSET_ENTRY (replay, amode_start)
 CALLSET_ENTRY (replay, file_register)
 {
 	file_register (&replay_csum_info);
+}
+
+
+CALLSET_ENTRY (replay, end_game)
+{
+	/* Is replay boost enabled?  If so, and one or more replays were awarded in this game,
+	then increase the replay value temporarily. */
+	if (system_config.replay_boost)
+	{
+	}
 }
 

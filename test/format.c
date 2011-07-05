@@ -117,6 +117,27 @@ void replay_score_render (U8 val)
 }
 
 
+#ifndef CONFIG_REPLAY_BOOST_BOOLEAN
+/**
+ * Likewise, format a replay boost value (non-boolean)
+ */
+void replay_boost_render (U8 val)
+{
+	if (val == 0)
+	{
+		sprintf ("OFF");
+		return;
+	}
+	else
+	{
+		score_t score;
+		score_zero (score);
+		replay_code_to_boost (score, val);
+		sprintf_score (score);
+	}
+}
+#endif
+
 void minutes_render (U8 val)
 {
 	if (val == 0)

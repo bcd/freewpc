@@ -34,6 +34,7 @@ __test2__ void free_award_render (U8 val);
 __test2__ void game_restart_render (U8 val);
 __test2__ void percent_render (U8 val);
 __test2__ void replay_score_render (U8 val);
+__test2__ void replay_boost_render (U8 val);
 __test2__ void minutes_render (U8 val);
 __test2__ void brightness_render (U8 val);
 __test2__ void collection_text_render (U8 val);

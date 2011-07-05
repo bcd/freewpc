@@ -37,6 +37,10 @@ __common__ void replay_check_current (void);
 __common__ void replay_reset (void);
 __common__ bool replay_can_be_awarded (void);
 __common__ void replay_code_to_score (score_t score, U8 code);
+#ifndef CONFIG_REPLAY_BOOST_BOOLEAN
+__common__ void replay_code_to_boost (score_t, U8);
+#endif
+
 
 /* Replay scores can be configured in the adjustments menu, but the
    adjustments themselves are only 8-bit values.  You must define a method
@@ -76,5 +80,13 @@ __common__ void replay_code_to_score (score_t score, U8 code);
 #define REPLAY_SCORE_TYPE_MIN 0
 #define REPLAY_SCORE_TYPE_MAX 22 /* 21 score levels */
 #define REPLAY_SCORE_TYPE_DEFAULT 6 /* 20M */
+
+#define REPLAY_BOOST_MIN REPLAYVAL(0x0001)
+#define REPLAY_BOOST_STEP REPLAYVAL(0x0001)
+#define REPLAY_BOOST_MAX REPLAYVAL(0x0010)
+#define REPLAY_BOOST_DEFAULT REPLAYVAL(0x0005)
+#define REPLAY_BOOST_TYPE_MIN 0
+#define REPLAY_BOOST_TYPE_MAX 11 /* 10 boost levels */
+#define REPLAY_BOOST_TYPE_DEFAULT 5
 
 #endif /* _REPLAY_H */
