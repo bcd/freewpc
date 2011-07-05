@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -34,6 +34,7 @@
 #include <test.h>
 #include <format.h>
 #include <text.h>
+#include <replay.h>
 
 #if (MACHINE_DMD == 1)
 extern __test__ void print_row_center (const font_t *f, U8 row);
@@ -80,14 +81,9 @@ struct adjustment_value easy_or_hard_value = { EASY, HARD, 2, difficulty_render 
 struct adjustment_value easy_to_hard_value = { EASY, HARD, 1, difficulty_render };
 struct adjustment_value ex_easy_to_hard_value = { EXTRA_EASY, EXTRA_HARD, 1, difficulty_render };
 
-#ifndef MACHINE_REPLAY_SCORE_CHOICES
-#define MACHINE_REPLAY_SCORE_CHOICES 250
-#endif
-#ifndef MACHINE_REPLAY_START_CHOICE
-#define MACHINE_REPLAY_START_CHOICE 0
-#endif
 struct adjustment_value replay_score_value = {
-	0, MACHINE_REPLAY_SCORE_CHOICES, 1, replay_score_render
+	REPLAY_SCORE_TYPE_MIN, REPLAY_SCORE_TYPE_MAX-1,
+	1, replay_score_render
 };
 
 struct adjustment_value replay_level_count_value = { 1, 4, 1, decimal_render };
@@ -104,9 +100,9 @@ struct adjustment standard_adjustments[] = {
 	{ "MAX E.B. PER B.I.P.", &max_eb_value, 4, &system_config.max_ebs_per_bip },
 	{ "REPLAY SYSTEM", &replay_system_value, REPLAY_FIXED, &system_config.replay_system },
 	{ "REPLAY PERCENT", &replay_percent_value, 7, &system_config.replay_percent },
-	{ "REPLAY START", &replay_score_value, MACHINE_REPLAY_START_CHOICE, &system_config.replay_start },
+	{ "REPLAY START", &replay_score_value, REPLAY_SCORE_TYPE_DEFAULT, &system_config.replay_start },
 	{ "REPLAY LEVELS", &replay_level_count_value, 1, &system_config.replay_levels },
-	{ "REPLAY 1 " STR_LEVEL, &replay_score_value, MACHINE_REPLAY_START_CHOICE, &system_config.replay_level[0] },
+	{ "REPLAY 1 " STR_LEVEL, &replay_score_value, REPLAY_SCORE_TYPE_DEFAULT, &system_config.replay_level[0] },
 	{ "REPLAY 2 " STR_LEVEL, &replay_score_value, 0, &system_config.replay_level[1] },
 	{ "REPLAY 3 " STR_LEVEL, &replay_score_value, 0, &system_config.replay_level[2] },
 	{ "REPLAY 4 " STR_LEVEL, &replay_score_value, 0, &system_config.replay_level[3] },

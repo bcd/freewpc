@@ -139,11 +139,20 @@ typedef struct
 	adjval_t tilt_warnings; /* done */
 	adjval_t max_ebs; /* done */
 	adjval_t max_ebs_per_bip; /* done */
+		/* Auto or fixed */
 	adjval_t replay_system;
+		/* Percentage of replays when Auto Replay in effect.  Range 5-50% */
 	adjval_t replay_percent;
+		/* First replay level when Auto Replay in effect.  Up to 60 different
+		levels can be configured. */
 	adjval_t replay_start;
+		/* The number of replay levels used by Auto Replay.  Range is 1-4.
+		Levels 2-4 are automatically set to 2x-4x the base value */
 	adjval_t replay_levels;
+		/* Only used when Fixed Replay is enabled.  This replaces Replay Start
+		and Replay Levels.  Each level could also be set to OFF. */
 	adjval_t replay_level[MAX_REPLAY_LEVELS];
+		/* OFF, or amount to temporarily boost the replay */
 	adjval_t replay_boost;
 	adjval_t replay_award; /* done */
 	adjval_t special_award; /* done */

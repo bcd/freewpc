@@ -28,16 +28,12 @@
 #include <knocker.h>
 #include <coin.h>
 #include <eb.h>
+#include <bcd_string.h>
 
 /** The current replay scores */
 __nvram__ U8 replay_score_array[NUM_REPLAY_LEVELS][BYTES_PER_SCORE];
 
-/** The default replay score.  This is only used if the machine does not
-define a method for taking replay scores from the standard adjustment. */
-const score_t default_replay_score = { 0x00, 0x50, 0x00, 0x00, 0x00 };
-
-
-/** The replay checksum descriptor */
+/** The replay module NVRAM descriptor */
 const struct area_csum replay_csum_info = {
 	.type = FT_REPLAY,
 	.version = 1,
@@ -59,11 +55,64 @@ __local__ U8 replay_award_count;
 #define next_replay_score replay_score_array[replay_award_count]
 
 
-#ifdef MACHINE_REPLAY_CODE_INCREMENT
-void replay_code_convert (score_t score, U8 code)
+
+/*
+ * Code 0 means OFF.
+ * Code 1 is the minimum value.
+ */
+
+struct replay_code_info
 {
-#if (MACHINE_REPLAY_CODE_INCREMENT == REPLAY_CODE_MILLION)
-	score_add_byte (score, 4, code);
+	U16 min;
+	U16 step;
+	U16 max;
+	U16 deflt;
+	U16 step10;
+};
+
+
+struct replay_code_info replay_score_code_info = {
+	.min = REPLAY_SCORE_MIN,
+	.step = REPLAY_SCORE_STEP,
+	.max = REPLAY_SCORE_MAX,
+	.deflt = REPLAY_SCORE_DEFAULT,
+	.step10 = REPLAY_SCORE_STEP << 4,
+};
+
+void default_replay_code_convert (score_t score, U8 code,
+	struct replay_code_info *info)
+{
+	bcd_t *loc;
+
+	score_zero (score);
+	if (code == 0)
+		return;
+	code--;
+#ifdef REPLAY_MILLIONS
+	loc = score;
+#else
+	loc = score + 1;
+#endif
+	bcd_string_add (loc, (U8 *)&info->min, sizeof (U16));
+	while (code >= 10)
+	{
+		bcd_string_add (loc, (U8 *)&info->step10, sizeof (U16));
+		code -= 10;
+	}
+	while (code > 0)
+	{
+		bcd_string_add (loc, (U8 *)&info->step, sizeof (U16));
+		code--;
+	}
+}
+
+
+void replay_code_to_score (score_t score, U8 code)
+{
+#ifdef MACHINE_REPLAY_CODE_TO_SCORE
+	MACHINE_REPLAY_CODE_TO_SCORE (score, code);
+#else
+	default_replay_code_convert (score, code, &replay_score_code_info);
 #endif
 }
 #endif
@@ -146,18 +195,33 @@ bool replay_can_be_awarded (void)
 }
 
 
-/** Reset the replay score to its default value. */
+/** Reset the replay scores to their initial values. */
 void replay_reset (void)
 {
 	U8 replay_code;
+	U8 level;
+	U8 multiplier;
 
-	replay_code = system_config.replay_start;
-#ifdef MACHINE_REPLAY_CODE_TO_SCORE
-	score_zero (first_replay_score);
-	MACHINE_REPLAY_CODE_TO_SCORE (first_replay_score, replay_code);
-#else
-	memcpy (first_replay_score, default_replay_score, sizeof (score_t));
-#endif
+	for (level = 0; level < NUM_REPLAY_LEVELS; level++)
+	{
+		if (system_config.replay_system == REPLAY_AUTO)
+		{
+			if (system_config.replay_levels >= level)
+				continue;
+			replay_code = system_config.replay_start;
+			multiplier = level;
+		}
+		else
+		{
+			replay_code = system_config.replay_level[level];
+			if (replay_code == 0)
+				continue;
+			multiplier = 1;
+		}
+		score_zero (replay_score_array[level]);
+		replay_code_to_score (replay_score_array[level], replay_code);
+		score_mul (replay_score_array[level], multiplier);
+	}
 }
 
 
