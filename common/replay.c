@@ -41,8 +41,8 @@ const score_t default_replay_score = { 0x00, 0x50, 0x00, 0x00, 0x00 };
 const struct area_csum replay_csum_info = {
 	.type = FT_REPLAY,
 	.version = 1,
-	.area = replay_score_array,
-	.length = BYTES_PER_SCORE,
+	.area = (U8 *)replay_score_array,
+	.length = sizeof (replay_score_array),
 	.reset = replay_reset,
 };
 
