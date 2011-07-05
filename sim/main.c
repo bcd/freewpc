@@ -318,11 +318,6 @@ int main (int argc, char *argv[])
 #if !(MACHINE_PIC == 1)
 	writeb (WPC_SW_COL_STROBE, 0);
 #endif
-#if (MACHINE_DMD == 1)
-	writeb (WPC_DMD_LOW_PAGE, 0);
-	writeb (WPC_DMD_HIGH_PAGE, 0);
-	writeb (WPC_DMD_ACTIVE_PAGE, 0);
-#endif
 
 	/* Initialize the state of the switches; optos are backwards */
 	sim_switch_init ();
