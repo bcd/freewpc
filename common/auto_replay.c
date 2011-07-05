@@ -94,7 +94,7 @@ CALLSET_ENTRY (auto_replay, end_game)
 
 	/* After so many games, auto-adjust the replay score if
 	necessary */
-	if (auto_replay_game_count >= REPLAY_AUTO_ADJUST_RATE)
+	if (auto_replay_game_count >= AUTO_REPLAY_ADJUST_RATE)
 	{
 		auto_replay_adjust ();
 		auto_replay_game_count = 0;

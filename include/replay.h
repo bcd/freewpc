@@ -23,6 +23,9 @@
 
 #define NUM_REPLAY_LEVELS 4
 
+/* The number of games after which the auto replay score is recalculated */
+#define AUTO_REPLAY_ADJUST_RATE 50
+
 __common__ void replay_draw (void);
 __common__ void replay_award (void);
 __common__ void replay_check_current (void);
