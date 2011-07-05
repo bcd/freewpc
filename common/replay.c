@@ -128,9 +128,9 @@ void replay_award (void)
  * and a replay needs to be awarded */
 void replay_check_current (void)
 {
-	if (system_config.replay_award != FREE_AWARD_OFF
-		&& replay_award_count == 0
-		&& score_compare (next_replay_score, current_score) <= 0)
+	if (system_config.replay_award != FREE_AWARD_OFF &&
+		replay_award_count < NUM_REPLAY_LEVELS &&
+		score_compare (next_replay_score, current_score) <= 0)
 	{
 		replay_award ();
 	}
