@@ -48,8 +48,9 @@ during this game.  This is also an index into the replay_score_array,
 zero-based, which says what the next replay level to be awarded is */
 __local__ U8 replay_award_count;
 
-/* The first replay score, used in attract mode */
-#define first_replay_score replay_score_array[0]
+/** The total number of replay awards for all players during this game */
+U8 replay_total_this_game;
+
 
 /* The next replay score, used during a game - this is per-player */
 #define next_replay_score replay_score_array[replay_award_count]
@@ -71,6 +72,7 @@ struct replay_code_info
 };
 
 
+/* Describe valid values for replay values */
 struct replay_code_info replay_score_code_info = {
 	.min = REPLAY_SCORE_MIN,
 	.step = REPLAY_SCORE_STEP,
@@ -79,6 +81,13 @@ struct replay_code_info replay_score_code_info = {
 	.step10 = REPLAY_SCORE_STEP << 4,
 };
 
+
+/**
+ * Convert a 8-bit replay adjustment code into a BCD score.
+ * Use the given info structure to guide the conversion.
+ * This function is used for both actual replay score values, and for
+ * replay boost values; we use a different info in each case.
+ */
 void default_replay_code_convert (score_t score, U8 code,
 	struct replay_code_info *info)
 {
@@ -107,6 +116,11 @@ void default_replay_code_convert (score_t score, U8 code,
 }
 
 
+/**
+ * Convert an 8-bit replay score adjustment into BCD form.
+ * The old MACHINE_REPLAY_CODE_TO_SCORE hook is still supported for now,
+ * but should not be used for new games.
+ */
 void replay_code_to_score (score_t score, U8 code)
 {
 #ifdef MACHINE_REPLAY_CODE_TO_SCORE
@@ -116,6 +130,10 @@ void replay_code_to_score (score_t score, U8 code)
 #endif
 }
 
+
+/**
+ * Convert an 8-bit, non-boolean replay boost adjustment into BCD.
+ */
 
 #ifndef CONFIG_REPLAY_BOOST_BOOLEAN
 struct replay_code_info replay_boost_code_info = {
@@ -152,7 +170,9 @@ void replay_draw (void)
 		default:
 			return;
 	}
-	sprintf_score (first_replay_score);
+	/* TODO - during a game, if there are multiple replay levels, we should show
+	the player what the next replay is at, not the first one */
+	sprintf_score (replay_score_array[0]);
 	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 }
@@ -217,12 +237,16 @@ void replay_reset (void)
 	U8 level;
 	U8 multiplier;
 
+	/* Repeat for each of the possible replay levels. */
 	for (level = 0; level < NUM_REPLAY_LEVELS; level++)
 	{
+		/* Get the correct adjustment code and multiplier.
+		 * This depends on the replay system in effect (auto or fixed). */
 		if (system_config.replay_system == REPLAY_AUTO)
 		{
 			if (system_config.replay_levels >= level)
 				continue;
+			/* TODO - this clears out any auto reflexing */
 			replay_code = system_config.replay_start;
 			multiplier = level;
 		}
@@ -233,25 +257,47 @@ void replay_reset (void)
 				continue;
 			multiplier = 1;
 		}
+
+		/* Convert and store in BCD form */
+		pinio_nvram_unlock ();
 		score_zero (replay_score_array[level]);
 		replay_code_to_score (replay_score_array[level], replay_code);
 		score_mul (replay_score_array[level], multiplier);
+		pinio_nvram_lock ();
 	}
 }
 
+CALLSET_ENTRY (replay, start_game)
+{
+	replay_total_this_game = 0;
+}
 
 CALLSET_ENTRY (replay, start_player)
 {
 	replay_award_count = 0;
 }
 
+CALLSET_ENTRY (replay, end_player)
+{
+	replay_total_this_game += replay_award_count;
+}
+
+CALLSET_ENTRY (replay, end_game)
+{
+	/* Is replay boost enabled?  If so, and one or more replays
+	were awarded in this game, then increase the replay value temporarily.
+	Note, replay boost is canceled when credits equal 0, a coin is inserted,
+	or test mode started. */
+	if (system_config.replay_boost && replay_total_this_game)
+	{
+	}
+}
 
 CALLSET_ENTRY (replay, init)
 {
 	/* Initialize the replay score from the menu adjustment. */
 	csum_area_reset (&replay_csum_info);
 }
-
 
 CALLSET_ENTRY (replay, amode_start)
 {
@@ -266,12 +312,4 @@ CALLSET_ENTRY (replay, file_register)
 }
 
 
-CALLSET_ENTRY (replay, end_game)
-{
-	/* Is replay boost enabled?  If so, and one or more replays were awarded in this game,
-	then increase the replay value temporarily. */
-	if (system_config.replay_boost)
-	{
-	}
-}
 
