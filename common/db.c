@@ -198,6 +198,8 @@ void bpt_hit (void)
 			task_runs_long ();
 		}
 	}
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
 }
 #endif /* CONFIG_BPT */
 
