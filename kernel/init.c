@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -54,8 +54,12 @@ const U8 wpc_machine_type = WPC_TYPE;
  */
 __noreturn__ void warm_reboot (void)
 {
+#ifdef __m6809__
+	start ();
+#else
 	disable_interrupts ();
 	freewpc_init ();
+#endif
 }
 
 

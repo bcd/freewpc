@@ -122,12 +122,8 @@ void fatal (errcode_t error_code)
 	while (1);
 #endif
 
-	/* Restart the system by jumping to the reset vector again. */
-#ifdef __m6809__
-	start ();
-#else
+	/* Restart the system */
 	warm_reboot ();
-#endif
 }
 
 
