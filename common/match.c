@@ -104,7 +104,7 @@ match_deff (void)
 #else
 		match_draw_scores ();
 #endif
-		sprintf ("%2b", &value);
+		sprintf ("%02X", value);
 		font_render_string_right (&font_fixed6, 126, 22, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_100MS);
