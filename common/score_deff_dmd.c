@@ -214,7 +214,7 @@ static void ll_score_sweep_rescan (void)
 	const struct score_font_info *info;
 	info = score_font_info_table + dmd_score_info_base[player_up-1];
 	ll_dmd_sweep_addr = info->bb_base;
-	ll_sweep_row = info->font->height + 1;
+	ll_sweep_row = far_read8 ((U8 *)info->font + 1, FON_PAGE) + 1;
 	ll_sweep_width = info->bb_width;
 }
 
