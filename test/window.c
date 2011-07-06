@@ -3126,10 +3126,12 @@ void solenoid_test_draw (void)
 
 void solenoid_test_enter (void)
 {
+	extern U8 sol_pulse_timer;
 	U8 sel = win_top->w_class.menu.selected;
+	if (sol_pulse_timer != 0)
+		return;
 	task_sleep (TIME_100MS);
 	sol_req_start_specific (sel, sol_duty_masks[sol_duty_level], browser_action);
-	task_sleep (TIME_100MS);
 }
 
 void flasher_test_enter (void)

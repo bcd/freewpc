@@ -126,8 +126,16 @@ sol_req_start_specific (U8 sol, U8 mask, U8 time)
 {
 	dbprintf ("Starting pulse %d now.\n", sol);
 
+	/* If the timer is nonzero, another request is already running.
+	This shouldn't happen.  The solenoid code takes care not to start
+	a request when something is already active.  The test mode code
+	calls this directly and bypasses those checks, but it enforces a delay
+	between pulses so it shouldn't occur. */
 	if (sol_pulse_timer != 0)
-		fatal (ERR_SOL_REQUEST);
+	{
+		nonfatal (ERR_SOL_REQUEST);
+		return;
+	}
 
 	req_reg_write = sol_get_write_reg (sol);
 	if (req_reg_write == (IOPTR)0)
