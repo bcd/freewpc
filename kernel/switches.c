@@ -409,6 +409,14 @@ void switch_sched_task (void)
 	const U8 sw = (U8)task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
+	/* Ignore any switch that doesn't have a processing function.
+	   This shouldn't ever happen if things are working correctly, but it
+		was observed on PIC games when the PIC code is broken and reporting
+		bad switch returns.  genmachine ensures that all defined switches
+		have a non-null value (null_function if nothing needs to be done) */
+	if (swinfo->fn == 0)
+		goto cleanup;
+
 	/* For test mode : this lets it see what was the last switch
 	 * to be scheduled.  Used by the Switch Edges test. */
 	sw_last_scheduled = sw;
