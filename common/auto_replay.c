@@ -21,9 +21,9 @@
 #include <freewpc.h>
 #include <replay.h>
 
-
-/** When auto replay is in effect, the adjustment value that denotes its starting
- * value (similar to system_config.replay_start, except that it varies). */
+/* When auto replay is in effect, the adjustment value that denotes
+   its starting value (similar to system_config.replay_start, except
+	that it varies). */
 __nvram__ U8 auto_replay_adj;
 
 __nvram__ U16 auto_replay_award_count;
@@ -67,7 +67,7 @@ CALLSET_ENTRY (auto_replay, end_player)
 		return;
 
 	/* Track the total number of replays this player earned during the game. */
-	auto_replay_award_count += replay_award_count;
+	auto_replay_award_count += replay_total_this_player;
 
 	/* Chalk the replay score histogram.  For each possible replay score N,
 	increment the stat for N if the player's score exceeded it. */

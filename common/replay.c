@@ -30,38 +30,61 @@
 #include <eb.h>
 #include <bcd_string.h>
 
-/** The current replay scores */
-__nvram__ U8 replay_score_array[NUM_REPLAY_LEVELS][BYTES_PER_SCORE];
+/* At present, only debug in simulation since we run out of ROM space
+   on the 6809 */
+#ifndef __m6809__
+#define REPLAY_DEBUG
+#endif
 
-/** The replay module NVRAM descriptor */
+#ifdef REPLAY_DEBUG
+#define rp_debug(fmt, rest...) dbprintf(fmt, ## rest)
+#else
+#define rp_debug(fmt, rest...)
+#endif
+
+struct replay_info {
+	/* The current configured replay levels, without boost */
+	replay_score_t base_levels[NUM_REPLAY_LEVELS];
+
+	/* The amount of boost that will be applied anytime a
+	replay is achieved during a game */
+	replay_score_t boost;
+
+	/* The current active levels, including boost */
+	score_t score_array[NUM_REPLAY_LEVELS];
+
+	/* The adjustment code which set the base level when
+	   auto replay is in effect */
+	U8 auto_adj;
+};
+__nvram__ struct replay_info replay_info;
+
+
+/** The replay module checksum descriptor */
 const struct area_csum replay_csum_info = {
 	.type = FT_REPLAY,
 	.version = 1,
-	.area = (U8 *)replay_score_array,
-	.length = sizeof (replay_score_array),
-	.reset = replay_reset,
+	.area = (U8 *)&replay_info,
+	.length = sizeof (replay_info),
+	.reset = replay_info_reset,
 };
 
 
 /** The number of replays already awarded to the current player
-during this game.  This is also an index into the replay_score_array,
+during this game.  This is also an index into the score array,
 zero-based, which says what the next replay level to be awarded is */
-__local__ U8 replay_award_count;
+__local__ U8 replay_total_this_player;
 
 /** The total number of replay awards for all players during this game */
 U8 replay_total_this_game;
 
-
 /* The next replay score, used during a game - this is per-player */
-#define next_replay_score replay_score_array[replay_award_count]
+#define next_replay_score replay_info.score_array[replay_total_this_player]
 
 
-
-/*
- * Code 0 means OFF.
- * Code 1 is the minimum value.
- */
-
+/* The replay_code_info structure encodes all of the compile-time
+   parameters for a replay value/replay boost value in BCD form.
+   It allows common code to be used on either type. */
 struct replay_code_info
 {
 	U16 min;
@@ -74,11 +97,11 @@ struct replay_code_info
 
 /* Describe valid values for replay values */
 struct replay_code_info replay_score_code_info = {
-	.min = REPLAY_SCORE_MIN,
-	.step = REPLAY_SCORE_STEP,
-	.max = REPLAY_SCORE_MAX,
-	.deflt = REPLAY_SCORE_DEFAULT,
-	.step10 = REPLAY_SCORE_STEP << 4,
+	.min = U16_TO_BCD2(REPLAY_SCORE_MIN),
+	.step = U16_TO_BCD2(REPLAY_SCORE_STEP),
+	.max = U16_TO_BCD2(REPLAY_SCORE_MAX),
+	.deflt = U16_TO_BCD2(REPLAY_SCORE_DEFAULT),
+	.step10 = U16_TO_BCD2(REPLAY_SCORE_STEP) << 4,
 };
 
 
@@ -88,7 +111,7 @@ struct replay_code_info replay_score_code_info = {
  * This function is used for both actual replay score values, and for
  * replay boost values; we use a different info in each case.
  */
-void default_replay_code_convert (score_t score, U8 code,
+static void default_replay_code_convert (score_t score, U8 code,
 	struct replay_code_info *info)
 {
 	bcd_t *loc;
@@ -97,11 +120,7 @@ void default_replay_code_convert (score_t score, U8 code,
 	if (code == 0)
 		return;
 	code--;
-#ifdef REPLAY_MILLIONS
-	loc = score;
-#else
-	loc = score + 1;
-#endif
+	loc = score + REPLAY_SCORE_OFFSET;
 	bcd_string_add (loc, (U8 *)&info->min, sizeof (U16));
 	while (code >= 10)
 	{
@@ -137,11 +156,11 @@ void replay_code_to_score (score_t score, U8 code)
 
 #ifndef CONFIG_REPLAY_BOOST_BOOLEAN
 struct replay_code_info replay_boost_code_info = {
-	.min = REPLAY_BOOST_MIN,
-	.step = REPLAY_BOOST_STEP,
-	.max = REPLAY_BOOST_MAX,
-	.deflt = REPLAY_BOOST_DEFAULT,
-	.step10 = REPLAY_BOOST_STEP << 4,
+	.min = U16_TO_BCD2(REPLAY_BOOST_MIN),
+	.step = U16_TO_BCD2(REPLAY_BOOST_STEP),
+	.max = U16_TO_BCD2(REPLAY_BOOST_MAX),
+	.deflt = U16_TO_BCD2(REPLAY_BOOST_DEFAULT),
+	.step10 = U16_TO_BCD2(REPLAY_BOOST_STEP) << 4,
 };
 
 void replay_code_to_boost (score_t score, U8 code)
@@ -151,28 +170,30 @@ void replay_code_to_boost (score_t score, U8 code)
 #endif
 
 
-/** Draw the replay screen, as used in attract mode */
+/** Draw the replay screen */
 void replay_draw (void)
 {
-	dmd_alloc_low_clean ();
+	const char *header;
+
 	switch (system_config.replay_award)
 	{
 		case FREE_AWARD_CREDIT:
-			font_render_string_center (&font_fixed6, 64, 8, "REPLAY AT");
+			header = "REPLAY AT";
 			break;
 		case FREE_AWARD_EB:
-			font_render_string_center (&font_fixed6, 64, 8, "EXTRA BALL AT");
+			header = "EXTRA BALL AT";
 			break;
 		case FREE_AWARD_TICKET:
-			font_render_string_center (&font_fixed6, 64, 8, "TICKET AT");
+			header = "TICKET AT";
 			break;
 		case FREE_AWARD_OFF:
 		default:
 			return;
 	}
-	/* TODO - during a game, if there are multiple replay levels, we should show
-	the player what the next replay is at, not the first one */
-	sprintf_score (replay_score_array[0]);
+
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 8, header);
+	sprintf_score (replay_info.score_array[in_game ? replay_total_this_player : 0]);
 	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 }
@@ -203,7 +224,7 @@ void replay_award (void)
 #endif
 
 	audit_increment (&system_audits.replays);
-	replay_award_count++;
+	replay_total_this_player++;
 	knocker_fire ();
 }
 
@@ -212,9 +233,16 @@ void replay_award (void)
  * and a replay needs to be awarded */
 void replay_check_current (void)
 {
-	if (system_config.replay_award != FREE_AWARD_OFF &&
-		replay_award_count < NUM_REPLAY_LEVELS &&
-		score_compare (next_replay_score, current_score) <= 0)
+	replay_score_t *curr;
+
+	if (unlikely (system_config.replay_award == FREE_AWARD_OFF))
+		return;
+
+	if (unlikely (replay_total_this_player >= NUM_REPLAY_LEVELS))
+		return;
+
+	curr = (replay_score_t *)(current_score + REPLAY_SCORE_OFFSET);
+	if (unlikely (*curr > next_replay_score))
 	{
 		replay_award ();
 	}
@@ -226,16 +254,23 @@ void replay_check_current (void)
 bool replay_can_be_awarded (void)
 {
 	return (system_config.replay_award != FREE_AWARD_OFF
-		&& replay_award_count == 0);
+		&& replay_total_this_player == 0);
 }
 
 
-/** Reset the replay scores to their initial values. */
-void replay_reset (void)
+/* Initialize the replay_info structure.
+ * This struct is populated with data from the adjustment system,
+ * which is already being checksummed to detect corruption.  This
+ * function does not attempt to duplicate that, but instead converts
+ * the adjustment data into more usable form.
+ */
+void replay_info_update (void)
 {
 	U8 replay_code;
 	U8 level;
 	U8 multiplier;
+
+	rp_debug ("replay_info_update\n");
 
 	/* Repeat for each of the possible replay levels. */
 	for (level = 0; level < NUM_REPLAY_LEVELS; level++)
@@ -245,9 +280,11 @@ void replay_reset (void)
 		if (system_config.replay_system == REPLAY_AUTO)
 		{
 			if (system_config.replay_levels >= level)
+			{
+				rp_debug ("#%d skipping\n", level);
 				continue;
-			/* TODO - this clears out any auto reflexing */
-			replay_code = system_config.replay_start;
+			}
+			replay_code = replay_info.auto_adj;
 			multiplier = level;
 		}
 		else
@@ -259,12 +296,38 @@ void replay_reset (void)
 		}
 
 		/* Convert and store in BCD form */
+		rp_debug ("#%d : code = %d mult = %d\n", level, replay_code, multiplier);
 		pinio_nvram_unlock ();
-		score_zero (replay_score_array[level]);
-		replay_code_to_score (replay_score_array[level], replay_code);
-		score_mul (replay_score_array[level], multiplier);
+		score_zero (replay_info.score_array[level]);
+		replay_code_to_score (replay_info.score_array[level], replay_code);
+		score_mul (replay_info.score_array[level], multiplier);
+		/* TBD - add boost */
 		pinio_nvram_lock ();
+
+#ifdef REPLAY_DEBUG
+		sprintf_score (replay_info.score_array[level]);
+		dbprintf1 ();
+		dbprintf ("\n");
+#endif
 	}
+}
+
+void replay_boost_reset (void)
+{
+	/* Copy base levels into score array */
+	rp_debug ("replay_boost_reset\n");
+}
+
+void replay_boost_now (void)
+{
+	rp_debug ("replay_boost_now\n");
+	/* Increment each score array entry by the boost value */
+}
+
+void replay_info_reset (void)
+{
+	rp_debug ("replay_info_reset\n");
+	replay_boost_reset ();
 }
 
 CALLSET_ENTRY (replay, start_game)
@@ -274,12 +337,12 @@ CALLSET_ENTRY (replay, start_game)
 
 CALLSET_ENTRY (replay, start_player)
 {
-	replay_award_count = 0;
+	replay_total_this_player = 0;
 }
 
 CALLSET_ENTRY (replay, end_player)
 {
-	replay_total_this_game += replay_award_count;
+	replay_total_this_game += replay_total_this_player;
 }
 
 CALLSET_ENTRY (replay, end_game)
@@ -290,19 +353,23 @@ CALLSET_ENTRY (replay, end_game)
 	or test mode started. */
 	if (system_config.replay_boost && replay_total_this_game)
 	{
+		/* ? Does boost apply if a game is aborted on ball 3? */
+		replay_boost_now ();
+	}
+	else if (get_credits () == 0)
+	{
+		replay_boost_reset ();
 	}
 }
 
 CALLSET_ENTRY (replay, init)
 {
-	/* Initialize the replay score from the menu adjustment. */
-	csum_area_reset (&replay_csum_info);
+	replay_info_update ();
 }
 
-CALLSET_ENTRY (replay, amode_start)
+CALLSET_ENTRY (replay, test_start, add_credits, add_partial_credits)
 {
-	/* Reinitialize the replay levels from the adjustments. */
-	csum_area_reset (&replay_csum_info);
+	replay_boost_reset ();
 }
 
 
@@ -312,4 +379,17 @@ CALLSET_ENTRY (replay, file_register)
 }
 
 
+CALLSET_ENTRY (replay, adjustment_changed)
+{
+	/* Handle changes to any replay-related adjustments. */
+
+	if (last_adjustment_changed == &system_config.replay_system ||
+		last_adjustment_changed == &system_config.replay_start ||
+		last_adjustment_changed == &system_config.replay_levels ||
+		last_adjustment_changed == &system_config.replay_boost)
+	{
+		rp_debug ("Replay adjustment changed.\n");
+		replay_info_update ();
+	}
+}
 

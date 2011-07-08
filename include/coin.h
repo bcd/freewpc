@@ -30,4 +30,10 @@ __common__ void remove_credit (void);
 __common__ void credits_clear (void);
 __common__ void units_clear (void);
 
+extern inline U8 get_credits (void)
+{
+	extern volatile U8 credit_count;
+	return credit_count;
+}
+
 #endif /* _COIN_H */
