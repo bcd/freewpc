@@ -700,7 +700,7 @@ void *task_alloca (task_t *tp, U8 size)
  * The task dispatcher.  This function selects a new task to run.
  *
  * This is called from two places: when a task exits, or when a
- * task sleeps/yields.  The 'x' register is expected to be loaded with
+ * task sleeps/yields.  The parameter 'tp' points to
  * the previous task's task structure pointer.  The search for a new
  * task to run starts with the next task in the table.  Code then
  * jumps back to the first candidate that is eligible, via
