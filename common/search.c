@@ -234,6 +234,11 @@ void ball_search_monitor_task (void)
 					/* Perform a ball search */
 					ball_search_run ();
 
+					/* After the third ball search, cancel the tilt lamp
+					effect, to help the player find the missing ball. */
+					if (ball_search_count == 3)
+						leff_stop (LEFF_TILT);
+
 					/* Wait a bit before searching again.  How long to wait?
 					A little while at first, then a little longer.  */
 					if (ball_search_count <= 5)
