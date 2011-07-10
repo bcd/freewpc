@@ -20,7 +20,11 @@
 
 #include <string.h>
 #include <stdarg.h>
+#ifdef CONFIG_HOST_CYGWIN
+#include <ncurses/ncurses.h>
+#else
 #include <ncurses.h>
+#endif
 #include <freewpc.h>
 #include <simulation.h>
 
