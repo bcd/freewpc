@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -27,7 +27,13 @@ U8 mb_mode_count;
 	function. */
 static void mb_mode_update (struct mb_mode_ops *ops, enum mb_mode_state state)
 {
-	ops->update (state); /* TODO - use callback page */
+	/* Update the mode state */
+	*(ops->state) = state;
+
+	/* Inform the mode */
+	ops->update (state);
+
+	/* Do common handling. */
 	switch (state)
 	{
 		case MB_INACTIVE:
@@ -45,8 +51,9 @@ static void mb_mode_update (struct mb_mode_ops *ops, enum mb_mode_state state)
 	}
 }
 
-/*	A task that runs when the multiball mode is active (running, not in grace). */
-static void mb_mode_active_task (void)
+/*	A task that runs when the multiball mode is active
+   (running, not in grace). */
+void mb_mode_active_task (void)
 {
 	for (;;)
 		task_sleep (TIME_4S);
@@ -68,17 +75,6 @@ static void mb_mode_grace_task (void)
 U8 mb_mode_running_count (void)
 {
 	return mb_mode_count;
-}
-
-/*	Return the current state of the multiball mode */
-enum mb_mode_state mb_mode_get_state (struct mb_mode_ops *ops)
-{
-	if (task_find_gid (ops->gid_running))
-		return MB_ACTIVE;
-	else if (task_find_gid (ops->gid_in_grace))
-		return MB_IN_GRACE;
-	else
-		return MB_INACTIVE;
 }
 
 /*	Start a multiball mode */
@@ -142,13 +138,15 @@ void mb_mode_end_ball (struct mb_mode_ops *ops)
 
 void mb_mode_music_refresh (struct mb_mode_ops *ops)
 {
-	if (ops->music && mb_mode_effect_running_p (ops))
+	if (ops->prio && mb_mode_effect_running_p (ops))
+	{
 		music_request (ops->music, ops->prio);
+	}
 }
 
 void mb_mode_display_update (struct mb_mode_ops *ops)
 {
-	if (ops->deff_running && mb_mode_effect_running_p (ops))
+	if (ops->prio && mb_mode_effect_running_p (ops))
 		deff_start_bg (ops->deff_running, ops->prio);
 }
 

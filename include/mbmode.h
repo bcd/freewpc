@@ -32,17 +32,29 @@ struct mb_mode_ops
 {
 	/* The update callback is invoked whenever the state of the
 	multiball changes. */
-	U8 callback_page;
 	void (*update) (enum mb_mode_state state);
 	U8 music;
 	U8 deff_starting;
 	U8 deff_running;
 	U8 deff_ending;
 	U8 prio;
+	void_function active_task;
 	task_gid_t gid_running;
 	task_gid_t gid_in_grace;
 	task_ticks_t grace_period;
+	enum mb_mode_state *state;
 };
+
+#define DEFAULT_MBMODE \
+	.update = null_function, \
+	.music = MUS_OFF, \
+	.deff_starting = DEFF_NULL, \
+	.deff_running = DEFF_NULL, \
+	.deff_ending = DEFF_NULL, \
+	.prio = PRI_NULL, \
+	.active_task = mb_mode_active_task, \
+	.grace_period = TIME_500MS
+
 
 struct mb_mode_task_config
 {
@@ -51,13 +63,19 @@ struct mb_mode_task_config
 
 U8 mb_mode_running_count (void);
 
+void mb_mode_active_task (void);
+
 void mb_mode_start (struct mb_mode_ops *ops);
 void mb_mode_restart (struct mb_mode_ops *ops);
 void mb_mode_single_ball (struct mb_mode_ops *ops);
 void mb_mode_end_ball (struct mb_mode_ops *ops);
 void mb_mode_music_refresh (struct mb_mode_ops *ops);
 void mb_mode_display_update (struct mb_mode_ops *ops);
-enum mb_mode_state mb_mode_get_state (struct mb_mode_ops *ops);
+
+extern inline enum mb_mode_state mb_mode_get_state (struct mb_mode_ops *ops)
+{
+	return *(ops->state);
+}
 
 extern inline bool mb_mode_effect_running_p (struct mb_mode_ops *ops)
 {

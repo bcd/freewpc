@@ -17,7 +17,6 @@ COMMON_BASIC_OBJS +=	common/initials.o
 COMMON_BASIC_OBJS +=	$(if $(MACHINE_TZ),,common/pin.o)
 COMMON_BASIC_OBJS +=	common/locale.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_PLAYABLE), common/match.o)
-COMMON_BASIC_OBJS +=	common/mbmode.o
 COMMON_BASIC_OBJS +=	common/optocheck.o
 COMMON_BASIC_OBJS += $(if $(CONFIG_MUTE_PAUSE), common/pause.o)
 COMMON_BASIC_OBJS +=	common/plunger.o
