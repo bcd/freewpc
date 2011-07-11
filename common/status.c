@@ -76,15 +76,6 @@ void status_report_deff (void)
 	status_page_complete ();
 #endif
 
-#ifdef DEBUGGER
-	status_page_init ();
-	sprintf ("CNT %1d MIS %1d", counted_balls, missing_balls);
-	font_render_string_center (&font_mono5, 64, 11, sprintf_buffer);
-	sprintf ("LIVE %1d KLOCKS %1d", live_balls, kickout_locks);
-	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
-	status_page_complete ();
-#endif
-
 	/* Allow other modules to report status as well.
 	 * The order is unspecified. */
 	callset_invoke (status_report);
