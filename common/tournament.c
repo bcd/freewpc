@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -81,14 +81,6 @@ void tournament_check_player_enable (void)
 	{
 		task_recreate_gid (GID_PLAYER_TOURNAMENT_DETECT,
 			tournament_player_detect);
-	}
-}
-
-
-CALLSET_ENTRY (tournament, sw_escape)
-{
-	if (in_game && tournament_mode_enabled)
-	{
 	}
 }
 
