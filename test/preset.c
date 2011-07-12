@@ -215,18 +215,17 @@ void preset_install_country_code (U8 code)
 	switch (code)
 	{
 		case LC_USA_CANADA:
-		case LC_USA_CANADA2:
 			preset_install (preset_usa_canada_comps);
 			break;
 
-		case LC_FRANCE:
+		case LC_FRANCE1:
 		case LC_FRANCE2:
 		case LC_FRANCE3:
 		case LC_FRANCE4:
 			preset_install (preset_french_comps);
 			break;
 
-		case LC_GERMANY:
+		case LC_GERMANY1:
 			preset_install (preset_german_comps);
 			break;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,12 +21,13 @@
 #ifndef _GENERIC_H
 #define _GENERIC_H
 
-/* Locales.  The values here are taken directly from the WPC jumper codes,
-but they are otherwise generic. */
-#define LC_USA_CANADA 0
-#define LC_FRANCE 1
-#define LC_GERMANY 2
+/* Locales.  The values here are taken directly from the
+WPC jumper codes, but they are otherwise generic. */
+#define LC_ERROR 0
+#define LC_FRANCE1 1
+#define LC_GERMANY1 2
 #define LC_FRANCE2 3
+#define LC_GERMANY2 7
 #define LC_EXPORT_ENGLISH 8
 #define LC_FRANCE3 9
 #define LC_EXPORT 10
@@ -34,7 +35,7 @@ but they are otherwise generic. */
 #define LC_UK 12
 #define LC_EUROPE 13
 #define LC_SPAIN 14
-#define LC_USA_CANADA2 15
+#define LC_USA_CANADA 15
 
 
 /** Atomically increment a variable in protected memory by N. */

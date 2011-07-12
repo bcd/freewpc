@@ -41,10 +41,10 @@ static const char *month_names[] = {
 
 
 const char *locale_names[] = {
-	"USA/CANADA 1", "FRANCE", "GERMANY", "FRANCE 20F",
+	"ERROR", "FRANCE", "GERMANY", "FRANCE 20F",
 	"INVALID", "INVALID", "INVALID", "GERMANY 2",
 	"INVALID", "FRANCE 3", "EXPORT", "FRANCE 4",
-	"UNITED KINGDOM", "EUROPE", "SPAIN", "USA/CANADA 2",
+	"UNITED KINGDOM", "EUROPE", "SPAIN", "USA/CANADA",
 };
 
 /* TODO - option to render in short form for audit display */
