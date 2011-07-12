@@ -157,14 +157,7 @@ static void status_report_check (void)
 }
 
 
-CALLSET_ENTRY (status_report, sw_left_button)
-{
-	if (in_live_game)
-		status_report_check ();
-}
-
-
-CALLSET_ENTRY (status_report, sw_right_button)
+CALLSET_ENTRY (status_report, sw_left_button, sw_right_button)
 {
 	if (in_live_game)
 		status_report_check ();
