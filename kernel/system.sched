@@ -79,7 +79,7 @@ lockup_check_rtt      128     23c
 free_timer_rtt        32		94c
 
 # Update the segmented displays, if CONFIG_SEG is defined.
-seg_rtt?CONFIG_SEG    1       50c # guess?
+seg_rtt?CONFIG_ALPHA  1       50c # guess?
 
 # Common processing required at the end of every IRQ
 ### process_check_rtt     1       50c
