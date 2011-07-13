@@ -242,13 +242,15 @@ void ui_init (void)
 #if (MACHINE_DMD == 1)
 	display_win = ui_window_create (130, 34, x, y, " ASCII-Matrix ");
 	x += 130 + 1;
-#else
-	display_win = ui_window_create (20, 4, x, y, " Display Panel ");
-	x += 20 + 1;
-#endif
-
 	y = 0;
 	debug_win = ui_window_create (64, 46, x, y, NULL);
+#else
+	display_win = ui_window_create (20, 4, x, y, " Display Panel ");
+	x = 0;
+	y += 4 + 1;
+	debug_win = ui_window_create (80, 25, x, y, NULL);
+#endif
+
 	scrollok (debug_win, 1);
 	x += 64 + 1;
 	y += 2;
