@@ -31,6 +31,11 @@
 #define MAX_DEVICES 8
 #endif
 
+/** The number of balls installed in the game */
+#ifndef MACHINE_MAX_BALLS
+#define MACHINE_MAX_BALLS MACHINE_TROUGH_SIZE
+#endif
+
 /** The GIDs for the device update tasks.
  * Every device has its own GID for the function that runs to service it.
  * This task is in charge of processing switch closures AND servicing

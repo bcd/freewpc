@@ -65,7 +65,7 @@ static volatile int sim_debug_init = 0;
 
 /** The initial number of balls to 'install' as given on the command-line. */
 #ifdef DEVNO_TROUGH
-int sim_installed_balls = MACHINE_TROUGH_SIZE;
+int sim_installed_balls = MACHINE_MAX_BALLS;
 #else
 int sim_installed_balls = 0;
 #endif

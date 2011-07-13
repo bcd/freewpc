@@ -950,11 +950,7 @@ void device_init (void)
 	device_t *dev;
 	U8 i;
 
-#ifdef MACHINE_MAX_BALLS
-	max_balls = MACHINE_MAX_BALLS ();
-#else
-	max_balls = MACHINE_TROUGH_SIZE;
-#endif
+	max_balls = MACHINE_MAX_BALLS;
 	counted_balls = MACHINE_TROUGH_SIZE;
 	missing_balls = 0;
 	live_balls = 0;
