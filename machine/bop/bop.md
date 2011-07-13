@@ -34,6 +34,7 @@ include platform/wpc/wpc89.md
 #define MACHINE_DEBUGGER_HOOK
 #define MACHINE_OUTHOLE_KICK_HOOK
 define MACHINE_BALL_SAVE_TIME             0
+define MACHINE_MAX_BALLS                  2
 
 #define MACHINE_CUSTOM_AMODE
 define MACHINE_GRAND_CHAMPION_INITIALS { 'L', 'E', 'D' }
@@ -168,7 +169,7 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 46: Under Playfield Kickback
 47: Enter Head
 51: Spinner, ingame
-52: Shooter, shooter, debounce(TIME_200MS)
+52: Shooter, shooter, edge, noplay, debounce(TIME_200MS)
 53: UR Jet, ingame, c_decl(jet_hit)
 54: UL Jet, ingame, c_decl(jet_hit)
 55: Lower Jet, ingame, c_decl(jet_hit)
