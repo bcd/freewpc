@@ -102,6 +102,7 @@ void amode_start (void)
 #ifdef CONFIG_GI
 	triac_enable (PINIO_GI_STRINGS);
 #endif
+	flipper_disable ();
 	far_task_recreate_gid (GID_DEVICE_PROBE, device_probe, COMMON_PAGE);
 	task_yield ();
 	callset_invoke (amode_start);
