@@ -5,8 +5,6 @@
 
 MACHINE_FILE = bop.md
 
-MACHINE_SCHEDULE := $(M)/bop.sched
-
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
@@ -60,6 +58,3 @@ GAME_PAGED_OBJS = leffs.o skill.o outhole.o jets.o head.o \
 
 GAME_INCLUDES =
 
-SCHED_HEADERS += build/left_sling.h build/right_sling.h build/jet_sling.h \
-	build/ul_jet.h build/ur_jet.h build/lower_jet.h build/spinner.h \
-	build/gate.h 
