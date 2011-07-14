@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,25 +18,17 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+@@parameter swevent
+
+@@
+@@file @class.c
+@@
+
 #include <freewpc.h>
 
-CALLSET_ENTRY (trough, dev_trough_enter)
+CALLSET_ENTRY (trough, @swevent)
 {
-	/* Audit center drains (outlanes are audited in their respective
-	 * switches) */
-	if (!event_did_follow (any_outlane, center_drain))
-	{
-		audit_increment (&system_audits.center_drains);
-	}
-
-	/* Note that there is one less ball in play now */
-	device_remove_live ();
+/* TODO - handle trough stack/jam switch on newer games */
 }
 
-
-CALLSET_ENTRY (trough, dev_trough_kick_success)
-{
-	/* Note that there is one more ball in play now */
-	device_add_live ();
-}
 

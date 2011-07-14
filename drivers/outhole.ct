@@ -1,0 +1,79 @@
+/*
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/* Outhole switch driver.
+ *
+ * The outhole switch is simple; just trigger the kicker
+ * to move the balls into the trough.
+ */
+
+@@class outhole
+@@parameter swno
+@@parameter swevent
+@@parameter sol
+
+@@
+@@file @class.h
+@@
+/* Nothing required */
+
+
+@@
+@@file @class.c
+@@
+
+#include <freewpc.h>
+
+static void handle_outhole (void)
+{
+	/* TODO : in empty balls test or device tests, this should activate */
+	while (switch_poll (@swno))
+	{
+#ifdef MACHINE_TZ
+		/* For TZ, if the far left trough switch is empty,
+		this also allows an outhole kick, even though the main
+		trough does not count it. */
+		if (!switch_poll_logical (SW_FAR_LEFT_TROUGH))
+		{
+		}
+		else
+#endif
+		if (device_full_p (device_entry (DEVNO_TROUGH)))
+		{
+			task_sleep_sec (1);
+			continue;
+		}
+
+		/* Wait for ball to settle more before kicking.  Then wait again
+		briefly before repolling the switch */
+		task_sleep (TIME_300MS);
+		sol_request (@sol);
+		task_sleep_sec (2);
+	}
+	task_exit ();
+}
+
+
+CALLSET_ENTRY (outhole_driver, @swevent, amode_start, init_complete)
+{
+	task_create_gid1 (GID_OUTHOLE_HANDLER, handle_outhole);
+}
+
+/* vim: set filetype=c: */

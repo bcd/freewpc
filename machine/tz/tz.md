@@ -292,6 +292,8 @@ Ramp Div: driver(duty2),
 Gumball Div: driver(duty2),
 	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
+Outhole: driver(outhole), sol=SOL_OUTHOLE, swno=SW_OUTHOLE, swevent=sw_outhole
+
 ##########################################################################
 # Containers
 # These denote devices that can hold, count, and eject pinballs.
