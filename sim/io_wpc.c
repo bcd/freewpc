@@ -84,7 +84,7 @@ static void wpc_write_debug (struct wpc_debug_port *port, unsigned int addr, U8 
 	if (val == '\n')
 	{
 		*--port->outptr = '\0';
-		simlog (SLC_DEBUG_PORT, port->outbuf);
+		simlog (SLC_DEBUG_PORT, "%s", port->outbuf);
 		port->outptr = port->outbuf;
 	}
 }

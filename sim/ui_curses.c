@@ -82,7 +82,7 @@ void ui_print_command (const char *cmdline)
 	if (*cmdline != '\0')
 	{
 		wprintw (cmdline_win, ":");
-		wprintw (cmdline_win, cmdline);
+		wprintw (cmdline_win, "%s", cmdline);
 	}
 	wrefresh (cmdline_win);
 }
@@ -91,7 +91,7 @@ void ui_write_debug (enum sim_log_class c, const char *buffer)
 {
 	if (c != SLC_DEBUG_PORT)
 		wprintw (debug_win, "[SIM] ");
-	wprintw (debug_win, buffer);
+	wprintw (debug_win, "%s", buffer);
 	waddch (debug_win, '\n');
 	wrefresh (debug_win);
 }
