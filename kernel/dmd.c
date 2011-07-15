@@ -456,43 +456,6 @@ void dmd_alloc_pair_clean (void)
 }
 
 
-/** Draw a thin border 2 pixels wide around the given display page. */
-void dmd_draw_border (U8 *dbuf)
-{
-	const dmd_buffer_t dbuf_bot = (dmd_buffer_t)((char *)dbuf + 480);
-	register U16 *dbuf16 = (U16 *)dbuf;
-	register U16 *dbuf16_bot = (U16 *)dbuf_bot;
-	U8 i;
-
-	for (i=0; i < 16; i++)
-		*dbuf16_bot++ = *dbuf16++ = 0xFFFFUL;
-	dbuf += 32;
-	for (i=0; i < 28; i++)
-	{
-		dbuf[0] = 0x03;
-		dbuf[15] = 0xC0;
-		dbuf += 16;
-	}
-}
-
-/**
- * Draw a horizontal line at the specified y-coordinate.
- */
-void dmd_draw_horiz_line (U16 *dbuf, U8 y)
-{
-	dbuf += y * (16 / 2);
-
-	*dbuf++ = 0xffffUL;
-	*dbuf++ = 0xffffUL;
-	*dbuf++ = 0xffffUL;
-	*dbuf++ = 0xffffUL;
-	*dbuf++ = 0xffffUL;
-	*dbuf++ = 0xffffUL;
-	*dbuf++ = 0xffffUL;
-	*dbuf++ = 0xffffUL;
-}
-
-
 /*
  * Helper function used to do a DMD transition.
  * This contains common logic that needs to happen several times during

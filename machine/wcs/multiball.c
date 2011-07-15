@@ -13,7 +13,7 @@ score_t mb_jackpot_value;
 void ball_locked_deff (void)
 {
 	dmd_alloc_low_clean ();
-	dmd_draw_border (dmd_low_buffer);
+	dmd_draw_thin_border (dmd_low_buffer);
 	sprintf ("BALL %d LOCKED", lock_count);
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	dmd_show_low ();
