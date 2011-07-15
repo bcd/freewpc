@@ -453,7 +453,6 @@ void trickmb_update (void)
 
 struct mb_mode_ops trickmb_mode = {
 	DEFAULT_MBMODE,
-	.callback_page = PAGE,
 	.update = trickmb_update,
 	.deff_running = DEFF_TRICK_MB,
 	.gid_running = GID_TRICK_MB_RUNNING,
@@ -964,7 +963,6 @@ void main_mb_update (void)
 
 struct mb_mode_ops main_mb_mode = {
 	DEFAULT_MBMODE,
-	.callback_page = PAGE,
 	.update = main_mb_update,
 	.deff_running = DEFF_MAIN_MB,
 	.gid_running = GID_MAIN_MB_RUNNING,
@@ -1098,7 +1096,6 @@ void midnight_mb_update (void)
 
 struct mb_mode_ops midnight_mb_mode = {
 	DEFAULT_MBMODE,
-	.callback_page = PAGE,
 	.update = midnight_mb_update,
 	.deff_running = DEFF_MIDNIGHT_MB,
 	.gid_running = GID_MIDNIGHT_MB_RUNNING,
@@ -1388,7 +1385,6 @@ void quick_mb_update (void)
 
 struct mb_mode_ops quick_mb_mode = {
 	DEFAULT_MBMODE,
-	.callback_page = PAGE,
 	.update = quick_mb_update,
 	.deff_running = DEFF_QUICK_MB,
 	.gid_running = GID_QUICK_MB_RUNNING,
