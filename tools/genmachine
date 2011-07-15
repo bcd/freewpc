@@ -1091,6 +1091,14 @@ sub machine_write_makefile {
 		my $driver = $inst->{'driver'};
 		my $ident = $inst->{'c_decl'};
 		my $id;
+		my $section = $inst->{'page'};
+
+		if (!defined $section) {
+			$section = "KERNEL_HW_OBJS";
+		}
+		else {
+			$section =~ s/PAGE$/OBJS/;
+		}
 
 		if (!defined ($tempid{$driver})) {
 			$tempid{$driver} = 0;
@@ -1123,6 +1131,7 @@ sub machine_write_makefile {
 
 SCHED_HEADERS += $h_file
 TEMPLATE_OBJS += $o_file
+$section += $o_file
 
 $o_file : $c_file $h_file build/mach-Makefile
 
@@ -1138,7 +1147,6 @@ $test_o_file : $test_c_file build/mach-Makefile
 END
 		}
 	}
-	print "\nKERNEL_HW_OBJS += \$(TEMPLATE_OBJS)\n";
 	print "MACHINE_SCHED_FLAGS += \$(BLDDIR)/*.sched\n";
 
 	# Print rules for building the FIFs.
