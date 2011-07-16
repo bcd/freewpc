@@ -21,6 +21,32 @@
 #ifndef _RTC_H
 #define _RTC_H
 
+#define HOURS_PER_DAY 24
+#define DAYS_PER_WEEK 7
+#define MAX_DAYS_PER_MONTH 31
+#define MONTHS_PER_YEAR 12
+#define MIN_YEAR 2000
+
+enum day_of_week
+{
+	SUNDAY,
+	MONDAY,
+	TUESDAY,
+	WEDNESDAY,
+	THURSDAY,
+	FRIDAY,
+	SATURDAY,
+};
+
+struct date
+{
+	U8 year;
+	U8 month;
+	U8 day;
+	U8 hour;
+	U8 min;
+};
+
 __common__ void rtc_reset (void);
 __common__ void rtc_render_date (void);
 __common__ void rtc_render_time (void);

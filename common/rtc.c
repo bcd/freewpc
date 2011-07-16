@@ -149,14 +149,14 @@ static void rtc_calc_day_of_week (void)
 	 * For values larger than 64, subtract 63 at a time to speed up
 	 * the computation. */
 #ifndef __m6809__
-	day_of_week %= 7;
+	day_of_week %= DAYS_PER_WEEK;
 #else
-	while (day_of_week >= 7)
+	while (day_of_week >= DAYS_PER_WEEK)
 	{
 		if (day_of_week > 64)
 			day_of_week -= (64 - 1);
 		else
-			day_of_week -= 7;
+			day_of_week -= DAYS_PER_WEEK;
 	}
 #endif
 }
@@ -167,10 +167,10 @@ static void rtc_normalize (void)
 {
 	pinio_nvram_unlock ();
 
-	while (hour >= 24)
+	while (hour >= HOURS_PER_DAY)
 	{
-		hour -= 24;
-		writeb (WPC_CLK_HOURS_DAYS, readb (WPC_CLK_HOURS_DAYS) - 24);
+		hour -= HOURS_PER_DAY;
+		writeb (WPC_CLK_HOURS_DAYS, readb (WPC_CLK_HOURS_DAYS) - HOURS_PER_DAY);
 		day++;
 	}
 
@@ -180,7 +180,7 @@ static void rtc_normalize (void)
 		month++;
 	}
 
-	if (month > 12)
+	if (month > MONTHS_PER_YEAR)
 	{
 		month = 1;
 		year++;
@@ -192,9 +192,9 @@ static void rtc_normalize (void)
 	rtc_calc_day_of_week ();
 
 	/* Perform sanity checks, just in case. */
-	if ((month < 1) || (month > 12))
+	if ((month < 1) || (month > MONTHS_PER_YEAR))
 		month = 1;
-	if ((day < 1) || (day > 31))
+	if ((day < 1) || (day > MAX_DAYS_PER_MONTH))
 		day = 1;
 
 	/* Update checksums and save */
@@ -238,7 +238,7 @@ static void rtc_pinmame_read (void)
 		/* Copy the PinMAME data into FreeWPC's date structure,
 		then clear the PinMAME area so we don't do this again. */
 		pinio_nvram_unlock ();
-		year = clock_data->year - 2000;
+		year = clock_data->year - MIN_YEAR;
 		month = clock_data->month;
 		day = clock_data->day;
 		clock_data->year = 0;
@@ -303,7 +303,7 @@ CALLSET_ENTRY (rtc, diagnostic_check)
 void rtc_render_date (void)
 {
 	extern __common__ void locale_render_date (U8, U8, U16);
-	locale_render_date (month, day, 2000+year);
+	locale_render_date (month, day, MIN_YEAR+year);
 }
 
 
@@ -384,7 +384,7 @@ void rtc_end_modify (U8 cancel_flag)
 void rtc_next_field (void)
 {
 	rtc_edit_field++;
-	if (rtc_edit_field >= 5)
+	if (rtc_edit_field >= NUM_RTC_FIELDS)
 		rtc_edit_field = 0;
 }
 
