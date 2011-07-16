@@ -68,6 +68,8 @@ struct sim_triac wpc_triac;
 static U8 wpc_flipper_relay;
 #endif
 
+unsigned long wpc_wall_time_when_clock_set = 0;
+unsigned int wpc_minute_reg = 0;
 
 
 static void wpc_io_debug_init (struct wpc_debug_port *port)
@@ -324,15 +326,34 @@ void wpc_write (void *unused, unsigned int addr, U8 val)
 }
 
 
-U8 wpc_clock_reader (void *unused, unsigned int reg)
+U8 wpc_clock_reader (void *unused, unsigned int regno)
 {
-	unsigned int minutes_on = sim_get_wall_clock ();
+	unsigned int minute_reg;
+
+	minute_reg = wpc_minute_reg;
+	minute_reg += sim_get_wall_clock () - wpc_wall_time_when_clock_set;
+
 	/* The time-of-day registers return the system time of the
 	simulator itself. */
-	if (reg == 0)
-		return minutes_on / MINS_PER_HOUR;
+	if (regno == 0)
+		return minute_reg / MINS_PER_HOUR;
 	else
-		return minutes_on % MINS_PER_HOUR;
+		return minute_reg % MINS_PER_HOUR;
+}
+
+void wpc_clock_writer (void *unused, unsigned int regno, U8 val)
+{
+	wpc_wall_time_when_clock_set = sim_get_wall_clock ();
+	if (regno == 0)
+	{
+		wpc_minute_reg %= MINS_PER_HOUR;
+		wpc_minute_reg += val * MINS_PER_HOUR;
+	}
+	else
+	{
+		wpc_minute_reg /= MINS_PER_HOUR;
+		wpc_minute_reg += val;
+	}
 }
 
 
@@ -485,7 +506,7 @@ void io_wpc_init (void)
 
 	/* Install clock handler.  Since clock time comes from the native OS,
 	it cannot be changed and so these are read-only registers */
-	io_add (WPC_CLK_HOURS_DAYS, 2, wpc_clock_reader, io_null_writer, NULL);
+	io_add (WPC_CLK_HOURS_DAYS, 2, wpc_clock_reader, wpc_clock_writer, NULL);
 
 	/* Install the internal timer handler */
 	io_add_ro (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, wpc_timer_reader, NULL);
