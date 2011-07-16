@@ -40,20 +40,6 @@ struct wpc_pinmame_clock_data
 };
 
 
-/** The memory state of the realtime clock.  These variables
-hold the 'base time' that is not counted in the ASIC, plus
-a snapshot of the last value that was read from the ASIC. */
-struct rtc_state
-{
-	U8 year;
-	U8 month;
-	U8 day;
-	U8 hour;
-	U8 min;
-	U8 day_of_week;
-};
-
-
 /** The editable fields of the date/time. */
 #define RTC_FIELD_MONTH 0
 #define RTC_FIELD_DAY 1
@@ -62,39 +48,27 @@ struct rtc_state
 #define RTC_FIELD_MINUTE 4
 #define NUM_RTC_FIELDS 5
 
+/** The current date/time */
+__nvram__ struct date current_date;
+/* year, month, day, hour, minute, day_of_week */
 
-/* Year is stored as an offset from 2000 */
-static __nvram__ U8 year;
-static __nvram__ U8 month;
-static __nvram__ U8 day;
-static __nvram__ U8 hour;
-static __nvram__ U8 day_of_week;
+/** Keeps track of when the minute changes, for auditing */
+static U8 last_minute;
 
+/** The date/time being edited */
+struct date edit_date;
+
+/** Which field is being edited */
 U8 rtc_edit_field;
-
-struct date_time_backup
-{
-	U8 year;
-	U8 month;
-	U8 day;
-	U8 hour;
-	U8 min;
-} backup;
-
 
 /** Checksum descriptor for the RTC info */
 const struct area_csum rtc_csum_info = {
 	.type = FT_DATE,
 	.version = 1,
-	.area = &year,
-	.length = 5,
+	.area = (U8 *)&current_date,
+	.length = sizeof (struct date),
 	.reset = rtc_reset,
 };
-
-static U8 minute;
-
-/** Keeps track of when the minute changes, for auditing */
-static U8 last_minute;
 
 
 static U8 days_in_month_table[] = {
@@ -115,11 +89,11 @@ static const char *day_names[] = {
 /** Returns the number of days in the current month.
  * This handles leap years in February correctly until 2100,
  * which is not be a leap year but will be detected as such. */
-static U8 rtc_days_in_current_month (void)
+static U8 rtc_days_in_current_month (struct date *d)
 {
-	U8 days = days_in_month_table[month-1];
+	U8 days = days_in_month_table[d->month-1];
 	/* Handle leap years */
-	if ((month == 2) && ((year % 4) == 0))
+	if ((d->month == 2) && ((d->year % 4) == 0))
 		days++;
 	return (days);
 }
@@ -127,20 +101,21 @@ static U8 rtc_days_in_current_month (void)
 
 /** Calculate the day of the week (0=Sunday, 6=Saturday)
 from the current values of year, month, and day. */
-static void rtc_calc_day_of_week (void)
+static enum day_of_week rtc_calc_day_of_week (struct date *d)
 {
 	static U8 day_of_week_month_code[] = {
 		0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5
 	};
+	U8 day_of_week;
 
 	/* Compute (6 + year + (year/4) + month code + day - N) mod 7.
 	N is 1 if it is a leap year and the month is January or February,
 	else it is zero. */
-	day_of_week = year;
-	day_of_week += (year / 4);
-	day_of_week += day_of_week_month_code[month-1];
-	day_of_week += day;
-	if (!(year % 4) && month <= 2)
+	day_of_week = d->year;
+	day_of_week += (d->year / 4);
+	day_of_week += day_of_week_month_code[d->month-1];
+	day_of_week += d->day;
+	if (!(d->year % 4) && d->month <= 2)
 		day_of_week--;
 	day_of_week --;
 
@@ -159,43 +134,44 @@ static void rtc_calc_day_of_week (void)
 			day_of_week -= DAYS_PER_WEEK;
 	}
 #endif
+	return day_of_week;
 }
 
 
 /** Normalizes the current date and time. */
-static void rtc_normalize (void)
+static void rtc_normalize (struct date *d)
 {
 	pinio_nvram_unlock ();
 
-	while (hour >= HOURS_PER_DAY)
+	while (d->hour >= HOURS_PER_DAY)
 	{
-		hour -= HOURS_PER_DAY;
+		d->hour -= HOURS_PER_DAY;
 		writeb (WPC_CLK_HOURS_DAYS, readb (WPC_CLK_HOURS_DAYS) - HOURS_PER_DAY);
-		day++;
+		d->day++;
 	}
 
-	if (day > rtc_days_in_current_month ())
+	if (d->day > rtc_days_in_current_month (d))
 	{
-		day = 1;
-		month++;
+		d->day = 1;
+		d->month++;
 	}
 
-	if (month > MONTHS_PER_YEAR)
+	if (d->month > MONTHS_PER_YEAR)
 	{
-		month = 1;
-		year++;
+		d->month = 1;
+		d->year++;
 		/* FreeWPC stores the year in nvram as the offset from
 		the year 2000; therefore, this won't overflow until
 		the year 2256. */
 	}
 
-	rtc_calc_day_of_week ();
+	//rtc_calc_day_of_week ();
 
 	/* Perform sanity checks, just in case. */
-	if ((month < 1) || (month > MONTHS_PER_YEAR))
-		month = 1;
-	if ((day < 1) || (day > MAX_DAYS_PER_MONTH))
-		day = 1;
+	if ((d->month < 1) || (d->month > MONTHS_PER_YEAR))
+		d->month = 1;
+	if ((d->day < 1) || (d->day > MAX_DAYS_PER_MONTH))
+		d->day = 1;
 
 	/* Update checksums and save */
 	csum_area_update (&rtc_csum_info);
@@ -207,8 +183,8 @@ static void rtc_normalize (void)
 static void rtc_hw_read (void)
 {
 	pinio_nvram_unlock ();
-	hour = readb (WPC_CLK_HOURS_DAYS);
-	minute = readb (WPC_CLK_MINS);
+	current_date.hour = readb (WPC_CLK_HOURS_DAYS);
+	current_date.minute = readb (WPC_CLK_MINS);
 	csum_area_update (&rtc_csum_info);
 	pinio_nvram_lock ();
 }
@@ -216,8 +192,8 @@ static void rtc_hw_read (void)
 
 static void rtc_hw_write (void)
 {
-	writeb (WPC_CLK_HOURS_DAYS, hour);
-	writeb (WPC_CLK_MINS, minute);
+	writeb (WPC_CLK_HOURS_DAYS, current_date.hour);
+	writeb (WPC_CLK_MINS, current_date.minute);
 }
 
 
@@ -238,12 +214,12 @@ static void rtc_pinmame_read (void)
 		/* Copy the PinMAME data into FreeWPC's date structure,
 		then clear the PinMAME area so we don't do this again. */
 		pinio_nvram_unlock ();
-		year = clock_data->year - MIN_YEAR;
-		month = clock_data->month;
-		day = clock_data->day;
+		current_date.year = clock_data->year - MIN_YEAR;
+		current_date.month = clock_data->month;
+		current_date.day = clock_data->day;
 		clock_data->year = 0;
 		pinio_nvram_lock ();
-		rtc_normalize ();
+		rtc_normalize (&current_date);
 	}
 #endif
 }
@@ -254,13 +230,13 @@ void rtc_reset (void)
 	/* Reset the date to the time at which the software
 	 * was built.
 	 * TODO : this should trigger a CLOCK NOT SET message */
-	year = 0;
-	month = 1;
-	day = 1;
-	hour = 0;
-	minute = 0;
+	current_date.year = 0;
+	current_date.month = 1;
+	current_date.day = 1;
+	current_date.hour = 0;
+	current_date.minute = 0;
 	last_minute = 0;
-	rtc_calc_day_of_week ();
+	//rtc_calc_day_of_week (&current_date);
 }
 
 
@@ -279,36 +255,36 @@ CALLSET_ENTRY (rtc, idle_every_ten_seconds)
 {
 	/* Re-read the timer hardware registers and normalize the values. */
 	rtc_hw_read ();
-	rtc_normalize ();
+	rtc_normalize (&current_date);
 
 	/* Did the minute value change? */
-	if (minute != last_minute)
+	if (current_date.minute != last_minute)
 	{
 		/* Note: the assumption here is that the idle task will
 		 * always get called at least once per minute. */
 		callset_invoke (minute_elapsed);
 	}
-	last_minute = minute;
+	last_minute = current_date.minute;
 }
 
 
 CALLSET_ENTRY (rtc, diagnostic_check)
 {
-	if (year == 0)
+	if (current_date.year == 0)
 		diag_post_error ("TIME AND DATE\nNOT SET\n", COMMON_PAGE);
 }
 
 
 /** Render the current date to the printf buffer */
-void rtc_render_date (void)
+void rtc_render_date (struct date *d)
 {
 	extern __common__ void locale_render_date (U8, U8, U16);
-	locale_render_date (month, day, MIN_YEAR+year);
+	locale_render_date (d->month, d->day, MIN_YEAR+d->year);
 }
 
 
 /** Render the current time to the printf buffer */
-void rtc_render_time (void)
+void rtc_render_time (struct date *d)
 {
 	static const U8 rtc_us_hours[] = {
 		12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
@@ -320,11 +296,11 @@ void rtc_render_time (void)
 		case CLOCK_STYLE_AMPM:
 		default:
 			sprintf ("%d:%02d %s",
-				rtc_us_hours[hour], minute, (hour >= 12)?"PM":"AM");
+				rtc_us_hours[d->hour], d->minute, (d->hour >= 12)?"PM":"AM");
 			break;
 
 		case CLOCK_STYLE_24HOUR:
-			sprintf ("%02d:%02d", hour, minute);
+			sprintf ("%02d:%02d", d->hour, d->minute);
 			break;
 	}
 }
@@ -339,19 +315,20 @@ const char *rtc_edit_field_name[] = {
 };
 
 
-void rtc_render (void)
+void rtc_render (struct date *d)
 {
 #if (MACHINE_DMD == 1)
-	sprintf ("%s", day_names[day_of_week]);
+	enum day_of_week day = rtc_calc_day_of_week (d);
+	sprintf ("%s", day_names[day]);
 	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
-	rtc_render_date ();
+	rtc_render_date (d);
 	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
-	rtc_render_time ();
+	rtc_render_time (d);
 	font_render_string_center (&font_mono5, 64, 25, sprintf_buffer);
 #else
-	rtc_render_date ();
+	rtc_render_date (d);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
-	rtc_render_time ();
+	rtc_render_time (d);
 	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 #endif
 	if (rtc_edit_field != 0xFF)
@@ -363,22 +340,30 @@ void rtc_render (void)
 
 
 /** Show the current date/time on the DMD */
-void rtc_show_date_time (void)
+void rtc_show_date_time (struct date *d)
 {
 	dmd_alloc_low_clean ();
-	rtc_render ();
+	rtc_render (d);
 	dmd_show_low ();
 }
 
 
 void rtc_begin_modify (void)
 {
+	memcpy (&edit_date, &current_date, sizeof (struct date));
 	rtc_edit_field = 0;
 }
 
 void rtc_end_modify (U8 cancel_flag)
 {
 	rtc_edit_field = 0xFF;
+	if (!cancel_flag)
+	{
+		pinio_nvram_unlock ();
+		current_date = edit_date;
+		pinio_nvram_lock ();
+		rtc_hw_write ();
+	}
 }
 
 void rtc_next_field (void)
@@ -391,46 +376,43 @@ void rtc_next_field (void)
 
 void rtc_modify_field (U8 up_flag)
 {
-	pinio_nvram_unlock ();
-
+	struct date *d = &edit_date;
 	switch (rtc_edit_field)
 	{
 		case RTC_FIELD_MONTH:
 			if (up_flag)
-				month++;
-			else if (month > 1)
-				month--;
+				d->month++;
+			else if (d->month > 1)
+				d->month--;
 			break;
 		case RTC_FIELD_DAY:
 			if (up_flag)
-				day++;
-			else if (day > 1)
-				day--;
+				d->day++;
+			else if (d->day > 1)
+				d->day--;
 			break;
 		case RTC_FIELD_YEAR:
-			if (up_flag && year < 99)
-				year++;
-			else if (year > 8)
-				year--;
+			if (up_flag && d->year < 99)
+				d->year++;
+			else if (d->year > 8)
+				d->year--;
 			break;
 		case RTC_FIELD_HOUR:
-			if (up_flag && hour < 23)
-				hour++;
-			else if (hour > 0)
-				hour--;
+			if (up_flag && d->hour < 23)
+				d->hour++;
+			else if (d->hour > 0)
+				d->hour--;
 			rtc_hw_write ();
 			break;
 		case RTC_FIELD_MINUTE:
-			if (up_flag && minute < 59)
-				minute++;
-			else if (minute > 0)
-				minute--;
+			if (up_flag && d->minute < 59)
+				d->minute++;
+			else if (d->minute > 0)
+				d->minute--;
 			rtc_hw_write ();
 			break;
 	}
-
-	pinio_nvram_lock ();
-	rtc_normalize ();
+	rtc_normalize (d);
 }
 
 

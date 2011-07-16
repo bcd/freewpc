@@ -164,7 +164,7 @@ void amode_date_time_page (void)
 {
 	if (system_config.show_date_and_time == YES)
 	{
-		rtc_show_date_time ();
+		rtc_show_date_time (&current_date);
 		amode_page_end (3);
 	}
 }

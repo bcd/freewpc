@@ -71,7 +71,7 @@ void status_report_deff (void)
 	status_page_complete ();
 
 #ifdef CONFIG_RTC
-	rtc_show_date_time ();
+	rtc_show_date_time (&current_date);
 	dmd_draw_border (dmd_low_buffer);
 	status_page_complete ();
 #endif

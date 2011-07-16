@@ -2313,13 +2313,13 @@ void set_time_thread (void)
 	for (;;)
 	{
 		task_sleep_sec (5);
-		rtc_show_date_time ();
+		rtc_show_date_time (&edit_date);
 	}
 }
 
 void set_time_window_draw (void)
 {
-	rtc_show_date_time ();
+	rtc_show_date_time (&edit_date);
 }
 
 void set_time_up (void)

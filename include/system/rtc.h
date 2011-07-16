@@ -44,13 +44,16 @@ struct date
 	U8 month;
 	U8 day;
 	U8 hour;
-	U8 min;
+	U8 minute;
 };
 
+extern struct date current_date;
+extern struct date edit_date;
+
 __common__ void rtc_reset (void);
-__common__ void rtc_render_date (void);
-__common__ void rtc_render_time (void);
-__common__ void rtc_show_date_time (void);
+__common__ void rtc_render_date (struct date *);
+__common__ void rtc_render_time (struct date *);
+__common__ void rtc_show_date_time (struct date *);
 __common__ void rtc_begin_modify (void);
 __common__ void rtc_end_modify (U8 cancel_flag);
 __common__ void rtc_next_field (void);
