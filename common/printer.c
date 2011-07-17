@@ -278,6 +278,7 @@ void print_all_audits (void)
 {
 	printer_reconfig ();
 
+	timestamp_update (&system_timestamps.last_printout);
 	printout_name = "AUDIT REPORT";
 	print_audit_list ("MAIN AUDITS", main_audits);
 	print_nl ();

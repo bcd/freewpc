@@ -73,6 +73,7 @@ void factory_reset (void)
 #else
 	/* TODO - how to clean the permanent area in native mode? */
 #endif
+	timestamp_update (&system_timestamps.factory_reset);
 	callset_invoke (factory_reset);
 }
 

@@ -595,6 +595,21 @@ struct audit feature_audit_info[] = {
 };
 
 
+struct audit timestamp_audit_info[] = {
+	{ "TOTALS CLEARED", AUDIT_TYPE_TIMESTAMP, &system_timestamps.totals_cleared },
+	{ "CLOCK LAST SET", AUDIT_TYPE_TIMESTAMP, &system_timestamps.clock_last_set },
+	{ "AUDITS CLEARED", AUDIT_TYPE_TIMESTAMP, &system_timestamps.audits_cleared },
+	{ "COINS CLEARED", AUDIT_TYPE_TIMESTAMP, &system_timestamps.coins_cleared },
+	{ "FACTORY RESET", AUDIT_TYPE_TIMESTAMP, &system_timestamps.factory_reset },
+	{ "LAST GAME START", AUDIT_TYPE_TIMESTAMP, &system_timestamps.last_game_start },
+	{ "LAST REPLAY", AUDIT_TYPE_TIMESTAMP, &system_timestamps.last_replay },
+	{ "LAST H.S.T.D. RESET", AUDIT_TYPE_TIMESTAMP, &system_timestamps.last_hstd_reset },
+	{ "CHAMPION RESET", AUDIT_TYPE_TIMESTAMP, &system_timestamps.champion_reset },
+	{ "LAST PRINTOUT", AUDIT_TYPE_TIMESTAMP, &system_timestamps.last_printout },
+	{ "LAST SERV. CREDIT", AUDIT_TYPE_TIMESTAMP, &system_timestamps.last_service_credit },
+};
+
+
 void audit_browser_init (void)
 {
 	struct audit *aud;
@@ -622,7 +637,15 @@ void audit_browser_draw (void)
 
 	if (aud->nvram)
 	{
-		if (aud->format >= AUDIT_TYPE_TIMESTAMP)
+		if (aud->format == AUDIT_TYPE_TIMESTAMP)
+		{
+			struct date *d = (struct date *)aud->nvram;
+			if (d->year == 0)
+				sprintf ("NOT SET");
+			else
+				rtc_render_date (d);
+		}
+		else if (aud->format > AUDIT_TYPE_TIMESTAMP)
 			render_audit ((U16)aud->nvram, aud->format);
 		else
 			render_audit (*(aud->nvram), aud->format);
@@ -2242,6 +2265,7 @@ struct menu factory_reset_item = {
 void clear_audits_confirm (void)
 {
 	audit_reset ();
+	timestamp_update (&system_timestamps.audits_cleared);
 	confirm_start ();
 }
 
@@ -2261,6 +2285,7 @@ struct menu clear_audits_item = {
 void clear_coins_confirm (void)
 {
 	/* TODO */
+	timestamp_update (&system_timestamps.coins_cleared);
 	confirm_start ();
 }
 
@@ -2587,10 +2612,15 @@ struct menu histogram_audits_item = {
 };
 
 
+#ifdef CONFIG_RTC
+
 struct menu timestamp_audits_item = {
 	.name = "TIME-STAMPS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &audit_browser_window, timestamp_audit_info } },
 };
+
+#endif
 
 struct menu *audit_menu_items[] = {
 	&main_audits_item,
@@ -2598,7 +2628,9 @@ struct menu *audit_menu_items[] = {
 	&standard_audits_item,
 	&feature_audits_item,
 	&histogram_audits_item,
+#ifdef CONFIG_RTC
 	&timestamp_audits_item,
+#endif
 	NULL,
 };
 

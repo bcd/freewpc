@@ -576,6 +576,7 @@ void start_game (void)
 		/* Going through all of the start game hooks can take a while,
 		 * so sleep before/after to keep the system scheduling OK. */
 		task_sleep (TIME_33MS);
+		timestamp_update (&system_timestamps.last_game_start);
 		callset_invoke (start_game);
 		task_sleep (TIME_33MS);
 

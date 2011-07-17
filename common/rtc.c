@@ -61,6 +61,9 @@ struct date edit_date;
 /** Which field is being edited */
 U8 rtc_edit_field;
 
+/** System timestamps */
+__nvram__ std_timestamps_t system_timestamps;
+
 /** Checksum descriptor for the RTC info */
 const struct area_csum rtc_csum_info = {
 	.type = FT_DATE,
@@ -84,6 +87,24 @@ static const char *day_names[] = {
 	"THURSDAY", "FRIDAY", "SATURDAY"
 };
 #endif
+
+
+bool date_verify (struct date *d)
+{
+	if (d->month == 0 || d->day == 0)
+		return FALSE;
+	if (d->year > 2050 - MIN_YEAR)
+		return FALSE;
+	if (d->day > 31)
+		return FALSE;
+	if (d->month > 12)
+		return FALSE;
+	if (d->hour >= 24)
+		return FALSE;
+	if (d->minute >= 60)
+		return FALSE;
+	return TRUE;
+}
 
 
 /** Returns the number of days in the current month.
@@ -167,12 +188,6 @@ static void rtc_normalize (struct date *d)
 
 	//rtc_calc_day_of_week ();
 
-	/* Perform sanity checks, just in case. */
-	if ((d->month < 1) || (d->month > MONTHS_PER_YEAR))
-		d->month = 1;
-	if ((d->day < 1) || (d->day > MAX_DAYS_PER_MONTH))
-		d->day = 1;
-
 	/* Update checksums and save */
 	csum_area_update (&rtc_csum_info);
 	pinio_nvram_lock ();
@@ -203,7 +218,15 @@ static void rtc_hw_write (void)
 static void rtc_pinmame_read (void)
 {
 	/* Do not try this in native mode. */
-#ifndef CONFIG_NATIVE
+#ifdef CONFIG_NATIVE
+	/* TBD - read from system */
+	pinio_nvram_unlock ();
+	current_date.year = 2011 - MIN_YEAR;
+	current_date.month = 6;
+	current_date.day = 1;
+	pinio_nvram_lock ();
+	rtc_normalize (&current_date);
+#else
 	struct wpc_pinmame_clock_data *clock_data;
 
 	clock_data = (struct wpc_pinmame_clock_data *)0x1800;
@@ -363,6 +386,7 @@ void rtc_end_modify (U8 cancel_flag)
 		current_date = edit_date;
 		pinio_nvram_lock ();
 		rtc_hw_write ();
+		timestamp_update (&system_timestamps.clock_last_set);
 	}
 }
 
@@ -419,5 +443,26 @@ void rtc_modify_field (U8 up_flag)
 CALLSET_ENTRY (rtc, file_register)
 {
 	file_register (&rtc_csum_info);
+}
+
+
+void timestamp_update (struct date *timestamp)
+{
+	pinio_nvram_unlock ();
+	memcpy (timestamp, &current_date, sizeof (struct date));
+	pinio_nvram_lock ();
+}
+
+CALLSET_ENTRY (rtc, init_complete)
+{
+	struct date *d = (struct date *)&system_timestamps;
+	while (d < (struct date *)&system_timestamps + sizeof (system_timestamps) / sizeof (struct date))
+	{
+		if (!date_verify (d))
+		{
+			memset (d, 0, sizeof (system_timestamps));
+		}
+		d++;
+	}
 }
 

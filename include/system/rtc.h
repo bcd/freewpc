@@ -50,6 +50,7 @@ struct date
 extern struct date current_date;
 extern struct date edit_date;
 
+__common__ bool date_verify (struct date *);
 __common__ void rtc_reset (void);
 __common__ void rtc_render_date (struct date *);
 __common__ void rtc_render_time (struct date *);
@@ -58,5 +59,6 @@ __common__ void rtc_begin_modify (void);
 __common__ void rtc_end_modify (U8 cancel_flag);
 __common__ void rtc_next_field (void);
 __common__ void rtc_modify_field (U8 up_flag);
+__common__ void timestamp_update (struct date *timestamp);
 
 #endif /* _RTC_H */

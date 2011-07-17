@@ -100,6 +100,7 @@ CALLSET_ENTRY (service, sw_escape)
 	{
 		add_credit ();
 		audit_increment (&system_audits.service_credits);
+		timestamp_update (&system_timestamps.last_service_credit);
 	}
 #endif
 }

@@ -96,8 +96,24 @@ MACHINE_FEATURE_AUDIT_MEMBERS
 } feature_audits_t;
 
 
+typedef struct
+{
+	struct date totals_cleared;
+	struct date clock_last_set; /* done */
+	struct date audits_cleared; /* done */
+	struct date coins_cleared; /* done */
+	struct date factory_reset; /* done */
+	struct date last_game_start; /* done */
+	struct date last_replay;
+	struct date last_hstd_reset;
+	struct date champion_reset;
+	struct date last_printout; /* done */
+	struct date last_service_credit; /* done */
+} std_timestamps_t;
+
 extern __nvram__ std_audits_t system_audits;
 extern __nvram__ feature_audits_t feature_audits;
+extern __nvram__ std_timestamps_t system_timestamps;
 
 void audit_reset (void);
 void audit_increment (audit_t *aud);

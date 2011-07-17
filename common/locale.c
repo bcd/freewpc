@@ -47,6 +47,7 @@ const char *locale_names[] = {
 	"UNITED KINGDOM", "EUROPE", "SPAIN", "USA/CANADA 2",
 };
 
+/* TODO - option to render in short form for audit display */
 
 void locale_render_date (U8 month, U8 day, U16 year)
 {
