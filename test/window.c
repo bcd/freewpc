@@ -626,7 +626,7 @@ void audit_browser_draw (void)
 			render_audit ((U16)aud->nvram, aud->format);
 		else
 			render_audit (*(aud->nvram), aud->format);
-		font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
+		font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 	}
 
 	dmd_show_low ();
