@@ -103,8 +103,10 @@ __noreturn__ void freewpc_init (void)
 	bpt_init ();
 	pinio_watchdog_reset ();
 #endif
+#ifdef CONFIG_AC
 	ac_init ();
 	pinio_watchdog_reset ();
+#endif
 	sol_init ();
 	pinio_watchdog_reset ();
 #ifdef CONFIG_GI
