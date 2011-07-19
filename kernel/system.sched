@@ -56,7 +56,7 @@ lamp_rtt              2       90c
 switch_rtt            2       560c
 
 # Resynchronize to the AC zero cross point.
-ac_rtt                1       50c
+ac_rtt?CONFIG_AC      1       36c
 
 # Update flashers.  Each bank of 8 is updated
 # once every 4ms (the 2 banks are alternated every 2ms).
