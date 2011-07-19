@@ -542,9 +542,9 @@ void switch_transitioned (const U8 sw)
 		|| (!bit_test (sw_logical, sw) && bit_test (mach_opto_mask, sw))
 		|| (bit_test (sw_logical, sw) && !bit_test (mach_opto_mask, sw)))
 	{
-#ifdef DEBUGGER
+#ifdef CONFIG_BPT
 		/* One extra condition : do not schedule any switches when the
-		debugger has paused the game */
+		system is paused */
 		if (db_paused != 0)
 			return;
 #endif

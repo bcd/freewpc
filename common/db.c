@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -34,8 +34,9 @@
  */
 #include <freewpc.h>
 
-#ifdef DEBUGGER
+extern __permanent__ bool new_fatal_error;
 
+#ifdef CONFIG_BPT
 /** Nonzero when the system (all tasks except for interrupts)
 is paused */
 U8 db_paused;
@@ -49,9 +50,10 @@ U16 bpt_debounce_timer;
 U8 bpt_repeat_count;
 
 U8 db_tilt_flag;
+#endif
 
-extern __permanent__ bool new_fatal_error;
 
+#ifdef DEBUGGER
 void db_dump_all (void)
 {
 	VOIDCALL (task_dump);
@@ -62,8 +64,10 @@ void db_dump_all (void)
 	VOIDCALL (triac_dump);
 	SECTION_VOIDCALL (__common__, device_debug_all);
 }
+#endif
 
 
+#ifdef CONFIG_BPT
 /**
  * Debounce a button press, waiting for it to clear.
  */
@@ -127,10 +131,8 @@ void bpt_display (void)
 
 		sprintf ("PID %p GID %d", task_getpid (), task_getgid ());
 		font_render_string_left (&font_bitmap8, 0, 8, sprintf_buffer);
-#ifdef CONFIG_BPT
 		sprintf ("%02X%02X %02X", bpt_addr[0], bpt_addr[1]-2, bpt_addr[2]);
 		font_render_string_left (&font_bitmap8, 0, 16, sprintf_buffer);
-#endif
 	}
 	else
 	{
@@ -151,7 +153,6 @@ void bpt_display (void)
  * the continue, we have to invoke the switch and debugger periodic
  * functions.
  */
-#ifdef CONFIG_BPT
 void bpt_hit (void)
 {
 	U8 key;
@@ -203,8 +204,6 @@ void bpt_hit (void)
 }
 #endif /* CONFIG_BPT */
 
-#endif /* DEBUGGER */
-
 
 /** Check for debug input periodically */
 void db_periodic (void)
@@ -251,11 +250,13 @@ void db_periodic (void)
 /** Initialize the debugger */
 void db_init (void)
 {
-#ifdef DEBUGGER
+#ifdef CONFIG_BPT
 	db_paused = 0;
 	bpt_mem_addr = 0;
 	bpt_debounce_timer = 0x1C00;
+#endif
 
+#ifdef DEBUGGER
 	/* Signal the debugger that the system has just reset. */
 	if (wpc_debug_read_ready ())
 	{
