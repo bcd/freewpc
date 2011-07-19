@@ -33,8 +33,8 @@ per AC cycle */
 typedef U8 triacbits_t;
 
 void triac_rtt (void);
-void triac_enable (triacbits_t bits);
-void triac_disable (triacbits_t bits);
+void gi_enable (triacbits_t bits);
+void gi_disable (triacbits_t bits);
 void gi_leff_allocate (U8 triac);
 void gi_leff_free (U8 triac);
 void gi_leff_enable (U8 triac);

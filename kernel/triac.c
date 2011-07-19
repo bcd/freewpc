@@ -184,7 +184,7 @@ void triac_update (void)
 
 
 /** Turns on one or more triacs */
-void triac_enable (U8 triac)
+void gi_enable (U8 triac)
 {
 	log_event (SEV_INFO, MOD_TRIAC, EV_TRIAC_ON, triac);
 	gi_clear_dimming (triac, gi_dimming);
@@ -194,7 +194,7 @@ void triac_enable (U8 triac)
 
 
 /** Turns off one or more triacs */
-void triac_disable (U8 triac)
+void gi_disable (U8 triac)
 {
 	log_event (SEV_INFO, MOD_TRIAC, EV_TRIAC_OFF, triac);
 	gi_clear_dimming (triac, gi_dimming);

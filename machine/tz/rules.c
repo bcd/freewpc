@@ -71,7 +71,7 @@ void rules_leff (void)
 
 void rules_rollover_leff (void)
 {
-	triac_disable (PINIO_GI_STRINGS);
+	gi_disable (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		lamp_tristate_off (LM_RIGHT_INLANE);
@@ -88,7 +88,7 @@ void rules_rollover_leff (void)
 
 void rules_sssmb_leff (void)
 {
-	triac_disable (PINIO_GI_STRINGS);
+	gi_disable (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		lamp_tristate_off (LM_BONUS_X);
@@ -189,11 +189,11 @@ void rules_ramp_battle_leff (void)
 {
 	for (;;)
 	{
-		triac_disable (GI_POWERFIELD);
+		gi_disable (GI_POWERFIELD);
 		lamp_tristate_flash (LM_RAMP_BATTLE);
 		task_sleep_sec (4);
 		lamp_tristate_off (LM_RAMP_BATTLE);
-		triac_enable (GI_POWERFIELD);
+		gi_enable (GI_POWERFIELD);
 		task_sleep_sec (3);
 	}
 }
@@ -202,9 +202,9 @@ void rules_powerfield_leff (void)
 {
 	for (;;)
 	{
-		triac_enable (GI_POWERFIELD);
+		gi_enable (GI_POWERFIELD);
 		task_sleep_sec (2);
-		triac_disable (GI_POWERFIELD);
+		gi_disable (GI_POWERFIELD);
 		leff_start (LEFF_MPF_HIT);
 		task_sleep_sec (2);
 	}
@@ -251,7 +251,7 @@ void rules_deff (void)
 	leff_stop_all ();
 
 	rule_begin ();
-	triac_disable (PINIO_GI_STRINGS);
+	gi_disable (PINIO_GI_STRINGS);
 	rule_msg ("BACK TO THE ZONE", "", "HOW TO PLAY", "");
 	rules_sleep_sec (5);
 	rule_complete ();
@@ -312,7 +312,7 @@ void rules_deff (void)
 	rule_msg ("POWERFIELD", "PRESS THE FLIPPER BUTTONS", "TO SHOOT THE BALL INTO", "THE TOP OF THE POWERFIELD");
 	task_create_gid1 (GID_RULES_LEFF, rules_powerfield_leff);
 	rules_sleep_sec (9);
-	triac_disable (GI_POWERFIELD);
+	gi_disable (GI_POWERFIELD);
 	rule_complete ();
 
 	rule_begin ();

@@ -100,7 +100,7 @@ void amode_start (void)
 	leff_start (LEFF_AMODE);
 #endif
 #ifdef CONFIG_GI
-	triac_enable (PINIO_GI_STRINGS);
+	gi_enable (PINIO_GI_STRINGS);
 #endif
 	flipper_disable ();
 	far_task_recreate_gid (GID_DEVICE_PROBE, device_probe, COMMON_PAGE);
@@ -488,7 +488,7 @@ void start_ball (void)
 
 	flipper_enable ();
 #ifdef CONFIG_GI
-	triac_enable (PINIO_GI_STRINGS);
+	gi_enable (PINIO_GI_STRINGS);
 #endif
 	ball_search_timeout_set (12);
 	ball_search_monitor_start ();
