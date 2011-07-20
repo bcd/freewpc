@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,56 +21,17 @@
 #ifndef _SYS_DEBUG_H
 #define _SYS_DEBUG_H
 
-#include <freewpc.h>
-
-#ifdef CONFIG_PLATFORM_WPC
-#define WPC_DEBUG_WRITE_READY 0x1
-#define WPC_DEBUG_READ_READY 0x2
-#endif
-
-extern inline U8 wpc_debug_get_status (void)
-{
-#ifdef CONFIG_PLATFORM_WPC
-	return readb (WPC_DEBUG_CONTROL_PORT);
-#endif
-}
-
-extern inline U8 wpc_debug_write_ready (void)
-{
-#ifdef CONFIG_PLATFORM_WPC
-	return wpc_debug_get_status () & WPC_DEBUG_WRITE_READY;
-#endif
-}
-
-extern inline U8 wpc_debug_read_ready (void)
-{
-#ifdef CONFIG_PLATFORM_WPC
-	return wpc_debug_get_status () & WPC_DEBUG_READ_READY;
-#endif
-}
-
-extern inline void wpc_debug_write (U8 data)
-{
-#ifdef CONFIG_PLATFORM_WPC
-	writeb (WPC_DEBUG_DATA_PORT, data);
-#endif
-}
-
-extern inline U8 wpc_debug_read (void)
-{
-#ifdef CONFIG_PLATFORM_WPC
-	return readb (WPC_DEBUG_DATA_PORT);
-#endif
-}
-
+#ifdef CONFIG_BPT
 extern U8 db_paused;
+#endif
 
 __common__ void db_init (void);
 __common__ void db_dump_all (void);
 __common__ void db_periodic (void);
-extern void (*db_puts) (const char *s);
-void db_puts_orkin (const char *s);
-void db_puts_parallel (const char *s);
+
+extern void (*puts_handler) (const char *s);
+void puts_debug (const char *s);
+void puts_parallel (const char *s);
 
 /**
  * CONFIG_BPT is used to turn on the embedded debugger.

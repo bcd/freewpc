@@ -42,23 +42,27 @@
 /** A pointer to the current output driver.  This must be
 initialized during startup before debug messages can be written.
 See db_init(). */
-void (*db_puts) (const char *s);
+void (*puts_handler) (const char *s);
 
 
-/** Writes a constant string to the ORKIN debugger port */
-void db_puts_orkin (const char *s)
+/** Writes a constant string to the debugger port */
+#ifdef PINIO_HAVE_DEBUG_PORT
+void puts_debug (const char *s)
 {
 	register U8 c;
 	while ((c = *s++) != '\0')
-		wpc_debug_write (c);
+		pinio_debug_write (c);
 }
+#endif
 
 
 /** Writes a constant string to the parallel port */
-void db_puts_parallel (const char *s)
+#ifdef HAVE_PARALLEL_PORT
+void puts_parallel (const char *s)
 {
 	register U8 c;
 	while ((c = *s++) != '\0')
 		pinio_parport_write (c);
 }
+#endif
 

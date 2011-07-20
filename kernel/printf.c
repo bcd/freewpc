@@ -498,7 +498,7 @@ sprintf_score (const U8 *score)
 void
 dbprintf1 (void)
 {
-	db_puts (sprintf_buffer);
+	puts_handler (sprintf_buffer);
 }
 #endif
 

@@ -736,7 +736,6 @@ void task_dispatcher (task_t *tp)
 		periodic functions. */
 		if (unlikely (tp == task_tail))
 		{
-#ifdef CONFIG_PLATFORM_WPC
 			/* Call the debugger.  This is not implemented as a true
 			'idle' event below because it should _always_ be called,
 			even when 'sys_init_complete' is not true.  This lets us
@@ -746,7 +745,6 @@ void task_dispatcher (task_t *tp)
 			/* If the system is fully initialized, run the periodic functions. */
 			if (likely (periodic_ok))
 				do_periodic ();
-#endif /* CONFIG_PLATFORM_WPC */
 
 			/* Wait for time to change before continuing.  This ensures that
 			the task table+periodic functions are not scanned/called more

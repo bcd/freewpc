@@ -216,10 +216,10 @@ void db_periodic (void)
 #endif
 
 #ifdef DEBUGGER
-	if (wpc_debug_read_ready ())
+	if (pinio_debug_read_ready ())
 	{
-		char c = wpc_debug_read ();
-		db_puts = db_puts_orkin;
+		char c = pinio_debug_read ();
+		puts_handler = puts_debug;
 		switch (c)
 		{
 			case 'a':
@@ -258,14 +258,14 @@ void db_init (void)
 
 #ifdef DEBUGGER
 	/* Signal the debugger that the system has just reset. */
-	if (wpc_debug_read_ready ())
+	if (pinio_debug_read_ready ())
 	{
-		wpc_debug_write (0);
-		db_puts = db_puts_orkin;
+		pinio_debug_write (0);
+		puts_handler = puts_debug;
 	}
 	else
 	{
-		db_puts = db_puts_parallel;
+		puts_handler = puts_parallel;
 	}
 
 	/* Announce myself to the world. */
