@@ -291,4 +291,25 @@ __transition__ void dmd_rough_copy1 (void);
 __transition__ void dmd_rough_erase1 (void);
 
 
+
+/**
+ * Invert a portion of the low DMD page.
+ *
+ * x,y denote the coordinates of the upper leftmost pixel.
+ * width is the width of the area to be erased in pixels.
+ * height is the height of the area to be erased in pixels.
+ * All pixel values should be a multiple of 8 for correct results.
+ */
+#define dmd_rough_invert(x, y, w, h) \
+	do { \
+		extern struct dmd_rough_args dmd_rough_args; \
+		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0) + \
+			((x) / CHAR_BIT) + (y) * DMD_BYTE_WIDTH; \
+		dmd_rough_args.bwidth = (w) / CHAR_BIT; \
+		dmd_rough_args.height = h; \
+		dmd_rough_invert1 (); \
+	} while (0)
+
+__transition__ void dmd_rough_invert1 (void);
+
 #endif /* _SYS_DMD_H */

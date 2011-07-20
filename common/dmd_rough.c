@@ -79,3 +79,26 @@ __attribute__((noinline)) void dmd_rough_erase1 (void)
 	} while (dmd_rough_args.height > 0);
 }
 
+
+/**
+ * Invert a portion of the low DMD page.
+ *
+ * Use the function dmd_rough_erase() instead of this one.  This function
+ * expects the global parameter block 'dmd_rough_args' to be filled in.
+ */
+__attribute__((noinline)) void dmd_rough_invert1 (void)
+{
+	U8 *dst;
+
+	do {
+		dst = dmd_rough_args.dst;
+		U8 bytes = dmd_rough_args.bwidth;
+		do {
+			*dst++ ^= 0xFF;
+			bytes--;
+		} while (bytes > 0);
+		dmd_rough_args.dst += DMD_BYTE_WIDTH;
+		dmd_rough_args.height--;
+	} while (dmd_rough_args.height > 0);
+}
+
