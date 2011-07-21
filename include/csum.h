@@ -37,11 +37,10 @@ struct area_csum
 	/** A pointer to the variable that actually holds the checksum */
 	/* __nvram__ */ U8 *csum;
 
-	/** A function that will reset the block to factory defaults */
+	/** A function that will reset the block to factory defaults.
+	    This must reside within the same page as the caller to the
+		 csum module. */
 	void (*reset) (void);
-
-	/** The ROM page in which the reset function resides */
-	U8 reset_page;
 };
 
 void csum_area_update (const struct area_csum *csi);

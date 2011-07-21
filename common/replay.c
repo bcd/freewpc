@@ -47,7 +47,6 @@ const struct area_csum replay_csum_info = {
 	.length = BYTES_PER_SCORE,
 	.csum = &replay_csum,
 	.reset = replay_reset,
-	.reset_page = PAGE,
 };
 
 
