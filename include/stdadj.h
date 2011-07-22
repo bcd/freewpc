@@ -194,7 +194,7 @@ typedef struct
 	adjval_t max_credits; /* done */
 	adjval_t free_play; /* done */
 	adjval_t hide_coin_audits;
-	adjval_t payment_method;
+	adjval_t payment_method; /*( done */
 	adjval_t base_coin_size;
 	adjval_t coin_meter_units;
 	adjval_t fast_bill_slot;
