@@ -33,24 +33,34 @@
 #include <diag.h>
 
 
-/** The number of credits */
-__nvram__ volatile U8 credit_count;
+struct coin_state
+{
+	/* The number of raw coin units paid */
+	U8 units;
 
-/** The number of additional units purchased, less than the value
- * of one credit */
-__nvram__ volatile U8 unit_count;
+	/* The number of credits accumulated.  Units are converted
+	to credits based on the "units per credit" adjustment. */
+	U8 credits;
+
+	/* The total number of units earned for "units per bonus". */
+	U8 total_units;
+};
+
+__nvram__ struct coin_state coin_state;
+__nvram__ U8 coin_csum;
 
 
 void coin_reset (void)
 {
-	credit_count = unit_count = 0;
+	coin_state.units = 0;
+	coin_state.total_units = 0;
+	coin_state.credits = 0;
 }
 
 
-__nvram__ U8 coin_csum;
 const struct area_csum coin_csum_info = {
-	.area = (U8 *)&credit_count,
-	.length = sizeof (credit_count) + sizeof (unit_count),
+	.area = (U8 *)&coin_state,
+	.length = sizeof (coin_state),
 	.csum = &coin_csum,
 	.reset = coin_reset,
 };
@@ -96,9 +106,9 @@ void credits_render (void)
 		sprintf ("FREE PLAY");
 	else
 	{
-		if (unit_count != 0)
+		if (coin_state.units != 0)
 		{
-			U8 units = unit_count;
+			U8 units = coin_state.units;
 			U8 units_per_credit = price_config.units_per_credit;
 
 			/* There are fractional credits.  Reduce to the
@@ -106,18 +116,18 @@ void credits_render (void)
 
 			reduce_unit_fraction (&units, &units_per_credit);
 
-			if (credit_count == 0)
+			if (coin_state.credits == 0)
 				sprintf ("%d/%d CREDIT", units, units_per_credit);
 			else
 				sprintf ("%d %d/%d CREDITS",
-					credit_count, units, units_per_credit);
+					coin_state.credits, units, units_per_credit);
 		}
 		else
 		{
-			if (credit_count == 1)
-				sprintf ("%d CREDIT", credit_count);
+			if (coin_state.credits == 1)
+				sprintf ("%d CREDIT", coin_state.credits);
 			else
-				sprintf ("%d CREDITS", credit_count);
+				sprintf ("%d CREDITS", coin_state.credits);
 		}
 	}
 #endif
@@ -200,13 +210,16 @@ void announce_credits (void)
 
 
 /** Increment the credit count by 1. */
-static void increment_credit_count (void)
+void add_credit (void)
 {
-	if (credit_count >= price_config.max_credits)
+	if (coin_state.credits >= price_config.max_credits)
 		return;
 
 #ifndef FREE_ONLY
-	credit_count++;
+	pinio_nvram_unlock ();
+	coin_state.credits++;
+	csum_area_update (&coin_csum_info);
+	pinio_nvram_lock ();
 #endif
 
 #ifdef MACHINE_ADD_CREDIT_SOUND
@@ -219,16 +232,6 @@ static void increment_credit_count (void)
 }
 
 
-/** Add a credit. */
-void add_credit (void)
-{
-	pinio_nvram_unlock ();
-	increment_credit_count ();
-	csum_area_update (&coin_csum_info);
-	pinio_nvram_lock ();
-}
-
-
 /** Returns true if there are credits available.  This also returns
 true if the game is in free play mode. */
 bool has_credits_p (void)
@@ -238,7 +241,7 @@ bool has_credits_p (void)
 	if (price_config.free_play)
 		return (TRUE);
 	else
-		return (credit_count > 0);
+		return (coin_state.credits > 0);
 #else
 	return (TRUE);
 #endif
@@ -250,10 +253,10 @@ void remove_credit (void)
 {
 #ifndef FREE_ONLY
 	csum_area_check (&coin_csum_info);
-	if (credit_count > 0)
+	if (coin_state.credits > 0)
 	{
 		pinio_nvram_unlock ();
-		credit_count--;
+		coin_state.credits--;
 		csum_area_update (&coin_csum_info);
 		pinio_nvram_lock ();
 	}
@@ -265,15 +268,29 @@ void remove_credit (void)
 void add_units (U8 n)
 {
 	csum_area_check (&coin_csum_info);
-	if (credit_count >= price_config.max_credits)
+	if (coin_state.credits >= price_config.max_credits)
 		return;
 
-	nvram_add (unit_count, n);
-	if (unit_count >= price_config.units_per_credit)
+	/* Add credits based on units/bonus */
+	pinio_nvram_unlock ();
+	coin_state.units += n;
+	if (price_config.units_per_bonus > 0)
 	{
-		while (unit_count >= price_config.units_per_credit)
+		coin_state.total_units += n;
+		while (coin_state.total_units >= price_config.units_per_bonus)
 		{
-			nvram_subtract (unit_count, price_config.units_per_credit);
+			coin_state.total_units -= price_config.units_per_bonus;
+			coin_state.credits += price_config.bonus_credits;
+		}
+	}
+	pinio_nvram_lock ();
+
+	/* Check for enough units to convert to a credit */
+	if (coin_state.units >= price_config.units_per_credit)
+	{
+		while (coin_state.units >= price_config.units_per_credit)
+		{
+			nvram_subtract (coin_state.units, price_config.units_per_credit);
 			add_credit ();
 			audit_increment (&system_audits.paid_credits);
 		}
@@ -288,7 +305,6 @@ void add_units (U8 n)
 		announce_credits ();
 	}
 	csum_area_update (&coin_csum_info);
-	pinio_nvram_lock ();
 }
 
 
@@ -348,8 +364,9 @@ CALLSET_ENTRY (coin, sw_buyin_button)
 void credits_clear (void)
 {
 	pinio_nvram_unlock ();
-	credit_count = 0;
-	unit_count = 0;
+	coin_state.credits = 0;
+	coin_state.units = 0;
+	coin_state.total_units = 0;
 	csum_area_update (&coin_csum_info);
 	pinio_nvram_lock ();
 }
@@ -359,7 +376,8 @@ void credits_clear (void)
 void units_clear (void)
 {
 	pinio_nvram_unlock ();
-	unit_count = 0;
+	coin_state.units = 0;
+	coin_state.total_units = 0;
 	csum_area_update (&coin_csum_info);
 	pinio_nvram_lock ();
 }

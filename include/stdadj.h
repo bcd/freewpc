@@ -185,8 +185,8 @@ typedef struct
 	adjval_t pricing_mode; /* done */
 	adjval_t coin_units[MAX_COIN_SLOTS]; /* done */
 	adjval_t units_per_credit; /* done */
-	adjval_t units_per_bonus;
-	adjval_t bonus_credits;
+	adjval_t units_per_bonus; /* done */
+	adjval_t bonus_credits; /* done */
 	adjval_t min_units;
 	adjval_t coin_door_type; /* done */
 	adjval_t collection_text; /* done */
