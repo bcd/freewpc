@@ -71,22 +71,6 @@ void burnin_flasher_thread (void)
 	task_sleep (TIME_500MS);
 }
 
-void burnin_sol_thread (void)
-{
-	for (;;)
-	{
-		U8 sol;
-		for (sol=0; sol < NUM_POWER_DRIVES; sol++)
-		{
-			if (!MACHINE_SOL_FLASHERP (sol))
-			{
-				sol_request_async (sol);
-				task_sleep_sec (2);
-			}
-		}
-	}
-	task_sleep_sec (2);
-}
 
 void burnin_lamp_thread (void)
 {
@@ -130,7 +114,6 @@ void burnin_thread (void)
 		task_create_peer (burnin_gi_thread);
 #endif
 		task_create_peer (burnin_flasher_thread);
-		//task_create_peer (burnin_sol_thread);
 		task_create_peer (burnin_time_audit_thread);
 #if (MACHINE_FLIPTRONIC == 1)
 		task_create_peer (burnin_flipper_thread);
