@@ -85,7 +85,16 @@ static bool ball_search_solenoid_ok (U8 sol)
 	/* If the machine description is not proper, then we can't know
 	 * for sure which solenoids are OK, so don't fire _any_.  */
 	return (FALSE);
-#else
+#endif
+
+#if defined(MACHINE_SOLENOID_P)
+	/* If it's not a valid solenoid number, don't allow it.  This
+	skips coils that are not installed. */
+	if (!MACHINE_SOLENOID_P (sol))
+		return FALSE;
+#endif
+
+	/* Skip known coils which should always be skipped. */
 	if (MACHINE_SOL_FLASHERP(sol)
 #ifdef MACHINE_BALL_SERVE_SOLENOID
 		 || (sol == MACHINE_BALL_SERVE_SOLENOID)
@@ -119,7 +128,6 @@ static bool ball_search_solenoid_ok (U8 sol)
 			return (FALSE);
 		}
 	}
-#endif
 
 	/* OK, you can use it. */
 	return (TRUE);
@@ -232,22 +240,27 @@ void ball_search_monitor_task (void)
 				ball_search_count = 0;
 				while (ball_search_timer != 0)
 				{
-					/* Perform a ball search */
-					ball_search_run ();
+					if ((ball_search_count >= 5) && chase_ball_enabled ())
+					{
+						/* If chase ball is enabled, after the 5th ball search
+						we will force endball. */
+						audit_increment (&system_audits.chase_balls);
+						end_ball ();
+						return;
+					}
+					else
+					{
+						/* Perform a ball search */
+						ball_search_run ();
+					}
 
 					/* After the third ball search, cancel the tilt lamp
 					effect, to help the player find the missing ball. */
 					if (ball_search_count == 3)
 						leff_stop (LEFF_TILT);
 
-					if ((ball_search_count == 5) && chase_ball_enabled ())
-					{
-						/* If chase ball is enabled, after the 5th ball search
-						we will force endball. */
-						audit_increment (&system_audits.chase_balls);
-						end_ball ();
-					}
-					else if (ball_search_count < 10)
+
+					if (ball_search_count < 10)
 					{
 						/* Delay a small amount for the first few ball searches */
 						task_sleep_sec (12);
