@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <amode.h>
 
 static U8 lamplist;
 
@@ -40,7 +41,7 @@ CALLSET_ENTRY (wcs_amode, amode_page)
 	frame_draw (IMG_STRIKER);
 	dmd_overlay_outline ();
 	dmd_show2 ();
-	task_sleep_sec (5);
+	amode_page_end (5);
 }
 
 
