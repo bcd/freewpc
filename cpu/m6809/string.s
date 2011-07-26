@@ -121,13 +121,13 @@ _memcpy:
 
 	; Calculate the number of 16 byte blocks that can be copied fast.
 	lsra
-	rolb
+	rorb
 	lsra
-	rolb
+	rorb
 	lsra
-	rolb
+	rorb
 	lsra
-	rolb
+	rorb
 	beq   __memcpy_small
 
 	; Copy the 16 byte blocks first.
