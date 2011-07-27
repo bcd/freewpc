@@ -50,4 +50,5 @@ KERNEL_BASIC_OBJS += $(if $(CONFIG_MALLOC), $(C)/malloc.o)
 KERNEL_ASM_OBJS += $(C)/string.o
 KERNEL_ASM_OBJS += $(C)/bcd_string.o
 KERNEL_ASM_OBJS += $(C)/irqload.o
+KERNEL_ASM_OBJS += $(C)/div32.o
 KERNEL_ASM_OBJS += $(if $(CONFIG_BPT), $(C)/breakpoint.o)
