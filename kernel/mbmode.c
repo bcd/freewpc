@@ -27,7 +27,9 @@ U8 mb_mode_count;
 	function. */
 static void mb_mode_update (struct mb_mode_ops *ops, enum mb_mode_state state)
 {
-	/* Update the mode state */
+	/* Update the mode state if necessary */
+	if (*(ops->state) == state)
+		return;
 	*(ops->state) = state;
 
 	/* Inform the mode */
