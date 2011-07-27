@@ -233,7 +233,7 @@ void jackpot_deff (void) { generic_jackpot_deff ("JACKPOT", 1); }
 void double_jackpot_deff (void) { generic_jackpot_deff ("DOUBLE JACKPOT", 2); }
 void super_jackpot_deff (void) { generic_jackpot_deff ("SUPER JACKPOT", 10); }
 
-extern struct timed_mode_ops *double_score_mode;
+extern struct timed_mode_ops double_score_mode;
 struct mode_deff double_scoring_deff_config = {
 	MF_TIMED,
 	"DOUBLE SCORING", { .fixed = "ALL SHOTS SCORE 2X" }, { .timed = &double_score_mode }
@@ -241,7 +241,7 @@ struct mode_deff double_scoring_deff_config = {
 void double_scoring_deff (void) { generic_mode_deff (&double_scoring_deff_config); }
 
 
-extern struct mb_mode_ops *quick_mb_mode;
+extern struct mb_mode_ops quick_mb_mode;
 struct mode_deff quick_mb_deff_config = {
 	MF_MB,
 	"QUICK MULTIBALL", { .fixed = "ALL SHOTS = 25,000" }, { .mb = &quick_mb_mode }
@@ -249,7 +249,7 @@ struct mode_deff quick_mb_deff_config = {
 void quick_mb_deff (void) { generic_mode_deff (&quick_mb_deff_config); }
 
 
-extern struct mb_mode_ops *trickmb_mode;
+extern struct mb_mode_ops trickmb_mode;
 struct mode_deff trick_mb_deff_config = {
 	MF_MB,
 	"TRICK MULTIBALL", { .fixed = "SHOOT JACKPOTS" }, { .mb = &trickmb_mode }
@@ -257,7 +257,7 @@ struct mode_deff trick_mb_deff_config = {
 void trick_mb_deff (void) { generic_mode_deff (&trick_mb_deff_config); }
 
 
-extern struct mb_mode_ops *trickmb_mode;
+extern struct mb_mode_ops trickmb_mode;
 struct mode_deff super_trick_mb_deff_config = {
 	MF_MB,
 	"SUPER TRICK", { .fixed = "ALL JACKPOTS 2X" }, { .mb = &trickmb_mode }
@@ -265,26 +265,26 @@ struct mode_deff super_trick_mb_deff_config = {
 void super_trick_mb_deff (void) { generic_mode_deff (&super_trick_mb_deff_config); }
 
 
-extern struct mb_mode_ops *main_mb_mode;
+extern struct mb_mode_ops main_mb_mode;
 struct mode_deff main_mb_deff_config = {
 	MF_MB,
 	"MULTIBALL", { .fixed = "SHOOT THE TRUNK" }, { .mb = &main_mb_mode }
 };
 void main_mb_deff (void) { generic_mode_deff (&trick_mb_deff_config); }
 
-extern struct mb_mode_ops *midnight_mb_mode;
+extern struct mb_mode_ops midnight_mb_mode;
 // Alternate between:
 // ALL SWITCHES = %8b
 // %d HITS TO INCREASE VALUE
 // JACKPOT = %8b
 struct mode_deff midnight_mb_deff_config = {
 	MF_MB,
-	"MIDNIGHT MULTIBALL", { .fixed = "ALL SWITCHES SCORE" }, { .mb = &main_mb_mode }
+	"MIDNIGHT MULTIBALL", { .fixed = "ALL SWITCHES SCORE" }, { .mb = &midnight_mb_mode }
 };
 void midnight_mb_deff (void) { generic_mode_deff (&midnight_mb_deff_config); }
 
 
-extern struct timed_mode_ops *hurryup_mode;
+extern struct timed_mode_ops hurryup_mode;
 extern score_t hurryup_value;
 struct mode_deff hurryup_deff_config = {
 	MF_TIMED | MF_FLASH_HELP | MF_OTHER_SCORE,
@@ -316,7 +316,7 @@ void magic_letter_draw (void)
 	U8 count;
 	deff_data_pull (count);
 
-	sprintf ("MAGIC", count);
+	sprintf ("MAGIC %d", count);
 	font_render_string_center (&font_fixed10, 64, 11, sprintf_buffer);
 	if (count < 5)
 		font_render_string_center (&font_var5, 64, 28, "COMPLETE TO LIGHT LOCK");
