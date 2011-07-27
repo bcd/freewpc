@@ -65,12 +65,6 @@ KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/dot.o)
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/shadow.o)
 KERNEL_ASM_OBJS += $(P)/start.o
 
-# On PIC games, we need to do some complex 32-bit math.  The standard
-# library functions in the 6809 toolchain do not work, so there is a
-# replacement in math.c.  However, since this is only needed at
-# initialization, put it into the COMMON_PAGE.
-INIT_OBJS += $(if $(CONFIG_PIC), $(P)/math.o)
-
 # Import images that are common to all games.
 ifeq ($(CONFIG_DMD),y)
 IMAGE_MAP += $(P)/wpc.ild

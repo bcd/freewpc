@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -26,6 +26,7 @@
  */
 
 /** For low-level debugging ; normally this is not needed */
+//#define pic_debug dbprintf
 #define pic_debug(rest...)
 
 
@@ -160,9 +161,12 @@ void pic_decode32 (U32 *reg, const U32 offset, const U16 divisor, const bool neg
 		dbprintf ("error: there is a remainder\n");
 	*reg /= divisor;
 #else
-	/* TODO : this is done differently only because native
-	32-bit division on the 6809 does not work. */
-	udiv32 (*reg, divisor, reg, NULL);
+	/* This is done differently only because native 32-bit division on
+	the 6809 does not work. */
+	struct divrem32 divrem;
+	U32 divisor32 = divisor;
+	divide32 (reg, &divisor32, &divrem);
+	*reg = divrem.quotient;
 #endif
 	pic_debug ("reg.after_divide = %w\n", *reg);
 }
@@ -179,6 +183,7 @@ void pic_strip_digits (U32 reg, struct pic_strip_info *info)
 	for (place = 0 ; place < 5 ; place++)
 	{
 		digit = 0;
+		pic_debug ("pic_strip_digits %w\n", reg);
 		while (reg >= place_value[place])
 		{
 			reg -= place_value[place];
