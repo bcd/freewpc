@@ -41,7 +41,7 @@ checkpage ()
 		echo -n "."
 	done
 
-	if [ "$percent_used" -ge 100 ]; then
+	if [ "$percent_used" -gt 100 ]; then
 		echo "  error: overflow ($*)"
 		return 1
 	fi
