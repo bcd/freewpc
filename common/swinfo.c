@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2009-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,12 +20,16 @@
 
 #include <freewpc.h>
 
-__nvram__ U16 swinfo_permanent_size;
-__nvram__ U16 swinfo_nvram_size;
-__nvram__ U8 swinfo_system_major;
-__nvram__ U8 swinfo_system_minor;
-__nvram__ U8 swinfo_machine_major;
-__nvram__ U8 swinfo_machine_minor;
+__nvram__ struct software_info
+{
+	U16 permanent_size;
+	U16 nvram_size;
+	U8 sys_major;
+	U8 sys_minor;
+	U8 mach_major;
+	U8 mach_minor;
+} software_info;
+
 
 #define swinfo_verify1(dst, src) ((dst) == (src))
 
@@ -33,32 +37,34 @@ __nvram__ U8 swinfo_machine_minor;
 /**
  * Save the current software settings into persistent & protected memory.
  */
-CALLSET_ENTRY (swinfo, factory_reset)
+void swinfo_reset (void)
 {
-	pinio_nvram_unlock ();
-	swinfo_permanent_size = AREA_SIZE(permanent);
-	swinfo_nvram_size = AREA_SIZE(nvram);
-	swinfo_system_major = FREEWPC_MAJOR_VERSION;
-	swinfo_system_minor = FREEWPC_MINOR_VERSION;
-	swinfo_machine_major = MACHINE_MAJOR_VERSION;
-	swinfo_machine_minor = MACHINE_MINOR_VERSION;
-	pinio_nvram_lock ();
+	software_info.permanent_size = AREA_SIZE(permanent);
+	software_info.nvram_size = AREA_SIZE(nvram);
+	software_info.sys_major = FREEWPC_MAJOR_VERSION;
+	software_info.sys_minor = FREEWPC_MINOR_VERSION;
+	software_info.mach_major = MACHINE_MAJOR_VERSION;
+	software_info.mach_minor = MACHINE_MINOR_VERSION;
 }
 
 
 /**
- * Verify that nothing has changed significantly since the last reboot.
- * In particular, major software revision changes and structure sizes
- * are checked.
+ * Verify that software versions and the total size of the saved RAM
+ * has not changed since the last power up.
+ *
+ * This check is called _after_ individual areas of the persistent memory
+ * are verified.  It intends to catch global problems not isolated to a
+ * particular module.  When this fails, a factory reset is forced.  This
+ * is more forceful than simply reinitializing each area.
  */
 CALLSET_BOOL_ENTRY (swinfo, init_ok)
 {
-	if (swinfo_verify1 (swinfo_permanent_size, AREA_SIZE(permanent))
-		&& swinfo_verify1 (swinfo_nvram_size, AREA_SIZE(nvram))
-		&& swinfo_verify1 (swinfo_system_major, FREEWPC_MAJOR_VERSION)
-		&& swinfo_verify1 (swinfo_system_minor, FREEWPC_MINOR_VERSION)
-		&& swinfo_verify1 (swinfo_machine_major, MACHINE_MAJOR_VERSION)
-		&& swinfo_verify1 (swinfo_machine_minor, MACHINE_MINOR_VERSION)
+	if (swinfo_verify1 (software_info.permanent_size, AREA_SIZE(permanent))
+		&& swinfo_verify1 (software_info.nvram_size, AREA_SIZE(nvram))
+		&& swinfo_verify1 (software_info.sys_major, FREEWPC_MAJOR_VERSION)
+		&& swinfo_verify1 (software_info.sys_minor, FREEWPC_MINOR_VERSION)
+		&& swinfo_verify1 (software_info.mach_major, MACHINE_MAJOR_VERSION)
+		&& swinfo_verify1 (software_info.mach_minor, MACHINE_MINOR_VERSION)
 		)
 	{
 		/* Everything matches */
@@ -70,5 +76,19 @@ CALLSET_BOOL_ENTRY (swinfo, init_ok)
 		dbprintf ("S/W incompatible with previous config");
 		return FALSE;
 	}
+}
+
+const struct area_csum software_csum_info = {
+	.type = FT_VERSION,
+	.version = 1,
+	.area = (U8 *)&software_info,
+	.length = sizeof (software_info),
+	.reset = swinfo_reset
+};
+
+
+CALLSET_ENTRY (swinfo, file_register)
+{
+	file_register (&software_csum_info);
 }
 

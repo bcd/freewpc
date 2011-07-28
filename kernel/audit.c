@@ -35,9 +35,10 @@ __nvram__ feature_audits_t feature_audits;
 __nvram__ U8 audit_csum;
 
 const struct area_csum audit_csum_info = {
+	.type = FT_AUDIT,
+	.version = 1,
 	.area = (U8 *)&system_audits,
 	.length = sizeof (system_audits) + sizeof (feature_audits),
-	.csum = &audit_csum,
 	.reset = audit_reset,
 };
 
@@ -46,12 +47,9 @@ const struct area_csum audit_csum_info = {
 /** Resets all audits to zero */
 void audit_reset (void)
 {
-	pinio_nvram_unlock ();
 	memset (&system_audits, 0, sizeof (system_audits));
 	if (sizeof (feature_audits) > 0)
 		memset (&feature_audits, 0, sizeof (feature_audits));
-	csum_area_update (&audit_csum_info);
-	pinio_nvram_lock ();
 }
 
 
@@ -91,8 +89,8 @@ void audit_assign (audit_t *aud, audit_t val)
 }
 
 
-CALLSET_ENTRY (sys_audit, factory_reset)
+CALLSET_ENTRY (sys_audit, file_register)
 {
-	audit_reset ();
+	file_register (&audit_csum_info);
 }
 

@@ -50,7 +50,7 @@ csum_get_var (const struct area_csum *csi)
 /**
  * Updates a checksummed region after an update.
  * This should be invoked immediately after any changes to protected
- * memory.
+ * memory.  It assumes the region is UNLOCKED, since you just wrote to it.
  */
 void
 csum_area_update (const struct area_csum *csi)
@@ -66,8 +66,21 @@ csum_area_update (const struct area_csum *csi)
 
 	/* Store this as the new checksum */
 	csum_var_p = csum_get_var (csi);
-	pinio_nvram_unlock ();
 	*csum_var_p = csum;
+}
+
+
+/**
+ * Force a reset of a region to known, good values.  This is called whenever
+ * a checksum check fails, or it can be called explicitly.  The NVRAM should
+ * be LOCKED prior to calling.
+ */
+void
+csum_area_reset (const struct area_csum *csi)
+{
+	pinio_nvram_unlock ();
+	csi->reset ();
+	csum_area_update (csi);
 	pinio_nvram_lock ();
 }
 
@@ -75,6 +88,7 @@ csum_area_update (const struct area_csum *csi)
 /**
  * Checks a checksummed region for correctness.
  * If the checksum fails, the data is reset to defaults.
+ * The data area should be LOCKED prior to calling (this function only reads it).
  */
 void
 csum_area_check (const struct area_csum *csi)
@@ -91,13 +105,6 @@ csum_area_check (const struct area_csum *csi)
 	/* Compare against the stored checksum */
 	csum_var_p = csum_get_var (csi);
 	if (csum != *csum_var_p)
-	{
-		/* If different, reset area to default values.
-		 * Enable write access prior to calling this. */
-		pinio_nvram_unlock ();
-		csi->reset ();
-		*csum_var_p = csum;
-		pinio_nvram_lock ();
-	}
+		csum_area_reset (csi);
 }
 

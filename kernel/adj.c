@@ -56,17 +56,16 @@ void adj_csum_failure (void)
 }
 
 
-__nvram__ U8 adj_csum;
 const struct area_csum adj_csum_info = {
+	.type = FT_ADJUST,
+	.version = 1,
 	.area = (U8 *)&system_config,
 	.length = sizeof (system_config) + sizeof (price_config)
 		+ sizeof (hstd_config) + sizeof (printer_config)
 #ifdef MACHINE_FEATURE_ADJUSTMENTS
 		+ sizeof (feature_config)
 #endif
-											,
-	.csum = &adj_csum,
-	.reset = adj_csum_failure,
+	, .reset = adj_csum_failure,
 };
 
 
@@ -86,9 +85,8 @@ void adj_modified (adjval_t *adjp)
 
 /** Initialize the adjustment module.
  *
- * Verify that all adjustments are sane; if any values are out-of-range
- * or checksums fail, the adjustment will be reset to factory
- * defaults.
+ * Verify that all adjustments are sane; if any values are out-of-range,
+ * the adjustment will be reset to factory defaults.
  */
 void adj_init (void)
 {
@@ -109,5 +107,11 @@ CALLSET_ENTRY (nvram, idle_every_100ms)
 		fatal (ERR_NVRAM_UNLOCKED);
 	}
 #endif
+}
+
+
+CALLSET_ENTRY (adj, file_register)
+{
+	file_register (&adj_csum_info);
 }
 

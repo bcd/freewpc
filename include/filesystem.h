@@ -43,6 +43,7 @@ enum file_type
 	FT_REPLAY,
 	FT_VERSION,
 	FT_ROTEST,
+	FT_DATE,
 };
 
 
@@ -89,8 +90,8 @@ struct file_info
 struct file_info *file_find (enum file_type type);
 void file_init (void);
 void file_reset (void);
-void file_register (struct area_csum *csi);
+void file_register (const struct area_csum *csi);
 
 void csum_area_update (const struct area_csum *csi);
+void csum_area_reset (const struct area_csum *csi);
 void csum_area_check (const struct area_csum *csi);
-void csum_area_check_all (void);

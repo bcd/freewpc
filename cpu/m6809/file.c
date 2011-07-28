@@ -88,7 +88,7 @@ void file_init (void)
 
 /**
  * Reset the contents of all registered files.  This invalidates the
- * file table and then performs re-registration.
+ * entire file table and then performs re-registration.
  */
 void file_reset (void)
 {
@@ -103,13 +103,23 @@ void file_reset (void)
 /**
  * Register a file used by the current build.  Each module that uses persistent
  * data should call this API during the 'file_register' event call.  This happens
- * before 'init'.
+ * before 'init'.  The purpose is to verify that previously saved values are sane
+ * before we try to use them.
  */
-void file_register (struct area_csum *csi)
+void file_register (const struct area_csum *csi)
 {
 	struct file_info *fi;
 
-	/* Find the file info.  If it doesn't exist, create one. */
+	/* If type is FT_NONE, which is reserved, it probably means that csi was not
+	updated to include a value for the type field, so it defaults to zero.  This
+	indicates improper coding. */
+	if (csi->type == FT_NONE)
+	{
+		dbprintf ("warning: csi %p has zero type\n", csi);
+		return;
+	}
+
+	/* Find the file info in persistent storage.  If it doesn't exist, create one. */
 	fi = file_find (csi->type);
 	if (fi)
 	{
@@ -121,25 +131,33 @@ void file_register (struct area_csum *csi)
 		dbprintf ("file type %d: new entry\n", csi->type);
 	}
 
-	/* If the version has changed, force reset.  Previous data is not considered. */
+	/* Now check for changes to the structure from the previous version of the code.
+	We are not checking values here, just the structure itself. */
+
 	if (fi->version != csi->version)
 	{
+		/* If the version has changed, force reset.  Previous data will not be considered
+		no matter what.  Developers bump the version when they change the structure in
+		incompatible ways that absolutely require that previous data is discarded. */
 		dbprintf ("new version %d\n", csi->version);
-		csi->reset ();
+		csum_area_reset (csi);
 	}
-
-	/* If the structure moved from the last power up, ... */
 	else if (fi->data != csi->area)
 	{
+		/* If the structure moved from the last power up, then ... */
 		dbprintf ("new address %p\n", csi->area);
-		csi->reset ();
+		csum_area_reset (csi);
 	}
-
-	/* If only the structure size changed, then ... */
 	else if (csi->length != fi->len)
 	{
+		/* If only the structure size changed, then ... */
 		dbprintf ("new length %p\n", csi->length);
-		csi->reset ();
+		csum_area_reset (csi);
+	}
+	else
+	{
+		/* Everything matches, the old data can be used as-is */
+		dbprintf ("ok\n");
 	}
 
 	/* Save current structure info into the file table. */
@@ -149,9 +167,8 @@ void file_register (struct area_csum *csi)
 	fi->len = csi->length;
 	pinio_nvram_lock ();
 
-	/* Make sure that the region checksum passes; if not, the 'reset' hook
-	will be called. */
+	/* Now also verify the data contents are sane.  This would fail if the structure
+	did not change, but the data had been corrupted somehow. */
 	csum_area_check (csi);
 }
-
 

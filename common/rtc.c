@@ -83,11 +83,11 @@ struct date_time_backup
 
 
 /** Checksum descriptor for the RTC info */
-static __nvram__ U8 rtc_csum;
 const struct area_csum rtc_csum_info = {
+	.type = FT_DATE,
+	.version = 1,
 	.area = &year,
 	.length = 5,
-	.csum = &rtc_csum,
 	.reset = rtc_factory_reset,
 };
 
@@ -249,12 +249,11 @@ static void rtc_pinmame_read (void)
 }
 
 
-CALLSET_ENTRY (rtc, factory_reset)
+void rtc_factory_reset (void)
 {
 	/* Reset the date to the time at which the software
 	 * was built.
 	 * TODO : this should trigger a CLOCK NOT SET message */
-	pinio_nvram_unlock ();
 	year = 0;
 	month = 1;
 	day = 1;
@@ -262,7 +261,6 @@ CALLSET_ENTRY (rtc, factory_reset)
 	minute = 0;
 	last_minute = 0;
 	rtc_calc_day_of_week ();
-	pinio_nvram_lock ();
 }
 
 
@@ -433,5 +431,11 @@ void rtc_modify_field (U8 up_flag)
 
 	pinio_nvram_lock ();
 	rtc_normalize ();
+}
+
+
+CALLSET_ENTRY (rtc, file_register)
+{
+	file_register (&rtc_csum_info);
 }
 

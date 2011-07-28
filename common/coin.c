@@ -47,7 +47,6 @@ struct coin_state
 };
 
 __nvram__ struct coin_state coin_state;
-__nvram__ U8 coin_csum;
 
 
 void coin_reset (void)
@@ -59,9 +58,10 @@ void coin_reset (void)
 
 
 const struct area_csum coin_csum_info = {
+	.type = FT_COIN,
+	.version = 1,
 	.area = (U8 *)&coin_state,
 	.length = sizeof (coin_state),
-	.csum = &coin_csum,
 	.reset = coin_reset,
 };
 
@@ -366,5 +366,11 @@ void units_clear (void)
 	coin_state.total_units = 0;
 	csum_area_update (&coin_csum_info);
 	pinio_nvram_lock ();
+}
+
+
+CALLSET_ENTRY (coin, file_register)
+{
+	file_register (&coin_csum_info);
 }
 

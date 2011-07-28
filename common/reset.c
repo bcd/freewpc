@@ -67,9 +67,7 @@ extern inline void wait_for_button (const U8 swno)
  */
 void factory_reset (void)
 {
-	adj_reset_all ();
-	/* TODO : this should also clear audits, reset the high scores,
-	 * and reset the custom message. */
+	file_reset ();
 #ifdef __m6809__
 	memset (AREA_BASE (permanent), 0, AREA_SIZE (permanent));
 #else

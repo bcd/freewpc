@@ -42,11 +42,11 @@ __nvram__ struct high_score high_score_table[HS_COUNT];
 
 
 /** A checksum descriptor for the high scores/initials */
-__nvram__ U8 high_csum;
 struct area_csum high_csum_info = {
+	.type = FT_HIGHSCORE,
+	.version = 1,
 	.area = (U8 *)high_score_table,
 	.length = sizeof (high_score_table),
-	.csum = &high_csum,
 	.reset = high_score_reset,
 };
 
@@ -445,8 +445,8 @@ void high_score_check (void)
 }
 
 
-CALLSET_ENTRY (high_score, factory_reset)
+CALLSET_ENTRY (high_score, file_register)
 {
-	high_score_reset ();
+	file_register (&high_csum_info);
 }
 

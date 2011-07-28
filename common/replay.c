@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -32,9 +32,6 @@
 /** The current replay score */
 __nvram__ U8 replay_score[BYTES_PER_SCORE];
 
-/** The checksum for the current replay score */
-__nvram__ U8 replay_csum;
-
 
 /** The default replay score.  This is only used if the machine does not
 define a method for taking replay scores from the standard adjustment. */
@@ -43,9 +40,10 @@ const score_t default_replay_score = { 0x00, 0x50, 0x00, 0x00, 0x00 };
 
 /** The replay checksum descriptor */
 const struct area_csum replay_csum_info = {
+	.type = FT_REPLAY,
+	.version = 1,
 	.area = replay_score,
 	.length = BYTES_PER_SCORE,
-	.csum = &replay_csum,
 	.reset = replay_reset,
 };
 
@@ -178,5 +176,11 @@ CALLSET_ENTRY (replay, amode_start)
 {
 	/* Initialize the replay score from the menu adjustment. */
 	replay_reset ();
+}
+
+
+CALLSET_ENTRY (replay, file_register)
+{
+	file_register (&replay_csum_info);
 }
 
