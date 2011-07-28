@@ -152,6 +152,10 @@ __noreturn__ void freewpc_init (void)
 	 * but not before all of the hardware modules are done. */
 	enable_interrupts ();
 
+	/* Check all adjustments and make sure that their checksums are valid.
+	If problems are found, those adjustments will be made sane again. */
+	file_init ();
+
 	/* Initialize everything else.  Some of these are given explicitly
 	to force a particular order, since callsets do not guarantee the
 	order of invocation.  For most things the order doesn't matter. */
@@ -161,10 +165,6 @@ __noreturn__ void freewpc_init (void)
 	adj_init ();
 	log_init ();
 	callset_invoke (init);
-
-	/* Check all adjustments and make sure that their checksums are valid.
-	If problems are found, those adjustments will be made sane again. */
-	csum_area_check_all ();
 
 	/* Enable periodic processing. */
 	periodic_ok = 1;

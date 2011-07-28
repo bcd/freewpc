@@ -43,6 +43,7 @@ GCC_VERSION ?= 4.3.4
 
 KERNEL_OBJS     += $(C)/vector.o
 KERNEL_OBJS     += $(C)/div10.o
+KERNEL_OBJS     += $(C)/file.o
 KERNEL_ASM_OBJS += $(C)/farcall.o
 KERNEL_OBJS     += $(if $(CONFIG_TASK), $(C)/task.o)
 KERNEL_ASM_OBJS += $(if $(CONFIG_TASK), $(C)/task_6809.o)

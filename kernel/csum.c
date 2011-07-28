@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -32,41 +32,6 @@
  */
 
 #include <freewpc.h>
-
-
-extern const struct area_csum coin_csum_info;
-extern const struct area_csum replay_csum_info;
-extern const struct area_csum high_csum_info;
-extern const struct area_csum rtc_csum_info;
-extern const struct area_csum adj_csum_info;
-extern const struct area_csum audit_csum_info;
-
-
-/** A table of all csum info structures.  All of these
-will be scanned during initialization to ensure that the
-protected memory is valid. */
-const struct area_csum *csum_info_table[] = {
-	&coin_csum_info,
-	&replay_csum_info,
-	&high_csum_info,
-#ifdef CONFIG_RTC
-	&rtc_csum_info,
-#endif
-	&adj_csum_info,
-	&audit_csum_info,
-};
-
-
-/** A table of the csum info page locations */
-const U8 csum_paging_info_table[] = {
-	COMMON_PAGE,
-	COMMON_PAGE,
-	COMMON_PAGE,
-	COMMON_PAGE,
-	COMMON_PAGE,
-	SYS_PAGE,
-	SYS_PAGE,
-};
 
 
 /**
@@ -119,25 +84,6 @@ csum_area_check (const struct area_csum *csi)
 		/* Automatically invoke update to save the correct
 		 * checksum for the default values. */
 		csum_area_update (csi);
-	}
-}
-
-
-/**
- * Checks all checksummed regions for correctness.
- * This is called during system initialization.
- */
-void
-csum_area_check_all (void)
-{
-	U8 n;
-	for (n=0 ;
-		n < sizeof (csum_info_table) / sizeof (struct area_csum *);
-		n++)
-	{
-		page_push (csum_paging_info_table[n]);
-		csum_area_check (csum_info_table[n]);
-		page_pop ();
 	}
 }
 
