@@ -37,6 +37,9 @@ struct area_csum
 	/** A pointer to the variable that actually holds the checksum */
 	/* __nvram__ */ U8 *csum;
 
+	/** A version identifier for the structure */
+	U8 version;
+
 	/** A function that will reset the block to factory defaults.
 	    This must reside within the same page as the caller to the
 		 csum module. */
