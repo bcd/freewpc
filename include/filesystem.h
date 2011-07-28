@@ -24,6 +24,7 @@
 
 typedef U16 size_t;
 
+
 /* A list of 'filenames', which are just values that denote the contents of
    a particular region of NVRAM.  It is extremely important that filename
 	IDs do not change over time!  Always add values to the end, and don't
@@ -44,6 +45,36 @@ enum file_type
 	FT_ROTEST,
 };
 
+
+/** Describes an area of protected memory that should be checksummed.
+The data area and the checksum itself need not be contiguous.
+A reset function is provided which says what to do to the block
+if checksum validation fails. */
+struct area_csum
+{
+	/** The name of the file that is described here */
+	enum file_type type;
+
+	/** A pointer to the beginning of the block */
+	/* __nvram__ */ U8 *area;
+
+	/** The length of the protected block, in bytes */
+	U8 length;
+
+	/** A pointer to the variable that actually holds the checksum */
+	/* __nvram__ */ U8 *csum;
+
+	/** A version identifier for the structure */
+	U8 version;
+
+	/** A function that will reset the block to factory defaults.
+	    This must reside within the same page as the caller to the
+		 csum module. */
+	void (*reset) (void);
+};
+
+
+
 struct file_info
 {
 	enum file_type type;
@@ -55,6 +86,11 @@ struct file_info
 };
 
 
+struct file_info *file_find (enum file_type type);
 void file_init (void);
 void file_reset (void);
+void file_register (struct area_csum *csi);
 
+void csum_area_update (const struct area_csum *csi);
+void csum_area_check (const struct area_csum *csi);
+void csum_area_check_all (void);

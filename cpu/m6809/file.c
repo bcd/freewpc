@@ -37,7 +37,7 @@ __dirtab__ struct file_info file_info[MAX_FILE_INFO];
 /**
  * Return a pointer to the file info for a particular file type.
  */
-static struct file_info *file_find (enum file_type type)
+struct file_info *file_find (enum file_type type)
 {
 	U8 i;
 	struct file_info *fi;
@@ -105,20 +105,20 @@ void file_reset (void)
  * data should call this API during the 'file_register' event call.  This happens
  * before 'init'.
  */
-void file_register (enum file_type type, struct area_csum *csi)
+void file_register (struct area_csum *csi)
 {
 	struct file_info *fi;
 
 	/* Find the file info.  If it doesn't exist, create one. */
-	fi = file_find (type);
+	fi = file_find (csi->type);
 	if (fi)
 	{
-		dbprintf ("file type %d: prev addr=%p len=%ld\n", type, fi->data, fi->len);
+		dbprintf ("file type %d: prev addr=%p len=%ld\n", csi->type, fi->data, fi->len);
 	}
 	else
 	{
-		fi = file_create (type);
-		dbprintf ("file type %d: new entry\n");
+		fi = file_create (csi->type);
+		dbprintf ("file type %d: new entry\n", csi->type);
 	}
 
 	/* If the version has changed, force reset.  Previous data is not considered. */

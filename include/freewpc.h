@@ -198,7 +198,6 @@ __noreturn__ void freewpc_init (void);
 #include <system/rtc.h>
 
 /* Common software structures */
-#include <filesystem.h>
 #include <priority.h>
 #include <system/deff.h>
 #include <system/leff.h>
@@ -213,7 +212,7 @@ __noreturn__ void freewpc_init (void);
 #include <printf.h>
 #endif
 #include <callset.h>
-#include <csum.h>
+#include <filesystem.h>
 #include <audio.h>
 #include <timedmode.h>
 #include <serve.h>
