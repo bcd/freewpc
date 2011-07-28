@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -88,7 +88,7 @@ const struct area_csum rtc_csum_info = {
 	.version = 1,
 	.area = &year,
 	.length = 5,
-	.reset = rtc_factory_reset,
+	.reset = rtc_reset,
 };
 
 static U8 minute;
@@ -249,7 +249,7 @@ static void rtc_pinmame_read (void)
 }
 
 
-void rtc_factory_reset (void)
+void rtc_reset (void)
 {
 	/* Reset the date to the time at which the software
 	 * was built.

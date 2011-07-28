@@ -133,5 +133,7 @@ void sound_write (sound_code_t code);
 void sound_reset (void);
 void volume_set (U8);
 bool sound_version_render (void);
+void volume_reset (void);
+void volume_refresh (void);
 
 #endif /* _SYS_SOUND_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -65,7 +65,15 @@ music_code_t current_music;
 /** The current master volume.  Individual sound clips may override this
  * temporarily, but this is the default. */
 __nvram__ U8 current_volume;
-__nvram__ U8 current_volume_checksum;
+
+
+const struct area_csum volume_csum_info = {
+	.type = FT_VOLUME,
+	.version = 1,
+	.area = (U8 *)&current_volume,
+	.length = sizeof (current_volume),
+	.reset = volume_reset,
+};
 
 
 /** -1 if the sound board booted OK, otherwise an error code returned from
@@ -268,13 +276,9 @@ void sound_reset (void)
 }
 
 
-void volume_refresh (void)
+void volume_reset (void)
 {
-	/* Use nvram value if it's sensible */
-	if (current_volume_checksum == ~current_volume && current_volume < MAX_VOLUME)
-		volume_set (current_volume);
-	else
-		volume_set (DEFAULT_VOLUME);
+	volume_set (DEFAULT_VOLUME);
 }
 
 
@@ -385,7 +389,7 @@ void volume_set (U8 vol)
 	/* Save the volume level in nvram. */
 	pinio_nvram_unlock ();
 	current_volume = vol;
-	current_volume_checksum = ~vol;
+	csum_area_update (&volume_csum_info);
 	pinio_nvram_lock ();
 
 	if (current_volume == 0)
@@ -409,12 +413,6 @@ void volume_set (U8 vol)
 		sound_write_queue_insert (~current_volume);
 #endif
 	}
-}
-
-
-CALLSET_ENTRY (sound, factory_reset)
-{
-	volume_set (DEFAULT_VOLUME);
 }
 
 
@@ -442,5 +440,17 @@ CALLSET_ENTRY (sound, volume_up)
 		volume_set (current_volume+1);
 	deff_restart (DEFF_VOLUME_CHANGE);
 	effect_update_request ();
+}
+
+void volume_refresh (void)
+{
+	csum_area_check (&volume_csum_info);
+	volume_set (current_volume);
+}
+
+
+CALLSET_ENTRY (sound, file_register)
+{
+	file_register (&volume_csum_info);
 }
 

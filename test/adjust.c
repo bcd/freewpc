@@ -276,7 +276,6 @@ struct adjustment empty_adjustments[] = {
 
 void adj_reset (struct adjustment *adjs)
 {
-	pinio_nvram_unlock ();
 	while (adjs->name != NULL)
 	{
 		if (adjs->nvram)
@@ -285,7 +284,6 @@ void adj_reset (struct adjustment *adjs)
 		}
 		adjs++;
 	}
-	pinio_nvram_lock ();
 }
 
 

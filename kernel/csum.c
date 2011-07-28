@@ -37,13 +37,13 @@
 U8 *
 csum_get_var (const struct area_csum *csi)
 {
-	if (csi->type == 0)
-		return csi->csum;
-	else
+	if (csi->type == 0 || csi->csum)
 	{
-		struct file_info *fi = file_find (csi->type);
-		return (U8 *)&fi->csum;
+		dbprintf ("warning: old style csi %p\n", csi);
 	}
+
+	struct file_info *fi = file_find (csi->type);
+	return (U8 *)&fi->csum;
 }
 
 

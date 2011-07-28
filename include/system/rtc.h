@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,7 +21,7 @@
 #ifndef _RTC_H
 #define _RTC_H
 
-__common__ void rtc_factory_reset (void);
+__common__ void rtc_reset (void);
 __common__ void rtc_render_date (void);
 __common__ void rtc_render_time (void);
 __common__ void rtc_show_date_time (void);

@@ -2201,7 +2201,8 @@ struct menu development_menu = {
 
 void factory_adjust_confirm (void)
 {
-	adj_reset_all ();
+	extern const struct area_csum adj_csum_info;
+	csum_area_reset (&adj_csum_info);
 	confirm_start ();
 }
 

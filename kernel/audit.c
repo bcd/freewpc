@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -32,7 +32,6 @@ __nvram__ std_audits_t system_audits;
 
 __nvram__ feature_audits_t feature_audits;
 
-__nvram__ U8 audit_csum;
 
 const struct area_csum audit_csum_info = {
 	.type = FT_AUDIT,

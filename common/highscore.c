@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -191,8 +191,6 @@ void high_score_reset (void)
 
 	dbprintf ("Resetting high score table\n");
 
-	pinio_nvram_unlock ();
-
 	/* Reset the grand champion */
 	memcpy (high_score_table[0].score, default_gc_score, HIGH_SCORE_WIDTH);
 	memcpy (high_score_table[0].initials, default_gc_initials, HIGH_SCORE_NAMESZ);
@@ -206,7 +204,6 @@ void high_score_reset (void)
 			HIGH_SCORE_NAMESZ);
 	}
 
-	pinio_nvram_lock ();
 	csum_area_update (&high_csum_info);
 
 	/* Reset when the next auto-reset will occur */
@@ -292,7 +289,7 @@ void high_score_reset_check (void)
 		if (--hs_reset_counter1 == 0)
 		{
 			hs_reset_counter1 = hstd_config.hs_reset_every;
-			high_score_reset ();
+			csum_area_reset (&high_csum_info);
 		}
 	}
 }
