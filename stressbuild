@@ -87,7 +87,7 @@ for sim in $sim_options; do
 				if [ "$count" -lt "$mincount" ]; then continue; fi
 				for target in `echo clean default_target`; do
 
-					cfg="CONFIG_SIM=$NATIVE MACHINE=$mach FREEWPC_DEBUGGER=$debugger CONFIG_BPT=$bpt GCC_VERSION=$gcc target=$target"
+					cfg="CONFIG_SIM=$CONFIG_SIM MACHINE=$mach FREEWPC_DEBUGGER=$debugger CONFIG_BPT=$bpt GCC_VERSION=$gcc target=$target"
 					echo "Begin: ($count) $cfg" | tee -a stressbuild.log
 
 					export MACHINE=$mach
