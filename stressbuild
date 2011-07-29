@@ -6,20 +6,37 @@
 typeset -i count
 typeset -i mincount
 
-machines="funhouse t2 tz wcs afm corvette tester"
+machines="tz corvette wcs funhouse t2 afm bop tester"
 sim_options="n y"
 gcc_options="4.3.4"
-debugger_options="n y"
+debugger_options="y n"
+bpt_options="y n"
 mincount=1
+make_options="-j3"
 
 while [ "x$1" != "x" ]; do
 option=$1; shift
 case $option in
+	--loop)
+		sim_options="$sim_options $sim_options $sim_options $sim_options $sim_options"
+		;;
 	--sim)
 		sim_options="y"
 		;;
 	--6809)
 		sim_options="n"
+		;;
+	--debug)
+		debugger_options="y"
+		;;
+	--nodebug)
+		debugger_options="n"
+		;;
+	--bpt)
+		bpt_options="y"
+		;;
+	--nobpt)
+		bpt_options="n"
 		;;
 	--fast)
 		machines="funhouse t2 tz wcs afm"
@@ -30,8 +47,15 @@ case $option in
 	--gcc)
 		gcc_options="$1"; shift
 		;;
+	[a-z]*)
+		machines="$option"
+		;;
+	[0-9]*)
+		mincount="$option"
+		;;
 	*)
-		mincount=$option
+		echo "Unknown option $option"
+		exit 1
 		;;
 esac
 done
@@ -43,6 +67,12 @@ for sim in $sim_options; do
 		CONFIG_SIM=y
 	else
 		unset CONFIG_SIM
+	fi
+	for bpt in $bpt_options; do
+	if [ "$bpt" = "y" ]; then
+		CONFIG_BPT=y
+	else
+		unset CONFIG_BPT
 	fi
 	for mach in ${machines}; do
 		for debugger in $debugger_options; do
@@ -57,14 +87,15 @@ for sim in $sim_options; do
 				if [ "$count" -lt "$mincount" ]; then continue; fi
 				for target in `echo clean default_target`; do
 
-					cfg="CONFIG_SIM=$NATIVE MACHINE=$mach FREEWPC_DEBUGGER=$debugger GCC_VERSION=$gcc target=$target"
+					cfg="CONFIG_SIM=$NATIVE MACHINE=$mach FREEWPC_DEBUGGER=$debugger CONFIG_BPT=$bpt GCC_VERSION=$gcc target=$target"
 					echo "Begin: ($count) $cfg" | tee -a stressbuild.log
 
 					export MACHINE=$mach
 					export FREEWPC_DEBUGGER=$debugger
 					export GCC_VERSION=$gcc
 					export CONFIG_SIM
-					make -j3 DOTCONFIG="" $target 2>&1 > /dev/null
+					export CONFIG_BPT
+					make $make_options DOTCONFIG="" $target 2>&1 > /dev/null
 					rc="$?"
 
 					if [ -f err ]; then
@@ -82,6 +113,7 @@ for sim in $sim_options; do
 			done
 		done
 	done
+done
 done
 echo "All done".
 exit 0
