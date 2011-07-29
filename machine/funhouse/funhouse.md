@@ -480,3 +480,4 @@ Steps Gate: driver(duty),
 Eye Direction: driver(bivar),
 	forward_sol=SOL_EYES_RIGHT, reverse_sol=SOL_EYES_LEFT
 
+Outhole: driver(outhole), sol=SOL_OUTHOLE, swno=SW_OUTHOLE, swevent=sw_outhole

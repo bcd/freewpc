@@ -398,3 +398,5 @@ Gate: driver(duty), sol=SOL_MPF_GATE, ontime=TIME_300MS, duty_ontime=TIME_33MS, 
 
 Head Motor: driver(duty), sol=SOL_HEAD_MOTOR, ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=20
 Head Motor Relay: driver(duty), sol=SOL_HEAD_MOTOR_RELAY, ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=20
+
+Outhole: driver(outhole), sol=SOL_OUTHOLE, swno=SW_OUTHOLE, swevent=sw_outhole
