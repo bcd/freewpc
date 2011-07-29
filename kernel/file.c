@@ -45,7 +45,11 @@ struct file_info *file_find (enum file_type type)
 	{
 		/* If the entry appears corrupted, ignore its contents hereafter. */
 		if (fi->type != FT_NONE &&
-			(fi->type >= 0x40 || fi->data >= (void *)file_info || fi->len > 0x200))
+				(fi->type >= 0x40 ||
+#ifdef __m6809__
+				fi->data >= (void *)file_info ||
+#endif
+				fi->len > 0x200))
 		{
 			pinio_nvram_unlock ();
 			fi->type = FT_NONE;
@@ -65,6 +69,8 @@ struct file_info *file_create (enum file_type type)
 	/* Find a free slot.  Ensure that the file does not already exist.
 	   Initialize it after creation. */
 	struct file_info *fi = file_find (FT_NONE);
+	if (!fi)
+		dbprintf ("warning: could not file_create!\n");
 	pinio_nvram_unlock ();
 	fi->type = type;
 	fi->attr = 0;
@@ -109,6 +115,7 @@ void file_reset (void)
 void file_register (const struct area_csum *csi)
 {
 	struct file_info *fi;
+	bool need_reset = FALSE;
 
 	/* If type is FT_NONE, which is reserved, it probably means that csi was not
 	updated to include a value for the type field, so it defaults to zero.  This
@@ -140,19 +147,19 @@ void file_register (const struct area_csum *csi)
 		no matter what.  Developers bump the version when they change the structure in
 		incompatible ways that absolutely require that previous data is discarded. */
 		dbprintf ("new version %d\n", csi->version);
-		csum_area_reset (csi);
+		need_reset = TRUE;
 	}
 	else if (fi->data != csi->area)
 	{
 		/* If the structure moved from the last power up, then ... */
 		dbprintf ("new address %p\n", csi->area);
-		csum_area_reset (csi);
+		need_reset = TRUE;
 	}
 	else if (csi->length != fi->len)
 	{
 		/* If only the structure size changed, then ... */
 		dbprintf ("new length %p\n", csi->length);
-		csum_area_reset (csi);
+		need_reset = TRUE;
 	}
 	else
 	{
@@ -167,8 +174,9 @@ void file_register (const struct area_csum *csi)
 	fi->len = csi->length;
 	pinio_nvram_lock ();
 
-	/* Now also verify the data contents are sane.  This would fail if the structure
-	did not change, but the data had been corrupted somehow. */
-	csum_area_check (csi);
+	if (need_reset)
+		csum_area_reset (csi);
+	else
+		csum_area_check (csi);
 }
 

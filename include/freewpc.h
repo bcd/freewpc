@@ -61,6 +61,7 @@ typedef int I16, S16;
 typedef unsigned int U16;
 typedef U16 INTPTR;
 typedef unsigned long U32;
+typedef U16 size_t;
 #elif defined(CONFIG_NATIVE)
 typedef short I16, S16;
 typedef unsigned short U16;
@@ -70,6 +71,7 @@ typedef long I16, S16;
 typedef unsigned long U16;
 typedef unsigned long long U32;
 typedef unsigned int INTPTR;
+typedef U16 size_t;
 #endif
 
 typedef U16 IOPTR;

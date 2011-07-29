@@ -18,11 +18,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef __m6809__
 #define __dirtab__ __attribute__((section ("dirtab")))
+#else
+#define __dirtab__ __nvram__
+#endif
 
 #define MAX_FILE_INFO 32
-
-typedef U16 size_t;
 
 
 /* A list of 'filenames', which are just values that denote the contents of
@@ -83,7 +85,8 @@ struct file_info
 	U8 version : 4;
 	void *data;
 	size_t len;
-	U16 csum;
+	U8 csum;
+	U8 reserved;
 };
 
 

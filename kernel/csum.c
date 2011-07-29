@@ -43,7 +43,10 @@ csum_get_var (const struct area_csum *csi)
 	}
 
 	struct file_info *fi = file_find (csi->type);
-	return (U8 *)&fi->csum;
+	if (!fi)
+		dbprintf ("warning: csum_get_var could not find fi\n");
+	U8 *res = &fi->csum;
+	return res;
 }
 
 

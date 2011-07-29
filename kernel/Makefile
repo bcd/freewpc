@@ -39,6 +39,7 @@ KERNEL_HW_OBJS += kernel/audit.o
 KERNEL_HW_OBJS += kernel/csum.o
 KERNEL_HW_OBJS += $(if $(CONFIG_DMD),kernel/dmd.o)
 KERNEL_HW_OBJS += kernel/error.o
+KERNEL_HW_OBJS += kernel/file.o
 KERNEL_HW_OBJS += $(if $(CONFIG_WHITESTAR),,kernel/flip.o)
 KERNEL_HW_OBJS += kernel/freetimer.o   # could be KERNEL_SW_OBJS
                                        # except for RTT.
