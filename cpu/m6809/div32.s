@@ -82,10 +82,14 @@ notzero:
 	; significant bit is 1.)  Store M+1 as the maximum number of
 	; subtractions.  Use a soft register to hold this.
 	;
-	; Note that if the inputs are small, then the prescaling will create
-	; a much larger divider than will ever work, and the following loop
-	; will be a little inefficient.  However, it is not much, and comparing
-	; here against the dividend would add overhead of its own.
+	; If during the loop we find that the divisor becomes larger than
+	; the dividend/remainder, then we can stop, because no higher values
+	; can be subtracted and the loop below will only end up shifting
+	; useless zeroes into the result.  However, doing an exact comparison
+	; adds extra cycles here.  Thus, we do an inexact comparison -- using
+	; only the uppermost 8-bits -- which only adds two instructions.
+	; This can optimize out up to 7 iterations of the main loop, which is
+	; a definite win.
 	;
 	; Since register A is not used in the loop, we cache the MSB of the
 	; divisor in A to save a few cycles on operations on that byte, and
@@ -99,8 +103,10 @@ prescale_loop:
 	rol	2,x
 	rol	1,x
 	rola
-	tsta  ; TBD - is this needed?
-	bpl	prescale_loop
+	tsta
+	bmi	prescale_exit
+	cmpa	high(remainder)
+	bls	prescale_loop
 prescale_exit:
 	sta	,x
 	stb	shiftcount
