@@ -638,10 +638,6 @@ void switch_service_queue (void)
 				switch_transitioned (entry->id);
 			}
 		}
-		else
-		{
-			dbprintf ("%d down, %d to go\n", elapsed_time, entry->timer);
-		}
 		entry++;
 	}
 
