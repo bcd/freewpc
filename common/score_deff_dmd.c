@@ -266,7 +266,7 @@ void ll_score_redraw (void)
 void ll_score_strobe_novalid (void)
 {
 	dmd_show_other ();
-	score_deff_sleep (TIME_166MS);
+	score_deff_sleep (TIME_133MS);
 }
 
 
@@ -321,7 +321,7 @@ void ll_score_strobe_valid (void)
 			if (ll_sweep_off == TRUE)
 			{
 				ll_dmd_sweep_counter = LL_SWEEP_REFRESH_DELAY;
-				score_deff_sleep (TIME_166MS);
+				score_deff_sleep (TIME_100MS);
 				return;
 			}
 		}
@@ -346,7 +346,7 @@ void ll_score_strobe_valid (void)
 	callset_invoke (score_overlay);
 	dmd_show_low ();
 #endif
-	score_deff_sleep (TIME_166MS);
+	score_deff_sleep (TIME_133MS);
 }
 
 
