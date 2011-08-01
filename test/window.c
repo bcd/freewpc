@@ -596,17 +596,17 @@ struct audit feature_audit_info[] = {
 
 
 struct audit timestamp_audit_info[] = {
-	{ "TOTALS CLEARED", AUDIT_TYPE_TIMESTAMP, &system_timestamps.totals_cleared },
-	{ "CLOCK LAST SET", AUDIT_TYPE_TIMESTAMP, &system_timestamps.clock_last_set },
-	{ "AUDITS CLEARED", AUDIT_TYPE_TIMESTAMP, &system_timestamps.audits_cleared },
-	{ "COINS CLEARED", AUDIT_TYPE_TIMESTAMP, &system_timestamps.coins_cleared },
-	{ "FACTORY RESET", AUDIT_TYPE_TIMESTAMP, &system_timestamps.factory_reset },
-	{ "LAST GAME START", AUDIT_TYPE_TIMESTAMP, &system_timestamps.last_game_start },
-	{ "LAST REPLAY", AUDIT_TYPE_TIMESTAMP, &system_timestamps.last_replay },
-	{ "LAST H.S.T.D. RESET", AUDIT_TYPE_TIMESTAMP, &system_timestamps.last_hstd_reset },
-	{ "CHAMPION RESET", AUDIT_TYPE_TIMESTAMP, &system_timestamps.champion_reset },
-	{ "LAST PRINTOUT", AUDIT_TYPE_TIMESTAMP, &system_timestamps.last_printout },
-	{ "LAST SERV. CREDIT", AUDIT_TYPE_TIMESTAMP, &system_timestamps.last_service_credit },
+	{ "TOTALS CLEARED", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.totals_cleared },
+	{ "CLOCK LAST SET", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.clock_last_set },
+	{ "AUDITS CLEARED", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.audits_cleared },
+	{ "COINS CLEARED", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.coins_cleared },
+	{ "FACTORY RESET", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.factory_reset },
+	{ "LAST GAME START", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_game_start },
+	{ "LAST REPLAY", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_replay },
+	{ "LAST H.S.T.D. RESET", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_hstd_reset },
+	{ "CHAMPION RESET", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.champion_reset },
+	{ "LAST PRINTOUT", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_printout },
+	{ "LAST SERV. CREDIT", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_service_credit },
 };
 
 
