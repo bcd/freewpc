@@ -460,7 +460,7 @@ CALLSET_ENTRY (rtc, init_complete)
 	{
 		if (!date_verify (d))
 		{
-			memset (d, 0, sizeof (system_timestamps));
+			memset (d, 0, sizeof (struct date));
 		}
 		d++;
 	}
