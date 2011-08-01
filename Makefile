@@ -17,16 +17,6 @@
 SHELL := /bin/bash
 export SHELL
 
-# Include the .config file, which must exist
-DOTCONFIG ?= .config
-ifneq ($(DOTCONFIG),)
-include $(DOTCONFIG)
-endif
-
-define require
-$(if $($1),,$(error $1 is not defined : $($1)))
-endef
-
 define have
 $1 := y
 AUTO_CFLAGS += -D$1
@@ -38,6 +28,16 @@ define nohave
 $1 :=
 AUTO_CFLAGS += -U$1
 EXTRA_ASFLAGS += -U$1
+endef
+
+# Include the .config file, which must exist
+DOTCONFIG ?= .config
+ifneq ($(DOTCONFIG),)
+include $(DOTCONFIG)
+endif
+
+define require
+$(if $($1),,$(error $1 is not defined : $($1)))
 endef
 
 ifndef Q
