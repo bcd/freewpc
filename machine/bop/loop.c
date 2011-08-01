@@ -33,7 +33,7 @@ U8 last_right_loop_level;
 
 U8 total_loops;
 
-score_t loop_score_table[] = {
+score_id_t loop_score_table[] = {
 	SC_25K, SC_50K, SC_100K, SC_500K
 };
 
