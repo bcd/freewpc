@@ -312,7 +312,7 @@ bool switch_poll_logical (const switchnum_t sw)
 }
 
 
-void switch_rtt_0 (void)
+void switch_rtt (void)
 {
 	switch_rowpoll (0);
 	if (switch_scanning_ok ())
@@ -321,14 +321,6 @@ void switch_rtt_0 (void)
 		switch_rowpoll (2);
 		switch_rowpoll (3);
 		switch_rowpoll (4);
-	}
-}
-
-
-void switch_rtt_1 (void)
-{
-	if (switch_scanning_ok ())
-	{
 		switch_rowpoll (5);
 		switch_rowpoll (6);
 		switch_rowpoll (7);
