@@ -53,7 +53,7 @@ lamp_rtt              2       90c
 !pic_rtt_finish?CONFIG_PIC    2       8c
 
 # Read the regular switch matrix and coin door
-switch_rtt/2          1       280c
+switch_rtt            2       560c
 
 # Resynchronize to the AC zero cross point.
 ac_rtt                1       50c
