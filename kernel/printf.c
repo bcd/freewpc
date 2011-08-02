@@ -19,11 +19,6 @@
  */
 
 #include <freewpc.h>
-#ifdef __m6809__
-#include <m6809/math.h>
-#else
-#include <native/math.h>
-#endif
 
 /* When building with -mint16, 8-bit values are converted to 16-bits
 before they are passed as arguments.  */

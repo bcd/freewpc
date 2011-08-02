@@ -33,11 +33,6 @@
  * messages at all.
  */
 #include <freewpc.h>
-#ifdef __m6809__
-#include <m6809/math.h>
-#else
-#include <native/math.h>
-#endif
 
 /** A pointer to the current output driver.  This must be
 initialized during startup before debug messages can be written.

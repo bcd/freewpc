@@ -25,7 +25,6 @@
  */
 
 #include <freewpc.h>
-#include <m6809/math.h>
 
 bool seg_in_transition;
 
