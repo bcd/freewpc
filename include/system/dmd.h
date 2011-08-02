@@ -212,6 +212,10 @@ __transition__ void dmd_overlay_color (void);
 __transition__ void dmd_overlay_onto_color (void);
 __transition__ void dmd_dup_mapped (void);
 
+__effect__ void dmd_draw_border (U8 *dbuf);
+__effect__ void dmd_draw_thin_border (U8 *dbuf);
+__effect__ void dmd_draw_horiz_line (U16 *dbuf, U8 y);
+
 void dmd_and_page (void);
 void dmd_or_page (void);
 void dmd_xor_page (void);
@@ -252,19 +256,19 @@ struct dmd_rough_args
  * x,y denote the coordinates of the upper leftmost pixel.
  * w is the width of the area to be copied in pixels.
  * h is the height of the area to be copied in pixels.
- * All pixel values should be a multiple of 8 for correct results.
+ * x and w (col. values) should be a multiple of 8 for correct results.
  */
 #define dmd_rough_copy(x, y, w, h) \
 	do { \
 		extern struct dmd_rough_args dmd_rough_args; \
-		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1) + \
-			(x / CHAR_BIT) + y * DMD_BYTE_WIDTH; \
-		dmd_rough_args.bwidth = w / CHAR_BIT; \
+		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0) + \
+			((x) / CHAR_BIT) + (U16)(y) * DMD_BYTE_WIDTH; \
+		dmd_rough_args.bwidth = (w) / CHAR_BIT; \
 		dmd_rough_args.height = h; \
 		dmd_rough_copy1 (); \
 	} while (0)
 
-void dmd_rough_copy1 (void);
+__transition__ void dmd_rough_copy1 (void);
 
 /**
  * Zero a portion of the low DMD page.
@@ -272,18 +276,19 @@ void dmd_rough_copy1 (void);
  * x,y denote the coordinates of the upper leftmost pixel.
  * width is the width of the area to be erased in pixels.
  * height is the height of the area to be erased in pixels.
- * All pixel values should be a multiple of 8 for correct results.
+ * x and w (col. values) should be a multiple of 8 for correct results.
  */
 #define dmd_rough_erase(x, y, w, h) \
 	do { \
 		extern struct dmd_rough_args dmd_rough_args; \
-		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1) + \
-			(x / CHAR_BIT) + y * DMD_BYTE_WIDTH; \
-		dmd_rough_args.bwidth = w / CHAR_BIT; \
+		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0) + \
+			((x) / CHAR_BIT) + (U16)(y) * DMD_BYTE_WIDTH; \
+		dmd_rough_args.bwidth = (w) / CHAR_BIT; \
 		dmd_rough_args.height = h; \
 		dmd_rough_erase1 (); \
 	} while (0)
 
-void dmd_rough_erase1 (void);
+__transition__ void dmd_rough_erase1 (void);
+
 
 #endif /* _SYS_DMD_H */
