@@ -420,6 +420,7 @@ static void io_add_sol_bank (IOPTR addr, U8 solno)
 	ADDR identifies the mapping number.  VAL is the physical page.
 	Each window points to page 0 on reset. */
 
+#if (MACHINE_DMD == 1)
 static void io_dmd_write_map (void *window, unsigned int addr, U8 val)
 {
 	asciidmd_map_page ((int)window, val);
@@ -441,7 +442,7 @@ static void io_add_dmd_visible_reg (IOPTR addr)
 	asciidmd_set_visible (0);
 	io_add_wo (addr, io_dmd_write_visible, NULL);
 }
-
+#endif
 
 
 /**
