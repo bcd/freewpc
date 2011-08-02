@@ -173,9 +173,14 @@ static void set_ball_count_task (void)
 			serve_ball_auto ();
 		}
 
-		/* Delay slightly, and see if the live count changed.
-		We only track its maximum */
-		task_sleep (TIME_1500MS);
+		/* Wait a bit for the ball to make it to the shooter lane. */
+		task_sleep (TIME_2S + TIME_500MS);
+
+		/* As long as there is a ball on the shooter, wait before trying
+		to continue.  This flag will clear once the shooter switch
+		has cleared for a few seconds. */
+		while (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
+			task_sleep (TIME_133MS);
 
 		/* See if the ball count went up, indicating success */
 		if (live_balls > max_live_balls)
