@@ -126,7 +126,7 @@ to score *two shots* instead of one, as far as "Illusions" scoring
 is concerned (see below).
 
 The shots are: Captive Ball, Left Center Loop, Trunk Hole/Wall,
-Center Ramp, Right Center Loop (Spinner), Right Ramp, Right Orbit.
+Center Ramp, Right Center Loop (Spinner), Right Ramp, Jet Bumpers.
 There are 2 Trunk modes, only one of which is active at a time
 depending on which Trunk face is showing.
 
@@ -135,8 +135,8 @@ for a skill shot, bonus points are also awarded: 200K, 400K, etc.
 up to a maximum 1M.
 
 The "Spirit Cards" award, which is collected on the spinner, will
-award 2X spins for a maximum of 5 spins before it reverts to single
-scoring.
+award 2X spins for a maximum of 10 spins before it reverts to single
+scoring.  The same applies to the jet bumpers for "Strait Jacket".
 
 The Award lamps on each shot will flash if a Skill Shot is available
 there, or be steady if already collected.
@@ -186,7 +186,7 @@ see below.
 Making any 3 different shots in a row (they can be lit/unlit, it doesn't matter)
 will award a Combo for the final shot; see Combos below.
 
-When all 8 shots have been completed, Trick Multiball becomes lit at the
+When all 8 shots have been completed the required number of times, Trick Multiball becomes lit at the
 Trunk hole.  If all are flashing, because you finished all on the same ball,
 you'll get Super Trick Multiball instead.  See below.
 
@@ -262,14 +262,16 @@ Theatre:
 - When spelled, ball is diverted to the saucer lock, and then ejected back the
 	left loop.  Letters are cleared.
 - Trunk Hole is then lit for Theatre Hurry-Up.  Value counts down rapidly from
-	1M to 200K in 15 seconds.  Collect it to award the Theatre badge.
+	1M to 200K in 15 seconds.  Collect 3 times to earn the Theatre badge.  Does
+	not have to be on the same ball.
 - Hurry-Up can be collected more than once during the 15 seconds.  Timer is
 	paused briefly during effect and kickout.  Subsequent values are higher:
-		1.5X, 2X, 2.5X, 3X at max.  This multiplier carries over between balls?
-- Difficulty of Theatre increases for subsequent attempts:
-	- Letters no longer carry over from ball to ball.
-	- Timer reduced to 10 seconds.
-- Once Final Battle played, Theatre difficulty is reset?
+		1.5X, 2X, 2.5X, 3X at max.  This multiplier resets on each THEATRE spell.
+- Difficulty of spelling Theatre increases for subsequent attempts:
+	- Letters no longer carry over from ball to ball.  (Consider a HOLD THEATRE
+	award elsewhere?)
+- Once Final Battle played, it takes 1 more Hurry Up collection to award the
+  badge (4, then 5, etc.)
 - Hurryup can run during MB, if it is started before the MB.  But not the
 	other way around.
 
@@ -307,12 +309,12 @@ Midnight:
 	- For third+ runs, starts at 10min
 - At Midnight, badge is collected and Multiball is lit at the magnet:
 	- Immediate score 2M.
-	- Frenzy mode starts: All switches score 100K
+	- Frenzy mode starts: All switches score 50K
 	- Save Timer = 30 seconds (minimum time played)
 	- Right orbit collects Midnight Jackpot = 500K+10K per switch so far.
 		Each jackpot also boosts the base value by 250K.  Maximum base is 1.5M.
 		Switch addition resets after each collection.
-	- Trunk wall increases switch value by 10K, and jackpot boost by 10K.
+	- Trunk wall increases switch value by 10K up to 100K each.
 - Bumpers becomes unlit at ball start and at the end of Midnight Multiball.
 
 
@@ -329,13 +331,17 @@ Final Battle:
 - Stage 2: Shoot each Illusion again in order.  Each shot is worth 3M.
 	Final shot is Hat Magic to lock ball for effect.  Total 24M.
 - Stage 3: Super Spinner - 100 spins needed to win.  But the count will go
-	up slowly if you don't make the shot quickly enough.  20K per spin.
-	Minimum 20M, likely more.
+	up slowly if you don't make the shot quickly enough.  25K per spin.
+	25M total.  Points cannot be rescored.
 - Stage 4: Big Multiball!!!
 	- Unlimited Balls served for 45 seconds, like World Cup Soccer.
 	- All shots score Jackpot Value that increases as each shot is made.
 		1M, 1.1M, 1.2M, etc. up to 2.5M per shot.
 	- Trunk remains at WALL.
+	- Play continues after 45 seconds expires, until down to 1 ball again.
+	- One illusion at a time is lit for Super Jackpot (it does not roam until you
+	collect it), worth 2X the regular jackpot.  Collecting all 8 Supers reset
+	again and the multiplier increases to 3X (max) and restores 1 ball to play.
 - At completion of Big Multiball, badges are reset and progress can continue
 	on other things.
 
