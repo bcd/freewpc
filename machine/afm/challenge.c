@@ -195,7 +195,7 @@ void chal_sudden_death_deff (void)
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_var5, 64, 6, "SUDDEN DEATH");
-	font_render_string_center (&font_var5, 64, 27, "SUDDEN DEATH");
+	font_render_string_center (&font_var5, 64, 27, "TO CONTINUE GAME");
 	dmd_copy_low_to_high ();
 	sprintf ("SHOOT %d MARTIANS", martians_needed);
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
@@ -419,7 +419,7 @@ CALLSET_ENTRY (chal, device_update)
 
 CALLSET_ENTRY (chal, display_update)
 {
-	if (in_live_game)
+	if (in_live_game && valid_playfield)
 	{
 		if (martians_needed)
 			deff_start_bg (DEFF_CHAL_SUDDEN_DEATH, PRI_GAME_MODE1);

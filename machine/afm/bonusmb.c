@@ -138,3 +138,9 @@ CALLSET_ENTRY (bonusmb, music_refresh)
 	mb_mode_music_refresh (&afm_bonus_mb_mode);
 }
 
+#if 1
+CALLSET_ENTRY (bonusmb, center_ramp_shot)
+{
+	mb_mode_start (&afm_bonus_mb_mode);
+}
+#endif
