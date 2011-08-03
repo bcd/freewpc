@@ -592,7 +592,6 @@ void switch_service_queue (void)
 	entry = switch_queue;
 	while (unlikely (entry < switch_queue_top))
 	{
-		dbprintf ("Service SW%d: ", entry->id);
 		entry->timer -= elapsed_time;
 		if (entry->timer <= 0)
 		{
