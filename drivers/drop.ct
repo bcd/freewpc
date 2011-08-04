@@ -55,7 +55,9 @@ extern inline bool @self_down_p (void)
 
 void @self_init (void);
 void @self_reset (void);
+#ifdef @sol_down
 void @self_down (void);
+#endif
 
 
 @@
@@ -110,6 +112,7 @@ void @self_reset (void)
 /**
  * Force the drop target down.
  */
+#ifdef @sol_down
 void @self_down (void)
 {
 	if ((@self_state != DROP_DOWN) && (@self_down_errors < 5))
@@ -119,6 +122,7 @@ void @self_down (void)
 		sol_request_async (@sol_down);
 	}
 }
+#endif
 
 
 /**
@@ -167,6 +171,7 @@ CALLSET_ENTRY (@self, idle_every_100ms)
 			}
 			/* If we just tried to knockdown the drop, see if that
 			worked. */
+#ifdef @sol_down
 			else if (@self_state == DROP_GOING_DOWN)
 			{
 				if (@self_down_p ())
@@ -182,6 +187,7 @@ CALLSET_ENTRY (@self, idle_every_100ms)
 					@self_down ();
 				}
 			}
+#endif
 		}
 	}
 }
