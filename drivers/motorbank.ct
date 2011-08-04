@@ -1,0 +1,119 @@
+/*
+ * Copyright 2011 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/*
+ * Drivers for an up/down motor bank
+ * TODO:
+ * - Handle one broken up/down switch
+ * - Timeout if we don't find our target
+ */
+
+@@class duty
+
+@@parameter sol
+@@parameter up_sw_event
+@@parameter down_sw_event
+
+
+@@
+@@file @self.h
+@@
+
+#include <freewpc.h>
+
+enum @self_state {
+	MOTOR_BANK_INIT,
+	MOTOR_BANK_UP,
+	MOTOR_BANK_DOWN,
+};
+
+extern enum @self_state @self_state;
+
+void @self_move_up (void);
+void @self_move_down (void);
+
+
+@@
+@@file @self.c
+@@
+
+#include <freewpc.h>
+#include "@self.h"
+
+enum @self_state @self_state;
+
+void @self_move_monitor (void)
+{
+	sol_enable (@sol);
+	task_sleep_sec (10);
+	sol_disable (@sol);
+	task_exit ();
+}
+
+void @self_stop (void)
+{
+	dbprintf ("Stopping\n");
+	task_kill_gid (GID_@self_MONITOR);
+	sol_disable (@sol);
+}
+
+void @self_move_up (void)
+{
+	if (@self_state != MOTOR_BANK_UP)
+	{
+		@self_state = MOTOR_BANK_UP;
+		task_recreate_gid (GID_@self_MONITOR, @self_move_monitor);
+	}
+}
+
+
+void @self_move_down (void)
+{
+	if (@self_state != MOTOR_BANK_DOWN)
+	{
+		@self_state = MOTOR_BANK_DOWN;
+		task_recreate_gid (GID_@self_MONITOR, @self_move_monitor);
+	}
+}
+
+CALLSET_ENTRY (@self, @up_sw_event)
+{
+	if (@self_state == MOTOR_BANK_UP)
+		@self_stop ();
+}
+
+CALLSET_ENTRY (@self, @down_sw_event)
+{
+	if (@self_state == MOTOR_BANK_DOWN)
+		@self_stop ();
+}
+
+CALLSET_ENTRY (@self, tilt, test_start)
+{
+	@self_stop ();
+}
+
+CALLSET_ENTRY (@self, amode_start)
+{
+	@self_state = MOTOR_BANK_INIT;
+	@self_move_up ();
+}
+
+/* vim: set filetype=c: */
