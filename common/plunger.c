@@ -96,9 +96,7 @@ CALLSET_ENTRY (shooter_switch, amode_start, start_ball, sw_shooter)
 #ifdef INCLUDE_AUTOPLUNGER
 static void launch_button_pressed (void)
 {
-	/* Do not attempt to fire if a ball is in play and no ball is seen
-	on the shooter */
-	if (!valid_playfield || switch_poll_logical (MACHINE_SHOOTER_SWITCH))
+	if (in_live_game && global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
 		launch_ball ();
 }
 #endif
