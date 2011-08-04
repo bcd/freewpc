@@ -149,7 +149,7 @@ foreach $src (@srclist) {
 	while (<FH>) {
 		chomp;
 		++$lineno;
-		if ((/CALLSET_ENTRY[ \t]*\((.*)\)/)
+		if ((/CALLSET_ENTRY[ \t]*\(([^)]*)\)/)
 			|| (/CALLSET_BOOL_ENTRY[ \t]*\((.*)\)/)) {
 			my $callset_entry_args = $1;
 			my ($module, @sets) = split /, */, $callset_entry_args;
