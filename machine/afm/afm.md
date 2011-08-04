@@ -130,7 +130,7 @@ define MACHINE_BALL_SAVE_TIME 0
 74: Left Loop Low
 75: L. Saucer Tgt.
 76: R. Saucer Tgt.
-77: Drop Target
+77: Drop Target, debounce(TIME_200MS)
 78: Center Trough
 
 [drives]
@@ -224,24 +224,28 @@ Right Hole: Right Popper, Right Popper
 1:
 10:
 100:
+5K:
+10K:
+25K:
+50K:
+100K:
+500K:
+1M:
 
 [highscores]
 
 [flags]
 
 [globalflags]
-Divertor Open:
-Bank Up:
-Drop Up:
 
 [deffs]
-Chal Running: PRI_GAME_MODE1, page(MACHINE_PAGE)
-Chal Sudden Death: PRI_GAME_MODE1, page(MACHINE_PAGE)
-Chal Award: PRI_GAME_QUICK1, page(MACHINE_PAGE), D_SCORE+D_RESTARTABLE
-Chal Phase Finished: PRI_GAME_QUICK1, page(MACHINE_PAGE), D_QUEUED+D_PAUSE, c_decl(chal_all_shots_deff)
-Chal Ball Drain: PRI_GAME_QUICK2, page(MACHINE_PAGE)
-Chal Timeout Endgame: PRI_GAME_QUICK1, page(MACHINE_PAGE)
-Martian Kill: PRI_GAME_QUICK2, page(MACHINE_PAGE), D_RESTARTABLE
+#Chal Running: PRI_GAME_MODE1, page(MACHINE_PAGE)
+#Chal Sudden Death: PRI_GAME_MODE1, page(MACHINE_PAGE)
+#Chal Award: PRI_GAME_QUICK1, page(MACHINE_PAGE), D_SCORE+D_RESTARTABLE
+#Chal Phase Finished: PRI_GAME_QUICK1, page(MACHINE_PAGE), D_QUEUED+D_PAUSE, c_decl(chal_all_shots_deff)
+#Chal Ball Drain: PRI_GAME_QUICK2, page(MACHINE_PAGE)
+#Chal Timeout Endgame: PRI_GAME_QUICK1, page(MACHINE_PAGE)
+#Martian Kill: PRI_GAME_QUICK2, page(MACHINE_PAGE), D_RESTARTABLE
 
 BonusMB Running: PRI_GAME_MODE3, page(MACHINE_PAGE)
 BonusMB Ending: PRI_GAME_MODE3, page(MACHINE_PAGE), D_QUEUED
@@ -250,8 +254,8 @@ BonusMB Ending: PRI_GAME_MODE3, page(MACHINE_PAGE), D_QUEUED
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Flashfest: PRI_LEFF2, page(MACHINE_PAGE)
 Flash Random: PRI_LEFF3, page(MACHINE_PAGE)
-GI Strobe: PRI_LEFF4, GI(ALL), page(MACHINE_PAGE)
-GI Flash: PRI_LEFF4, GI(ALL), page(MACHINE_PAGE)
+#GI Strobe: PRI_LEFF4, GI(ALL), page(MACHINE_PAGE)
+#GI Flash: PRI_LEFF4, GI(ALL), page(MACHINE_PAGE)
 
 [fonts]
 

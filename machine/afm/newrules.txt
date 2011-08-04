@@ -1,0 +1,142 @@
+
+Timed Play
+----------
+The game is timed; you begin with 60 seconds on the clock.  When the timer
+reaches zero, the flippers are disabled and the game will soon end.
+
+Timers are paused in various cases: the ball is in the jets, a kickout is
+being held, and briefly after any Jackpot/Super Jackpot is scored.
+
+You can extend the game by completing the set of MARTIAN standup targets.
+Each target scores 10K unlit, 25K already lit, or 50K when flashing.
+Getting all targets lit scores a bonus of 500K and adds 30 seconds.
+Note that the timer will not exceed 60 seconds at any time though.
+
+For the first completion, all targets begin flashing, and already lit
+targets in the same bank will spot an adjacent flashing target.  For the
+second round, all targets flash but there is no spotting.  For the third
+and subsequent rounds, the targets must be hit in order, one at a time.
+
+There is no penalty for draining, except that Martian Attack and
+Double Scoring rounds end like an endball.
+
+
+
+The 5 Shots
+-----------
+The main 5 scoring shots of the game are: Left Loop, Left Ramp, Center Ramp,
+Right Ramp, and Right Loop.  Each can be lit for Jackpot, and each can count
+up to 3 total shots.
+
+At the start of the game, all shots are lit for Jackpot, which is worth 100K.
+Collecting all 5 Jackpots adds a ball into play, and relights all Jackpots.
+See "Multiball" below.
+
+Each additional hit to the same shot increases the shot value for the rest of
+the game: +20K after each score, to a maximum of 200K.  The jackpot value
+is tracked separately per shot.  The 1, 2, 3 lamps for each shot indicate
+the score value (flashing is the next shot to be awarded, lit if already
+awarded, unlit otherwise).
+
+On every 3rd shot, Double Scoring is started/advanced; see below.
+
+The Center Ramp never opens for Lock in these rules.
+
+
+Multiball
+---------
+Multiball is starting/advanced by making all Jackpots.  Doing so immediately
+adds one ball into play, possibly extending a previously multiball.  You can
+have up to 4 balls in play.  The number of balls in play affects the multiplier
+for the Super Jackpot (so 2 balls=SJ, 3=Double SJ, 4=Triple SJ).
+
+All other scoring features continue as usual during Multiball.  The only
+difference is the availability of a Super Jackpot at the Saucer Hole.
+
+The base Super Jackpot value is 500K.  During non-multiball play, the value
+is increased by 25K for each hit to the center 3-bank, which is up.  The
+maximum value is 1M.  (Each target also scores 25K right away.)
+
+In multiball, the 3-bank is lowered to reveal the saucer.  The drop target is
+initially UP.  You must first score a certain number of saucer target/drop hits,
+then collect it.  Initially you need 5 hits to qualify the Super.  Each hit is
+50K, or 250K in qualifying.  This is also multiplied.
+
+Thereafter it takes 5 more hits for each Super, up to a maximum of 15 hits.
+Progress towards a Super is not remembered if multiball ends.  Also, the value
+of the Super increases by 250K for each one collected, up to the 1M maximum.
+
+During multiball, you can continue to advance the 5 shots again to try to add a ball,
+start Double Scoring, or extend the game time.
+
+There is a brief (5 second) ball saver each time a ball is added to play; during
+this, timers are paused.
+
+Each Super scored advances one light on the City Ladder.
+
+
+Double Scoring
+--------------
+On every 3rd shot (the 140K or 200K scores), Double Scoring is started/advanced.
+The playfield multiplier is increased by 1, and the timer is reset to 15 seconds.
+So if you have 6 seconds left of 2X, and you complete another 3rd shot, it
+boosts the multiplier to 3X and resets to 15 seconds.
+
+Double Scoring ends whenever a ball drains.
+
+The shot made to start DS does not reset its lamps again until Double Scoring
+times out completely, so you must make other shots instead to try to stack them.
+It is theoretically possible to get 6X scoring if all are active simultaneously.
+Try to stack this with multiball :)
+
+The factory Super Jackpot moving sound ticks off while this mode runs.
+
+
+Stroke of Luck
+--------------
+Completing the inlane/outlane lamps as usual lights Stroke of Luck.  The awards are
+pseudorandom:
+	- Light Martian Attack (once per game, on the 1st completion)
+	- Collect Jackpot (once per game, if only one or two Jackpots are left).
+	- Add 15 Seconds (normally every 3rd competion gives this)
+	- Double Scoring (once per game on the 2nd completion)
+	- Increase Jackpot
+	- Increase Super Jackpot
+	- Spot Martian
+	- Big Points
+
+
+Martian Attack
+--------------
+Jet Bumpers count up towards lighting Martian Attack.  Initially it takes 50 jets to
+light, then 75, then 100 etc.  Martian Attack cannot be stacked.
+
+When collected, Martian targets score an additional 50K per hit (in addition to the
+default points) until all balls drain.
+
+You can relight and collect Martian Attack while it is already running, then the
+50K bonus is awarded twice (and so on).  This counts as 2 Martian hits.
+
+
+Bonus X
+-------
+Completing the Bonus X lanes does not award Bonus X - there is no bonus in this game :)
+
+Instead it temporarily boosts the value of the jet hits that follow.  Each jet is
+normally 5K each, but the lanes boost to 6K, 7K, etc. up to 10K each.  The multiplier
+times out when the ball leaves the jets.  This works in multiball too.
+
+Inlane/outlane/bonus X switches score 1K each.
+
+
+Rule the Universe (TBD):
+-----------------
+To qualify, you must complete all of these objectives:
+
+- 5-Way
+- Total Annihilation
+- Super Jackpot
+- Conquer Mars
+- Martian Multiball: Have Martian Attack+Multiball running simultaneously?
+- Super Jets: get jet value up to 10K each?
+
