@@ -281,8 +281,10 @@ void ball_search_monitor_task (void)
 					}
 				}
 
-				/* A ball was seen -- clear the counter and exit */
+				/* A ball was seen -- clear the counter and exit.  Also refresh devices
+				right away */
 				ball_search_count = 0;
+				callset_invoke (device_update);
 			}
 		}
 	}
