@@ -158,6 +158,7 @@ G3: Saucer Flash 6, flash
 G4: R. Martian Flash, flash
 G5: Saucer Arrow, flash
 G7: Saucer Flash, flash
+G8: Motor Bank
 
 A1: Saucer Flash 2, flash
 A2: Saucer Flash 3, flash
@@ -269,17 +270,11 @@ Right Sling: driver(spsol),
 	sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLINGSHOT,
 	ontime=3, offtime=16
 
-Left Jet: driver(spsol),
-	sw=SW_LEFT_JET, sol=SOL_LEFT_JET,
-	ontime=3, offtime=16
+Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
 
-Right Jet: driver(spsol),
-	sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET,
-	ontime=3, offtime=16
+Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
 
-Bottom Jet: driver(spsol),
-	sw=SW_BOTTOM_JET, sol=SOL_BOTTOM_JET,
-	ontime=3, offtime=16
+Bottom Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_BOTTOM_JET, ontime=3, offtime=16
 
 Left Gate: driver(duty),
 	sol=SOL_LEFT_GATE,
@@ -288,4 +283,12 @@ Left Gate: driver(duty),
 Right Gate: driver(duty),
 	sol=SOL_RIGHT_GATE,
 	ontime=TIME_300MS, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=60
+
+Divertor: driver(flipduty), power=SOL_DIVERTOR_POWER, hold=SOL_DIVERTOR_HOLD, time=TIME_66MS
+
+Drop Target: driver(drop), sol_up=SOL_DROP_TARGET, sol_down=SOL_NOT_DEFINED,
+	sw=SW_DROP_TARGET, sw_event=sw_drop_target
+
+Motor Bank: driver(motorbank), sol=SOL_MOTOR_BANK,
+	up_sw_event=sw_motor_bank_up, down_sw_event=sw_motor_bank_down
 
