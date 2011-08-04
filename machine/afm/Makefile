@@ -51,8 +51,7 @@ PINMAME_OTHER_ROMS = afm_s*.l1
 # Object files exported by this game
 #
 
-GAME_PAGED_OBJS = righthole.o lefthole.o afm_leff.o misc.o \
-	shot.o bonusmb.o rules.o
+GAME_PAGED_OBJS = afm_leff.o misc.o shot.o rules.o deffs.o
 
 GAME_INCLUDES =
 

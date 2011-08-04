@@ -1,22 +1,35 @@
+/*
+ * Copyright 2011 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <freewpc.h>
 #include <timedmode.h>
 
 /* Shot table */
 
-enum shot_id { 
+enum shot_id {
 	S_LEFT_LOOP = 0,
 	S_LEFT_RAMP,
 	S_CENTER_RAMP,
 	S_RIGHT_RAMP,
 	S_RIGHT_LOOP,
 	S_COUNT,
-};
-
-struct shot
-{
-	U8 lamplist;
-} shottab[S_COUNT] = {
 };
 
 /* Jackpots */
@@ -31,6 +44,13 @@ void jackpot_reset (void)
 
 void jackpot_shot (enum shot_id id)
 {
+	U8 lamp = lamplist_index (LAMPLIST_JACKPOTS, id);
+	if (lamp_flash_test (lamp))
+	{
+		deff_start (DEFF_JACKPOT);
+		lamp_flash_off (lamp);
+		lamp_on (lamp);
+	}
 }
 
 CALLSET_ENTRY (jackpot, left_loop_shot) { jackpot_shot (S_LEFT_LOOP); }
@@ -50,13 +70,48 @@ U8 shot_multiplier;
 U8 ball_count_multiplier;
 U8 pf_mult_count[S_COUNT];
 
+U8 pf_mult_timer;
+
+struct timed_mode_ops pf_mult_mode = {
+	DEFAULT_MODE,
+	.gid = GID_PF_MULT_MODE,
+	.timer = &pf_mult_timer,
+	.init_timer = 15,
+	.grace_timer = 3,
+};
+
+const U8 pf_lamplists[S_COUNT] = {
+	LAMPLIST_L_LOOP_COUNT,
+	LAMPLIST_L_RAMP_COUNT,
+	LAMPLIST_LOCKS,
+	LAMPLIST_R_RAMP_COUNT,
+	LAMPLIST_R_LOOP_COUNT,
+};
+
 void pf_mult_update (void)
 {
 	score_multiplier_set (shot_multiplier * ball_count_multiplier);
 }
 
+void pf_mult_shot_reset (enum shot_id id)
+{
+	pf_mult_count[id] = 0;
+	lamplist_apply (pf_lamplists[id], lamp_off);
+	lamplist_apply (pf_lamplists[id], lamp_flash_off);
+	lamp_flash_on (lamplist_index (pf_lamplists[id], 0));
+}
+
 void pf_mult_shot (enum shot_id id)
 {
+	if (pf_mult_count[id] < 3)
+	{
+		lamp_tristate_on (lamplist_index (pf_lamplists[id], pf_mult_count[id]));
+		pf_mult_count[id]++;
+		if (pf_mult_count[id] < 3)
+			lamp_flash_on (lamplist_index (pf_lamplists[id], pf_mult_count[id]));
+		else
+			timed_mode_begin (&pf_mult_mode);
+	}
 }
 
 CALLSET_ENTRY (pf_mult, left_loop_shot) { pf_mult_shot (S_LEFT_LOOP); }
@@ -73,7 +128,7 @@ CALLSET_ENTRY (pf_mult, start_ball, end_ball)
 
 CALLSET_ENTRY (pf_mult, start_player)
 {
-	memset (pf_mult_count, 0, S_COUNT);
+	memset (pf_mult_count, 0, sizeof (pf_mult_count));
 }
 
 CALLSET_ENTRY (pf_mult, ball_count_change)
@@ -107,6 +162,11 @@ void add_time_martian (U8 id)
 		if (lamplist_test_all (LAMPLIST_MARTIANS, lamp_test))
 		{
 			add_time_award ();
+			deff_start (DEFF_MARTIAN_SPELLED);
+		}
+		else
+		{
+			deff_start (DEFF_MARTIAN_ADVANCE);
 		}
 	}
 }
@@ -195,10 +255,11 @@ void mb_add_ball (void)
 		serve_ball_auto ();
 }
 
-CALLSET_ENTRY (mb, sw_forcefield_1, sw_forcefield_2, sw_forcefield_3)
+CALLSET_ENTRY (mb, sw_motor_bank_1, sw_motor_bank_2, sw_motor_bank_3)
 {
 	if (!mb_running_p ())
 	{
+		deff_start (DEFF_MB_INCREASE_JACKPOT);
 	}
 }
 
@@ -234,6 +295,12 @@ CALLSET_ENTRY (mb, start_player)
 	score_copy (mb_super_value, score_table[SC_500K]);
 }
 
+CALLSET_ENTRY (mb, display_update)
+{
+	if (mb_running_p ())
+		deff_start_bg (DEFF_MB_RUNNING, 0);
+}
+
 /* Martian Attack */
 
 __local__ U8 attack_lit;
@@ -243,6 +310,7 @@ U8 attack_timer;
 struct timed_mode_ops attack_mode = {
 	DEFAULT_MODE,
 	.gid = GID_ATTACK_MODE,
+	.deff_running = DEFF_ATTACK_RUNNING,
 	.timer = &attack_timer,
 	.init_timer = 20,
 	.grace_timer = 4,
@@ -251,12 +319,14 @@ struct timed_mode_ops attack_mode = {
 void attack_light (void)
 {
 	attack_lit++;
+	deff_start (DEFF_ATTACK_LIT);
 }
 
 CALLSET_ENTRY (attack, any_martian_target)
 {
 	if (timed_mode_running_p (&attack_mode))
 	{
+		deff_start (DEFF_ATTACK_SCORE);
 		attack_hits++;
 	}
 }
@@ -278,6 +348,11 @@ CALLSET_ENTRY (attack, end_ball)
 CALLSET_ENTRY (attack, lamp_update)
 {
 	lamp_flash_if (LM_MARTIAN_ATTACK, attack_lit);
+}
+
+CALLSET_ENTRY (attack, display_update)
+{
+	timed_mode_display_update (&attack_mode);
 }
 
 CALLSET_ENTRY (attack, start_player)
@@ -338,7 +413,7 @@ CALLSET_ENTRY (drop_rule, drop_target_down)
 
 CALLSET_ENTRY (motor_bank_rule, device_update)
 {
-	if (mb_device_running_p ())
+	if (mb_running_p ())
 		motor_bank_move_down ();
 	else
 		motor_bank_move_up ();
