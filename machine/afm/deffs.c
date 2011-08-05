@@ -20,6 +20,26 @@
 
 #include <freewpc.h>
 
+const char *shot_names[S_COUNT] = {
+	"LEFT LOOP", "LEFT RAMP", "CENTER RAMP",
+	"RIGHT RAMP", "RIGHT LOOP"
+};
+
+const char *jackpot_levels[] = {
+	"SUPER", "DOUBLE SUPER", "TRIPLE SUPER", "4X SUPER"
+};
+
+const char *luck_awards[] = {
+	"BIG POINTS",
+	"LIGHT MARTIAN ATTACK",
+	"JACKPOT",
+	"ADD-A-BALL",
+	"ADD TIME",
+	"START 2X SCORING",
+	"ADD TO JACKPOT",
+	"SPOT MARTIAN",
+};
+
 void jackpot_deff (void)
 {
 	dmd_alloc_low_clean ();

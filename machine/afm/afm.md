@@ -221,14 +221,15 @@ Right Hole: Right Popper, Right Popper
 [system_music]
 
 [scores]
-1:
-10:
-100:
+170:
+1K:
 5K:
 10K:
+20K:
 25K:
 50K:
 100K:
+250K:
 500K:
 1M:
 

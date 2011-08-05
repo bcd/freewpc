@@ -45,12 +45,14 @@ void jackpot_reset (void)
 void jackpot_shot (enum shot_id id)
 {
 	U8 lamp = lamplist_index (LAMPLIST_JACKPOTS, id);
+	score_long (jackpot_value[id]);
 	if (lamp_flash_test (lamp))
 	{
 		deff_start (DEFF_JACKPOT);
 		lamp_flash_off (lamp);
 		lamp_on (lamp);
 	}
+	score_add (jackpot_value[id], score_table[SC_20K]);
 }
 
 CALLSET_ENTRY (jackpot, left_loop_shot) { jackpot_shot (S_LEFT_LOOP); }
@@ -72,8 +74,11 @@ U8 pf_mult_count[S_COUNT];
 
 U8 pf_mult_timer;
 
+void pf_mode_exit (void);
+
 struct timed_mode_ops pf_mult_mode = {
 	DEFAULT_MODE,
+	.exit = pf_mode_exit,
 	.gid = GID_PF_MULT_MODE,
 	.timer = &pf_mult_timer,
 	.init_timer = 15,
@@ -99,6 +104,10 @@ void pf_mult_shot_reset (enum shot_id id)
 	lamplist_apply (pf_lamplists[id], lamp_off);
 	lamplist_apply (pf_lamplists[id], lamp_flash_off);
 	lamp_flash_on (lamplist_index (pf_lamplists[id], 0));
+}
+
+void pf_mode_exit (void)
+{
 }
 
 void pf_mult_shot (enum shot_id id)
@@ -192,6 +201,7 @@ __local__ U8 luck_count_given;
 
 void lower_lane_score (U8 id)
 {
+	score (SC_5K);
 	lamp_on (id);
 	if (lamplist_test_all (LAMPLIST_BOTTOM_LANES, lamp_test))
 	{
@@ -264,13 +274,15 @@ void mb_super_award (void)
 void mb_add_ball (void)
 {
 	if (live_balls < MB_MAX_BALLS)
-		serve_ball_auto ();
+		add_ball_count (1);
 }
 
 CALLSET_ENTRY (mb, sw_motor_bank_1, sw_motor_bank_2, sw_motor_bank_3)
 {
 	if (!mb_running_p ())
 	{
+		fixed_ladder_advance (&mb_super_score_rule);
+		score (SC_25K);
 		deff_start (DEFF_MB_INCREASE_JACKPOT);
 	}
 }
@@ -305,6 +317,7 @@ CALLSET_ENTRY (mb, single_ball_play)
 CALLSET_ENTRY (mb, start_player)
 {
 	mb_count = 0;
+	fixed_ladder_reset (&mb_super_score_rule);
 	mb_super_reset ();
 }
 
@@ -382,13 +395,15 @@ score_t jet_value;
 
 void jet_level_up (void)
 {
-	jet_count_goal += 25;
+	if (jet_count_goal < 100)
+		jet_count_goal += 25;
 	jet_count = 0;
 	attack_light ();
 }
 
 void upper_lane_score (U8 id)
 {
+	score (SC_5K);
 }
 
 CALLSET_ENTRY (jet, any_jet) {}

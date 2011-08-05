@@ -20,6 +20,11 @@ and subsequent rounds, the targets must be hit in order, one at a time.
 There is no penalty for draining, except that Martian Attack and
 Double Scoring rounds end like an endball.
 
+The game cannot end while a timed or multiball mode is running (Double Scoring,
+Martian Attack, or the regular Multiball).  When the timer expires while one
+of these is true, then that condition goes away, there is a brief grace period
+before the game truly ends.  During any of this game, you can "restart" the
+game by restarting one of those conditions, or adding to the timer.
 
 
 The 5 Shots
@@ -55,7 +60,7 @@ difference is the availability of a Super Jackpot at the Saucer Hole.
 
 The base Super Jackpot value is 500K.  During non-multiball play, the value
 is increased by 25K for each hit to the center 3-bank, which is up.  The
-maximum value is 1M.  (Each target also scores 25K right away.)
+maximum value is 1.5M.  (Each target also scores 25K right away.)
 
 In multiball, the 3-bank is lowered to reveal the saucer.  The drop target is
 initially UP.  You must first score a certain number of saucer target/drop hits,
@@ -64,7 +69,7 @@ then collect it.  Initially you need 5 hits to qualify the Super.  Each hit is
 
 Thereafter it takes 5 more hits for each Super, up to a maximum of 15 hits.
 Progress towards a Super is not remembered if multiball ends.  Also, the value
-of the Super increases by 250K for each one collected, up to the 1M maximum.
+of the Super increases by 250K for each one collected, up to the 1.5M maximum.
 
 During multiball, you can continue to advance the 5 shots again to try to add a ball,
 start Double Scoring, or extend the game time.
@@ -72,7 +77,8 @@ start Double Scoring, or extend the game time.
 There is a brief (5 second) ball saver each time a ball is added to play; during
 this, timers are paused.
 
-Each Super scored advances one light on the City Ladder.
+Each Super scored advances one light on the City Ladder.  Collecting 5 Supers
+start "Attack Mars".
 
 
 Double Scoring
@@ -95,27 +101,41 @@ The factory Super Jackpot moving sound ticks off while this mode runs.
 Stroke of Luck
 --------------
 Completing the inlane/outlane lamps as usual lights Stroke of Luck.  The awards are
-pseudorandom:
-	- Light Martian Attack (once per game, on the 1st completion)
-	- Collect Jackpot (once per game, if only one or two Jackpots are left).
-	- Add 15 Seconds (normally every 3rd competion gives this)
-	- Double Scoring (once per game on the 2nd completion)
+pseudorandom.
+
+You can light more than Stroke of Luck award at a time; they will stack.
+
+The algorithm is as follows.  Each of the major awards is given at most once per
+game, until all awards have been given.  They are awarded top to bottom,
+skipping if conditions do not allow it at the time.
+
+
+	Awards 1, 4, 7,...
+	- Jackpot (not if only 1 Jackpot lit)
+	- Light Martian Attack (not if it is already lit)
+	- Spot Martian (not if Martian Attack is running)
+	- Double Scoring (not if already running)
+
+	Awards 2, 5, 8...
 	- Increase Jackpot
 	- Increase Super Jackpot
-	- Spot Martian
 	- Big Points
+
+	Awards 3, 6, 9...
+		Add 15 Seconds (every 3rd award gives this)
 
 
 Martian Attack
 --------------
-Jet Bumpers count up towards lighting Martian Attack.  Initially it takes 50 jets to
-light, then 75, then 100 etc.  Martian Attack cannot be stacked.
+Jet Bumpers count up towards lighting Martian Attack.  Initially it takes 25 jets to
+light, then 30, then 35 etc.
+
+Martian Attack can be stacked, by not collecting it and then lighting it again
+with more jets or a Stroke of Luck award.
 
 When collected, Martian targets score an additional 50K per hit (in addition to the
-default points) until all balls drain.
-
-You can relight and collect Martian Attack while it is already running, then the
-50K bonus is awarded twice (and so on).  This counts as 2 Martian hits.
+default points) for 20 seconds.  If you restart it again due to stacking, the timer
+is reset 20 seconds, and the value is increased to 100K each, etc.
 
 
 Bonus X
@@ -127,6 +147,10 @@ normally 5K each, but the lanes boost to 6K, 7K, etc. up to 10K each.  The multi
 times out when the ball leaves the jets.  This works in multiball too.
 
 Inlane/outlane/bonus X switches score 1K each.
+
+
+Attack Mars
+-----------
 
 
 Rule the Universe (TBD):
