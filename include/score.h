@@ -35,7 +35,7 @@
 /** The standard score type, kept in packed BCD, 2 digits per byte */
 typedef bcd_t score_t[BYTES_PER_SCORE], *score_pointer_t;
 
-typedef bcd_t * const const_score_pointer_t;
+typedef const bcd_t *const const_score_pointer_t;
 
 typedef U8 score_id_t;
 
@@ -63,9 +63,9 @@ struct generic_ladder
  */
 struct fixed_ladder
 {
-	const const_score_pointer_t base;
-	const const_score_pointer_t increment;
-	const const_score_pointer_t max;
+	const_score_pointer_t base;
+	const_score_pointer_t increment;
+	const_score_pointer_t max;
 	score_pointer_t current;
 };
 
@@ -78,6 +78,9 @@ extern score_t scores[];
 
 /** A pointer to the current score in the scores[] array */
 extern U8 *current_score;
+
+/** The last score that was awarded, used by display effects */
+extern score_t last_score;
 
 /** The all-inclusive score multiplier */
 extern U8 global_score_multiplier;
