@@ -438,13 +438,13 @@ __local__ U8 trickmb_level;
 
 U8 trickmb_multiplier;
 
-void trickmb_update (void)
+void trickmb_update (enum mb_mode_state state)
 {
-	if (mb_mode_update_state () == MB_ACTIVE)
+	if (state == MB_ACTIVE)
 	{
 		add_ball_count (1);
 	}
-	else if (mb_mode_update_state () == MB_INACTIVE)
+	else if (state == MB_INACTIVE)
 	{
 		trickmb_multiplier = 1;
 		global_multiplier_update ();
@@ -681,7 +681,7 @@ struct fixed_ladder theatre_letter_scoring = {
 	.base = score_table[SC_100K],
 	.increment = score_table[SC_10K],
 	.max = score_table[SC_200K],
-	.current = &theatre_letter_value
+	.current = theatre_letter_value
 };
 
 bool theatre_can_be_spelled (void)
@@ -934,7 +934,7 @@ struct fixed_ladder main_mb_trunk_scoring = {
 	.base = score_table[SC_200K],
 	.increment = score_table[SC_100K],
 	.max = score_table[SC_600K],
-	.current = &main_mb_trunk_value
+	.current = main_mb_trunk_value
 };
 
 score_t main_mb_jackpot_value;
@@ -943,19 +943,19 @@ struct fixed_ladder main_mb_jackpot_scoring = {
 	.base = score_table[SC_2M],
 	.increment = score_table[SC_2M],
 	.max = score_table[SC_10M],
-	.current = &main_mb_trunk_value
+	.current = main_mb_trunk_value
 };
 
 U8 main_mb_shots_left;
 
-void main_mb_update (void)
+void main_mb_update (enum mb_mode_state state)
 {
-	if (mb_mode_update_state () == MB_ACTIVE)
+	if (state == MB_ACTIVE)
 	{
 		effect_update_request ();
 		set_ball_count (3);
 	}
-	else if (mb_mode_update_state () == MB_INACTIVE)
+	else if (state == MB_INACTIVE)
 	{
 		main_mb_level++;
 	}
@@ -1073,7 +1073,7 @@ struct fixed_ladder midnight_mb_sw_scoring = {
 	.base = score_table[SC_25K],
 	.increment = score_table[SC_5K],
 	.max = score_table[SC_50K],
-	.current = &midnight_mb_sw_value,
+	.current = midnight_mb_sw_value,
 };
 
 score_t midnight_mb_jackpot_value;
@@ -1081,14 +1081,14 @@ struct fixed_ladder midnight_mb_jackpot_scoring = {
 	.base = score_table[SC_500K],
 	.increment = score_table[SC_100K],
 	.max = score_table[SC_1M],
-	.current = &midnight_mb_jackpot_value,
+	.current = midnight_mb_jackpot_value,
 };
 
 U8 midnight_mb_trunk_count;
 
-void midnight_mb_update (void)
+void midnight_mb_update (enum mb_mode_state state)
 {
-	if (mb_mode_update_state () == MB_ACTIVE)
+	if (state == MB_ACTIVE)
 	{
 		add_ball_count (1);
 	}
@@ -1324,7 +1324,7 @@ struct fixed_ladder newton_scoring = {
 	.base = score_table[SC_50K],
 	.increment = score_table[SC_10K],
 	.max = score_table[SC_100K],
-	.current = &newton_value
+	.current = newton_value
 };
 
 
@@ -1375,9 +1375,9 @@ CALLSET_ENTRY (newton, start_ball)
 
 /* Quick Multiball rules - use timed mode */
 
-void quick_mb_update (void)
+void quick_mb_update (enum mb_mode_state state)
 {
-	if (mb_mode_update_state () == MB_ACTIVE)
+	if (state == MB_ACTIVE)
 	{
 		add_ball_count (1);
 	}
