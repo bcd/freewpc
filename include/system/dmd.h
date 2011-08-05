@@ -261,7 +261,7 @@ struct dmd_rough_args
 #define dmd_rough_copy(x, y, w, h) \
 	do { \
 		extern struct dmd_rough_args dmd_rough_args; \
-		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0) + \
+		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1) + \
 			((x) / CHAR_BIT) + (U16)(y) * DMD_BYTE_WIDTH; \
 		dmd_rough_args.bwidth = (w) / CHAR_BIT; \
 		dmd_rough_args.height = h; \
