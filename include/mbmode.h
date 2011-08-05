@@ -46,7 +46,7 @@ struct mb_mode_ops
 };
 
 #define DEFAULT_MBMODE \
-	.update = null_function, \
+	.update = NULL, \
 	.music = MUS_OFF, \
 	.deff_starting = DEFF_NULL, \
 	.deff_running = DEFF_NULL, \

@@ -31,7 +31,8 @@ static void mb_mode_update (struct mb_mode_ops *ops, enum mb_mode_state state)
 	*(ops->state) = state;
 
 	/* Inform the mode */
-	ops->update (state);
+	if (ops->update)
+		ops->update (state);
 
 	/* Do common handling. */
 	switch (state)
