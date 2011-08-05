@@ -238,6 +238,13 @@ __local__ U8 mb_target_level;
 U8 mb_targets_left;
 score_t mb_super_value;
 
+struct fixed_ladder mb_super_score_rule = {
+	.base = score_table[SC_500K],
+	.increment = score_table[SC_25K],
+	.max = score_table[SC_1M],
+	.current = mb_super_value,
+};
+
 bool mb_running_p (void)
 {
 	return live_balls > 1;
@@ -247,6 +254,11 @@ void mb_super_reset (void)
 {
 	mb_target_level = 5;
 	mb_targets_left = mb_target_level;
+}
+
+void mb_super_award (void)
+{
+	score_long (mb_super_value);
 }
 
 void mb_add_ball (void)
@@ -281,6 +293,8 @@ CALLSET_ENTRY (mb, dev_left_hole_enter)
 {
 	if (mb_running_p ())
 	{
+		if (mb_targets_left == 0)
+			mb_super_award ();
 	}
 }
 
@@ -292,7 +306,6 @@ CALLSET_ENTRY (mb, start_player)
 {
 	mb_count = 0;
 	mb_super_reset ();
-	score_copy (mb_super_value, score_table[SC_500K]);
 }
 
 CALLSET_ENTRY (mb, display_update)

@@ -40,11 +40,64 @@ void pf_mult_shot_deff (void)
 	deff_exit ();
 }
 
-void martian_advance_deff (void) { deff_exit (); }
-void martian_spelled_deff (void) { deff_exit (); }
+void martian_spell (bool on)
+{
+	const char text[] = "MARTIAN";
+	const char *s;
+	U8 x = 16;
+	U8 i;
+	char c[2];
+
+	s = text;
+	i = 0;
+	while (*s)
+	{
+		bool b = lamp_test (lamplist_index (LAMPLIST_MARTIANS, i));
+		if (!on)
+			b = !b;
+		if (b)
+		{
+			c[0] = *s;
+			c[1] = '\0';
+			font_render_string_center (&font_times8, x, 11, c);
+		}
+		x += 16;
+		s++;
+		i++;
+	}
+}
+
+void martian_advance_deff (void)
+{
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+	martian_spell (TRUE);
+	font_render_string_center (&font_var5, 64, 25, "COMPLETE FOR EXTRA TIME");
+	dmd_copy_low_to_high ();
+	martian_spell (FALSE);
+	dmd_show2 ();
+	task_sleep (TIME_2S);
+	deff_exit ();
+}
+
+void martian_spelled_deff (void)
+{
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+	martian_spell (TRUE);
+	font_render_string_center (&font_var5, 64, 25, "EXTRA TIME ADDED");
+	dmd_copy_low_to_high ();
+	dmd_show2 ();
+	task_sleep (TIME_2S+TIME_500MS);
+	deff_exit ();
+}
 
 void lower_lane_finish_deff (void) { deff_exit (); }
-void luck_award_deff (void) { deff_exit (); }
+
+void luck_award_deff (void)
+{
+	deff_exit ();
+}
 
 void mb_running_deff (void)
 {
@@ -61,7 +114,16 @@ void mb_running_deff (void)
 	}
 }
 
-void mb_super_award_deff (void) { deff_exit (); }
+void mb_super_award_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 10, "SUPER JACKPOT");
+	sprintf_score (last_score);
+	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep (TIME_3S);
+	deff_exit ();
+}
 
 void mb_increase_jackpot_deff (void)
 {
