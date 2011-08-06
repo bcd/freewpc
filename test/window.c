@@ -1763,17 +1763,27 @@ struct menu dev_force_error_item = {
 #if (MACHINE_DMD == 1)
 
 U16 test_frameno;
+U8 test_frame_mode;
 
 void dev_frametest_init (void)
 {
 	test_frameno = 0;
+	test_frame_mode = 0;
 }
 
 
 void dev_frametest_draw (void)
 {
 	dmd_alloc_pair ();
-	frame_draw (test_frameno);
+	if (test_frame_mode == 0)
+	{
+		frame_draw (test_frameno);
+	}
+	else
+	{
+		frame_draw_plane (test_frameno + test_frame_mode - 1);
+		dmd_clean_page_high ();
+	}
 	dmd_show2 ();
 }
 
@@ -1783,6 +1793,7 @@ void dev_frametest_up (void)
 	test_frameno += 2;
 	if (test_frameno >= MAX_IMAGE_NUMBER)
 		test_frameno = 0;
+	test_frame_mode = 0;
 }
 
 
@@ -1792,6 +1803,14 @@ void dev_frametest_down (void)
 		test_frameno -= 2;
 	else
 		test_frameno = MAX_IMAGE_NUMBER - 2;
+	test_frame_mode = 0;
+}
+
+void dev_frametest_enter (void)
+{
+	test_frame_mode++;
+	if (test_frame_mode > 2)
+		test_frame_mode = 0;
 }
 
 struct window_ops dev_frametest_window = {
@@ -1800,7 +1819,7 @@ struct window_ops dev_frametest_window = {
 	.draw = dev_frametest_draw,
 	.up = dev_frametest_up,
 	.down = dev_frametest_down,
-	.enter = null_function,
+	.enter = dev_frametest_enter,
 };
 
 
