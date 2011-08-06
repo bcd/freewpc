@@ -20,7 +20,33 @@
 
 #include <freewpc.h>
 
-const char *shot_names[S_COUNT] = {
+/* Library calls */
+
+void message_end (void)
+{
+	dmd_show_low ();
+	task_sleep (TIME_2S+TIME_166MS);
+	deff_exit ();
+}
+
+void message1 (font_t *f, const char *line)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (f, 64, 16, line);
+	message_end ();
+}
+
+void message2 (font_t *f, const char *line1, const char *line2)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (f, 64, 10, line1);
+	font_render_string_center (f, 64, 22, line2);
+	message_end ();
+}
+
+/* AFM display effects */
+
+const char *shot_names[] = {
 	"LEFT LOOP", "LEFT RAMP", "CENTER RAMP",
 	"RIGHT RAMP", "RIGHT LOOP"
 };
@@ -44,20 +70,21 @@ void jackpot_deff (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 10, "JACKPOT");
+	sprintf_score (last_score);
+	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep (TIME_2S+TIME_166MS);
 	deff_exit ();
 }
 
-void pf_mult_advance_deff (void) { deff_exit (); }
+void pf_mult_advance_deff (void)
+{
+	message1 (&font_fixed6, "ADV. MULTIPLIER");
+}
 
 void pf_mult_shot_deff (void)
 {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 10, "ADVANCE SHOT");
-	dmd_show_low ();
-	task_sleep (TIME_2S+TIME_166MS);
-	deff_exit ();
+	message1 (&font_fixed10, "ADVANCE SHOT");
 }
 
 void martian_spell (bool on)
@@ -112,25 +139,59 @@ void martian_spelled_deff (void)
 	deff_exit ();
 }
 
-void lower_lane_finish_deff (void) { deff_exit (); }
+void luck_lit_deff (void)
+{
+	message2 (&font_fixed6, "STROKE OF LUCK", "IS LIT");
+}
 
 void luck_award_deff (void)
 {
-	deff_exit ();
+	const char *award = luck_awards[0];
+	message2 (&font_fixed6, "STROKE OF LUCK", award);
 }
 
 void mb_running_deff (void)
 {
+	extern U8 mb_targets_left;
+
+	dmd_map_overlay ();
+	frame_draw (IMG_UFO);
+	font_render_string_center (&font_mono5, 96, 5, "MULTIBALL");
+	dmd_rough_copy (64, 2, 64, 6);
+	if (mb_targets_left == 0)
+		sprintf ("SUPER JACKPOT LIT");
+	else
+		sprintf ("%d TARGETS LEFT", mb_targets_left);
+	font_render_string_center (&font_var5, 88, 27, sprintf_buffer);
+outer_loop:
 	for (;;)
 	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_mono5, 64, 5, "MULTIBALL");
+		dmd_map_overlay ();
 		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		dmd_show_low ();
-		do {
-			task_sleep (TIME_166MS);
-		} while (!score_update_required ());
+		dmd_rough_erase (64, 11, 64, 10);
+		font_render_string_center (&font_mono9, 96, 16, sprintf_buffer);
+		dmd_rough_copy (64, 11, 64, 10);
+
+		for (;;)
+		{
+			dmd_map_overlay ();
+			dmd_dup_mapped ();
+			dmd_show2 ();
+			task_sleep (TIME_200MS);
+			if (score_update_required ())
+				goto outer_loop;
+
+			dmd_map_overlay ();
+			dmd_dup_mapped ();
+			dmd_rough_erase (64, 11, 64, 10);
+			dmd_flip_low_high ();
+			dmd_rough_erase (64, 11, 64, 10);
+			dmd_flip_low_high ();
+			dmd_show2 ();
+			task_sleep (TIME_200MS);
+			if (score_update_required ())
+				goto outer_loop;
+		}
 	}
 }
 
@@ -159,12 +220,7 @@ void mb_increase_jackpot_deff (void)
 
 void attack_lit_deff (void)
 {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 10, "MARTIAN ATTACK");
-	font_render_string_center (&font_fixed6, 64, 22, "IS LIT");
-	dmd_show_low ();
-	task_sleep (TIME_2S+TIME_166MS);
-	deff_exit ();
+	message2 (&font_fixed6, "MARTIAN ATTACK", "IS LIT");
 }
 
 void attack_running_deff (void)

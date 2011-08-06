@@ -55,4 +55,5 @@ GAME_PAGED_OBJS = afm_leff.o misc.o shot.o rules.o deffs.o
 
 GAME_INCLUDES =
 
+IMAGE_MAP += $(M)/afm.ild
 

@@ -1,0 +1,5 @@
+
+IMG_UFO: !machine/afm/images/ufo.pgm
+IMG_EIFFEL: !machine/afm/images/eiffel.pgm
+IMG_WORLDMAP: !machine/afm/images/worldmap.pgm
+IMG_ROCKET: !machine/afm/images/rocket.pgm

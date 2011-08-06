@@ -108,6 +108,10 @@ void pf_mult_shot_reset (enum shot_id id)
 
 void pf_mode_exit (void)
 {
+	U8 n;
+	for (n=0; n < S_COUNT; n++)
+		if (pf_mult_count[n] == 3)
+			pf_mult_shot_reset (n);
 }
 
 void pf_mult_shot (enum shot_id id)
@@ -123,9 +127,11 @@ void pf_mult_shot (enum shot_id id)
 	}
 }
 
+extern void mb_add_ball (void);
+
 CALLSET_ENTRY (pf_mult, left_loop_shot) { pf_mult_shot (S_LEFT_LOOP); }
 CALLSET_ENTRY (pf_mult, left_ramp_shot) { pf_mult_shot (S_LEFT_RAMP); }
-CALLSET_ENTRY (pf_mult, center_ramp_shot) { pf_mult_shot (S_CENTER_RAMP); }
+CALLSET_ENTRY (pf_mult, center_ramp_shot) { pf_mult_shot (S_CENTER_RAMP); mb_add_ball (); }
 CALLSET_ENTRY (pf_mult, right_ramp_shot) { pf_mult_shot (S_RIGHT_RAMP); }
 CALLSET_ENTRY (pf_mult, right_loop_shot) { pf_mult_shot (S_RIGHT_LOOP); }
 
@@ -142,8 +148,11 @@ CALLSET_ENTRY (pf_mult, start_player)
 
 CALLSET_ENTRY (pf_mult, ball_count_change)
 {
-	ball_count_multiplier = live_balls;
-	pf_mult_update ();
+	if (live_balls > 1)
+	{
+		ball_count_multiplier = live_balls;
+		pf_mult_update ();
+	}
 }
 
 /* Add Time */
@@ -206,6 +215,7 @@ void lower_lane_score (U8 id)
 	if (lamplist_test_all (LAMPLIST_BOTTOM_LANES, lamp_test))
 	{
 		lamplist_apply (LAMPLIST_BOTTOM_LANES, lamp_off);
+		deff_start (DEFF_LUCK_LIT);
 		luck_count_lit++;
 	}
 }
@@ -266,6 +276,15 @@ void mb_super_reset (void)
 	mb_targets_left = mb_target_level;
 }
 
+void mb_target_award (void)
+{
+	if (mb_targets_left > 0)
+	{
+		mb_targets_left--;
+		score (SC_50K);
+	}
+}
+
 void mb_super_award (void)
 {
 	score_long (mb_super_value);
@@ -287,18 +306,10 @@ CALLSET_ENTRY (mb, sw_motor_bank_1, sw_motor_bank_2, sw_motor_bank_3)
 	}
 }
 
-CALLSET_ENTRY (mb, sw_left_saucer_target, sw_right_saucer_target)
+CALLSET_ENTRY (mb, sw_left_saucer_target, sw_right_saucer_target, drop_target_down)
 {
 	if (mb_running_p ())
-	{
-	}
-}
-
-CALLSET_ENTRY (mb, drop_target_shot)
-{
-	if (mb_running_p ())
-	{
-	}
+		mb_target_award ();
 }
 
 CALLSET_ENTRY (mb, dev_left_hole_enter)
@@ -413,6 +424,12 @@ CALLSET_ENTRY (jet, sw_left_button)
 { lamplist_rotate_next (LAMPLIST_TOP_LANES, matrix_lookup (LMX_DEFAULT)); }
 CALLSET_ENTRY (jet, sw_right_button)
 { lamplist_rotate_previous (LAMPLIST_TOP_LANES, matrix_lookup (LMX_DEFAULT)); }
+
+CALLSET_ENTRY (jet, sw_left_jet, sw_bottom_jet, sw_right_jet)
+{
+	score_long (jet_value);
+}
+
 CALLSET_ENTRY (jet, start_player)
 {
 	jet_count_goal = 50;
@@ -445,5 +462,68 @@ CALLSET_ENTRY (motor_bank_rule, device_update)
 		motor_bank_move_down ();
 	else
 		motor_bank_move_up ();
+}
+
+
+/* Timed game rules */
+
+__local__ U8 game_timer;
+__local__ U8 timed_game_locks;
+task_ticks_t game_delay;
+
+void timed_game_update (void)
+{
+	if (game_delay)
+		game_delay -= TIME_200MS;
+}
+
+bool timed_game_pause_p (void)
+{
+	if (game_delay)
+		return TRUE;
+	return system_timer_pause ();
+}
+
+void timed_game_delay (task_ticks_t ticks)
+{
+	game_delay += ticks;
+	if (game_delay >= TIME_3S)
+		game_delay = TIME_3S;
+}
+
+void new_timed_game_extend (U8 secs)
+{
+}
+
+void timed_game_lock (U8 reason)
+{
+	timed_game_locks |= reason;
+}
+
+void timed_game_unlock (U8 reason)
+{
+	timed_game_locks &= ~reason;
+}
+
+struct timed_mode_ops timed_game_mode = {
+	DEFAULT_MODE,
+	.gid = GID_TIMED_GAME_MODE,
+	.update = timed_game_update,
+	.pause = timed_game_pause_p,
+	.timer = &game_timer,
+	.init_timer = 60,
+	.grace_timer = 4,
+};
+
+CALLSET_ENTRY (timed_game, start_player)
+{
+}
+
+CALLSET_ENTRY (timed_game, start_ball, valid_playfield)
+{
+}
+
+CALLSET_ENTRY (timed_game, end_ball)
+{
 }
 
