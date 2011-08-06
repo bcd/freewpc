@@ -157,6 +157,7 @@ void coin_door_closed (void)
 
 	if (in_live_game && system_config.coin_door_ball_save)
 	{
+#ifdef DEVNO_TROUGH
 		dbprintf ("resetting to %d balls\n", live_balls_before_door_open);
 		if (live_balls_before_door_open != live_balls)
 		{
@@ -165,6 +166,7 @@ void coin_door_closed (void)
 		deff_start (DEFF_BALL_SAVE);
 #endif
 		}
+#endif
 		ball_search_monitor_start ();
 		live_balls_before_door_open = 0;
 	}
