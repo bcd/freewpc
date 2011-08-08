@@ -76,6 +76,9 @@ struct adjustment_value pricing_mode_value = { 0, NUM_PRICING_MODES-1, 1, pricin
 struct adjustment_value coin_door_type_value = { 0, NUM_COIN_DOOR_TYPES-1, 1, coin_door_render };
 struct adjustment_value volume_value = { MIN_VOLUME, MAX_VOLUME, 1, decimal_render };
 struct adjustment_value payment_method_value = { 0, MAX_PAY_METHODS-1, 1, payment_method_render };
+struct adjustment_value easy_or_hard_value = { EASY, HARD, 2, difficulty_render };
+struct adjustment_value easy_to_hard_value = { EASY, HARD, 1, difficulty_render };
+struct adjustment_value ex_easy_to_hard_value = { EXTRA_EASY, EXTRA_HARD, 1, difficulty_render };
 
 #ifndef MACHINE_REPLAY_SCORE_CHOICES
 #define MACHINE_REPLAY_SCORE_CHOICES 250

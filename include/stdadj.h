@@ -105,6 +105,13 @@ typedef U8 adjval_t;
 #define PAY_BILL 3
 #define MAX_PAY_METHODS 4
 
+/* Difficulty Settings */
+#define EXTRA_EASY 0
+#define EASY 1
+#define MEDIUM 2
+#define HARD 3
+#define EXTRA_HARD 4
+
 typedef struct
 {
 	adjval_t balls_per_game; /* done */

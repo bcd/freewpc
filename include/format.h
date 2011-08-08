@@ -43,6 +43,7 @@ __test2__ void time_interval_render (U8 val);
 __test2__ void pricing_mode_render (U8 val);
 __test2__ void coin_door_render (U8 val);
 __test2__ void payment_method_render (U8 val);
+__test2__ void difficulty_render (U8 val);
 
 __test2__ void integer_audit (audit_t val) ;
 __test2__ void percentage_of_games_audit (audit_t val);

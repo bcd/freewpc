@@ -245,6 +245,20 @@ void payment_method_render (U8 val)
 }
 
 
+void difficulty_render (U8 val)
+{
+	switch (val)
+	{
+		case EXTRA_EASY: sprintf ("EX. EASY"); break;
+		case EASY: sprintf ("EASY"); break;
+		case MEDIUM: sprintf ("MEDIUM"); break;
+		case HARD: sprintf ("HARD"); break;
+		case EXTRA_HARD: sprintf ("EX. HARD"); break;
+		default: break;
+	}
+}
+
+
 void percentage_of_games_audit (audit_t val)
 {
 	/* Avoid divide-by-zero error */
