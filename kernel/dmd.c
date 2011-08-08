@@ -320,11 +320,6 @@ void dmd_show_high (void)
 /** Flip the mapping between low and high pages. */
 void dmd_flip_low_high (void)
 {
-	/* Note: tmp is made volatile here on purpose.
-	 * Without it, the compiler might optimize and try
-	 * to read from the hardware register, which doesn't
-	 * work.
-	 */
 	register dmd_pagenum_t tmp __areg__;
 
 	tmp = pinio_dmd_window_get (PINIO_DMD_WINDOW_0);
