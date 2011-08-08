@@ -106,7 +106,7 @@ U8 task_max_count;
 
 /** A count that represents accumulated idle time.
  * Whenever there are no tasks to be scheduled, this counter
- * is incremented.
+ * is incremented.  Each tick represents about 32 CPU cycles.
  */
 U16 idle_time;
 
@@ -136,21 +136,19 @@ __noreturn__ void task_restore (task_t *tp);
 /**
  * Take a snapshot of the number of idle cycles.
  *
- * This function MUST be done in interrupt context to be effective.
+ * This function MUST be done in interrupt context to be effective.  It runs
+ * once per second.
  */
 void idle_profile_rtt (void)
 {
 	/* Divide the idle tick count by 256 to smooth out the
 	readings, ignore small fluctuations.
-		Each of these "idle chunks" is now roughly 23x256 = 5888 CPU cycles, or
-	about 3ms.
-		If the system is completely busy, the value will be 0.
-		If the system were completely idle (impossible though), it would be
-	333 (at 3ms each, that would fill the entire second).  We store the
-	chunk count in 8-bits, so in practice this can only reach 255
-	(77.7% idle)
-		So, in a 1 second period, idle chunks divided by 3.3 is an
-	approximation to the percentage of idle time.
+		Each of these "idle chunks" is now roughly 32x256 = 8192 CPU cycles, or
+	about 4ms.
+		If the system is completely busy, the value will be 0.  If the system were
+	completely idle (impossible though), it would be 250.  As it turns out,
+	the scaled value cannot overflow so 8-bits is sufficient.
+		Divide idle_chunks by 2.5 for the percentage of CPU time that is free.
 	*/
 	idle_chunks = idle_time >> 8UL;
 	idle_time = 0;
@@ -167,11 +165,11 @@ CALLSET_ENTRY (idle_profile, idle_every_100ms)
 #ifdef IDLE_PROFILE
 	/* Note that idle_chunks is unlikely to ever be 0xFF (a very idle
 	system).  So we use that value to mark that we have printed the
-	last computed value.  This function runs much more frequently than
-	chunks is computed, but only prints once per computation. */
-	if (idle_chunks != 0xFF)
+	last computed value.  This function runs more frequently than
+	chunks is computed, but only prints once per new value (every second). */
+	if (unlikely (idle_chunks != 0xFF))
 	{
-		dbprintf ("I: 0x%02X\n", idle_chunks);
+		dbprintf ("I:%02X\n", idle_chunks);
 		idle_chunks = 0xFF;
 	}
 #endif
