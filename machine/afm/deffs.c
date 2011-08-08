@@ -29,14 +29,14 @@ void message_end (void)
 	deff_exit ();
 }
 
-void message1 (font_t *f, const char *line)
+void message1 (const font_t *f, const char *line)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (f, 64, 16, line);
 	message_end ();
 }
 
-void message2 (font_t *f, const char *line1, const char *line2)
+void message2 (const font_t *f, const char *line1, const char *line2)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (f, 64, 10, line1);
