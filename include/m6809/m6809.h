@@ -118,6 +118,13 @@ extern inline void m6809_firq_restore_regs (void)
 	asm __volatile__ ("puls\td,x");
 }
 
+extern inline U16 __bswap16 (U16 val)
+{
+	U16 res;
+	asm ("exg\ta,b" : "=d"(res) : "d"(val));
+	return res;
+}
+
 extern inline void __blockclear16 (void *s1, U16 n)
 {
 	register U16 *_s1 = (U16 *)s1;

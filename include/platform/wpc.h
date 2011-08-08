@@ -267,6 +267,21 @@ extern inline U8 pinio_dmd_window_get (U8 window)
 
 
 /**
+ * Flip the mapping of windows 0 and 1.
+ * This is an optimized swap function using 6809 assembly.
+ */
+#ifdef __m6809__
+#define HAVE_PINIO_DMD_WINDOW_FLIP
+extern inline void pinio_dmd_window_flip (void)
+{
+	dmd_mapped_pages.pair = __bswap16 (dmd_mapped_pages.pair);
+	asm ("sta\t%0" :: "m"(*(U8 *)WPC_DMD_LOW_PAGE));
+	asm ("stb\t%0" :: "m"(*(U8 *)WPC_DMD_HIGH_PAGE));
+}
+#endif
+
+
+/**
  * Get a pointer to the first byte of the named display window.
  */
 #ifdef CONFIG_NATIVE

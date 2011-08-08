@@ -320,14 +320,15 @@ void dmd_show_high (void)
 /** Flip the mapping between low and high pages. */
 void dmd_flip_low_high (void)
 {
+#ifdef HAVE_PINIO_DMD_WINDOW_FLIP
+	pinio_dmd_window_flip ();
+#else
 	register dmd_pagenum_t tmp __areg__;
-
 	tmp = pinio_dmd_window_get (PINIO_DMD_WINDOW_0);
 	pinio_dmd_window_set (PINIO_DMD_WINDOW_0,
 		pinio_dmd_window_get (PINIO_DMD_WINDOW_1));
 	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, tmp);
-	/* TODO - for the 6809, this can be optimized by using
-	 * the EXG instruction to swap the values. */
+#endif
 }
 
 
