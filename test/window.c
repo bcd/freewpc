@@ -3591,30 +3591,21 @@ struct menu dipsw_test_item = {
 
 /*************** Empty Balls Test ********************/
 
-void empty_balls_test_init (void)
+static void empty_balls_request (void)
 {
-	if (counted_balls != 0)
+	device_t *dev;
+	for (dev = device_entry (0); dev < device_entry (NUM_DEVICES); dev++)
 	{
-		device_t *dev;
-		for (dev = device_entry (0); dev < device_entry (NUM_DEVICES); dev++)
-		{
-			device_request_empty (dev);
-			task_sleep (TIME_500MS);
-		}
+		device_request_kick (dev);
+		task_sleep (TIME_200MS);
 	}
 	callset_invoke (empty_balls_test);
 }
 
-void empty_balls_test_enter (void)
-{
-	window_stop_thread ();
-	empty_balls_test_init ();
-	window_start_thread ();
-}
 
 void empty_balls_test_draw (void)
 {
-	window_title ("EMPTYING BALLS");
+	window_title ("EMPTY BALLS TEST");
 	dmd_show_low ();
 }
 
@@ -3622,10 +3613,8 @@ void empty_balls_test_thread (void)
 {
 	for (;;)
 	{
+		empty_balls_request ();
 		task_sleep_sec (2);
-		dmd_alloc_low_clean ();
-		window_title ("EMPTY BALLS DONE");
-		dmd_show_low ();
 
 		/* If the machine has an autoplunger, activate it as balls
 			pile up in the shooter lane. */
@@ -3633,6 +3622,7 @@ void empty_balls_test_thread (void)
 		if (switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 		{
 			sol_request_async (MACHINE_LAUNCH_SOLENOID);
+			task_sleep_sec (1);
 		}
 #endif
 	}
@@ -3640,11 +3630,11 @@ void empty_balls_test_thread (void)
 
 struct window_ops empty_balls_test_window = {
 	INHERIT_FROM_BROWSER,
-	.init = empty_balls_test_init,
-	.enter = empty_balls_test_enter,
+	.init = null_function,
 	.draw = empty_balls_test_draw,
 	.up = null_function,
 	.down = null_function,
+	.enter = null_function,
 	.thread = empty_balls_test_thread,
 };
 
