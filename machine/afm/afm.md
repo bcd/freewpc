@@ -213,6 +213,20 @@ Right Hole: Right Popper, Right Popper
 #############################################################
 
 [adjustments]
+Game Timer: integer, 90
+Martian Time: integer, 30
+Multiplier Time: integer, 20
+Attack Time: integer, 20
+Jet Start: integer, 30
+Jet Increase: integer, 10
+Martian Hard: yes_no, NO
+Multiplier Pause: integer, 3
+Martian Pause: integer, 3
+Multiball Pause: integer, 3
+Free Luck: yes_no, YES
+Luck Time: integer, 15
+Max. Balls: integer, 4
+Saucer Carryover: yes_no, YES
 
 [audits]
 

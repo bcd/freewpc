@@ -527,3 +527,7 @@ CALLSET_ENTRY (timed_game, end_ball)
 {
 }
 
+CALLSET_ENTRY (timed_game, lamp_update)
+{
+}
+
