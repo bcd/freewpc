@@ -90,7 +90,9 @@ void fatal (errcode_t error_code)
 	if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
 		wpc_write_flippers (0);
 #endif
+#ifdef CONFIG_TICKET
 	pinio_write_ticket (0);
+#endif
 	pinio_write_solenoid_set (0, 0);
 	pinio_write_solenoid_set (1, 0);
 	pinio_write_solenoid_set (2, 0);
