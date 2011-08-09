@@ -154,32 +154,38 @@ void mb_running_deff (void)
 {
 	extern U8 mb_targets_left;
 
+target_change:
 	dmd_map_overlay ();
 	frame_draw (IMG_UFO);
-	font_render_string_center (&font_mono5, 96, 5, "MULTIBALL");
+	font_render_string_center (&font_mono5, 92, 5, "MULTIBALL");
 	dmd_rough_copy (64, 2, 64, 6);
 	if (mb_targets_left == 0)
 		sprintf ("SUPER JACKPOT LIT");
+	else if (mb_targets_left == 1)
+		sprintf ("%d TARGET LEFT", mb_targets_left);
 	else
 		sprintf ("%d TARGETS LEFT", mb_targets_left);
-	font_render_string_center (&font_var5, 88, 27, sprintf_buffer);
-outer_loop:
+	font_render_string_center (&font_var5, 92, 27, sprintf_buffer);
+
+	U8 t = mb_targets_left;
+score_change:
 	for (;;)
 	{
 		dmd_map_overlay ();
 		sprintf_current_score ();
 		dmd_rough_erase (64, 11, 64, 10);
-		font_render_string_center (&font_mono9, 96, 16, sprintf_buffer);
+		font_render_string_center (&font_mono9, 92, 16, sprintf_buffer);
 		dmd_rough_copy (64, 11, 64, 10);
 
 		for (;;)
 		{
+			score_update_start ();
 			dmd_map_overlay ();
 			dmd_dup_mapped ();
 			dmd_show2 ();
 			task_sleep (TIME_200MS);
 			if (score_update_required ())
-				goto outer_loop;
+				goto score_change;
 
 			dmd_map_overlay ();
 			dmd_dup_mapped ();
@@ -190,7 +196,7 @@ outer_loop:
 			dmd_show2 ();
 			task_sleep (TIME_200MS);
 			if (score_update_required ())
-				goto outer_loop;
+				goto score_change;
 		}
 	}
 }

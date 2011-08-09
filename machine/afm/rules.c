@@ -20,6 +20,9 @@
 
 #include <freewpc.h>
 #include <timedmode.h>
+#include <motor_bank.h>
+#include <drop_target.h>
+#include <divertor.h>
 
 /* Shot table */
 
@@ -272,7 +275,7 @@ bool mb_running_p (void)
 
 void mb_super_reset (void)
 {
-	mb_target_level = 5;
+	mb_target_level = 3;
 	mb_targets_left = mb_target_level;
 }
 
@@ -281,13 +284,22 @@ void mb_target_award (void)
 	if (mb_targets_left > 0)
 	{
 		mb_targets_left--;
+		score_update_request ();
 		score (SC_50K);
+	}
+	else
+	{
+		score (SC_10K);
 	}
 }
 
 void mb_super_award (void)
 {
 	score_long (mb_super_value);
+	drop_target_reset ();
+	if (mb_target_level < 15)
+		mb_target_level += 3;
+	mb_targets_left = mb_target_level;
 }
 
 void mb_add_ball (void)
@@ -407,7 +419,7 @@ score_t jet_value;
 void jet_level_up (void)
 {
 	if (jet_count_goal < 100)
-		jet_count_goal += 25;
+		jet_count_goal += 10;
 	jet_count = 0;
 	attack_light ();
 }
@@ -432,16 +444,12 @@ CALLSET_ENTRY (jet, sw_left_jet, sw_bottom_jet, sw_right_jet)
 
 CALLSET_ENTRY (jet, start_player)
 {
-	jet_count_goal = 50;
+	jet_count_goal = 30;
 	jet_count = 0;
 	score_copy (jet_value, score_table[SC_5K]);
 }
 
 /* Device update rules */
-
-#include <motor_bank.h>
-#include <drop_target.h>
-#include <divertor.h>
 
 CALLSET_ENTRY (divertor_rule, device_update)
 {
