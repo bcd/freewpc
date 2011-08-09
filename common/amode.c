@@ -217,6 +217,12 @@ __attribute__((noinline)) void amode_page_change (S8 delta)
 		/* All done */
 		break;
 	}
+
+	/* Reset any DMD transition in progress */
+#if (MACHINE_DMD == 1)
+	dmd_in_transition = FALSE;
+#endif
+
 	amode_page_changed = 1;
 }
 
