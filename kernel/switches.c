@@ -521,14 +521,11 @@ void switch_transitioned (const U8 sw)
 	bit_off (sw_unstable, sw);
 	enable_irq ();
 
-	/* See if the transition requires scheduling.  It does if:
-	 a) the switch is bidirectional, or
-	 b) the switch is an opto and it is now open, or
-	 c) the switch is not an opto and it is now closed.
-	*/
-	if (bit_test (mach_edge_switches, sw)
-		|| (!bit_test (sw_logical, sw) && bit_test (mach_opto_mask, sw))
-		|| (bit_test (sw_logical, sw) && !bit_test (mach_opto_mask, sw)))
+	/* See if the transition requires scheduling.  It does if the
+	   switch is declared 'edge' (it schedules when becoming active
+		or inactive), otherwise only becoming active.  Because most
+		switches are not edge, check for the active state first. */
+	if (switch_poll_logical (sw) || bit_test (mach_edge_switches, sw))
 	{
 #ifdef CONFIG_BPT
 		/* One extra condition : do not schedule any switches when the
