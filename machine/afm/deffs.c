@@ -106,7 +106,7 @@ void martian_spell (bool on)
 		{
 			c[0] = *s;
 			c[1] = '\0';
-			font_render_string_center (&font_times8, x, 11, c);
+			font_render_string_center (&font_fixed10, x, 11, c);
 		}
 		x += 16;
 		s++;
