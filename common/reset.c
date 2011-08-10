@@ -88,6 +88,7 @@ void factory_reset_if_required (void)
 {
 	if (!callset_invoke_boolean (init_ok))
 	{
+		deff_stop (DEFF_SYSTEM_RESET);
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_mono5, 64, 10, "FACTORY SETTINGS");
 		font_render_string_center (&font_mono5, 64, 20, "RESTORED");

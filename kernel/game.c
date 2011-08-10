@@ -739,7 +739,7 @@ CALLSET_ENTRY (game, display_update)
 	{
 		deff_start_bg (DEFF_SCORES, PRI_SCORES);
 	}
-	else
+	else if (sys_init_complete)
 	{
 		deff_start_bg (DEFF_AMODE, PRI_AMODE);
 	}

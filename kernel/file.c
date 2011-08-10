@@ -100,8 +100,10 @@ void file_reset (void)
 {
 	U8 i;
 	struct file_info *fi;
+	pinio_nvram_unlock ();
 	for (i=0, fi = file_info; i < MAX_FILE_INFO; i++, fi++)
 		fi->type = FT_NONE;
+	pinio_nvram_lock ();
 	file_init ();
 }
 

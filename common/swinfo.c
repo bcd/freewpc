@@ -39,6 +39,7 @@ __nvram__ struct software_info
  */
 void swinfo_reset (void)
 {
+	dbprintf ("resetting SW versions\n");
 	software_info.permanent_size = AREA_SIZE(permanent);
 	software_info.nvram_size = AREA_SIZE(nvram);
 	software_info.sys_major = FREEWPC_MAJOR_VERSION;
@@ -73,7 +74,7 @@ CALLSET_BOOL_ENTRY (swinfo, init_ok)
 	else
 	{
 		/* Something changed ... trigger factory reset */
-		dbprintf ("S/W incompatible with previous config");
+		dbprintf ("S/W incompatible with previous config\n");
 		return FALSE;
 	}
 }
