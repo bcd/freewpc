@@ -70,10 +70,6 @@ ifeq ($(CONFIG_DMD),y)
 IMAGE_MAP += $(P)/wpc.ild
 endif
 
-# The math code must be compiled in 16-bit mode, since it interfaces
-# to the system libraries which expect this.
-$(P)/math.o : INT_CFLAGS=-mint16
-
 # The startup code needs to know the number of paged regions in the ROM
 # to checksum.  The pages between BOTTOM_BANK and TOP_BANK are paged in
 # and contribute to the total checksum.  TOP_BANK is fixed but

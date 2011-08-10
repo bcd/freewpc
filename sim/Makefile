@@ -1,7 +1,7 @@
-# This Makefile is used to control a native build, where the code
-# runs on the same machine as the build.  It is slightly different
-# because of toolchain differences, and also simulation files need
-# to be linked in.
+# This Makefile is used to control a simulation build, where the code
+# runs on the same machine as the build.  It assumes that the normal,
+# non-simulation platform makefile has already been included, then it
+# redefines those things which are necessarily different for simulation.
 
 D := sim
 P := platform/wpc
