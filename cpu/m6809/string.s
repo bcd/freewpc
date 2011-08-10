@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Brian Dominy <brian@oddchange.com>
+ * Copyright 2010-2011 Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -183,3 +183,20 @@ __strlen_loop:
 	subd	*m0
 	tfr	d,x
 	rts
+
+	.globl _strcpy
+_strcpy:
+	pshs	u
+	ldu	4,s
+	stx	*m0
+1$:
+	ldd	,u++
+	sta	,x+
+	tsta
+	beq	2$
+	stb	,x+
+	tstb
+	bne	1$
+2$:
+	ldx	*m0
+	puls	u,pc
