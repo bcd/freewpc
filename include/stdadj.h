@@ -27,90 +27,110 @@ typedef U8 adjval_t;
 #define MAX_COIN_SLOTS 4
 
 /* Yes/No value defines */
-#define YES 1
-#define NO 0
+enum { NO, YES };
 
 /* Off/On value defines */
-#define OFF 0
-#define ON 1
+enum { OFF, ON };
 
 /* Date/Time styles */
-#define CLOCK_STYLE_AMPM 0
-#define CLOCK_STYLE_24HOUR 1
+enum {
+	CLOCK_STYLE_AMPM,
+	CLOCK_STYLE_24HOUR
+};
 
-#define DATE_STYLE_US 0
-#define DATE_STYLE_EURO 1
+enum {
+	DATE_STYLE_US,
+	DATE_STYLE_EURO
+};
 
 /* Game restart setting */
-#define GAME_RESTART_NEVER 0
-#define GAME_RESTART_SLOW 1
-#define GAME_RESTART_ALWAYS 2
+enum {
+	GAME_RESTART_NEVER,
+	GAME_RESTART_SLOW,
+	GAME_RESTART_ALWAYS
+};
 
 /* Free awards */
-#define FREE_AWARD_OFF 0
-#define FREE_AWARD_CREDIT 1
-#define FREE_AWARD_EB 2
-#define FREE_AWARD_TICKET 3
-#define FREE_AWARD_POINTS 4
+enum {
+	FREE_AWARD_OFF,
+	FREE_AWARD_CREDIT,
+	FREE_AWARD_EB,
+	FREE_AWARD_TICKET,
+	FREE_AWARD_POINTS
+};
 
 /* Replay systems */
-#define REPLAY_FIXED 0
-#define REPLAY_AUTO 1
+enum {
+	REPLAY_FIXED,
+	REPLAY_AUTO
+};
 
 /* Currency types */
-#define CUR_DOLLAR 0
-#define CUR_FRANC 1
-#define CUR_LIRA 2
-#define CUR_PESETA 3
-#define CUR_YEN 4
-#define CUR_DM 5
-#define CUR_GBP 6
-#define CUR_EURO 7
-#define CUR_TOKEN 8
-#define NUM_CURRENCY_TYPES 9
+enum {
+	CUR_DOLLAR,
+	CUR_FRANC,
+	CUR_LIRA,
+	CUR_PESETA,
+	CUR_YEN,
+	CUR_DM,
+	CUR_GBP,
+	CUR_EURO,
+	CUR_TOKEN,
+	NUM_CURRENCY_TYPES
+};
 
 /* Pricing modes */
-#define PRICE_CUSTOM 0
-#define PRICE_USA_25CENT 1
-#define PRICE_USA_50CENT 2
-#define PRICE_USA_50_75_100 3
-#define PRICE_USA_3_FOR_1 4
-#define PRICE_USA_5_FOR_2 5
-#define PRICE_USA_75CENT 6
-#define PRICE_USA_DOLLAR 7
-#define PRICE_UK 8
-#define PRICE_EURO 9
-#define NUM_PRICING_MODES 10
+enum {
+	PRICE_CUSTOM,
+	PRICE_USA_25CENT,
+	PRICE_USA_50CENT,
+	PRICE_USA_50_75_100,
+	PRICE_USA_3_FOR_1,
+	PRICE_USA_5_FOR_2,
+	PRICE_USA_75CENT,
+	PRICE_USA_DOLLAR,
+	PRICE_UK,
+	PRICE_EURO,
+	NUM_PRICING_MODES,
+};
 
 /* Coin door types */
-#define COIN_DOOR_CUSTOM 0
-#define COIN_DOOR_25_25_25 1
-#define COIN_DOOR_25_100_25 2
-#define COIN_DOOR_UK 3
-#define COIN_DOOR_EURO 4
-#define NUM_COIN_DOOR_TYPES 5
+enum {
+	COIN_DOOR_CUSTOM,
+	COIN_DOOR_25_25_25,
+	COIN_DOOR_25_100_25,
+	COIN_DOOR_UK,
+	COIN_DOOR_EURO,
+	NUM_COIN_DOOR_TYPES
+};
 
 /* Languages */
-#define LANG_US_ENGLISH 0
-#define LANG_GERMAN 1
-#define LANG_FRENCH 2
-#define LANG_SPANISH 3
-#define LANG_UK_ENGLISH 4
-#define NUM_LANGUAGES 5
+enum {
+	LANG_US_ENGLISH,
+	LANG_GERMAN,
+	LANG_FRENCH,
+	LANG_SPANISH,
+	LANG_UK_ENGLISH,
+	NUM_LANGUAGES
+};
 
 /* Payment Method */
-#define PAY_COIN 0
-#define PAY_TOKEN 1
-#define PAY_CARD 2
-#define PAY_BILL 3
-#define MAX_PAY_METHODS 4
+enum {
+	PAY_COIN,
+	PAY_TOKEN,
+	PAY_CARD,
+	PAY_BILL,
+	MAX_PAY_METHODS
+};
 
 /* Difficulty Settings */
-#define EXTRA_EASY 0
-#define EASY 1
-#define MEDIUM 2
-#define HARD 3
-#define EXTRA_HARD 4
+enum {
+	EXTRA_EASY,
+	EASY,
+	MEDIUM,
+	HARD,
+	EXTRA_HARD,
+};
 
 typedef struct
 {
