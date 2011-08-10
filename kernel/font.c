@@ -359,11 +359,7 @@ static void font_get_string_area (const char *s)
 	 */
 	if (s != sprintf_buffer)
 	{
-		/* TODO - use a real strcpy() here that is more efficient */
-		char *ram = sprintf_buffer;
-		do {
-			*ram++ = *s;
-		} while (*s++ != '\0');
+		strcpy (sprintf_buffer, s);
 		s = sprintf_buffer;
 	}
 
