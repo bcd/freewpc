@@ -158,17 +158,25 @@ static void score_award (const bcd_t *s)
 }
 
 
-/** Like score_add_byte, but modifies the current player's score */
+/** Like score_add_byte, but modifies the current player's score.
+ * This function is analogous to score_award(). */
 void score_award_compact (U8 offset, bcd_t val)
 {
-	/* TODO - this function does not obey the global multiplier */
+	U8 mult;
+
+	if (in_tilt)
+		return;
 	if (!in_live_game)
 	{
 		nonfatal (ERR_SCORE_NOT_IN_GAME);
 		return;
 	}
 
-	score_add_byte (current_score, offset, val);
+	mult = global_score_multiplier;
+	do {
+		score_add_byte (current_score, offset, val);
+		mult--;
+	} while (mult != 0);
 	score_update_request ();
 	replay_check_current ();
 }
