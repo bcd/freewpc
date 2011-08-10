@@ -47,22 +47,25 @@
 /* A list of score font keys.  Each of these is an index into the
  * table below.  A key identifies a location on the DMD where
  * a score can be placed, and its font size there. */
-#define SCORE_POS_CENTER_LARGE 0
-#define SCORE_POS_UL_SMALL 1
-#define SCORE_POS_UR_SMALL 2
-#define SCORE_POS_LL_SMALL 3
-#define SCORE_POS_LR_SMALL 4
-#define SCORE_POS_UL_LARGE 5
-#define SCORE_POS_LR_LARGE 6
-#define SCORE_POS_LL_LARGE 7
-#define SCORE_POS_UL_TINY 8
-#define SCORE_POS_LR_TINY 9
-#define SCORE_POS_LL_TINY 10
-#define SCORE_POS_UR_TINY 11
-#define SCORE_POS_UL_MED 12
-#define SCORE_POS_LR_MED 13
-#define SCORE_POS_LL_MED 14
-#define SCORE_POS_UR_MED 15
+enum score_font_key
+{
+	SCORE_POS_CENTER_LARGE,
+	SCORE_POS_UL_SMALL,
+	SCORE_POS_UR_SMALL,
+	SCORE_POS_LL_SMALL,
+	SCORE_POS_LR_SMALL,
+	SCORE_POS_UL_LARGE,
+	SCORE_POS_LR_LARGE,
+	SCORE_POS_LL_LARGE,
+	SCORE_POS_UL_TINY,
+	SCORE_POS_LR_TINY,
+	SCORE_POS_LL_TINY,
+	SCORE_POS_UR_TINY,
+	SCORE_POS_UL_MED,
+	SCORE_POS_LR_MED,
+	SCORE_POS_LL_MED,
+	SCORE_POS_UR_MED,
+};
 
 
 /** A lookup table for mapping a 'score font key' into a font and
@@ -124,7 +127,7 @@ const struct score_font_info
  *
  * The third index says which player's score is being drawn.
  */
-const U8 score_font_info_key[MAX_PLAYERS][MAX_PLAYERS+1][MAX_PLAYERS] = {
+const enum score_font_key score_font_info_key[MAX_PLAYERS][MAX_PLAYERS+1][MAX_PLAYERS] = {
 	/* 1 player */  {
 		{SCORE_POS_UL_SMALL},
 		{SCORE_POS_CENTER_LARGE},

@@ -41,12 +41,16 @@ struct wpc_pinmame_clock_data
 
 
 /** The editable fields of the date/time. */
-#define RTC_FIELD_MONTH 0
-#define RTC_FIELD_DAY 1
-#define RTC_FIELD_YEAR 2
-#define RTC_FIELD_HOUR 3
-#define RTC_FIELD_MINUTE 4
-#define NUM_RTC_FIELDS 5
+enum rtc_field
+{
+	RTC_FIELD_MONTH,
+	RTC_FIELD_DAY,
+	RTC_FIELD_YEAR,
+	RTC_FIELD_HOUR,
+	RTC_FIELD_MINUTE,
+	NUM_RTC_FIELDS,
+	RTC_FIELD_INVALID = 0xFF
+};
 
 /** The current date/time */
 __nvram__ struct date current_date;
@@ -59,7 +63,7 @@ static U8 last_minute;
 struct date edit_date;
 
 /** Which field is being edited */
-U8 rtc_edit_field;
+enum rtc_field rtc_edit_field;
 
 /** System timestamps */
 __nvram__ std_timestamps_t system_timestamps;
@@ -270,7 +274,7 @@ CALLSET_ENTRY (rtc, init)
 	will apply those values to its saved date information. */
 	rtc_pinmame_read ();
 
-	rtc_edit_field = 0xFF;
+	rtc_edit_field = RTC_FIELD_INVALID;
 }
 
 
@@ -354,7 +358,7 @@ void rtc_render (struct date *d)
 	rtc_render_time (d);
 	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 #endif
-	if (rtc_edit_field != 0xFF)
+	if (rtc_edit_field != RTC_FIELD_INVALID)
 	{
 		sprintf ("%s", rtc_edit_field_name[rtc_edit_field]);
 		font_render_string_left (&font_var5, 1, 1, sprintf_buffer);
@@ -379,7 +383,7 @@ void rtc_begin_modify (void)
 
 void rtc_end_modify (U8 cancel_flag)
 {
-	rtc_edit_field = 0xFF;
+	rtc_edit_field = RTC_FIELD_INVALID;
 	if (!cancel_flag)
 	{
 		pinio_nvram_unlock ();
