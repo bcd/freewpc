@@ -71,8 +71,9 @@ __fastram__ U8 in_tilt;
  * delivered to the plunger lane. */
 U8 valid_playfield;
 
-/** The number of switch closures before playfield valid */
-U8 pending_valid_count;
+/** The IDs of up to two playfield switches that have activated
+ * at ball start and were marked 'novalid'. */
+switchnum_t novalid_sw[2];
 
 /** The number of players in the current game */
 __permanent__ U8 num_players;
@@ -429,7 +430,7 @@ void start_ball (void)
 	in_tilt = FALSE;
 	valid_playfield = FALSE;
 	music_enable ();
-	pending_valid_count = 0;
+	novalid_sw[0] = novalid_sw[1] = 0;
 
 	/* Since lamp effects from previous balls could have been killed,
 	ensure that no lamps for leffs are allocated, causing incorrect
@@ -527,15 +528,24 @@ void set_valid_playfield (void)
 occurs that does not automatically set valid playfield. */
 void try_validate_playfield (U8 swno)
 {
-	/* TODO : The current logic goes ahead and sets
-	valid playfield after any 3 such closures.  A better
-	implementation would ensure that they are 3 *different*
-	switches, to handle a chatty sling/jet. */
-	pending_valid_count++;
-	if (pending_valid_count == 3)
-	{
+	/* If this switch has already been seen since ball start,
+	   then ignore it. */
+	if (novalid_sw[0] == swno)
+		return;
+	else if (novalid_sw[1] == swno)
+		return;
+
+	/* If the total number of other switches seen that are 'novalid'
+	   is less than 2, then add this switch to the tracker. */
+	else if (novalid_sw[0] == 0)
+		novalid_sw[0] = swno;
+	else if (novalid_sw[1] == 0)
+		novalid_sw[1] = swno;
+
+	/* Here, this is the third different 'novalid' switch we've
+	   seen, so go ahead and declare valid playfield anyway. */
+	else
 		set_valid_playfield ();
-	}
 }
 
 
