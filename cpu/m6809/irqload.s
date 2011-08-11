@@ -40,21 +40,13 @@ loop_count:: .blkw 1
 		; Divided by 2047, that's about 289.75ms of actual runtime here.
 
 		; Compute load.
-		; end_time - start_time says how many IRQs occurred during
-		; the run.  This should be > 290 for sure.  This indicates
+		; end_time - start_time says how many 16ms ticks occurred during
+		; the run.  At 60 ticks/sec, over 290ms, we would expect to see
+		; at least 17 ticks.
 		; total CPU time.
 		ldd	_sys_time
 		subd	start_time
-		aslb
-		rola
-		aslb
-		rola
-		aslb
-		rola
-		aslb
-		rola
 		std	_sched_test_count
-
-		; IRQ load = (exec_time - 290) / exec_time
+		; IRQ load = (16.66*D - 290) / (16.66*D)
 		rts
 
