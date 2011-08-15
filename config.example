@@ -4,8 +4,13 @@
 # and change anything you don't like.
 #
 
-# If you want to simulate, enable NATIVE.
-#NATIVE := y
+# If you want to simulate, define CONFIG_SIM.  This builds a
+# program you can run on your build system instead of a ROM.
+# You should also choose a UI for how the system will be displayed;
+# we recommended 'curses', but there is also 'console'.
+#CONFIG_SIM := y
+#CONFIG_UI := curses
+#CONFIG_UI := console
 
 # Set the machine you are trying to build.
 # If you are primarily working with a single machine type, it is
@@ -19,6 +24,10 @@
 #MACHINE := tester
 #MACHINE := tzsound
 #MACHINE := tspp
+#MACHINE := afm
+#MACHINE := tom
+#MACHINE := bop
+#MACHINE := corvette
 
 #
 # Set this to the directory in which MAME roms should be installed.
@@ -29,9 +38,18 @@
 #TARGET_ROMPATH := "/cygdrive/c/Progra~1/VPinmame/roms"
 
 #
-# Set to 'y' if you wish to use the FreeWPC console debugger.
+# Set FREEWPC_DEBUGGER if you want to enable printf() statements throughout
+# the code.  This will be written to the serial/parallel port.
 #
-#FREEWPC_DEBUGGER := n
+#FREEWPC_DEBUGGER := y
+
+#
+# Enable CONFIG_BPT if you want to enable breakpoints.  You can press
+# Escape anytime and the non-interrupt driven part of the system will
+# pause, and you can inspect memory addresses.
+#
+#CONFIG_BPT := y
+
 
 #
 # Set if you wish to override the major/minor version numbers
