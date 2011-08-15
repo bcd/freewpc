@@ -12,7 +12,7 @@ include cpu/$(CPU)/Makefile
 # 1. -Wno-format is to not check format strings, because we define those
 # differently than ANSI C does (e.g. look at sprintf()).
 INT_CFLAGS = -mint8
-CFLAGS += $(INT_CFLAGS) -mdirect -DCONFIG_PLATFORM_WPCSOUND -fno-builtin -DCONFIG_PINMAME -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
+CFLAGS += $(INT_CFLAGS) -mdirect -DCONFIG_PLATFORM_WPCSOUND -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
 EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WPCSOUND
 
 # Rules for converting sound files into ROM

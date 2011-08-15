@@ -126,14 +126,6 @@ output to be written to the parallel port, rather than to the
 debug console.  This allows for debugging when using an
 unpatched PinMAME.
 
-@item	CONFIG_PINMAME
-
-Says that this ROM can be run under PinMAME, as well as on
-real hardware.  This is necessary to enable some code which
-is not needed for real machines, but which PinMAME expects.
-
-Currently this is only being used in the real-time clock module.
-
 @item	DEBUG_SWITCH_NUMBER
 
 Causes the switch number to be printed to the debugger every time
