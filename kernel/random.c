@@ -53,7 +53,7 @@ U8 random_entropy;
 __attribute__((noinline)) U8 random (void)
 {
 	register U16 r = random_cong_seed * 33 + 1;
-	random_cong_seed = r;
+	random_cong_seed = r ^ (r >> 1);
 	return (r >> 8);
 }
 
