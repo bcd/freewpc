@@ -1669,68 +1669,29 @@ struct menu dev_trans_test_item = {
 
 void dev_random_test_task (void)
 {
-	U16 i;
-	U8 *rowcount;
-
-	/* Allocate a temporary buffer to store the histogram data */
-	rowcount = malloc (32);
-	if (rowcount == NULL)
-		task_exit ();
-
-	/* Initialize the histogram */
-	for (i=0; i < 32; i++)
-		rowcount[i] = 0;
-
-	/* Unlike normal items, all drawing is done from here, not from
-	the draw function. */
-	dmd_alloc_low_clean ();
-	dmd_show_low ();
-
-	/* Allocate 200 random numbers from 0-31.  Increment a count for
-	the number of times that number was chosen.  As long as the
-	count doesn't exceed the width of the display, grow a horizontal
-	bar for that value. */
-	for (i=0; i < 200; i++)
+	dmd_buffer_t ptr;
+	U16 len;
+	for (;;)
 	{
-		U8 r = random ();
-		r &= 31;
-		if (rowcount[r] < 16)
+		/* Unlike normal items, all drawing is done from here, not from
+		the draw function. */
+		dmd_alloc_low_clean ();
+		ptr = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0);
+		len = DMD_PAGE_SIZE;
+		while (len > 0)
 		{
-#if (MACHINE_DMD == 1)
-			U16 offset = ((U16)r << 4) + rowcount[r];
-			dmd_low_buffer[offset] = 0xFF;
-			rowcount[r]++;
-#endif
+			*ptr++ = random ();
+			len--;
 		}
-		task_sleep (TIME_33MS);
+		dmd_show_low ();
+		task_sleep (TIME_166MS);
 	}
-
-	dmd_invert_page (dmd_low_buffer);
-	task_sleep (TIME_200MS);
-	dmd_invert_page (dmd_low_buffer);
-	font_render_string_right (&font_var5, 127, 1, "PRESS ENTER");
-	font_render_string_right (&font_var5, 127, 7, "TO REPEAT");
-
-	free (rowcount);
-	task_exit ();
 }
 
-void dev_random_test_enter (void)
-{
-	/* Enter while the test is running does nothing; otherwise
-	it restarts the test. */
-	task_create_gid1 (GID_WINDOW_THREAD, dev_random_test_task);
-}
-
-void dev_random_test_init (void)
-{
-	dev_random_test_enter ();
-}
 
 struct window_ops dev_random_test_window = {
 	DEFAULT_WINDOW,
-	.init = dev_random_test_init,
-	.enter = dev_random_test_enter,
+	.thread = dev_random_test_task
 };
 
 struct menu dev_random_test_item = {
