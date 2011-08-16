@@ -1669,12 +1669,13 @@ struct menu dev_trans_test_item = {
 
 void dev_random_test_task (void)
 {
-	dmd_buffer_t ptr;
+	U8 *ptr;
 	U16 len;
 	for (;;)
 	{
 		/* Unlike normal items, all drawing is done from here, not from
 		the draw function. */
+#if (MACHINE_DMD == 1)
 		dmd_alloc_low_clean ();
 		ptr = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0);
 		len = DMD_PAGE_SIZE;
@@ -1684,6 +1685,18 @@ void dev_random_test_task (void)
 			len--;
 		}
 		dmd_show_low ();
+#else
+		extern seg_page_t *seg_writable_page;
+		seg_alloc_clean ();
+		ptr = seg_writable_page;
+		len = 64;
+		while (len > 0)
+		{
+			*ptr++ = random ();
+			len--;
+		}
+		seg_show ();
+#endif
 		task_sleep (TIME_166MS);
 	}
 }
