@@ -105,7 +105,7 @@ static void award_left_loop (void)
 	 * array bounds */
 	bounded_increment (left_loop_level, NUM_LOOP_LEVELS - 1);
 	/* Reset the loop level timer */
-	left_loop_level = LOOP_LEVEL_DELAY;
+	left_loop_timer = LOOP_LEVEL_DELAY;
 	score (loop_score_table[left_loop_level]);
 	award_loop ();
 }
@@ -113,7 +113,7 @@ static void award_left_loop (void)
 static void award_right_loop (void)
 {
 	bounded_increment (right_loop_level, NUM_LOOP_LEVELS - 1);
-	right_loop_level = LOOP_LEVEL_DELAY;
+	right_loop_timer = LOOP_LEVEL_DELAY;
 	score (loop_score_table[right_loop_level]);
 	award_loop ();
 }
