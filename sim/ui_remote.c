@@ -27,7 +27,7 @@
  * program.
  *
  * State changes are built up in memory until a certain amount of elapsed time.
- * Then, messages are generated which encapsulates all of the state change since
+ * Then, messages are generated which encapsulate all of the state changes since
  * the last update.
  *
  * This is similar to the console UI but the output is more machine parseable.
@@ -68,12 +68,16 @@
  */
 struct remote_msg
 {
-	U8 type;
-	U8 seq;
-	U8 len;
-	U8 data[128];
+	U8 type;        /* One of the PSM_ types above */
+	U8 seq;         /* An increasing sequence number for detecting errors */
+	U8 len;         /* The length of the data that follows */
+	U8 data[128];   /* Depends on 'type' */
 };
 
+
+/* The message queue holds a list of all messages to be transmitted on the
+   next update.  These are statically allocated in a ring.  The 'head'
+	and 'tail' are indices into the array. */
 #define MAX_MSGS 256
 
 struct remote_msg remote_msg_queue[MAX_MSGS];
@@ -81,6 +85,9 @@ struct remote_msg remote_msg_queue[MAX_MSGS];
 unsigned int remote_msg_tail = 0;
 unsigned int remote_msg_head = 0;
 
+/* The state of a hardware type is maintained in a single message per
+   update; as the hardware changes, that one message is constantly modified,
+	rather than allocating a new message for every change. */
 struct remote_msg *remote_sol_msg = NULL;
 struct remote_msg *remote_lamp_msg = NULL;
 struct remote_msg *remote_sw_msg = NULL;
@@ -93,10 +100,14 @@ const char *remote_msg_typenames[] = {
 	"String", "Debug", "Sim", "Sol", "Lamp", "Switch", "GI", "Sound", "Ball", "Tick",
 };
 
+
+/* Allocate a new message buffer. */
 struct remote_msg *remote_msg_alloc (U8 type)
 {
 	struct remote_msg *msg = remote_msg_queue + remote_msg_head;
 	remote_msg_head = (remote_msg_head + 1) % MAX_MSGS;
+	/* If we are giving out the last buffer, wait until another one
+	   becomes free before returning. */
 	while (remote_msg_head == remote_msg_tail)
 		task_sleep (1);
 	msg->type = type;
@@ -133,6 +144,8 @@ void remote_msg_modify (struct remote_msg *msg, U8 val)
 }
 
 
+/* Send a remote message.
+   Currently, this just prints it to the display... */
 void remote_msg_send (struct remote_msg *msg)
 {
 	U8 *ptr, *endptr;
@@ -161,16 +174,22 @@ void remote_msg_send (struct remote_msg *msg)
 }
 
 
+/* Called periodically (at the rate of PS_FREQ) to send out all
+   queued remote messages.  This reduces the total number of messages
+	sent for hardware devices which change more frequently than that. */
 void remote_msg_update (void)
 {
 	struct remote_msg *msg;
 
+	/* Always send a PSM_TICK message first; this tells the receiver
+	   that PS_FREQ milliseconds have elapsed. */
 	msg = remote_msg_alloc (PSM_TICK);
 	msg->len = 1;
 	msg->data[0] = 0;
 	total_updates++;
 	unsigned int total = 0;
 
+	/* Drain the queue */
 	while (remote_msg_tail != remote_msg_head)
 	{
 		msg = remote_msg_queue + remote_msg_tail;
@@ -179,6 +198,8 @@ void remote_msg_update (void)
 			remote_msg_send (msg);
 		total += 3 + msg->len;
 	}
+
+	/* Reset all hardware change messages */
 	remote_sol_msg = NULL;
 	remote_lamp_msg = NULL;
 	remote_sw_msg = NULL;
@@ -208,11 +229,9 @@ void ui_console_render_string (const char *buffer)
 
 void ui_write_debug (enum sim_log_class c, const char *buffer)
 {
-	if (c == SLC_DEBUG_PORT)
-		printf ("[PROG] %s", buffer);
-	else
-		printf ("[SIM]  %s", buffer);
-	printf ("\n");
+	struct remote_msg *msg = remote_msg_alloc (c == SLC_DEBUG_PORT ? PSM_DEBUG : PSM_SIM);
+	msg->len = strlen (buffer);
+	strcpy (msg->data, buffer);
 }
 
 void ui_write_solenoid (int solno, int on_flag)
