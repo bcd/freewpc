@@ -1688,7 +1688,7 @@ void dev_random_test_task (void)
 #else
 		extern seg_page_t *seg_writable_page;
 		seg_alloc_clean ();
-		ptr = seg_writable_page;
+		ptr = (U8 *)seg_writable_page;
 		len = 64;
 		while (len > 0)
 		{

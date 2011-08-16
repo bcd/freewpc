@@ -439,6 +439,8 @@ void rtc_modify_field (U8 up_flag)
 				d->minute--;
 			rtc_hw_write ();
 			break;
+		default:
+			break;
 	}
 	rtc_normalize (d);
 }
