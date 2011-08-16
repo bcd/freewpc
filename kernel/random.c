@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -26,31 +26,34 @@
  * This generator does not satisfy the properties required for a really
  * good generator, but is adequate for what pinball machines need.
  *
- * There are 2 independent components to each random number:
- * 1. a linear congruential component, derived from the relation
+ * It is a linear congruential generator, derived from the relation
  * Xn+1 = (A(Xn) + C) mod M, where A=33, C=1, and M=255.  This is
- * fairly easy to do with shifts and adds.
- * 2. a timing component, based on the number of FIRQs asserted
+ * fairly easy to do with shifts and adds.  This produces a sequence that
+ * has a full period, i.e. it won't repeat until all 65536 values have been
+ * produced.  The most variance is in the upper 8-bits, so that is all that
+ * is returned to the caller.
+ *
+ * To add an element of true randomness, we will periodically drain 1
+ * random number from the sequence according to some external, unpredictable
+ * event.  These events do not need to be frequent, but should sufficiently
+ * vary.
  */
 
 
 /** The seed for the linear congruential component of the random numbers. */
 __permanent__ U16 random_cong_seed;
 
+/** A count of true random events */
+U8 random_entropy;
 
 
 /**
  * Return a new random number from 0-255.
  */
-U8
-random (void)
+__attribute__((noinline)) U8 random (void)
 {
-	register U16 r;
-	extern U8 firq_count;
-
-	r = random_cong_seed * 33 + 1;
-	random_cong_seed = r;
-	r ^= firq_count;
+	register U16 r = random_cong_seed * 33 + 1;
+	random_cong_seed = r ^ (r >> 1);
 	return (r >> 8);
 }
 
@@ -66,21 +69,28 @@ random_scaled (U8 N)
 
 
 /**
- * Tweak the random number seed slightly.
+ * Drain entropy from the sequence every second.
+ * The frequency is chosen long because random numbers are not drawn
+ * very often.
  */
-void
-random_reseed (void)
+CALLSET_ENTRY (random, idle_every_second)
 {
-	random_cong_seed++;
+	random_entropy %= 8;
+	while (random_entropy)
+	{
+		(void)random ();
+		random_entropy--;
+	}
 }
 
 
 /**
- * Reseed the random number generator during system idle time.
+ * Assert a random hardware evnt occurred to stir the random
+ * number sequence later.
  */
-CALLSET_ENTRY (random, idle_every_second)
+void random_hw_event (void)
 {
-	random_reseed ();
+	random_entropy++;
 }
 
 
@@ -90,5 +100,6 @@ CALLSET_ENTRY (random, idle_every_second)
 CALLSET_ENTRY (random, init)
 {
 	random_cong_seed = 0x1745;
+	random_entropy = 0;
 }
 
