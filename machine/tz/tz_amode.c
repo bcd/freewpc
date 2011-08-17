@@ -327,39 +327,74 @@ static void show_popups (void)
 	/* We can't get our names on the playfield, but at least we can get our
 	 * ugly mugs on the DMD :-)
 	 */
-	U8 p;
+//	U8 p;
 	/* 33% chance of happening */
-	if (random_scaled (3) != 1)
-		return;
+//	if (random_scaled (3) != 1)
+//		return;
 	/* Scan through scores and do popups if qualified */
-	for (p = 0; p < num_players; p++)
-	{
-		if (score_compare (score_table[SC_20M], scores[p]) == 1
-			&& score_compare (scores[p], score_table[SC_10]) == 1)
-		{
+//	for (p = 0; p < num_players; p++)
+//	{
+//		if (score_compare (score_table[SC_20M], scores[p]) == 1
+//			&& score_compare (scores[p], score_table[SC_10]) == 1)
+//		{
 			show_bcd ();
-			return;
-		}
-	}
+//			return;
+//		}
+//	}
 	
-	for (p = 0; p < num_players; p++)
-	{
-		if (score_compare (scores[p], score_table[SC_500M]) == 1)
-		{
+//	for (p = 0; p < num_players; p++)
+//	{
+//		if (score_compare (scores[p], score_table[SC_500M]) == 1)
+//		{
 			show_sonny_jim ();
-			return;
-		}
-	}
+//			return;
+//		}
+//	}
 
 	//show_hydra();
+}
+
+static void show_ukpp (void)
+{
+	map_and_clean ();
+	font_render_string_center (&font_nayupixel10, 64, 5, "WELCOME TO THE");
+	font_render_string_center (&font_steel, 64, 14, "UK PINBALL");
+	font_render_string_center (&font_steel, 64, 24, "PARTY");
+	show_text_on_stars ();
+	if (amode_show_scores_long)
+		return;
+
+	extern U8 hour;
+	extern U8 day_of_week;
+	if (day_of_week == 6 && hour < 15)
+	{
+		map_and_clean ();
+		font_render_string_center (&font_nayupixel10, 64, 5, "PRESENTATION AND TALK");
+		font_render_string_center (&font_fixed6, 64, 16, "SATURDAY 3PM");
+		font_render_string_center (&font_var5, 64, 27, "SEE POSTERS FOR VENUE");
+		show_text_on_stars ();
+		show_text_on_stars ();
+		if (amode_show_scores_long)
+			return;
+	}
+
+	map_and_clean ();
+	font_render_string_center (&font_nayupixel10, 64, 4, "ANY QUESTIONS");
+	font_render_string_center (&font_fixed6, 64, 15, "CALL EWAN");
+	font_render_string_center (&font_fixed6, 64, 26, "07792 626406");
+	show_text_on_stars ();
+	show_text_on_stars ();
+	dmd_sched_transition (&trans_random_boxfade);
+	if (amode_show_scores_long)
+		return;
 }
 
 CALLSET_ENTRY (tz_amode, amode_page)
 {
 	if (amode_show_scores_long)
 		return;
+	//show_ukpp ();	
 	show_popups ();
-
 	if (random_scaled (4) == 1)
 		show_silverball ("PINBALL", "HAVE YOU GOT THE BALLS?");
 	else
@@ -367,8 +402,8 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	
 	if (amode_show_scores_long)
 		return;
-
-	map_and_clean ();
+	
+		map_and_clean ();
 	font_render_string_center (&font_fireball, 64, 22, "THE ZONE");
 	dmd_text_blur ();
 	font_render_string_center (&font_fireball, 64, 7, "BACK TO");

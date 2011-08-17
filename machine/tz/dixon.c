@@ -66,7 +66,7 @@ static inline void anti_cradle_monitor (U8 switch_number, U8 timeout)
 
 static bool anti_cradle_enabled (void)
 {
-	if (in_live_game && live_balls > 1 
+	if (in_live_game && !single_ball_play
 #ifdef CONFIG_MUTE_AND_PAUSE
 			&& !task_find_gid (GID_MUTE_AND_PAUSE)
 #endif

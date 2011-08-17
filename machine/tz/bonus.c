@@ -747,6 +747,7 @@ void score_to_beat_deff (void)
 		else
 			sprintf ("TO CATCH UP TO P%d", current_hi_player);
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+		sound_send (SND_YOU_CAN_DO_IT);
 	}
 	dmd_show_low ();
 	task_sleep_sec (4);

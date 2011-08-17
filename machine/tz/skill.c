@@ -28,6 +28,8 @@ __local__ U8 skill_min_value;
 /* Store skill_min for deff */
 U8 skill_min_stored;
 
+extern bool sdss_enabled;
+
 extern inline void flash_deff_begin_static (void)
 {
 	dmd_alloc_pair ();
@@ -60,20 +62,27 @@ void skill_shot_ready_deff (void)
 
 	sprintf_current_score ();
 	font_render_string_right (&font_mono5, 127, 2, sprintf_buffer);
+	if (!sdss_enabled)
+	{
+		font_render_string (&font_mono5, 16, 11, "YELLOW");
+		font_render_string (&font_mono5, 16, 17, "ORANGE");
+		font_render_string (&font_mono5, 16, 23, "RED");
 
-	font_render_string (&font_mono5, 16, 11, "YELLOW");
-	font_render_string (&font_mono5, 16, 17, "ORANGE");
-	font_render_string (&font_mono5, 16, 23, "RED");
+		flash_deff_begin_flashing ();
 
-	flash_deff_begin_flashing ();
-
-	sprintf ("%d,000,000", skill_min_value+3);
-	font_render_string_right (&font_mono5, 110, 11, sprintf_buffer);
-	sprintf ("%d,000,000", skill_min_value+1);
-	font_render_string_right (&font_mono5, 110, 17, sprintf_buffer);
-	sprintf ("%d,000,000", skill_min_value);
-	font_render_string_right (&font_mono5, 110, 23, sprintf_buffer);
-
+		sprintf ("%d,000,000", skill_min_value+3);
+		font_render_string_right (&font_mono5, 110, 11, sprintf_buffer);
+		sprintf ("%d,000,000", skill_min_value+1);
+		font_render_string_right (&font_mono5, 110, 17, sprintf_buffer);
+		sprintf ("%d,000,000", skill_min_value);
+		font_render_string_right (&font_mono5, 110, 23, sprintf_buffer);
+	}
+	else
+	{
+		font_render_string_center (&font_quadrit, 64, 26, "SKILL SHOT");
+		flash_deff_begin_flashing ();
+		font_render_string_center (&font_quadrit, 64, 14, "SUPER DUPER");
+	}
 	flash_deff_run ();
 }
 
@@ -166,7 +175,7 @@ static void skill_switch_monitor (void)
 		task_sleep_sec (1);
 	else
 	/* Wait longer so the ball can reach the slot switch */
-		task_sleep_sec (2);
+		task_sleep (TIME_2S + TIME_300MS);
 	award_skill_shot ();
 	task_exit ();
 }
@@ -200,23 +209,28 @@ CALLSET_ENTRY (skill, display_update)
 
 CALLSET_ENTRY (skill, sw_skill_bottom)
 {
+	callset_invoke (sdss_skill_sw);
 	award_skill_switch (1);
 }
 
 CALLSET_ENTRY (skill, sw_rocket_kicker)
 {
+	callset_invoke (sdss_skill_sw);
 	award_skill_switch (1);
 }
 
 CALLSET_ENTRY (skill, sw_skill_center)
 {
+	callset_invoke (sdss_skill_sw);
 	award_skill_switch (2);
 }
 
 
 CALLSET_ENTRY (skill, sw_skill_top)
 {
+	callset_invoke (sdss_skill_sw);
 	device_switch_can_follow (skill_shot, slot, TIME_4S);
+	timer_restart_free (GID_SKILL_TO_SLOT, TIME_4S);
 	award_skill_switch (3);
 }
 

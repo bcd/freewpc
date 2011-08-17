@@ -352,6 +352,7 @@ CALLSET_ENTRY (door, ball_count_change)
 
 void award_door_panel_task (void)
 {
+	ballsave_disable ();
 	unlit_shot_count = 0;
 	/* Stop the door lamps rotating */
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);

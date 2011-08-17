@@ -258,14 +258,14 @@ static void shot_slot_oddchange (void)
 
 CALLSET_ENTRY (slot, dev_slot_enter)
 {
-	if (task_kill_gid (GID_CAMERA_SLOT_PROX_DETECT)
+	if ((task_kill_gid (GID_CAMERA_SLOT_PROX_DETECT)
 		 || task_kill_gid (GID_PIANO_SLOT_PROX_DETECT))
+		&& single_ball_play ())
 	{
 		/* Proximity sensor did not trip ; must be the powerball */
 		pb_detect_event (PF_PB_DETECTED);
 		pb_announce ();
 	}
-
 	if (!in_live_game)
 		return;
 	else if (task_find_or_kill_gid (GID_DEADEND_TO_SLOT)
@@ -277,14 +277,14 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		/* piano was recently hit, so ignore slot */
 		/* camera was recently hit, so ignore slot */
 	}
-	else if (event_did_follow (skill_shot, slot)
+	else if (task_kill_gid (GID_SDSS_APPROACHING)) 
+			callset_invoke (sdss_ready);
+	else if (task_find_or_kill_gid (GID_SKILL_TO_SLOT)
 		|| skill_shot_enabled
 		|| global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 	{
 		/* TODO, this may be buggy during sssmb */
 		/* skill shot has been missed or ball landed in plunger lane*/
-		if (timer_kill_gid (GID_SDSS_APPROACHING)) 
-			callset_invoke (sdss_ready);
 		callset_invoke (skill_missed);
 	}
 	else if (timed_mode_running_p (&sslot_mode))

@@ -93,14 +93,16 @@ void sssmb_jackpot_lit_deff (void)
 	dmd_show_low ();
 	sound_send (SND_SPIRAL_EB_LIT);
 	task_sleep_sec (2);
-	for (;;)
+	while (task_find_gid (GID_SSSMB_JACKPOT_READY))
 	{
 		dmd_alloc_low_clean ();
-		sprintf ("JACKPOT IS %d,000,000", sssmb_jackpot_value);
-		font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_nayupixel10, 64, 5, sprintf_buffer);
+		sprintf ("%d,000,000", sssmb_jackpot_value);
+		font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_100MS);
 	}
+	deff_exit ();
 }
 
 void sssmb_jackpot_collected_deff (void)

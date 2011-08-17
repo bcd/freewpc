@@ -42,12 +42,14 @@ static void sdss_enable (void)
 	score_zero (sdss_score);
 	sound_send (SND_LIGHT_SLOT_TIMED);
 	sdss_enabled = TRUE;
+	deff_restart (DEFF_SKILL_SHOT_READY);
 }
 
 static void sdss_disable (void)
 {
 	sdss_enabled = FALSE;
 	task_kill_gid (GID_SDSS_READY);
+	task_kill_gid (GID_SDSS_APPROACHING);
 	task_kill_gid (GID_SDSS_BUTTON_MONITOR);
 	lamp_tristate_off (LM_SUPER_SKILL);
 }
@@ -200,12 +202,20 @@ CALLSET_ENTRY (sdss, sdss_ready)
 	task_create_gid (GID_SDSS_READY, sdss_ready_task);
 }
 
-CALLSET_ENTRY (sdss, sw_skill_top)
+static void sdss_approaching_task (void)
 {
-	if (sdss_enabled && skill_shot_enabled)
+	/* Give the player 4 seconds to get to the slot from the top switch */
+	task_sleep_sec (4);
+	sdss_disable ();
+	task_exit ();
+}
+
+CALLSET_ENTRY (sdss, sdss_skill_sw)
+{
+	if (sdss_enabled)
 	{
-		//sdss_enabled = FALSE;
-		timer_restart_free (GID_SDSS_APPROACHING, TIME_4S);
+		disable_skill_shot ();
+		task_recreate_gid (GID_SDSS_APPROACHING, sdss_approaching_task);
 		task_kill_gid (GID_SDSS_BUTTON_MONITOR);
 	}
 }
@@ -213,8 +223,8 @@ CALLSET_ENTRY (sdss, sw_skill_top)
 /* Ball is rolling back down, kill sdss */
 CALLSET_ENTRY (sdss, sw_skill_center, sw_skill_bottom)
 {
-	if (task_kill_gid (GID_SDSS_APPROACHING))
-		sdss_disable ();
+//	if (task_kill_gid (GID_SDSS_APPROACHING))
+//		sdss_disable ();
 }
 
 static bool sdss_ready_to_enable (void)
@@ -303,7 +313,7 @@ CALLSET_ENTRY (sdss, start_player)
 	sdss_level = 0;
 }
 
-CALLSET_ENTRY (sdss, start_ball)
+CALLSET_ENTRY (sdss, start_ball, end_game)
 {
-	sdss_enabled = FALSE;
+	sdss_disable ();
 }
