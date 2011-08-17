@@ -43,7 +43,7 @@ static const unsigned char initial_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ */-+";
 #endif
 #define MAX_INITIAL_INITIAL (sizeof (initial_chars) - MAX_LETTERS_SHOWN)
 
-#define SELECT_OFFSET 2
+#define SELECT_OFFSET 0
 #define FONT_WIDTH 8
 #define ALPHABET_LEN 32
 
