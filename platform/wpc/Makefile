@@ -9,7 +9,6 @@ P := platform/wpc
 CPU := m6809
 $(eval $(call have,CONFIG_PERIODIC_IRQ))
 CONFIG_TASK := y
-CONFIG_MALLOC := y
 include cpu/$(CPU)/Makefile
 
 # Subplatform support
@@ -23,7 +22,6 @@ $(eval $(call have,CONFIG_GI))
 $(eval $(call have,CONFIG_TRIAC))
 $(eval $(call have,CONFIG_RTC))
 $(eval $(call have,CONFIG_BUYIN))
-CONFIG_ANIMATION ?= $(CONFIG_DMD)
 CONFIG_SCORE_RANK := y
 
 # ROM bank switching

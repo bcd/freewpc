@@ -19,7 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <animation.h>
 #include <highscore.h>
 #include <replay.h>
 
@@ -230,46 +229,4 @@ void plunge_ball_deff (void)
 	deff_swap_low_high (13, TIME_300MS);
 	deff_exit ();
 }
-
-#if (MACHINE_DMD == 1)
-
-void animation_test1 (struct animation_object *obj)
-{
-	U8 *x = &obj->data.u8;
-	sprintf ("TOP %d", *x);
-	font_render_string_center (&font_var5, 64, 4, sprintf_buffer);
-	(*x) ++;
-}
-
-void animation_test2 (struct animation_object *obj)
-{
-	U8 *x = &obj->data.u8;
-	sprintf ("MIDDLE %d", *x);
-	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
-	(*x) += 2;
-}
-
-void animation_test3 (struct animation_object *obj)
-{
-	U8 *x = &obj->data.u8;
-	sprintf ("BOTTOM %d", *x);
-	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
-	(*x) += 3;
-}
-
-void animation_test_deff (void)
-{
-	U8 n;
-	animation_begin (AN_MONO+AN_CLEAN);
-	animation_set_speed (TIME_66MS);
-	animation_add_static (animation_test1);
-	animation_add_static (animation_test2);
-	animation_add_static (animation_test3);
-	for (n=0; n < 100; n++)
-		animation_step ();
-	animation_end ();
-	deff_exit ();
-}
-
-#endif /* MACHINE_DMD */
 
