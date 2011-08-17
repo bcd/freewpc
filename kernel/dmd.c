@@ -292,13 +292,11 @@ void dmd_show_low (void)
 	if (unlikely (dmd_transition))
 	{
 		dmd_high_page = dmd_low_page;
-		dmd_low_page = dmd_get_blank (0);
 		dmd_do_transition ();
 	}
 	else
 	{
-		dmd_dark_page = dmd_get_blank (0);
-		dmd_bright_page = dmd_low_page;
+		dmd_dark_page = dmd_bright_page = dmd_low_page;
 	}
 }
 
@@ -306,13 +304,12 @@ void dmd_show_high (void)
 {
 	if (unlikely (dmd_transition))
 	{
-		dmd_low_page = dmd_get_blank (0);
+		dmd_low_page = dmd_high_page;
 		dmd_do_transition ();
 	}
 	else
 	{
-		dmd_dark_page = dmd_get_blank (0);
-		dmd_bright_page = dmd_high_page;
+		dmd_dark_page = dmd_bright_page = dmd_high_page;
 	}
 }
 
