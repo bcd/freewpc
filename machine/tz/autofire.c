@@ -252,8 +252,8 @@ CALLSET_ENTRY (autofire, start_ball)
 {
 	/* TODO Bug in trough mech, multidrain can cause all other balls to be autofired 
 	 * live_balls > 0 even at the start of a ball*/
-	live_balls = 0;
-	autofire_request_count = 0;
+	//live_balls = 0;
+	//autofire_request_count = 0;
 }
 
 CALLSET_ENTRY (autofire, init)
