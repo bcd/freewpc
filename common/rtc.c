@@ -68,7 +68,7 @@ __nvram__ U8 year;
 __nvram__ U8 month;
 __nvram__ U8 day;
 __nvram__ U8 hour;
-static __nvram__ U8 day_of_week;
+__nvram__ U8 day_of_week;
 
 U8 rtc_edit_field;
 
