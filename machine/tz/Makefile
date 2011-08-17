@@ -89,3 +89,4 @@ GAME4_OBJS = jets.o
 
 IMAGE_MAP += $(M)/tz.ild
 
+CONFIG_EVENT_PAGE := 57
