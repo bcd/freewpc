@@ -165,7 +165,7 @@ target_change:
 		sprintf ("%d TARGET LEFT", mb_targets_left);
 	else
 		sprintf ("%d TARGETS LEFT", mb_targets_left);
-	font_render_string_center (&font_var5, 92, 27, sprintf_buffer);
+	font_render_string_center (&font_var5, 88, 27, sprintf_buffer);
 
 	U8 t = mb_targets_left;
 score_change:
