@@ -69,6 +69,7 @@ static void lamp_timer_effect_task (void)
 			if (tdata->timer >= TIME_3S)
 				task_sleep (TIME_100MS);
 		} while (tdata->timer != 0);
+		leff_off (tdata->lamp);
 		lamp_leff2_free (tdata->lamp);
 	}
 	task_exit ();
@@ -156,7 +157,7 @@ lamp_timer_stop (lampnum_t lamp)
 	{
 		tdata = task_class_data (tp, struct lamp_timer_data);
 		tdata->timer = 0;
-		task_sleep (TIME_500MS);
+	//	task_sleep (TIME_500MS);
 		task_kill_pid (tp);
 	}
 }
