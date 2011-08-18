@@ -60,7 +60,7 @@ CALLSET_ENTRY (tz, start_ball)
 CALLSET_ENTRY (tz, add_player)
 {
 #ifdef CONFIG_TZONE_IP
-	if (num_players >= 1 && num_players <= 4)
+	if (num_players > 1 && num_players <= 4)
 		sound_send (SND_PLAYER_ONE + num_players - 1);
 	else
 		sound_send (SND_YOU_WANT_MORE);
