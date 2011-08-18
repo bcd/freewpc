@@ -33,7 +33,6 @@ U8 timeout;
 
 /* How many balls are in the gumball */
 __fastram__ U8 gumball_count;
-extern sound_code_t music_active;
 
 /* How many times can the player enter the Gumball */
 __local__ U8 gumball_enable_count;

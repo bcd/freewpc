@@ -38,9 +38,6 @@ U8 music_prio;
 /** The best music code requested so far during the current refresh */
 sound_code_t music_requested;
 
-/** The music that is currently playing, or zero if none */
-sound_code_t music_active;
-
 U8 music_flags;
 
 
@@ -66,23 +63,8 @@ void music_update (void)
 {
 	music_prio = 0;
 	music_requested = 0;
-
 	callset_invoke (music_refresh);
-
-	if (music_requested != music_active)
-	{
-		if (music_requested != 0)
-		{
-			dbprintf ("Music now %04lX\n", music_requested);
-			sound_write (music_requested);
-		}
-		else
-		{
-			dbprintf ("Music now off\n");
-			music_off ();
-		}
-		music_active = music_requested;
-	}
+	music_set (music_requested);
 }
 
 
@@ -94,7 +76,6 @@ void music_disable (void)
 	task_kill_gid (GID_MUSIC_REFRESH);
 	music_off ();
 	music_flags |= MUS_DISABLED_BY_CALL;
-	music_active = MUS_OFF;
 }
 
 
@@ -220,7 +201,6 @@ void sound_start1 (U8 channels, sound_code_t code)
 			can be restarted later. */
 			if (chid == MUSIC_CHANNEL && sound_start_duration)
 			{
-				music_active = MUS_OFF;
 				music_flags |= MUS_DISABLED_BY_SOUND;
 				music_off ();
 			}
@@ -364,7 +344,6 @@ CALLSET_ENTRY (sound_effect, start_game)
 CALLSET_ENTRY (sound_effect, init)
 {
 	memset (chtab, 0, sizeof (chtab));
-	music_active = 0;
 	music_flags = 0;
 	music_update ();
 }
