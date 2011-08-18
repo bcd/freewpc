@@ -68,28 +68,22 @@ __common__ void replay_code_to_boost (score_t, U8);
 #endif
 
 
-/* Replay scores can be configured in the adjustments menu, but the
-   adjustments themselves are only 8-bit values.  You must define a method
-	for how to convert an adjustment level to an actual score.
-
-   Level 0 is reserved and means OFF, or no replay value.  Otherwise you
-	can define the mapping however you like, as long as increasing values
-	refer to higher replay scores.
-
-   First, you must define MACHINE_REPLAY_SCORE_CHOICES to the number
-	of valid values.  Then, use one of the following methods to define the
-	mapping.
-
-	The most flexible method is to define a function which converts the
-	value.  Then set MACHINE_REPLAY_CODE_TO_SCORE in the .md file to tell
-	the OS to call it when necessary.
- */
-
-
 /* Provide default parameters to the replay system.
-   Machines should normally override these values.
+   Machines should normally override these values in the md file.
    All values are given in decimal; use U16_TO_BCD2 when you
-   need a BCD-value. */
+   need a BCD-value.
+
+	First, the machine should define either REPLAY_MILLIONS or
+	REPLAY_TEN_THOUSANDS.  These determine the granularity of the
+	replay scores.  Generally you should use REPLAY_MILLIONS, unless
+	you're using 4-byte scores.
+
+	Then define REPLAY_SCORE_MIN, REPLAY_SCORE_STEP, REPLAY_SCORE_MAX,
+	and REPLAY_SCORE_DEFAULT.  These are in millions or 10K units,
+	depending on the above setting.
+
+	Likewise, define REPLAY_BOOST_xxx values to say how the REPLAY BOOST
+	adjustment should work. */
 
 #if !defined(REPLAY_MILLIONS) && !defined(REPLAY_TEN_THOUSANDS)
 #if (BYTES_PER_SCORE >= 5)
@@ -110,7 +104,7 @@ __common__ void replay_code_to_boost (score_t, U8);
 #define REPLAY_BOOST_DEFAULT 5
 #endif
 
-/* Compute other constants based on the configuration.
+/* Compute other constants based on the above configuration.
    The REPLAY_SCORE_TYPE_xxx constants mean the same thing
    as the parameters above, but they express the encoding as
    the adjustment system stores them. */
