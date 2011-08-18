@@ -317,6 +317,14 @@ CALLSET_ENTRY (task_chunk, amode_start, end_ball)
 	{
 		task_tail -= TASK_CHUNK_SIZE;
 		free_count -= TASK_CHUNK_SIZE;
+
+		/* GCC6809 is trying to optimize away this loop
+		and turn it into just two subtractions, but
+		the code generation is pretty bad.  Force a
+		barrier here to prevent that. */
+#ifdef __m6809__
+		barrier ();
+#endif
 	}
 }
 
@@ -396,8 +404,7 @@ task_t *task_expand_stack (task_t *tp)
 
 
 /** Free a task block for a task that no longer exists. */
-static __attribute__((noinline))
-void task_free (task_t *tp)
+static void task_free (task_t *tp)
 {
 #ifdef CONFIG_EXPAND_STACK
 	/* Free the auxiliary stack block first if it exists */
