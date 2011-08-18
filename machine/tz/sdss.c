@@ -20,6 +20,7 @@
 
 /* CALLSET_SECTION (sdss, __machine4__) */
 #include <freewpc.h>
+#include <lamptimer.h>
 
 /* Super Duper Skill Shot rules:
  * Hold down right flipper and launch ball straight into slot
@@ -47,11 +48,12 @@ static void sdss_enable (void)
 
 static void sdss_disable (void)
 {
+	lamp_timer_stop (LM_SUPER_SKILL);
 	sdss_enabled = FALSE;
 	task_kill_gid (GID_SDSS_READY);
 	task_kill_gid (GID_SDSS_APPROACHING);
 	task_kill_gid (GID_SDSS_BUTTON_MONITOR);
-	lamp_tristate_off (LM_SUPER_SKILL);
+	//lamp_tristate_off (LM_SUPER_SKILL);
 }
 
 static void flash_text_deff (U8 flash_count, task_ticks_t flash_delay)
@@ -158,6 +160,7 @@ static void usdss_awarded (void)
 {
 	task_kill_gid (GID_USDSS_APPROACHING);
 	task_kill_gid (GID_USDSS_READY);
+	lamp_timer_stop (LM_RAMP_BATTLE);
 	timer_restart_free (GID_USDSS_AWARDED, TIME_4S);
 	score_sdss ();
 	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
@@ -167,7 +170,11 @@ static void usdss_awarded (void)
 CALLSET_ENTRY (sdss, sw_left_inlane_2)
 {
 	if (task_kill_gid (GID_USDSS_APPROACHING))
+	{
+		struct lamptimer_args args = { .lamp = LM_RAMP_BATTLE, .secs = 5 };
+		lamp_timer_start (&args);
 		timer_restart_free (GID_USDSS_READY, TIME_5S);
+	}
 }
 
 CALLSET_ENTRY (sdss, left_ramp_exit)
@@ -191,7 +198,12 @@ static void sdss_ready_task (void)
 	lamp_tristate_flash (LM_SUPER_SKILL);
 	deff_start (DEFF_SDSS_READY);
 	/* Wait for ten seconds and then disable */
-	task_sleep_sec (10);
+	task_sleep_sec (5);
+	lamp_tristate_off (LM_SUPER_SKILL);
+	struct lamptimer_args args = { .lamp = LM_SUPER_SKILL, .secs = 5 };
+	lamp_timer_start (&args);
+	sound_send (SND_YOU_CAN_DO_IT);
+	task_sleep_sec (5);
 	sdss_disable ();
 	task_exit ();
 }
@@ -199,7 +211,7 @@ static void sdss_ready_task (void)
 /* called from slot.c */
 CALLSET_ENTRY (sdss, sdss_ready)
 {
-	task_create_gid (GID_SDSS_READY, sdss_ready_task);
+	task_recreate_gid (GID_SDSS_READY, sdss_ready_task);
 }
 
 static void sdss_approaching_task (void)
@@ -313,7 +325,7 @@ CALLSET_ENTRY (sdss, start_player)
 	sdss_level = 0;
 }
 
-CALLSET_ENTRY (sdss, start_ball, end_game)
+CALLSET_ENTRY (sdss, serve_ball)
 {
 	sdss_disable ();
 }

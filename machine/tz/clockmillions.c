@@ -21,6 +21,7 @@
 /* CALLSET_SECTION (clockmillions, __machine3__) */
 
 #include <freewpc.h>
+#include <lamptimer.h>
 
 U8 clock_millions_mode_timer;
 U8 clock_mode_hits;
@@ -38,7 +39,7 @@ struct timed_mode_ops clock_millions_mode = {
 	.gid = GID_CLOCK_MILLIONS_MODE_RUNNING,
 	.music = MUS_CLOCK_CHAOS1,
 	.deff_running = DEFF_CLOCK_MILLIONS_MODE,
-	.deff_ending = DEFF_CLOCK_MILLIONS_MODE_TOTAL,
+	//.deff_ending = DEFF_CLOCK_MILLIONS_MODE_TOTAL,
 	.prio = PRI_GAME_MODE1,
 	.init_timer = 20,
 	.timer = &clock_millions_mode_timer,
@@ -210,19 +211,22 @@ void clock_millions_mode_init (void)
 {
 	clock_mode_hits = 0;
 	score_zero (clock_mode_score);
-	lamp_tristate_flash (LM_CLOCK_MILLIONS);
+
+	struct lamptimer_args args = { .lamp = LM_CLOCK_MILLIONS, .secs = 20 };
+	lamp_timer_start (&args);
 	tz_clock_start_forward ();
 }
 
 void clock_millions_mode_expire (void)
 {
+	deff_start (DEFF_CLOCK_MILLIONS_MODE_TOTAL);
 	if (clock_mode_hits <= 2)
 		callset_invoke (start_hurryup);
 }
 
 void clock_millions_mode_exit (void)
 {
-	lamp_tristate_off (LM_CLOCK_MILLIONS);
+	lamp_timer_stop (LM_CLOCK_MILLIONS);
 	tz_clock_reset ();
 }
 

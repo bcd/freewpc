@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <eb.h>
+#include <lamptimer.h>
 
 U8 sslot_mode_timer;
 U8 sslot_award_index;
@@ -144,7 +145,9 @@ void sslot_mode_init (void)
 {
 	sslot_award_index = 0;
 	task_recreate_gid (GID_SSLOT_AWARD_ROTATE, sslot_award_rotate);
-	lamp_tristate_flash (LM_SLOT_MACHINE);
+
+	struct lamptimer_args args = { .lamp = LM_SLOT_MACHINE, .secs = 20 };
+	lamp_timer_start (&args);
 }
 
 void sslot_mode_expire (void)
@@ -154,7 +157,7 @@ void sslot_mode_expire (void)
 
 void sslot_mode_exit (void)
 {	
-	lamp_tristate_off (LM_SLOT_MACHINE);
+	lamp_timer_stop (LM_SLOT_MACHINE);
 	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 }
 

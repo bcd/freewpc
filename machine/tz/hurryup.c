@@ -21,6 +21,7 @@
 /* CALLSET_SECTION (hurryup, __machine3__) */
 
 #include <freewpc.h>
+#include <lamptimer.h>
 
 extern struct timed_mode_ops mball_restart_mode;
 
@@ -138,6 +139,8 @@ void hurryup_mode_init (void)
 	score_zero (hurryup_score);
 	score_copy (hurryup_score, score_table[SC_10M]);
 	task_create_gid (GID_HURRYUP_SCORE_COUNTDOWN, hurryup_countdown_score_task);
+	struct lamptimer_args args = { .lamp = LM_POWER_PAYOFF, .secs = 15 };
+	lamp_timer_start (&args);
 }
 
 void hurryup_mode_expire (void)
@@ -147,7 +150,7 @@ void hurryup_mode_expire (void)
 
 void hurryup_mode_exit (void)
 {
-	lamp_tristate_off (LM_POWER_PAYOFF);
+	lamp_timer_stop (LM_POWER_PAYOFF);
 	task_kill_gid (GID_HURRYUP_SCORE_COUNTDOWN);
 	task_kill_gid (GID_MUSIC_SPEED);
 }
@@ -183,12 +186,6 @@ CALLSET_ENTRY (hurryup, left_ball_grabbed)
 		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 		deff_start (DEFF_SHOOT_POWER_PAYOFF);
 	}
-}
-
-CALLSET_ENTRY (hurryup, lamp_update)
-{
-	if (timed_mode_running_p (&hurryup_mode))
-		lamp_tristate_flash (LM_POWER_PAYOFF);
 }
 
 CALLSET_ENTRY (hurryup, end_ball, mball_start, stop_hurryup, award_door_panel)

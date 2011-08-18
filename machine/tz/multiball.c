@@ -21,6 +21,7 @@
 #include <freewpc.h>
 #include <status.h>
 #include <eb.h>
+#include <lamptimer.h>
 
 __local__ U8 mball_locks_lit;
 __local__ U8 mball_locks_made;
@@ -121,6 +122,7 @@ void mball_restart_mode_init (void)
 
 void mball_restart_mode_exit (void)
 {
+	lamp_timer_stop (LM_LOCK_ARROW);
 }
 
 void mball_restart_deff (void)
@@ -165,7 +167,10 @@ CALLSET_ENTRY (mball_restart, mball_restart_stop)
 inline void mball_restart_start (void)
 {
 	timed_mode_begin (&mball_restart_mode);
+	struct lamptimer_args args = { .lamp = LM_LOCK_ARROW, .secs = 15 };
+	lamp_timer_start (&args);
 }
+
 /* Rules to say whether we can start multiball */
 bool multiball_ready (void)
 {
@@ -370,8 +375,6 @@ bool can_light_lock (void)
 		return TRUE;
 	else if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING) && !global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 		return TRUE;
-	else if (timed_mode_running_p (&mball_restart_mode))
-		return TRUE;
 	else if (flag_test (FLAG_SNAKE_READY) && single_ball_play ())
 		return TRUE;
 	else
@@ -380,12 +383,17 @@ bool can_light_lock (void)
 
 CALLSET_ENTRY (mball, lamp_update)
 {
-	/* Light the lock if it can be collected */
-	if (can_light_lock ())
-		lamp_tristate_flash (LM_LOCK_ARROW);
-	else	
-		lamp_tristate_off (LM_LOCK_ARROW);
 	
+	/* Light the lock if it can be collected */
+	/* Don't light the lock if there's a restart running */
+	if (!timed_mode_running_p (&mball_restart_mode))
+	{
+		if (can_light_lock ())
+			lamp_tristate_flash (LM_LOCK_ARROW);
+		else	
+			lamp_tristate_off (LM_LOCK_ARROW);
+	}
+
 	if (multiball_ready () && single_ball_play ())
 		lamp_tristate_flash (LM_MULTIBALL);
 	

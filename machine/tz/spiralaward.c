@@ -36,6 +36,7 @@
 #include <freewpc.h>
 #include <eb.h>
 #include <status.h>
+#include <lamptimer.h>
 
 U8 spiralaward;
 __local__ U8 spiralawards_collected; 
@@ -132,6 +133,8 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 		 */
 		if (!global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY))
 			magnet_disable_catch (MAG_RIGHT);
+		struct lamptimer_args args = { .lamp = LM_RIGHT_SPIRAL, .secs = 3 };
+		lamp_timer_start (&args);
 		leff_start (LEFF_SPIRALAWARD);
 		/* Only show the hint the first two times */
 		if (spiralawards_collected < 1 && !spiralaward_set_completed);
@@ -143,6 +146,7 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 
 static void award_spiralaward (void)
 {	
+	lamp_timer_stop (LM_RIGHT_SPIRAL);
 	bounded_increment (spiralawards_collected, 6);
 	
 	/* Pick a random award, random_scaled returns N-1 */

@@ -334,12 +334,13 @@ CALLSET_ENTRY (mpf, end_ball)
 
 CALLSET_ENTRY (mpf, lamp_update)
 {
-	if (task_find_gid (GID_USDSS_READY) || task_find_gid (GID_USDSS_APPROACHING))
-		lamp_tristate_flash (LM_RAMP_BATTLE);
-	else if (mpf_ready_p ())
-		lamp_tristate_on (LM_RAMP_BATTLE);
-	else
-		lamp_tristate_off (LM_RAMP_BATTLE);
+	if (!task_find_gid (GID_USDSS_READY) && !task_find_gid (GID_USDSS_APPROACHING))
+	{
+		if (mpf_ready_p ())
+			lamp_tristate_on (LM_RAMP_BATTLE);
+		else
+			lamp_tristate_off (LM_RAMP_BATTLE);
+	}
 }
 
 CALLSET_ENTRY (mpf, door_start_battle_power)

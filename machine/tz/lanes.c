@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <lamptimer.h>
 
 /* CALLSET_SECTION (lanes, __machine3__) */
 
@@ -39,7 +40,7 @@ void rollover_completed_deff (void)
 	else
 	{
 		font_render_string_center (&font_quadrit, 64, 8, "ROLLOVER");
-		font_render_string_center (&font_quadrit, 64, 18, "COMPLETED");
+		font_render_string_center (&font_quadrit, 64, 20, "COMPLETED");
 		sound_send (SND_GLASS_BREAKS);
 	}
 	dmd_show_low ();
@@ -169,6 +170,8 @@ CALLSET_ENTRY (lanes, sw_right_inlane)
 	/* Light Dead end if not lit */
 	lamp_on (LM_DEAD_END);
 	timer_restart_free (GID_TNF_READY, TIME_4S);
+	struct lamptimer_args args = { .lamp = LM_BONUS_X, .secs = 4 };
+	lamp_timer_start (&args);
 	//event_can_follow (right_inlane, left_ramp, TIME_4S);
 }
 

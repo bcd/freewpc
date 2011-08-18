@@ -21,6 +21,7 @@
 #include <freewpc.h>
 #include <eb.h>
 #include <status.h>
+#include <lamptimer.h>
 
 U8 left_ramps;
 extern U8 cameras_lit;
@@ -159,6 +160,7 @@ inline static bool right_inlane_combo_check (void)
 	if (task_kill_gid (GID_TNF_READY))
 	{
 		//event_can_follow (left_ramp_exit, tnf, TIME_4S);
+		lamp_timer_stop (LM_BONUS_X);
 		timer_restart_free (GID_TNF_APPROACHING, TIME_4S);
 		deff_start (DEFF_GET_READY_TO_DOINK);
 		return TRUE;
@@ -193,14 +195,6 @@ static void maybe_ramp_divert (void)
 		/* TODO Shore up logic by event_should_follow (plunger_switch); */
 		ramp_divert ();
 	}
-}
-
-CALLSET_ENTRY (left_ramp, lamp_update)
-{
-	if (timer_find_gid (GID_TNF_READY))
-		lamp_tristate_flash (LM_BONUS_X);
-	else
-		lamp_tristate_off (LM_BONUS_X);
 }
 
 CALLSET_ENTRY (left_ramp, sw_left_ramp_enter)
