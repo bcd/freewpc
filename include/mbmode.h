@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,6 +21,9 @@
 #ifndef _MBMODE_H
 #define _MBMODE_H
 
+/* The state of the multiball mode is one of these values.
+   Each module that implements a mode must declare a variable of
+	this type. */
 enum mb_mode_state
 {
 	MB_INACTIVE,
@@ -28,6 +31,8 @@ enum mb_mode_state
 	MB_IN_GRACE,
 };
 
+
+/* The definition of the mode. */
 struct mb_mode_ops
 {
 	/* The update callback is invoked whenever the state of the
@@ -45,6 +50,7 @@ struct mb_mode_ops
 	enum mb_mode_state *state;
 };
 
+/* The default values for mode fields */
 #define DEFAULT_MBMODE \
 	.update = NULL, \
 	.music = MUS_OFF, \
@@ -62,12 +68,11 @@ struct mb_mode_task_config
 };
 
 U8 mb_mode_running_count (void);
-
 void mb_mode_active_task (void);
-
 void mb_mode_start (struct mb_mode_ops *ops);
 void mb_mode_restart (struct mb_mode_ops *ops);
 void mb_mode_single_ball (struct mb_mode_ops *ops);
+void mb_mode_start_ball (struct mb_mode_ops *ops);
 void mb_mode_end_ball (struct mb_mode_ops *ops);
 void mb_mode_music_refresh (struct mb_mode_ops *ops);
 void mb_mode_display_update (struct mb_mode_ops *ops);

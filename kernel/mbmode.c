@@ -54,8 +54,11 @@ static void mb_mode_update (struct mb_mode_ops *ops, enum mb_mode_state state)
 	}
 }
 
-/*	A task that runs when the multiball mode is active
-   (running, not in grace). */
+/*	The default task that runs when the multiball mode is active
+   (running, not in grace).  It doesn't do anything other than
+	keep the GID in use.  Users can substitute their own task
+	instead if someone needs to happen constantly while it's
+	running (e.g. move a jackpot shot around or adjust shot values). */
 void mb_mode_active_task (void)
 {
 	for (;;)
@@ -85,7 +88,7 @@ void mb_mode_start (struct mb_mode_ops *ops)
 {
 	if (mb_mode_running_p (ops))
 		return;
-	task_create_gid1 (ops->gid_running, mb_mode_active_task);
+	task_create_gid1 (ops->gid_running, ops->active_task);
 	if (ops->deff_starting)
 		deff_start (ops->deff_starting);
 	mb_mode_update (ops, MB_ACTIVE);
@@ -96,7 +99,7 @@ void mb_mode_restart (struct mb_mode_ops *ops)
 {
 	if (!mb_mode_in_grace_p (ops))
 		return;
-	task_create_gid1 (ops->gid_running, mb_mode_active_task);
+	task_create_gid1 (ops->gid_running, ops->active_task);
 	mb_mode_update (ops, MB_ACTIVE);
 }
 
@@ -127,6 +130,15 @@ void mb_mode_single_ball (struct mb_mode_ops *ops)
 
 		mb_mode_update (ops, MB_IN_GRACE);
 	}
+}
+
+/* This function should be called by a mode driver when the
+	'start_ball' event occurs.  It ensures that the mode state
+	is set to INACTIVE, but does not schedule any effects as
+	when it is stopped while it is running. */
+void mb_mode_start_ball (struct mb_mode_ops *ops)
+{
+	*(ops->state) = MB_INACTIVE;
 }
 
 /* This function should be called by a mode driver when the
