@@ -42,7 +42,7 @@ static void mb_mode_update (struct mb_mode_ops *ops, enum mb_mode_state state)
 		case MB_INACTIVE:
 			mb_mode_count--;
 			if (ops->deff_ending)
-				deff_start (ops->deff_ending);
+				deff_queue_add (ops->deff_ending, TIME_10S);
 			break;
 
 		case MB_ACTIVE:
@@ -72,6 +72,7 @@ static void mb_mode_grace_task (void)
 	struct mb_mode_task_config *cfg =
 		task_current_class_data (struct mb_mode_task_config);
 	struct mb_mode_ops *ops = cfg->ops;
+	/* TBD: implement grace-grace periods like TSPP/LOTR. */
 	task_sleep (ops->grace_period);
 	mb_mode_update (ops, MB_INACTIVE);
 	task_exit ();
@@ -100,6 +101,8 @@ void mb_mode_restart (struct mb_mode_ops *ops)
 	if (!mb_mode_in_grace_p (ops))
 		return;
 	task_create_gid1 (ops->gid_running, ops->active_task);
+	task_kill_gid (ops->gid_in_grace);
+	deff_stop (ops->deff_ending);
 	mb_mode_update (ops, MB_ACTIVE);
 }
 
