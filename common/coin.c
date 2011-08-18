@@ -33,19 +33,6 @@
 #include <diag.h>
 
 
-struct coin_state
-{
-	/* The number of raw coin units paid */
-	U8 units;
-
-	/* The number of credits accumulated.  Units are converted
-	to credits based on the "units per credit" adjustment. */
-	U8 credits;
-
-	/* The total number of units earned for "units per bonus". */
-	U8 total_units;
-};
-
 __nvram__ struct coin_state coin_state;
 
 
