@@ -599,16 +599,21 @@ void start_game (void)
 
 
 /**
- * stop_game is called whenever a game is restarted.  It is
- * functionally equivalent to end_game aside from normal end
- * game features like match, high score check, etc.
+ * stop_game is called whenever a game is restarted, or test mode
+ * is entered.  It is functionally equivalent to end_game aside
+ * from normal end * game features like match, high score check, etc.
  */
 void stop_game (void)
 {
-	if ((ball_up == system_config.balls_per_game) || config_timed_game)
+	/* If a game was aborted before it completed, then end_player
+	   was not necessarily thrown for all players. */
+	if (in_game && ball_up <= system_config.balls_per_game)
 	{
-		/* TODO : increment final score histogram */
-		/* TODO : increment final game time histogram */
+		do
+		{
+			callset_invoke (end_player);
+			player_up--;
+		} while (player_up > 0);
 	}
 
 	in_game = FALSE;
