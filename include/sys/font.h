@@ -98,6 +98,7 @@ void font_lookup_char (const font_t *font, char c);
 void font_get_string_area (const font_t *font, const char *s);
 
 void fontargs_render_string_center (void);
+void fontargs_render_string_center_ytop (void);
 void fontargs_render_string_right (void);
 void fontargs_render_string_left (void);
 
@@ -128,7 +129,11 @@ void bitmap_draw (union dmd_coordinate coord, U8 c);
 
 #define font_render_string font_render_string_left
 
-
+#define font_render_string_center_ytop(f,x,y,s) \
+{ \
+	DECL_FONTARGS(f,x,y,s); \
+	fontargs_render_string_center_ytop (); \
+}
 #define font_render_string_center(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \

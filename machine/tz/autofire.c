@@ -29,8 +29,6 @@ U8 shooter_div_delay_time;
 /** Delay time in seconds before closing the shooter divertor */
 U8 shooter_div_open_time;
 
-/* Flag to say whether the autofire is busy firing a ball */
-//bool autofire_busy;
 extern bool hold_balls_in_autofire;
 
 CALLSET_ENTRY (autofire, sw_autofire1, sw_autofire2)
@@ -53,7 +51,19 @@ static void autofire_ball_catch_wait (void)
 	}
 }
 
-CALLSET_ENTRY (autofire, autofire_launch)
+static void autofire_ball_launch_wait (void)
+{
+	/* Give the ball time to settle and things to start */
+	task_sleep (TIME_300MS);
+	while (kickout_locks || task_find_gid (GID_LOCK_KICKED) 
+			|| deff_get_active () == DEFF_MB_START 
+			|| !switch_poll_logical (SW_AUTOFIRE2))
+	{
+		task_sleep (TIME_100MS);
+	}
+}
+
+static void autofire_launch (void)
 {
 	sol_request (SOL_AUTOFIRE);
 	if (in_live_game && single_ball_play ())
@@ -74,7 +84,6 @@ Upon entry, the autofire divertor solenoid is already pulsing
 and a ball is being kicked from the trough. */
 void autofire_monitor (void)
 {
-	//autofire_busy = TRUE;
 	/* Open the divertor to catch the ball.  Because it may be
 	coming from either the trough or a ramp divert, the
 	timings are variable. */
@@ -91,8 +100,6 @@ void autofire_monitor (void)
 	autofire_ball_catch_wait ();	
 	shooter_div_stop ();
 	
-	/* Wait a little longer for the ball to settle 
-	 * and the divertor to close */
 	
 	/* If Right inlane -> Left ramp combo, start tnf mode */
 	if (task_kill_gid (GID_TNF_APPROACHING) && single_ball_play ())
@@ -101,29 +108,26 @@ void autofire_monitor (void)
 	}
 	
 	/* Wait until allowed to kickout */
-	task_sleep (TIME_200MS);
-	while (kickout_locks || task_find_gid (GID_LOCK_KICKED))
-		task_sleep (TIME_200MS);
 	
+	autofire_ball_launch_wait ();	
 	/* Open diverter again */
 	shooter_div_start ();
 	
 	/* Wait for the diverter to fully open before firing */
-	task_sleep (TIME_700MS);	
-	
+	task_sleep_sec (1);
+	task_sleep (TIME_200MS);
 	/* Launch the ball */
 	if (feature_config.fire_empty == NO)
 	{
 		if (switch_poll_logical (SW_AUTOFIRE2))
-			callset_invoke (autofire_launch);
+			autofire_launch ();
 	}
 	else
-		callset_invoke (autofire_launch);
+		autofire_launch ();
 	
 	/* Wait for the ball to clear before closing the divertor */
 	task_sleep (TIME_700MS);
 	shooter_div_stop ();
-	//autofire_busy = FALSE;
 	task_exit ();
 }	
 
@@ -248,14 +252,12 @@ CALLSET_ENTRY (autofire, start_ball)
 {
 	/* TODO Bug in trough mech, multidrain can cause all other balls to be autofired 
 	 * live_balls > 0 even at the start of a ball*/
-//	live_balls = 0;
-	autofire_request_count = 0;
-//	autofire_busy = FALSE;
+	//live_balls = 0;
+	//autofire_request_count = 0;
 }
 
 CALLSET_ENTRY (autofire, init)
 {
 	autofire_request_count = 0;
-//	autofire_busy = FALSE;
 }
 

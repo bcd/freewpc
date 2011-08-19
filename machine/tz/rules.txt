@@ -3,6 +3,9 @@ BACK TO THE ZONE RULES
 
 Author: Sonny_Jim <sonny_jim@hotmail.com>
 
+What do you go when you get Lost in the Zone?
+You go Back to the Zone!
+
 Attract Mode
 ============
 Press Buyin button to display rules.
@@ -17,8 +20,10 @@ Skill shot awarded becomes the minimum score for the next skill shot.
 Super Duper Skill Shot
 ======================
 When the ball is in the plunger just before the skill shot, hold down the
-right flipper button for 3 seconds to activate 'Super Duper Skill Shot'.  Now
-plunge the ball straight into the slot (ie miss the skill shot on purpose).
+right flipper button for 3 'footsteps', let go and hold down the left button
+till you hear 3 footsteps and a noise.  
+
+Now plunge the ball straight into the slot (ie miss the skill shot on purpose).
 When the ball comes out of the slot, shoot the left ramp for 10M, incrementing
 in 10M steps up to 50M each successful attempt.
 

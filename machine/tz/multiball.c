@@ -21,6 +21,7 @@
 #include <freewpc.h>
 #include <status.h>
 #include <eb.h>
+#include <lamptimer.h>
 
 __local__ U8 mball_locks_lit;
 __local__ U8 mball_locks_made;
@@ -33,6 +34,7 @@ U8 jackpot_level_stored;
 /* Used to restart if multiball ends without picking up a jackpot */
 bool mball_jackpot_uncollected;
 bool mball_restart_collected;
+extern bool lock_powerball;
 extern struct timed_mode_ops mball_restart_mode;
 
 extern U8 unlit_shot_count;
@@ -65,7 +67,7 @@ struct timed_mode_ops mball_restart_mode = {
 	.gid = GID_MBALL_RESTART_MODE,
 	.music = MUS_FASTLOCK_COUNTDOWN,
 	.deff_running = DEFF_MBALL_RESTART,
-	.prio = PRI_MULTIBALL,
+	.prio = PRI_GAME_LOW3,
 	.init_timer = 15,
 	.timer = &mball_restart_timer,
 	.grace_timer = 3,
@@ -120,6 +122,7 @@ void mball_restart_mode_init (void)
 
 void mball_restart_mode_exit (void)
 {
+	lamp_timer_stop (LM_LOCK_ARROW);
 }
 
 void mball_restart_deff (void)
@@ -164,7 +167,10 @@ CALLSET_ENTRY (mball_restart, mball_restart_stop)
 inline void mball_restart_start (void)
 {
 	timed_mode_begin (&mball_restart_mode);
+	struct lamptimer_args args = { .lamp = LM_LOCK_ARROW, .secs = 15 };
+	lamp_timer_start (&args);
 }
+
 /* Rules to say whether we can start multiball */
 bool multiball_ready (void)
 {
@@ -204,10 +210,16 @@ CALLSET_ENTRY (mball, music_refresh)
 
 void lock_lit_deff (void)
 {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 16, "LOCK IS LIT");
-	dmd_show_low ();
-	task_sleep_sec (2);
+	U8 i;
+	for (i = 0; i < 20; i++)
+	{
+		dmd_alloc_pair_clean ();
+		font_render_string_center (&font_fireball, 64, 16, "LOCK IS LIT");
+		dmd_copy_low_to_high ();
+		callset_invoke (score_overlay);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 	deff_exit ();
 }
 
@@ -215,14 +227,16 @@ void mb_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("BALL %d LOCKED", mball_locks_made);
-	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 6, sprintf_buffer);
+	dmd_copy_low_to_high ();
 	if (multiball_ready ())
 	{
-		font_render_string_center (&font_mono5, 64, 20, "SHOOT LEFT RAMP");
-		font_render_string_center (&font_mono5, 64, 26, "FOR MULTIBALL");
+		font_render_string_center (&font_var5, 64, 16, "SHOOT LEFT RAMP FOR");
+		font_render_string_center (&font_quadrit, 64, 26, "MULTIBALL");
 	}
-	dmd_show_low ();
-	task_sleep_sec (3);
+	dmd_copy_low_to_high ();
+	dmd_show2 ();
+	task_sleep_sec (4);
 	deff_exit ();
 }
 
@@ -233,7 +247,7 @@ void mb_start_deff (void)
 		
 	U16 fno;
 	U8 i;
-	for (i = 0; i < 6; i++)
+	for (i = 0; i < 5; i++)
 	{
 		U8 j = 0;
 		for (fno = IMG_BOLT_TESLA_START; fno < IMG_BOLT_TESLA_END; fno += 2)
@@ -246,11 +260,11 @@ void mb_start_deff (void)
 				j = 0;
 			if (j % 2 != 0)
 			{
-				font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
+				font_render_string_center (&font_fireball, 64, 16, "MULTIBALL");
 			}
 			else if (check_for_midnight ())
 			{
-				font_render_string_center (&font_fixed10, 64, 16, "MIDNIGHT");
+				font_render_string_center (&font_fireball, 64, 16, "MIDNIGHT");
 			}
 			else
 			{
@@ -261,9 +275,9 @@ void mb_start_deff (void)
 			frame_draw (fno);
 			dmd_overlay_outline ();
 			dmd_show2 ();
-			if (i < 3)
+			if (i == 1)
 				task_sleep (TIME_100MS);
-			else if (i < 5)
+			else if (i < 2)
 				task_sleep (TIME_66MS);
 			else
 				task_sleep (TIME_33MS);
@@ -276,7 +290,7 @@ void jackpot_relit_deff (void)
 {
 	sound_send (0xFD);
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 16, "JACKPOT RELIT");
+	font_render_string_center (&font_fireball, 64, 16, "JACKPOT RELIT");
 	dmd_show_low ();
 	flash_and_exit_deff (50, TIME_100MS);
 }
@@ -308,7 +322,7 @@ void mb_running_deff (void)
 				i = 0;
 			i++;
 			sprintf_current_score ();
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_cowboy, 64, 16, sprintf_buffer);
 			if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 			{
 				sprintf("SHOOT PIANO FOR %dM", (jackpot_level * 10));
@@ -319,13 +333,13 @@ void mb_running_deff (void)
 				font_render_string_center (&font_var5, 64, 27, "SHOOT LOCK TO RELIGHT");
 			}
 			
-			if (i % 2 != 0)
+			if (fno % 4 == 0)
 			{
-				font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
+				font_render_string_center (&font_quadrit, 64, 6, "MULTIBALL");
 			}
 			else if (check_for_midnight ())
 			{
-				font_render_string_center (&font_fixed6, 64, 4, "MIDNIGHT");
+				font_render_string_center (&font_quadrit, 64, 6, "MIDNIGHT");
 			}
 
 			dmd_text_outline ();
@@ -347,8 +361,7 @@ bool can_lock_ball (void)
 		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING) 
 		&& !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING) 
 		&& !global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
-		&& !multi_ball_play ()
-		&& !pb_in_lock ())
+		&& !multi_ball_play ())
 		return TRUE;
 	else
 		return FALSE;
@@ -362,8 +375,6 @@ bool can_light_lock (void)
 		return TRUE;
 	else if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING) && !global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 		return TRUE;
-	else if (timed_mode_running_p (&mball_restart_mode))
-		return TRUE;
 	else if (flag_test (FLAG_SNAKE_READY) && single_ball_play ())
 		return TRUE;
 	else
@@ -372,12 +383,17 @@ bool can_light_lock (void)
 
 CALLSET_ENTRY (mball, lamp_update)
 {
-	/* Light the lock if it can be collected */
-	if (can_light_lock ())
-		lamp_tristate_flash (LM_LOCK_ARROW);
-	else	
-		lamp_tristate_off (LM_LOCK_ARROW);
 	
+	/* Light the lock if it can be collected */
+	/* Don't light the lock if there's a restart running */
+	if (!timed_mode_running_p (&mball_restart_mode))
+	{
+		if (can_light_lock ())
+			lamp_tristate_flash (LM_LOCK_ARROW);
+		else	
+			lamp_tristate_off (LM_LOCK_ARROW);
+	}
+
 	if (multiball_ready () && single_ball_play ())
 		lamp_tristate_flash (LM_MULTIBALL);
 	
@@ -643,9 +659,16 @@ CALLSET_ENTRY (mball, single_ball_play)
 	callset_invoke (mball_stop);
 }
 
-CALLSET_ENTRY (mball, dev_lock_enter)
+static void collect_extra_ball_task (void)
 {
 	collect_extra_ball ();
+	task_exit ();
+}
+
+CALLSET_ENTRY (mball, dev_lock_enter)
+{
+	callset_invoke (pb_lock_enter);
+	//task_create_anon (collect_extra_ball_task);
 	score (SC_50K);
 	sound_send (SND_ROBOT_FLICKS_GUN);
 	leff_start (LEFF_LOCK);
@@ -663,6 +686,7 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		deff_start (DEFF_JACKPOT_RELIT);
 	}
 	
+	collect_extra_ball ();
 	/* Check to see if mball_restart is running */
 	if (timed_mode_running_p (&mball_restart_mode))
 	{
@@ -679,6 +703,13 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 	/* Lock check should pretty much always go last */
 	else if (can_lock_ball ())
 	{
+		/* Ask the player if they wish to lock the powerball */
+		if (pb_in_lock () && !multi_ball_play () && device_recount (device_entry (DEVNO_LOCK)) == 1)
+		{
+			callset_invoke (pb_lock_choose);
+			if (!lock_powerball)
+				return;
+		}
 		/* Right loop -> Locked ball lucky bounce handler */
 		if (event_did_follow (right_loop, locked_ball))
 		{
@@ -695,7 +726,6 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		deff_start_sync (DEFF_MB_LIT);
 		/* Lock 2 balls, drop a ball if it's full */
 		if (device_recount (device_entry (DEVNO_LOCK)) <= 2)
-		//if (!device_full_p (device_entry (DEVNO_LOCK)))
 		{	
 			device_lock_ball (device_entry (DEVNO_LOCK));
 			enable_skill_shot ();

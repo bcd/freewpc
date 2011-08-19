@@ -31,6 +31,7 @@
 #endif
 
 U8 ball_save_timer;
+extern U8 balls_served;
 
 /*
  * Describe the ball save mode
@@ -65,9 +66,17 @@ void ball_save_leff (void)
  */
 void ballsave_add_time (U8 secs)
 {
-	if (in_tilt)
+	/* Don't increase if they've already have all their ball saves */
+	//TODO Lock counts as a ball serve?
+	if (in_tilt || balls_served <= feature_config.ball_saves)
 		return;
-	timed_mode_add (&ball_save_mode, secs);
+	
+	/* Don't increase over the max ball save time */	
+	if (secs + ball_save_timer <= feature_config.ball_save_time)
+		timed_mode_add (&ball_save_mode, secs);
+	else
+		timed_mode_reset (&ball_save_mode, MACHINE_BALL_SAVE_TIME);
+
 }
 
 
@@ -94,12 +103,12 @@ bool ballsave_test_active (void)
  */
 void ballsave_launch (void)
 {
+	deff_start (DEFF_BALL_SAVE);
 #if defined(MACHINE_TZ)
 	autofire_add_ball ();
 #elif defined (DEVNO_TROUGH)
 	device_request_kick (device_entry (DEVNO_TROUGH));
 #endif
-	deff_start (DEFF_BALL_SAVE);
 }
 
 
@@ -131,9 +140,8 @@ CALLSET_ENTRY (ballsave, valid_playfield)
 {
 #if MACHINE_BALL_SAVE_TIME > 0
 	#ifdef MACHINE_TZ
-	extern U8 balls_served;
 	/* Don't turn on the ball saver after the first ball */
-	if (!config_timed_game && balls_served < 2)
+	if (!config_timed_game && balls_served <= feature_config.ball_saves)
 	#else
 	if (!config_timed_game)
 	#endif
@@ -164,8 +172,8 @@ CALLSET_BOOL_ENTRY (ballsave, ball_drain)
 		callset_invoke (timed_drain_penalty);
 		return FALSE;
 	}
-	else if (timer_test_and_kill_gid (GID_BALLSAVE_EXTENDED)
-		|| ballsave_test_active ())
+	else if ((timer_test_and_kill_gid (GID_BALLSAVE_EXTENDED)
+		|| ballsave_test_active ()))
 	{
 		ballsave_launch ();
 		return FALSE;

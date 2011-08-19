@@ -76,9 +76,9 @@ extern U8 unlit_shot_count;
 
 static void mpf_countdown_score_task (void)
 {
-	while (mpf_award > 5)
+	while (mpf_award > 5 && task_find_gid (GID_MPF_MODE_RUNNING))
 	{
-		bounded_decrement (mpf_award, 0);
+		bounded_decrement (mpf_award, 1);
 		task_sleep_sec (1);
 	}
 	task_exit ();
@@ -165,7 +165,6 @@ void lightning_overlay (void)
 
 void mpf_mode_deff (void)
 {
-	//TODO Move this somewhere?
 	U16 fno;
 	dmd_alloc_pair_clean ();
 	for (;;)
@@ -174,14 +173,14 @@ void mpf_mode_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_var5, 64, 5, "BATTLE THE POWER");
+			font_render_string_center_ytop (&font_bitcube10, 64, 0, "BATTLE THE POWER");
 			sprintf ("%d,000,000", (mpf_award * mpf_level));
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-			sprintf ("SHOOT TOP HOLE TO COLLECT");
-			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+			font_render_string_center (&font_antiqua, 64, 14, sprintf_buffer);
 			sprintf ("%d", mpf_timer);
-			font_render_string (&font_var5, 2, 2, sprintf_buffer);
-			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			font_render_string (&font_mono5, 4, 26, sprintf_buffer);
+			font_render_string_right (&font_mono5, 122, 26, sprintf_buffer);
+			sprintf ("LEVEL %d", mpf_level);
+			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 			dmd_text_outline ();
 
 			dmd_alloc_pair ();
@@ -207,7 +206,7 @@ void mpf_award_deff (void)
 		if (fno > 4)
 		{
 			sprintf ("%d,000,000", (mpf_award * mpf_level));
-			font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+			font_render_string_center (&font_quadrit, 64, 10, sprintf_buffer);
 			font_render_string_center (&font_var5, 64, 20, "AND SPOT DOOR PANEL");
 		}
 		dmd_text_outline ();
@@ -219,7 +218,7 @@ void mpf_award_deff (void)
 	}
 	dmd_alloc_pair_clean ();
 	sprintf ("%d,000,000", (mpf_award * mpf_level));
-	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 10, sprintf_buffer);
 	font_render_string_center (&font_var5, 64, 20, "AND SPOT DOOR PANEL");
 	dmd_copy_low_to_high ();
 	dmd_show2 ();
@@ -304,7 +303,11 @@ bool mpf_ready_p (void)
 		 *  dropped back to the upper left flipper */
 		&& !hurryup_active ()
 		/* TODO Probably want to remove this later on */
-		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING))
+		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING)
+		/* Don't allow if Super Duper Skill Shot is enabled */
+		&& !task_find_gid (GID_USDSS_READY)
+		&& !task_find_gid (GID_USDSS_AWARDED)
+		&& !task_find_gid (GID_USDSS_APPROACHING))
 		return TRUE;
 	else
 		return FALSE;
@@ -331,10 +334,13 @@ CALLSET_ENTRY (mpf, end_ball)
 
 CALLSET_ENTRY (mpf, lamp_update)
 {
-	if (mpf_ready_p ())
-		lamp_tristate_on (LM_RAMP_BATTLE);
-	else
-		lamp_tristate_off (LM_RAMP_BATTLE);
+	if (!task_find_gid (GID_USDSS_READY) && !task_find_gid (GID_USDSS_APPROACHING))
+	{
+		if (mpf_ready_p ())
+			lamp_tristate_on (LM_RAMP_BATTLE);
+		else
+			lamp_tristate_off (LM_RAMP_BATTLE);
+	}
 }
 
 CALLSET_ENTRY (mpf, door_start_battle_power)
@@ -385,12 +391,12 @@ CALLSET_ENTRY (mpf, mpf_entered)
 	mpf_award = 10;
 	/* Increment the amount of balls in the mpf */
 	bounded_increment (mpf_ball_count, feature_config.installed_balls);
-	task_recreate_gid (GID_MPF_COUNTDOWN_SCORE_TASK, mpf_countdown_score_task);
 	/* Add on 10 seconds for each extra ball */
 //	if (mpf_ball_count > 1)
 //		mpf_timer += 10;
 	bounded_increment (mpf_level, 10);
 	bounded_decrement (mpf_enable_count, 0);
+	task_recreate_gid (GID_MPF_COUNTDOWN_SCORE_TASK, mpf_countdown_score_task);
 	
 	if ((mpf_ball_count = 1))
 	{	
@@ -467,7 +473,7 @@ CALLSET_ENTRY (mpf, sw_mpf_right)
 CALLSET_ENTRY (mpf, start_player)
 {
 	mpf_enable_count = 1;
-	mpf_level = 1;
+	mpf_level = 0;
 	mpf_active = FALSE;
 }
 

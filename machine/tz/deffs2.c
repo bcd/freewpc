@@ -54,9 +54,9 @@ void shoot_again_deff (void)
 	sound_send (SND_EXTRA_BALL_BALLOON);
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 10, "SHOOT AGAIN");
+	font_render_string_center (&font_bitoutline, 64, 10, "SHOOT AGAIN");
 	sprintf ("PLAYER %d", player_up);
-	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
+	font_render_string_center (&font_bitcube10, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
@@ -68,7 +68,7 @@ static inline void flash_and_exit_deff2 (U8 flash_count, task_ticks_t flash_dela
 {
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_bitoutline, 64, 16, sprintf_buffer);
 	dmd_show_low ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
@@ -91,7 +91,7 @@ void shoot_camera_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_bitoutline, 64, 16, sprintf_buffer);
 			dmd_text_outline ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
@@ -101,7 +101,7 @@ void shoot_camera_deff (void)
 		}
 		/* Get rid of the last dirty frame */
 		dmd_alloc_pair_clean ();
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_bitoutline, 64, 16, sprintf_buffer);
 		dmd_copy_low_to_high ();
 		dmd_show2 ();
 		flash_and_exit_deff2 (10, TIME_66MS);
@@ -116,8 +116,8 @@ void shoot_power_payoff_deff (void)
 {
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 9, "SHOOT");
-	font_render_string_center (&font_fixed10, 64, 24, "POWER PAYOFF");
+	font_render_string_center (&font_fireball, 64, 9, "SHOOT");
+	font_render_string_center (&font_fireball, 64, 24, "POWER PAYOFF");
 	dmd_show_low ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
@@ -141,6 +141,8 @@ CALLSET_ENTRY (deffs2, amode_page)
 		sprintf ("GOOD EVENING");
 	else
 		sprintf ("THE TWILIGHT HOUR");
-	font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_nayupixel10, 64, 16, sprintf_buffer);
 	show_text_on_stars ();
 }
+
+

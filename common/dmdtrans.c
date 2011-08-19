@@ -137,6 +137,16 @@ dmd_transition_t trans_scroll_up_slow = {
 	.count = 32,
 };
 
+dmd_transition_t trans_scroll_up_slower = {
+	.composite_init = trans_scroll_up_init,
+	.composite_old = trans_scroll_up_old,
+	.composite_new = trans_scroll_up_new,
+	.delay = TIME_200MS,
+	.arg = { .u16 = 1 * 16 }, /* 1 line at a time */
+	.count = 32,
+};
+
+
 /*********************************************************************/
 
 void trans_scroll_down_init (void)

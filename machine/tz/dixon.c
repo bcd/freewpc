@@ -40,34 +40,33 @@ static void dixon_the_flippers (void)
 	task_exit ();
 }
 
-/* Monitor the flipper button for 5 seconds */
-static inline void anti_cradle_monitor (U8 flipper_button)
+/* Monitor the switch */
+static inline void anti_cradle_monitor (U8 switch_number, U8 timeout)
 {
-	U8 timer = 0;
-	while (switch_poll_logical (flipper_button)
+	while (switch_poll_logical (switch_number)
 		&& in_live_game)
 	{
 		task_sleep (TIME_500MS);
-		if (++timer == 10)
+		if (--timeout == 0)
 		{
 			if (!task_find_gid (GID_DIXON_THE_FLIPPERS))
 				task_create_gid (GID_DIXON_THE_FLIPPERS, dixon_the_flippers);
 			break;
 		}
 		/* Warn the player 2 seconds before disabling*/
-		else if (timer == 6)
+		else if (timeout == 4)
 		{
 			sound_send (SND_TILT_WARNING);
 			deff_start (DEFF_TILT_WARNING);
 		}
-		else if (timer > 6)
+		else if (timeout == 6 || timeout == 2)
 			sound_send (SND_TILT_WARNING);
 	}
 }
 
 static bool anti_cradle_enabled (void)
 {
-	if (in_live_game && live_balls > 1 
+	if (in_live_game && !single_ball_play ()
 #ifdef CONFIG_MUTE_AND_PAUSE
 			&& !task_find_gid (GID_MUTE_AND_PAUSE)
 #endif
@@ -96,26 +95,38 @@ static bool check_for_dixoned_flippers (void)
 		return FALSE;
 }
 
+static void anti_cradle_shooter_task (void)
+{
+	anti_cradle_monitor (SW_SHOOTER, 20);
+	task_exit ();
+}
+
 static void anti_cradle_left_task (void)
 {
-	anti_cradle_monitor (SW_LEFT_BUTTON);
+	anti_cradle_monitor (SW_LEFT_BUTTON, 10);
 	task_exit ();
 }
 
 static void anti_cradle_right_task (void)
 {
-	anti_cradle_monitor (SW_RIGHT_BUTTON);
+	anti_cradle_monitor (SW_RIGHT_BUTTON, 10);
 	task_exit ();
+}
+
+CALLSET_ENTRY (dixon, sw_shooter)
+{
+//	if (!check_for_dixoned_flippers ()&& anti_cradle_enabled ())
+//		task_recreate_gid (GID_ANTI_CRADLE, anti_cradle_shooter_task);
 }
 
 CALLSET_ENTRY (dixon, sw_left_button)
 {
 	if (!check_for_dixoned_flippers ()&& anti_cradle_enabled ())
-		task_recreate_gid (GID_ANTI_CRADLE, anti_cradle_left_task);
+		task_create_gid (GID_ANTI_CRADLE, anti_cradle_left_task);
 }
 
 CALLSET_ENTRY (dixon, sw_right_button)
 {
 	if (!check_for_dixoned_flippers ()&& anti_cradle_enabled ())
-		task_recreate_gid (GID_ANTI_CRADLE, anti_cradle_right_task);
+		task_create_gid (GID_ANTI_CRADLE, anti_cradle_right_task);
 }

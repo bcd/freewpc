@@ -355,9 +355,9 @@ void gumball_deff (void)
 		dmd_alloc_pair_clean ();
 		dmd_clean_page_low ();
 		psprintf("1 GUMBALL", "%d GUMBALLS", gumball_collected_count);
-		font_render_string_center (&font_steel, 64, 7, sprintf_buffer);
+		font_render_string_center (&font_fireball, 64, 8, sprintf_buffer);
 		sprintf("%d MILLION", gumball_score);
-		font_render_string_center (&font_steel, 64, 20, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 22, sprintf_buffer);
 		dmd_copy_low_to_high ();
 		callset_invoke (score_overlay);
 		dmd_show2 ();

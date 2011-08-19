@@ -21,6 +21,7 @@
 /* CALLSET_SECTION (hurryup, __machine3__) */
 
 #include <freewpc.h>
+#include <lamptimer.h>
 
 extern struct timed_mode_ops mball_restart_mode;
 
@@ -51,17 +52,17 @@ void hurryup_mode_deff (void)
 	{
 
 		U16 fno;
-		dmd_alloc_pair_clean ();
 		for (fno = IMG_BOLT_TESLA_START; fno < IMG_BOLT_TESLA_END; fno += 2)
 		{
+			dmd_alloc_pair_clean ();
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_fixed10, 64, 8, "HURRY UP");
+			font_render_string_center (&font_fireball, 64, 8, "HURRY UP");
 			sprintf_score (hurryup_score);
-			font_render_string_center (&font_fixed6, 64, 19, sprintf_buffer);
+			font_render_string_center (&font_fixed6, 64, 20, sprintf_buffer);
 			if (on)
 			{
-				font_render_string_center (&font_var5, 64, 28, "SHOOT POWER PAYOFF");
+				font_render_string_center (&font_var5, 64, 29, "SHOOT POWER PAYOFF");
 				on = FALSE;
 			}
 			else
@@ -81,19 +82,19 @@ void hurryup_mode_deff (void)
 
 void hurryup_awarded_deff (void)
 {
-	dmd_alloc_pair_clean ();
 	U16 fno;
 	sound_send (SND_CLOCK_CHAOS_END_BOOM);
 	for (fno = IMG_EXPLODE_START; fno <= IMG_EXPLODE_END; fno += 2)
 	{
+		dmd_alloc_pair_clean ();
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 		
 		if (fno > 4)
 		{
-			font_render_string_center (&font_var5, 64, 5, "HURRY UP AWARDED");
+			font_render_string_center (&font_fireball, 64, 8, "HURRY UP");
 			sprintf_score (hurryup_score);
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_quadrit, 64, 24, sprintf_buffer);
 		}
 		dmd_text_outline ();
 		dmd_alloc_pair ();
@@ -103,9 +104,10 @@ void hurryup_awarded_deff (void)
 		task_sleep (TIME_33MS);
 	}
 	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_var5, 64, 5, "HURRY UP AWARDED");
+
+	font_render_string_center (&font_fireball, 64, 8, "HURRY UP");
 	sprintf_score (hurryup_score);
-	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 24, sprintf_buffer);
 	dmd_copy_low_to_high ();
 	dmd_show2 ();
 	task_sleep_sec (2);
@@ -137,6 +139,8 @@ void hurryup_mode_init (void)
 	score_zero (hurryup_score);
 	score_copy (hurryup_score, score_table[SC_10M]);
 	task_create_gid (GID_HURRYUP_SCORE_COUNTDOWN, hurryup_countdown_score_task);
+	struct lamptimer_args args = { .lamp = LM_POWER_PAYOFF, .secs = 15 };
+	lamp_timer_start (&args);
 }
 
 void hurryup_mode_expire (void)
@@ -146,7 +150,7 @@ void hurryup_mode_expire (void)
 
 void hurryup_mode_exit (void)
 {
-	lamp_tristate_off (LM_POWER_PAYOFF);
+	lamp_timer_stop (LM_POWER_PAYOFF);
 	task_kill_gid (GID_HURRYUP_SCORE_COUNTDOWN);
 	task_kill_gid (GID_MUSIC_SPEED);
 }
@@ -182,12 +186,6 @@ CALLSET_ENTRY (hurryup, left_ball_grabbed)
 		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 		deff_start (DEFF_SHOOT_POWER_PAYOFF);
 	}
-}
-
-CALLSET_ENTRY (hurryup, lamp_update)
-{
-	if (timed_mode_running_p (&hurryup_mode))
-		lamp_tristate_flash (LM_POWER_PAYOFF);
 }
 
 CALLSET_ENTRY (hurryup, end_ball, mball_start, stop_hurryup, award_door_panel)

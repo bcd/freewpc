@@ -41,15 +41,15 @@
 #include <freewpc.h>
 
 U8 unlit_shot_count;
-bool backdoor_award_collected;
+__local__ bool backdoor_award_collected;
 /* last switch that was collected unlit */
 U8 unlit_called_from_stored;
 
 void backdoor_award_deff (void)
 {
 	dmd_alloc_low_clean ();
-	sprintf ("BACKDOOR AWARD");
-	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_fireball, 64, 8, "BACKDOOR");
+	font_render_string_center (&font_antiqua, 64, 20, "AWARD");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -113,7 +113,7 @@ CALLSET_ENTRY (unlit, serve_ball)
 
 }
 
-CALLSET_ENTRY (unlit, start_game)
+CALLSET_ENTRY (unlit, start_player)
 {
 	unlit_shot_count = 0;
 	unlit_called_from_stored = 0;

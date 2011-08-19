@@ -32,7 +32,6 @@ U8 score_ranks[MAX_PLAYERS];
  */
 U8 prev_rank;
 
-
 /**
  * For debugging.
  */
@@ -84,19 +83,13 @@ void score_rank_update (void)
  * Ensure that rankings are recalculated and correct at the start
  * of each ball, and at the end of the game.
  */
-CALLSET_ENTRY (score_rank, start_ball, end_game)
-{
-	score_rank_update ();
-	score_rank_dump ();
-}
-
 
 /**
  * Periodically, update the rankings while a game is in progress.
  * Check for cases where it is impossible for the rankings to have
  * changed since the last call.
  */
-CALLSET_ENTRY (score_rank, idle_every_second)
+CALLSET_ENTRY (score_rank, idle_every_second, update_ranks, start_ball, end_game)
 {
 	/* Don't update unless we're in a game */
 	if (!in_live_game)
@@ -104,7 +97,7 @@ CALLSET_ENTRY (score_rank, idle_every_second)
 
 	/* Don't update if we haven't reached valid playfield.
 	Scores shouldn't be changing (much) at this point. */
-	if (!valid_playfield)
+	if (!valid_playfield && player_up != MAX_PLAYERS && ball_up != system_config.balls_per_game)
 		return;
 
 	/* Don't update if it's a 1-player game.  Rankings are

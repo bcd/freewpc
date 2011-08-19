@@ -48,7 +48,7 @@ static char *num5x7_glyphs[] = {
 };
 
 const font_t font_num5x7 = {
-	.spacing = 2,
+	.spacing = 1,
 	.height = 7,
 	.glyphs = num5x7_glyphs,
 	.basechar = BASECHAR,

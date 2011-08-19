@@ -95,13 +95,12 @@ void pb_detect_deff (void)
 			dmd_clean_page_low ();
 			if (on)
 			{
-				//font_render_string_center (&font_var5, 64, 26, "POWERBALL");
-				font_render_string_center (&font_var5, 64, 16, "POWERBALL");
+				font_render_string_center (&font_fixed6, 64, 16, "POWERBALL");
 				on = FALSE;
 			}
 			else
 			{
-				font_render_string_center (&font_fixed6, 64, 16, "POWERBALL");
+				font_render_string_center (&font_fireball, 64, 16, "POWERBALL");
 				on = TRUE;
 			}
 			dmd_text_outline ();
@@ -413,8 +412,6 @@ void powerball_magnet_detect_task (void)
 {
 	/* Wait a little while for the ball to be grabbed */
 	task_sleep (TIME_600MS);
-//	pb_set_location (PB_IN_PLAY, 0);
-//	pb_announce ();
 	pb_detect_event (PF_PB_DETECTED);
 	task_exit ();
 }
@@ -460,7 +457,7 @@ CALLSET_ENTRY (pb_detect, dev_trough_enter)
 	pb_poll_trough ();
 }
 
-CALLSET_ENTRY (pb_detect, dev_lock_enter)
+CALLSET_ENTRY (pb_detect, pb_lock_enter)
 {
 	pb_container_enter (PB_IN_LOCK, DEVNO_LOCK);
 }

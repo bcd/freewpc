@@ -1,0 +1,277 @@
+#include <freewpc.h>
+#define glyph_antiqua_period_width 2
+#define glyph_antiqua_period_height 2
+static char glyph_antiqua_period_bits[] = { glyph_antiqua_period_width, glyph_antiqua_period_height,
+  0x03, 0x03, };
+#define glyph_antiqua_atsign_width 7
+#define glyph_antiqua_atsign_height 7
+static char glyph_antiqua_atsign_bits[] = { glyph_antiqua_atsign_width, glyph_antiqua_atsign_height,
+  0x3C, 0x42, 0x59, 0x55, 0x39, 0x02, 0x3C, };
+#define glyph_antiqua_dollar_width 6
+#define glyph_antiqua_dollar_height 11
+static char glyph_antiqua_dollar_bits[] = { glyph_antiqua_dollar_width, glyph_antiqua_dollar_height,
+  0x08, 0x1E, 0x2B, 0x0B, 0x0B, 0x1E, 0x28, 0x2B, 0x2B, 0x1E, 0x08, };
+#define glyph_antiqua_comma_width 2
+#define glyph_antiqua_comma_height 3
+static char glyph_antiqua_comma_bits[] = { glyph_antiqua_comma_width, glyph_antiqua_comma_height,
+  0x03, 0x02, 0x01, };
+#define glyph_antiqua_plus_width 5
+#define glyph_antiqua_plus_height 5
+static char glyph_antiqua_plus_bits[] = { glyph_antiqua_plus_width, glyph_antiqua_plus_height,
+  0x04, 0x04, 0x1F, 0x04, 0x04, };
+#define glyph_antiqua_minus_width 4
+#define glyph_antiqua_minus_height 1
+static char glyph_antiqua_minus_bits[] = { glyph_antiqua_minus_width, glyph_antiqua_minus_height,
+  0x0F, };
+#define glyph_antiqua_semicolon_width 2
+#define glyph_antiqua_semicolon_height 6
+static char glyph_antiqua_semicolon_bits[] = { glyph_antiqua_semicolon_width, glyph_antiqua_semicolon_height,
+  0x03, 0x03, 0x00, 0x03, 0x02, 0x01, };
+#define glyph_antiqua_colon_width 2
+#define glyph_antiqua_colon_height 6
+static char glyph_antiqua_colon_bits[] = { glyph_antiqua_colon_width, glyph_antiqua_colon_height,
+  0x03, 0x03, 0x00, 0x00, 0x03, 0x03, };
+#define glyph_antiqua_amp_width 7
+#define glyph_antiqua_amp_height 9
+static char glyph_antiqua_amp_bits[] = { glyph_antiqua_amp_width, glyph_antiqua_amp_height,
+  0x1C, 0x02, 0x06, 0x6C, 0x3E, 0x1B, 0x33, 0x33, 0x6E, };
+#define glyph_antiqua_bang_width 2
+#define glyph_antiqua_bang_height 9
+static char glyph_antiqua_bang_bits[] = { glyph_antiqua_bang_width, glyph_antiqua_bang_height,
+  0x03, 0x03, 0x03, 0x03, 0x03, 0x02, 0x00, 0x03, 0x03, };
+#define glyph_antiqua_question_width 5
+#define glyph_antiqua_question_height 9
+static char glyph_antiqua_question_bits[] = { glyph_antiqua_question_width, glyph_antiqua_question_height,
+  0x0F, 0x19, 0x18, 0x0C, 0x06, 0x06, 0x00, 0x06, 0x06, };
+#define glyph_antiqua_lbrace_width 3
+#define glyph_antiqua_lbrace_height 12
+static char glyph_antiqua_lbrace_bits[] = { glyph_antiqua_lbrace_width, glyph_antiqua_lbrace_height,
+  0x07, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x07, 
+  };
+#define glyph_antiqua_rbrace_width 3
+#define glyph_antiqua_rbrace_height 12
+static char glyph_antiqua_rbrace_bits[] = { glyph_antiqua_rbrace_width, glyph_antiqua_rbrace_height,
+  0x07, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x07, 
+  };
+#define glyph_antiqua_percent_width 6
+#define glyph_antiqua_percent_height 7
+static char glyph_antiqua_percent_bits[] = { glyph_antiqua_percent_width, glyph_antiqua_percent_height,
+  0x33, 0x1B, 0x18, 0x0C, 0x06, 0x36, 0x33, };
+#define glyph_antiqua_lpar_width 3
+#define glyph_antiqua_lpar_height 10
+static char glyph_antiqua_lpar_bits[] = { glyph_antiqua_lpar_width, glyph_antiqua_lpar_height,
+  0x04, 0x02, 0x02, 0x03, 0x03, 0x03, 0x03, 0x03, 0x02, 0x04, };
+#define glyph_antiqua_rpar_width 3
+#define glyph_antiqua_rpar_height 10
+static char glyph_antiqua_rpar_bits[] = { glyph_antiqua_rpar_width, glyph_antiqua_rpar_height,
+  0x01, 0x02, 0x06, 0x06, 0x06, 0x06, 0x06, 0x02, 0x02, 0x01, };
+#define glyph_antiqua_hash_width 7
+#define glyph_antiqua_hash_height 9
+static char glyph_antiqua_hash_bits[] = { glyph_antiqua_hash_width, glyph_antiqua_hash_height,
+  0x36, 0x36, 0x7F, 0x36, 0x36, 0x36, 0x7F, 0x36, 0x36, };
+#define glyph_antiqua_A_width 7
+#define glyph_antiqua_A_height 9
+static char glyph_antiqua_A_bits[] = { glyph_antiqua_A_width, glyph_antiqua_A_height,
+  0x18, 0x34, 0x32, 0x62, 0x63, 0x7F, 0x63, 0x63, 0x63, };
+#define glyph_antiqua_B_width 6
+#define glyph_antiqua_B_height 9
+static char glyph_antiqua_B_bits[] = { glyph_antiqua_B_width, glyph_antiqua_B_height,
+  0x1F, 0x33, 0x33, 0x3B, 0x1F, 0x33, 0x33, 0x33, 0x1F, };
+#define glyph_antiqua_C_width 6
+#define glyph_antiqua_C_height 9
+static char glyph_antiqua_C_bits[] = { glyph_antiqua_C_width, glyph_antiqua_C_height,
+  0x1E, 0x33, 0x03, 0x03, 0x03, 0x03, 0x03, 0x33, 0x1E, };
+#define glyph_antiqua_D_width 6
+#define glyph_antiqua_D_height 9
+static char glyph_antiqua_D_bits[] = { glyph_antiqua_D_width, glyph_antiqua_D_height,
+  0x1F, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x1B, 0x0F, };
+#define glyph_antiqua_E_width 5
+#define glyph_antiqua_E_height 9
+static char glyph_antiqua_E_bits[] = { glyph_antiqua_E_width, glyph_antiqua_E_height,
+  0x1F, 0x13, 0x03, 0x03, 0x0F, 0x03, 0x03, 0x03, 0x1F, };
+#define glyph_antiqua_F_width 5
+#define glyph_antiqua_F_height 9
+static char glyph_antiqua_F_bits[] = { glyph_antiqua_F_width, glyph_antiqua_F_height,
+  0x1F, 0x13, 0x03, 0x03, 0x0F, 0x03, 0x03, 0x03, 0x03, };
+#define glyph_antiqua_G_width 6
+#define glyph_antiqua_G_height 9
+static char glyph_antiqua_G_bits[] = { glyph_antiqua_G_width, glyph_antiqua_G_height,
+  0x1E, 0x33, 0x03, 0x03, 0x3B, 0x33, 0x33, 0x33, 0x3E, };
+#define glyph_antiqua_H_width 7
+#define glyph_antiqua_H_height 9
+static char glyph_antiqua_H_bits[] = { glyph_antiqua_H_width, glyph_antiqua_H_height,
+  0x63, 0x63, 0x63, 0x63, 0x7F, 0x63, 0x63, 0x63, 0x63, };
+#define glyph_antiqua_I_width 4
+#define glyph_antiqua_I_height 9
+static char glyph_antiqua_I_bits[] = { glyph_antiqua_I_width, glyph_antiqua_I_height,
+  0x0F, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x0F, };
+#define glyph_antiqua_J_width 6
+#define glyph_antiqua_J_height 9
+static char glyph_antiqua_J_bits[] = { glyph_antiqua_J_width, glyph_antiqua_J_height,
+  0x3E, 0x32, 0x30, 0x30, 0x30, 0x30, 0x30, 0x33, 0x1E, };
+#define glyph_antiqua_K_width 6
+#define glyph_antiqua_K_height 9
+static char glyph_antiqua_K_bits[] = { glyph_antiqua_K_width, glyph_antiqua_K_height,
+  0x23, 0x33, 0x1B, 0x0F, 0x07, 0x0B, 0x1B, 0x33, 0x33, };
+#define glyph_antiqua_L_width 5
+#define glyph_antiqua_L_height 9
+static char glyph_antiqua_L_bits[] = { glyph_antiqua_L_width, glyph_antiqua_L_height,
+  0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x13, 0x1F, };
+#define glyph_antiqua_M_width 9
+#define glyph_antiqua_M_height 9
+static char glyph_antiqua_M_bits[] = { glyph_antiqua_M_width, glyph_antiqua_M_height,
+  0x83, 0x01, 0xC6, 0x01, 0xEE, 0x01, 0xAA, 0x00, 0xBA, 0x00, 0x92, 0x00, 
+  0x83, 0x01, 0x83, 0x01, 0x83, 0x01, };
+#define glyph_antiqua_N_width 7
+#define glyph_antiqua_N_height 9
+static char glyph_antiqua_N_bits[] = { glyph_antiqua_N_width, glyph_antiqua_N_height,
+  0x63, 0x63, 0x67, 0x6F, 0x7B, 0x73, 0x63, 0x63, 0x43, };
+#define glyph_antiqua_O_width 7
+#define glyph_antiqua_O_height 9
+static char glyph_antiqua_O_bits[] = { glyph_antiqua_O_width, glyph_antiqua_O_height,
+  0x3C, 0x72, 0x63, 0x63, 0x63, 0x63, 0x63, 0x27, 0x1E, };
+#define glyph_antiqua_P_width 6
+#define glyph_antiqua_P_height 9
+static char glyph_antiqua_P_bits[] = { glyph_antiqua_P_width, glyph_antiqua_P_height,
+  0x1F, 0x33, 0x33, 0x33, 0x33, 0x1F, 0x03, 0x03, 0x03, };
+#define glyph_antiqua_Q_width 7
+#define glyph_antiqua_Q_height 10
+static char glyph_antiqua_Q_bits[] = { glyph_antiqua_Q_width, glyph_antiqua_Q_height,
+  0x3C, 0x72, 0x63, 0x63, 0x63, 0x63, 0x63, 0x27, 0x1E, 0x78, };
+#define glyph_antiqua_R_width 6
+#define glyph_antiqua_R_height 9
+static char glyph_antiqua_R_bits[] = { glyph_antiqua_R_width, glyph_antiqua_R_height,
+  0x1F, 0x33, 0x33, 0x33, 0x1F, 0x0F, 0x1B, 0x3B, 0x33, };
+#define glyph_antiqua_S_width 6
+#define glyph_antiqua_S_height 9
+static char glyph_antiqua_S_bits[] = { glyph_antiqua_S_width, glyph_antiqua_S_height,
+  0x1E, 0x33, 0x07, 0x0E, 0x1C, 0x38, 0x30, 0x33, 0x1E, };
+#define glyph_antiqua_T_width 6
+#define glyph_antiqua_T_height 9
+static char glyph_antiqua_T_bits[] = { glyph_antiqua_T_width, glyph_antiqua_T_height,
+  0x3F, 0x0D, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, };
+#define glyph_antiqua_U_width 6
+#define glyph_antiqua_U_height 9
+static char glyph_antiqua_U_bits[] = { glyph_antiqua_U_width, glyph_antiqua_U_height,
+  0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x2E, };
+#define glyph_antiqua_V_width 7
+#define glyph_antiqua_V_height 9
+static char glyph_antiqua_V_bits[] = { glyph_antiqua_V_width, glyph_antiqua_V_height,
+  0x63, 0x63, 0x63, 0x63, 0x26, 0x36, 0x14, 0x1C, 0x08, };
+#define glyph_antiqua_W_width 9
+#define glyph_antiqua_W_height 9
+static char glyph_antiqua_W_bits[] = { glyph_antiqua_W_width, glyph_antiqua_W_height,
+  0xC3, 0x00, 0x83, 0x01, 0x93, 0x01, 0x93, 0x01, 0xBB, 0x01, 0xBB, 0x00, 
+  0xEE, 0x00, 0x66, 0x00, 0x66, 0x00, };
+#define glyph_antiqua_X_width 7
+#define glyph_antiqua_X_height 9
+static char glyph_antiqua_X_bits[] = { glyph_antiqua_X_width, glyph_antiqua_X_height,
+  0x63, 0x63, 0x26, 0x16, 0x1C, 0x34, 0x32, 0x63, 0x63, };
+#define glyph_antiqua_Y_width 6
+#define glyph_antiqua_Y_height 9
+static char glyph_antiqua_Y_bits[] = { glyph_antiqua_Y_width, glyph_antiqua_Y_height,
+  0x33, 0x33, 0x33, 0x16, 0x1E, 0x0C, 0x0C, 0x0C, 0x0C, };
+#define glyph_antiqua_Z_width 5
+#define glyph_antiqua_Z_height 9
+static char glyph_antiqua_Z_bits[] = { glyph_antiqua_Z_width, glyph_antiqua_Z_height,
+  0x1F, 0x19, 0x08, 0x0C, 0x06, 0x06, 0x03, 0x13, 0x1F, };
+#define glyph_antiqua_0_width 7
+#define glyph_antiqua_0_height 7
+static char glyph_antiqua_0_bits[] = { glyph_antiqua_0_width, glyph_antiqua_0_height,
+  0x1C, 0x36, 0x63, 0x63, 0x63, 0x36, 0x1C, };
+#define glyph_antiqua_1_width 4
+#define glyph_antiqua_1_height 7
+static char glyph_antiqua_1_bits[] = { glyph_antiqua_1_width, glyph_antiqua_1_height,
+  0x06, 0x07, 0x06, 0x06, 0x06, 0x06, 0x0F, };
+#define glyph_antiqua_2_width 5
+#define glyph_antiqua_2_height 7
+static char glyph_antiqua_2_bits[] = { glyph_antiqua_2_width, glyph_antiqua_2_height,
+  0x0E, 0x19, 0x18, 0x0C, 0x06, 0x13, 0x1F, };
+#define glyph_antiqua_3_width 5
+#define glyph_antiqua_3_height 9
+static char glyph_antiqua_3_bits[] = { glyph_antiqua_3_width, glyph_antiqua_3_height,
+  0x0E, 0x19, 0x18, 0x0C, 0x0E, 0x18, 0x18, 0x19, 0x0E, };
+#define glyph_antiqua_4_width 6
+#define glyph_antiqua_4_height 9
+static char glyph_antiqua_4_bits[] = { glyph_antiqua_4_width, glyph_antiqua_4_height,
+  0x18, 0x1C, 0x06, 0x03, 0x1B, 0x1B, 0x3F, 0x18, 0x18, };
+#define glyph_antiqua_5_width 5
+#define glyph_antiqua_5_height 9
+static char glyph_antiqua_5_bits[] = { glyph_antiqua_5_width, glyph_antiqua_5_height,
+  0x1F, 0x03, 0x03, 0x0F, 0x18, 0x18, 0x18, 0x19, 0x0E, };
+#define glyph_antiqua_6_width 6
+#define glyph_antiqua_6_height 9
+static char glyph_antiqua_6_bits[] = { glyph_antiqua_6_width, glyph_antiqua_6_height,
+  0x18, 0x0C, 0x06, 0x1F, 0x33, 0x33, 0x33, 0x33, 0x1E, };
+#define glyph_antiqua_7_width 6
+#define glyph_antiqua_7_height 9
+static char glyph_antiqua_7_bits[] = { glyph_antiqua_7_width, glyph_antiqua_7_height,
+  0x3F, 0x31, 0x30, 0x18, 0x0C, 0x0C, 0x06, 0x06, 0x06, };
+#define glyph_antiqua_8_width 6
+#define glyph_antiqua_8_height 9
+static char glyph_antiqua_8_bits[] = { glyph_antiqua_8_width, glyph_antiqua_8_height,
+  0x1E, 0x33, 0x33, 0x33, 0x1E, 0x33, 0x33, 0x33, 0x1E, };
+#define glyph_antiqua_9_width 6
+#define glyph_antiqua_9_height 9
+static char glyph_antiqua_9_bits[] = { glyph_antiqua_9_width, glyph_antiqua_9_height,
+  0x1E, 0x33, 0x33, 0x33, 0x33, 0x3E, 0x30, 0x18, 0x0E, };
+static char *antiqua_glyphs[] = {
+	['.'] = glyph_antiqua_period_bits,
+	['@'] = glyph_antiqua_atsign_bits,
+	['$'] = glyph_antiqua_dollar_bits,
+	[','] = glyph_antiqua_comma_bits,
+	['+'] = glyph_antiqua_plus_bits,
+	['-'] = glyph_antiqua_minus_bits,
+	[';'] = glyph_antiqua_semicolon_bits,
+	[':'] = glyph_antiqua_colon_bits,
+	['&'] = glyph_antiqua_amp_bits,
+	['!'] = glyph_antiqua_bang_bits,
+	['?'] = glyph_antiqua_question_bits,
+	['['] = glyph_antiqua_lbrace_bits,
+	[']'] = glyph_antiqua_rbrace_bits,
+	['%'] = glyph_antiqua_percent_bits,
+	['('] = glyph_antiqua_lpar_bits,
+	[')'] = glyph_antiqua_rpar_bits,
+	['#'] = glyph_antiqua_hash_bits,
+	['A'] = glyph_antiqua_A_bits,
+	['B'] = glyph_antiqua_B_bits,
+	['C'] = glyph_antiqua_C_bits,
+	['D'] = glyph_antiqua_D_bits,
+	['E'] = glyph_antiqua_E_bits,
+	['F'] = glyph_antiqua_F_bits,
+	['G'] = glyph_antiqua_G_bits,
+	['H'] = glyph_antiqua_H_bits,
+	['I'] = glyph_antiqua_I_bits,
+	['J'] = glyph_antiqua_J_bits,
+	['K'] = glyph_antiqua_K_bits,
+	['L'] = glyph_antiqua_L_bits,
+	['M'] = glyph_antiqua_M_bits,
+	['N'] = glyph_antiqua_N_bits,
+	['O'] = glyph_antiqua_O_bits,
+	['P'] = glyph_antiqua_P_bits,
+	['Q'] = glyph_antiqua_Q_bits,
+	['R'] = glyph_antiqua_R_bits,
+	['S'] = glyph_antiqua_S_bits,
+	['T'] = glyph_antiqua_T_bits,
+	['U'] = glyph_antiqua_U_bits,
+	['V'] = glyph_antiqua_V_bits,
+	['W'] = glyph_antiqua_W_bits,
+	['X'] = glyph_antiqua_X_bits,
+	['Y'] = glyph_antiqua_Y_bits,
+	['Z'] = glyph_antiqua_Z_bits,
+	['0'] = glyph_antiqua_0_bits,
+	['1'] = glyph_antiqua_1_bits,
+	['2'] = glyph_antiqua_2_bits,
+	['3'] = glyph_antiqua_3_bits,
+	['4'] = glyph_antiqua_4_bits,
+	['5'] = glyph_antiqua_5_bits,
+	['6'] = glyph_antiqua_6_bits,
+	['7'] = glyph_antiqua_7_bits,
+	['8'] = glyph_antiqua_8_bits,
+	['9'] = glyph_antiqua_9_bits,
+};
+const font_t font_antiqua = {
+	.height = 12,
+	.spacing = 1,
+	.glyphs = antiqua_glyphs,
+};

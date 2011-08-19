@@ -79,8 +79,8 @@ void chaos_jackpot_deff (void)
 {
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 9, "CHAOS");
-	font_render_string_center (&font_fixed10, 64, 23, "JACKPOT");
+	font_render_string_center (&font_fireball, 64, 9, "CHAOS");
+	font_render_string_center (&font_fireball, 64, 23, "JACKPOT");
 	dmd_show_low ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
@@ -89,7 +89,7 @@ void chaos_jackpot_deff (void)
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	sprintf ("%d MILLION", chaosmb_shots[chaosmb_level_stored].jackpot_value);
-	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 	sound_send (SND_EXPLOSION_1);
 	dmd_show_low ();
 	dmd_copy_low_to_high ();
@@ -101,16 +101,17 @@ void chaos_jackpot_deff (void)
 void chaosmb_running_deff (void)
 {
 	U16 fno;
-	dmd_alloc_pair_clean ();
 	for (;;)
 	{
-		for (fno = IMG_CLOCK_START; fno <= IMG_CLOCK_END; fno += 2)
+		for (fno = IMG_BOLT_TESLA_START; fno <= IMG_BOLT_TESLA_END; fno += 2)
 		{
+			dmd_alloc_pair_clean ();
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_fixed6, 64, 4, "CHAOS MULTIBALL");
+			font_render_string_left (&font_bitoutline, 1, 1, "CHAOS");
+			font_render_string_left (&font_quadrit, 59, 2, "MULTIBALL");
 			sprintf_current_score ();
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_cowboy, 64, 16, sprintf_buffer);
 			if (chaosmb_hits_to_relight == 0)
 			{
 				sprintf ("SHOOT %s", chaosmb_shots[chaosmb_level].shot_name);
@@ -131,6 +132,7 @@ void chaosmb_running_deff (void)
 			dmd_text_outline ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
+			callset_invoke (score_overlay);
 			dmd_overlay_outline ();
 			dmd_show2 ();
 			task_sleep (TIME_66MS);

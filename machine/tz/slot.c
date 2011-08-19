@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <eb.h>
+#include <lamptimer.h>
 
 U8 sslot_mode_timer;
 U8 sslot_award_index;
@@ -74,7 +75,6 @@ void sslot_mode_deff (void)
 {
 	U16 fno;
 	dmd_alloc_pair_clean ();
-	//while (timed_mode_running_p (&sslot_mode))
 	for (;;)
 	{
 		for (fno = IMG_REELSTRIP_START; fno <= IMG_REELSTRIP_END; fno += 2)
@@ -82,10 +82,10 @@ void sslot_mode_deff (void)
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
 		
-			font_render_string_center (&font_var5, 64, 5, "SHOOT SLOT MACHINE");
+			font_render_string_center (&font_nayupixel10, 64, 5, "SHOOT SLOT MACHINE");
 			sprintf_current_score ();
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-			font_render_string_center (&font_var5, 64, 27, sslot_award_names[sslot_award_index]);
+			font_render_string_center (&font_cowboy, 64, 14, sprintf_buffer);
+			font_render_string_center (&font_bitcube10, 64, 25, sslot_award_names[sslot_award_index]);
 			sprintf ("%d", sslot_mode_timer);
 			font_render_string (&font_var5, 8, 16, sprintf_buffer);
 			font_render_string_right (&font_var5, 120, 16, sprintf_buffer);
@@ -104,19 +104,50 @@ void sslot_mode_deff (void)
 
 void sslot_award_deff (void)
 {
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_var5, 64, 5, "SLOT MACHINE AWARD");
-		font_render_string_center (&font_var5, 64, 20, sslot_award_names[sslot_award_index_stored]);
-		dmd_show_low ();
-		task_sleep_sec (2);
-		deff_exit ();
+	sprintf_score (score_deff_get ());
+	U16 fno;
+	U8 y = 20;
+	for (fno = IMG_ODDCHANGE_START; fno < IMG_ODDCHANGE_END; fno += 2)
+	{
+		dmd_alloc_pair_clean ();
+		y--;
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_var5, 64, y, "SLOT MACHINE AWARD");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_16MS);
+	}
+
+	for (fno = IMG_FLASHCENTRE_START; fno < IMG_FLASHCENTRE_END; fno += 2)
+	{
+		dmd_alloc_pair_clean ();
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_var5, 64, y, "SLOT MACHINE AWARD");
+		font_render_string_center (&font_bitcube10, 64, 20, sslot_award_names[sslot_award_index_stored]);
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_16MS);
+	}
+	task_sleep_sec (2);
+	deff_exit ();
 }
+
 
 void sslot_mode_init (void)
 {
 	sslot_award_index = 0;
 	task_recreate_gid (GID_SSLOT_AWARD_ROTATE, sslot_award_rotate);
-	lamp_tristate_flash (LM_SLOT_MACHINE);
+
+	struct lamptimer_args args = { .lamp = LM_SLOT_MACHINE, .secs = 20 };
+	lamp_timer_start (&args);
 }
 
 void sslot_mode_expire (void)
@@ -126,7 +157,7 @@ void sslot_mode_expire (void)
 
 void sslot_mode_exit (void)
 {	
-	lamp_tristate_off (LM_SLOT_MACHINE);
+	lamp_timer_stop (LM_SLOT_MACHINE);
 	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 }
 
@@ -230,14 +261,14 @@ static void shot_slot_oddchange (void)
 
 CALLSET_ENTRY (slot, dev_slot_enter)
 {
-	if (task_kill_gid (GID_CAMERA_SLOT_PROX_DETECT)
+	if ((task_kill_gid (GID_CAMERA_SLOT_PROX_DETECT)
 		 || task_kill_gid (GID_PIANO_SLOT_PROX_DETECT))
+		&& single_ball_play ())
 	{
 		/* Proximity sensor did not trip ; must be the powerball */
 		pb_detect_event (PF_PB_DETECTED);
 		pb_announce ();
 	}
-
 	if (!in_live_game)
 		return;
 	else if (task_find_or_kill_gid (GID_DEADEND_TO_SLOT)
@@ -249,14 +280,14 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		/* piano was recently hit, so ignore slot */
 		/* camera was recently hit, so ignore slot */
 	}
-	else if (event_did_follow (skill_shot, slot)
+	else if (task_kill_gid (GID_SDSS_APPROACHING)) 
+			callset_invoke (sdss_ready);
+	else if (task_find_or_kill_gid (GID_SKILL_TO_SLOT)
 		|| skill_shot_enabled
 		|| global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 	{
 		/* TODO, this may be buggy during sssmb */
 		/* skill shot has been missed or ball landed in plunger lane*/
-		if (timer_find_gid (GID_SDSS_READY)) 
-			deff_start (DEFF_SDSS_READY);
 		callset_invoke (skill_missed);
 	}
 	else if (timed_mode_running_p (&sslot_mode))

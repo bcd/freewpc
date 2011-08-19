@@ -90,6 +90,10 @@ void scores_draw_credits (void)
 #define SCORE_POS_LR_TINY 10
 #define SCORE_POS_LL_TINY 11
 #define SCORE_POS_UR_TINY 12
+#define SCORE_POS_ML_TINY 13
+#define SCORE_POS_MR_TINY 14
+#define SCORE_POS_ML_SMALL 15
+#define SCORE_POS_MR_SMALL 16
 
 
 /** A lookup table for mapping a 'score font key' into a font and
@@ -117,13 +121,17 @@ const struct score_font_info
 
 	[SCORE_POS_UL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 1 },
 	[SCORE_POS_UR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 1 },
-	[SCORE_POS_LL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 16 },
-	[SCORE_POS_LR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 16 },
+	[SCORE_POS_ML_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 8 },
+	[SCORE_POS_MR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 8 },
+	[SCORE_POS_LL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 15 },
+	[SCORE_POS_LR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 15 },
 
 	[SCORE_POS_UL_TINY] = { fontargs_render_string_left, &font_tinynum, 0, 1 },
 	[SCORE_POS_UR_TINY] = { fontargs_render_string_right, &font_tinynum, 127, 1 },
-	[SCORE_POS_LL_TINY] = { fontargs_render_string_left, &font_tinynum, 0, 16 },
-	[SCORE_POS_LR_TINY] = { fontargs_render_string_right, &font_tinynum, 127, 16 },
+	[SCORE_POS_ML_TINY] = { fontargs_render_string_left, &font_tinynum, 0, 8 },
+	[SCORE_POS_MR_TINY] = { fontargs_render_string_right, &font_tinynum, 127, 8 },
+	[SCORE_POS_LL_TINY] = { fontargs_render_string_left, &font_tinynum, 0, 15 },
+	[SCORE_POS_LR_TINY] = { fontargs_render_string_right, &font_tinynum, 127, 15 },
 };
 
 
@@ -138,7 +146,8 @@ const struct score_font_info
  *
  * The third index says which player's score is being drawn.
  */
-const U8 score_font_info_key[4][5][4] = {
+//const U8 score_font_info_key[4][5][4] = {
+const U8 score_font_info_key[MAX_PLAYERS][MAX_PLAYERS+1][MAX_PLAYERS] = {
 	/* 1 player */  {
 		{SCORE_POS_UL_SMALL},
 		{SCORE_POS_CENTER_LARGE},
@@ -162,6 +171,41 @@ const U8 score_font_info_key[4][5][4] = {
 		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_LL_SMALL, SCORE_POS_LR_TINY, },
 		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_LL_TINY, SCORE_POS_LR_SMALL, },
 	},
+#if MAX_PLAYERS >= 5
+	/* 5 players */ {
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_ML_SMALL,
+			SCORE_POS_MR_SMALL, SCORE_POS_LL_SMALL },
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_TINY, SCORE_POS_ML_TINY,
+			SCORE_POS_MR_TINY, SCORE_POS_LL_TINY },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_SMALL, SCORE_POS_ML_TINY,
+			SCORE_POS_MR_TINY, SCORE_POS_LL_TINY },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_ML_SMALL,
+			SCORE_POS_MR_TINY, SCORE_POS_LL_TINY },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_ML_TINY,
+			SCORE_POS_MR_SMALL, SCORE_POS_LL_TINY },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_ML_TINY,
+			SCORE_POS_MR_TINY, SCORE_POS_LL_SMALL },
+	},
+#endif
+#if MAX_PLAYERS == 6
+	/* 6 players */ {
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_ML_SMALL,
+			SCORE_POS_MR_SMALL, SCORE_POS_LL_SMALL, SCORE_POS_LR_SMALL},
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_TINY, SCORE_POS_ML_TINY,
+			SCORE_POS_MR_TINY, SCORE_POS_LL_TINY, SCORE_POS_LR_TINY },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_SMALL, SCORE_POS_ML_TINY,
+			SCORE_POS_MR_TINY, SCORE_POS_LL_TINY, SCORE_POS_LR_TINY },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_ML_SMALL,
+			SCORE_POS_MR_TINY, SCORE_POS_LL_TINY, SCORE_POS_LR_TINY },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_ML_TINY,
+			SCORE_POS_MR_SMALL, SCORE_POS_LL_TINY, SCORE_POS_LR_TINY },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_ML_TINY,
+			SCORE_POS_MR_TINY, SCORE_POS_LL_SMALL, SCORE_POS_LR_TINY },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_ML_TINY,
+			SCORE_POS_MR_TINY, SCORE_POS_LL_TINY, SCORE_POS_LR_SMALL },
+
+	},
+#endif
 };
 
 #endif

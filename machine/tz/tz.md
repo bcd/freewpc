@@ -153,7 +153,7 @@ define CONFIG_TZONE_IP y
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
 26: Trough Proximity, edge, noscore
-27: Shooter, edge, shooter, noscore, debounce(TIME_200MS)
+27: Shooter, shooter, noscore
 28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), noplay, lamp(LM_LEFT_JET)
 32: Right Jet, ingame, c_decl(sw_jet), noplay, lamp(LM_RIGHT_JET)
@@ -188,7 +188,7 @@ define CONFIG_TZONE_IP y
 67: Standup 6, standup, ingame, lamp(LM_MR2_5M)
 68: Standup 7, standup, ingame, lamp(LM_LR_5M)
 71: Autofire1, opto, noplay, ingame
-72: Autofire2, opto, noplay, ingame
+72: Autofire2, opto, noplay, ingame, debounce (TIME_66MS)
 73: Right Ramp, opto, ingame
 74: Gumball Popper, opto, intest
 75: MPF Top, opto, ingame
@@ -286,13 +286,13 @@ Bridge Open: driver(duty2),
 	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
 Shooter Div: driver(duty2),
-	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_700MS, duty_mask=DUTY_MASK_50
+	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_1S, duty_mask=DUTY_MASK_50
 
 Ramp Div: driver(duty2),
 	sol=SOL_RAMP_DIVERTOR, timeout=TIME_3S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
 
 Gumball Div: driver(duty2),
-	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_33MS, duty_mask=DUTY_MASK_50
+	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_400MS, duty_mask=DUTY_MASK_50
 
 ### old duty driver ###
 #Ramp Div: driver(duty),
@@ -454,7 +454,7 @@ Auto SWAG:yes_no, NO
 Mag Throw:yes_no, YES
 
 # Dont allow cradling during multiball
-Dixon anti cradle:yes_no, NO
+Dixon anti cradle:yes_no, YES
 
 # Only allow one high score entry per player (Not working)
 One HS entry:yes_no, NO
@@ -607,7 +607,7 @@ Jets Level Up: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT
 Gumball: page(MACHINE_PAGE), PRI_GAME_MODE7, D_PAUSE+D_QUEUED+D_TIMEOUT
 SSSMB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
-SSSMB Jackpot Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_PAUSE+D_QUEUED+D_RESTARTABLE
+SSSMB Jackpot Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_RESTARTABLE
 SSlot Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 SSlot Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
 TSM Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
@@ -628,17 +628,15 @@ Clock Millions Mode Total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE
 MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT+D_PAUSE
 MPF Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 
-Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE2
-BG Flash: page(MACHINE_PAGE), PRI_GAME_MODE4
-Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
+Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Inlane lights Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Left ramp lights camera: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_RESTARTABLE+D_TIMEOUT
 Shoot Hitch: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
-TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
-Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
-Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
-Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
+#TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
+#Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
+#Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
+#Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 
 Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED+D_PAUSE
 Select mode: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
@@ -652,7 +650,7 @@ Ball From Lock: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 #Multiball deffs
 MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
-MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
+MB Start: page(MACHINE_PAGE), PRI_MULTIBALL, D_PAUSE+D_QUEUED
 MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
 MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_LOW3, D_QUEUED+D_TIMEOUT
@@ -703,11 +701,11 @@ Camera Award: page(MACHINE2_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 
 Rules: page(MACHINE3_PAGE), PRI_EGG1
 
-Pinwheel: page(MACHINE_PAGE), PRI_GAME_QUICK3
+#Pinwheel: page(MACHINE_PAGE), PRI_GAME_QUICK3
 Snake: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
 Snake Ready: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
 Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
-Explosion: page(MACHINE_PAGE), PRI_EGG1
+#Explosion: page(MACHINE_PAGE), PRI_EGG1
 
 Paused: page(MACHINE2_PAGE), PRI_STATUS, D_PAUSE+D_QUEUED
 Alarm: page(MACHINE2_PAGE), PRI_SLAMTILT, D_PAUSE+D_QUEUED
@@ -723,7 +721,13 @@ Oddchange collected: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT+D_
 Bitmap test: page(MACHINE2_PAGE), PRI_GAME_QUICK5
 
 SDSS Ready: page(MACHINE4_PAGE), PRI_GAME_MODE6, D_PAUSE
-SDSS Awarded: page(MACHINE4_PAGE), PRI_JACKPOT, D_PAUSE
+SDSS Awarded: page(MACHINE4_PAGE), PRI_MULTIBALL, D_PAUSE+D_QUEUED
+USDSS Awarded: page(MACHINE4_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+Lock Powerball: page(MACHINE4_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
+
+Random Factoid: page(MACHINE3_PAGE), PRI_GAME_VMODE, D_PAUSE+D_QUEUED
+Wheelie: page(MACHINE4_PAGE), PRI_GAME_VMODE
+WPCTris: page(MACHINE4_PAGE), PRI_GAME_VMODE
 
 ##########################################################################
 # Lamp effects
@@ -770,9 +774,18 @@ Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 # Fonts used in this game.
 ##########################################################################
 [fonts]
-times10:
-twizone:
+#times10:
 steel:
+quadrit:
+cowboy:
+fipps:
+bitoutline:
+bitcube10:
+fireball:
+nayupixel10:
+#abstract:
+antiqua:
+#celticbit8:
 
 [timers]
 Rocket Flipper:

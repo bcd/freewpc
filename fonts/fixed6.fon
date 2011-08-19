@@ -2,8 +2,8 @@
 #define glyph_fixed6_A_width 9
 #define glyph_fixed6_A_height 9
 static char glyph_fixed6_A_bits[] = { glyph_fixed6_A_width, glyph_fixed6_A_height,
- 0x38,0x00,0x38,0x00,0x78,0x00,0x6c,0x00,0x6c,0x00,0xfe,0x00,0xfe,0x00,0xc6,
- 0x00,0x83,0x01};
+ 0x38,0x00,0x38,0x00,0x78,0x00,0x6c,0x00,0x6c,0x00,0xfe,0x00,0xfe,0x00,0x83,
+ 0x01,0x83,0x01};
 #define glyph_fixed6_B_width 7
 #define glyph_fixed6_B_height 9
 static char glyph_fixed6_B_bits[] = { glyph_fixed6_B_width, glyph_fixed6_B_height,
@@ -233,7 +233,7 @@ static char *fixed6_glyphs[] = {
    ['%' - BASECHAR] = glyph_fixed6_percent_bits,
 };
 const font_t font_fixed6 = {
-	.spacing = 2,
+	.spacing = 1,
 	.height = 9,
 	.glyphs = fixed6_glyphs,
 	.basechar = BASECHAR,

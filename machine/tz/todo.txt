@@ -1,23 +1,28 @@
+SSSMB - Kill ballsaver when activated.
+
 Tennis style scoring, player must be a certain amounts of points in front to
 win, or 2 balls past and the other play fails to retake the lead.
 
-tnf - Change rules:
-Only gain score if you reach the end bar, add on an extra 10 button pushes
-required each time till a certain point (3 times only?);
-also, use Jet progress bar
-
 show ZZzz's on skill shot if no one is playing
 
-
 put dmd_text_outline into score_deff.c
+
+Extra ball outlane - Lit from door panel
+
+Make anticradle check shooter lane
+debug anticradle and pb in lock
 
 Count balls going into slot tunnel for more accurate pb detection during
 multiball
 Wavy demo style text
 
+lamp_tristate_flash speeds
+
 BUGS
 Autofire ballsave multiball drain bug
 sssmb, make 'easy' jackpot and fix existing code
+Door handle lit crash!  Gaah!
+
 
 Make TZ challenge
 Grand champion gets to enter a PIN which is stored in the machine.  This means

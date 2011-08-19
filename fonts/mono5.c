@@ -3,8 +3,8 @@
 
 static char font_5x5_alpha_cap[][7] = {
 	{ 5, 5, 4, 10, 31, 17, 17 },
-	{ 5, 5, 7, 9, 7, 9, 7 },
-	{ 5, 5, 14, 1, 1, 1, 14 },
+	{ 5, 5, 15, 17, 15, 17, 15 },
+	{ 5, 5, 30, 1, 1, 1, 30 },
 	{ 5, 5, 15, 17, 17, 17, 15 },
 	{ 5, 5, 31, 1, 31, 1, 31 },
 
@@ -111,7 +111,7 @@ static char *mono5_glyphs[] = {
 };
 
 const font_t font_mono5 = {
-	.spacing = 2,
+	.spacing = 1,
 	.height = 5, 
 	.glyphs = mono5_glyphs,
 	.basechar = BASECHAR,

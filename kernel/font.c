@@ -273,7 +273,7 @@ static void fontargs_render_string (void)
 #endif
 
 		/* advance by 1 char ... args->font->width */
-		args->coord.x += font_width + 1;
+		args->coord.x += font_width + args->font->spacing;
 
 		/* If the height was adjusted just for this character, restore
 		back to the original starting row */
@@ -375,7 +375,7 @@ void font_get_string_area (const font_t *font, const char *s)
 		(void)font_lookup (font, c);
 
 		/* Update the total width */
-		font_string_width += font_width + 1;
+		font_string_width += font_width + font_args.font->spacing;
 
 		/* Update the total height */
 		if (font_height > font_string_height)
@@ -405,6 +405,13 @@ static void fontargs_prep_center (void)
 	font_args.coord.y = font_args.coord.y - (font_string_height / 2);
 }
 
+static void fontargs_prep_center_ytop (void)
+{
+	font_get_string_area (font_args.font, font_args.s);
+	font_args.coord.x = font_args.coord.x - (font_string_width / 2);
+//	font_args.coord.y = font_args.coord.y - (font_string_height / 2);
+}
+
 static void fontargs_prep_right (void)
 {
 	font_get_string_area (font_args.font, font_args.s);
@@ -424,6 +431,13 @@ void fontargs_render_string_center (void)
 	fontargs_prep_center ();
 	fontargs_render_string ();
 }
+
+void fontargs_render_string_center_ytop (void)
+{
+	fontargs_prep_center_ytop ();
+	fontargs_render_string ();
+}
+
 
 
 void fontargs_render_string_right (void)

@@ -99,7 +99,7 @@ static char *mono9_glyphs[] = {
 };
 
 const font_t font_mono9 = {
-	.spacing = 2,
+	.spacing = 1,
 	.height = 9, 
 	.glyphs = mono9_glyphs,
 };

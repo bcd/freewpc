@@ -21,7 +21,7 @@
 /* CALLSET_SECTION (spiral, __machine3__) */
 
 #include <freewpc.h>
-
+#include <lamptimer.h>
 
 U8 spiral_mode_timer;
 score_t spiral_mode_total;
@@ -148,8 +148,12 @@ void spiral_mode_total_deff (void)
 
 void spiral_mode_init (void)
 {
-	lamp_tristate_flash (LM_RIGHT_SPIRAL);
-	lamp_tristate_flash (LM_LEFT_SPIRAL);
+	struct lamptimer_args args = { .lamp = LM_LEFT_SPIRAL, .secs = 30 };
+	lamp_timer_start (&args);
+	
+	args.lamp = LM_RIGHT_SPIRAL;
+	args.secs = 30;
+	lamp_timer_start (&args);
 	score_zero (spiral_mode_total);	
 	magnet_reset ();
 }
@@ -162,8 +166,8 @@ void spiral_mode_expire (void)
 
 void spiral_mode_exit (void)
 {
-	lamp_tristate_off (LM_RIGHT_SPIRAL);
-	lamp_tristate_off (LM_LEFT_SPIRAL);
+	lamp_timer_stop (LM_RIGHT_SPIRAL);
+	lamp_timer_stop (LM_LEFT_SPIRAL);
 }
 
 CALLSET_ENTRY (spiral, start_ball)

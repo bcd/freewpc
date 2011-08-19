@@ -157,6 +157,7 @@ void window_stop_thread (void)
 /** Redraws the current window. */
 void window_redraw (void)
 {
+	//TODO Don't redraw if running a deff test
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	window_call_op (win_top, draw);
@@ -1905,7 +1906,7 @@ struct menu irqload_test_item = {
 
 /**********************************************************************/
 
-#define SCORE_TEST_PLAYERS 4
+#define SCORE_TEST_PLAYERS MAX_PLAYERS
 
 const score_t score_test_increment = { 0x00, 0x01, 0x23, 0x45, 0x60 };
 

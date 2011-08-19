@@ -62,7 +62,7 @@ extern U8 spiralawards_collected;
 extern U8 dead_end_count;
 extern U8 hitch_count;
 extern U8 rollover_count;
-extern bool backdoor_award_collected;
+extern __local__ bool backdoor_award_collected;
 extern U8 multidrain_count;
 extern bool stdm_death;
 extern bool unfair_death;
@@ -77,7 +77,7 @@ extern U8 lucky_bounces;
  * returns player number - 1 for score purposes
  */
 
-static U8 find_player_ranked (U8 ranking)
+U8 find_player_ranked (U8 ranking)
 {
 	/* If out of range, return last place */
 	if (ranking > MAX_PLAYERS)
@@ -113,11 +113,11 @@ void bonus_button_monitor (void)
 static void bonus_pause (void)
 {
 	if (buttons_held)
-		task_sleep_sec (1);
+		task_sleep_sec (3);
 	else
 		task_sleep (TIME_100MS);
 }
-
+#if 0
 static void countup_pause (void)
 {
 	if (buttons_held)
@@ -134,7 +134,7 @@ static void countup_pause (void)
 	else
 		task_sleep (TIME_33MS);
 }
-
+#endif
 /* Function so we can call two different transistions
  * depending on whether the buttons were pressed */
 static inline void bonus_sched_transition (void)
@@ -228,7 +228,7 @@ static void draw_taunts (void)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("MULTIDRAIN");
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_bitoutline, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
@@ -237,8 +237,8 @@ static void draw_taunts (void)
 	else if (unfair_death)
 	{
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, 64, 11, "BAD SHOW");
-		font_render_string_center (&font_var5, 64, 26, "UNFAIR DEATH");
+		font_render_string_center (&font_bitoutline, 64, 11, "BAD SHOW");
+		font_render_string_center (&font_nayupixel10, 64, 22, "UNFAIR DEATH");
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_HAHA_POWERFIELD_EXIT);
@@ -250,7 +250,7 @@ static void draw_taunts (void)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("SDTM DEATH");
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_bitoutline, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
@@ -261,7 +261,7 @@ static void draw_taunts (void)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("YOU LASTED LONG");
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_HAHA_POWERFIELD_EXIT);
@@ -316,7 +316,7 @@ static void calc_and_draw_bonus (U8 award_value, U8 amount)
 {
 	dmd_alloc_low_clean ();
 	bonus_add_up_score (award_value, amount);
-	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 	sprintf ("%d X %10b", amount, score_table[award_value]);
 	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 }
@@ -348,7 +348,7 @@ void one_ball_score_task (void)
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
 		sprintf_score (points_this_ball);
-		font_render_string_center (&font_fixed10, 64, 24, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 24, sprintf_buffer);
 		dmd_show_low ();
 		if (check_for_puny_score ())
 			sound_send (SND_BUYIN_CANCELLED);
@@ -377,7 +377,7 @@ void one_ball_score_task (void)
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_mono5, 64, 4, "HIGHEST 1 BALL SCORE");
 		sprintf_score (current_one_ball_hi_score);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 		if (current_one_ball_hi_ball_number == ball_up)
 			sprintf ("P%d ON THEIR LAST BALL", current_one_ball_hi_player);
 		else if (current_one_ball_hi_ball_number == ball_up && current_one_ball_hi_player == player_up)
@@ -400,7 +400,7 @@ void bonus_deff (void)
 	/* Show Initial bonus screen */
 	sample_start (MUS_FADE_BONUS, SL_500MS);
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_times10, 64, 16, "BONUS");
+	font_render_string_center (&font_fireball, 64, 16, "BONUS");
 	dmd_sched_transition (&trans_bitfade_fast);
 	dmd_show_low ();
 	task_sleep_sec (1);
@@ -408,17 +408,17 @@ void bonus_deff (void)
 	/* Start a task to monitor the buttons */
 	task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor);
 	
-	if (door_panels_started)
+	if (door_panels_started > 0)
 	{
 		calc_and_draw_bonus (SC_1M, door_panels_started);
-		font_render_string_center (&font_mono5, 64, 4, "DOOR PANELS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "DOOR PANELS");
 		trans_and_show ();
 	}
 	
-	if (loops)
+	if (loops > 0)
 	{
 		calc_and_draw_bonus (SC_1M, loops);
-		font_render_string_center (&font_mono5, 64, 4, "LOOPS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "LOOPS");
 		trans_and_show ();
 		if (loops > loop_master_hi)
 		{
@@ -426,14 +426,14 @@ void bonus_deff (void)
 			loop_master_initial_enter = player_up;
 			task_sleep_sec (1);
 			dmd_alloc_low_clean ();
-			font_render_string_center (&font_fixed10, 64, 16, "LOOP MASTER");
+			font_render_string_center (&font_quadrit, 64, 16, "LOOP MASTER");
 			dmd_sched_transition (&trans_sequential_boxfade);
 			dmd_show_low ();
 			sound_send (SND_GLASS_BREAKS);
 			task_sleep_sec (2);
 			dmd_alloc_low_clean ();
 			sprintf ("%d LOOPS", loop_master_hi);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 			dmd_show_low ();
 			task_sleep_sec (2);
 		}
@@ -443,60 +443,59 @@ void bonus_deff (void)
 	{
 		dmd_alloc_low_clean ();
 		bonus_add_up_jets ();
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 		sprintf ("TOWNSQUARE JETS");
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+		font_render_string_center (&font_nayupixel10, 64, 4, sprintf_buffer);
 		trans_and_show ();
 	}
 	
-	if (left_ramps)
+	if (left_ramps > 0)
 	{
 		calc_and_draw_bonus (SC_100K, left_ramps);
-		font_render_string_center (&font_mono5, 64, 4, "LEFT RAMPS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "LEFT RAMPS");
 		trans_and_show ();
 	}
 	
-	if (gumball_collected_count)
+	if (gumball_collected_count > 0)
 	{
 		calc_and_draw_bonus (SC_1M, gumball_collected_count);
-		font_render_string_center (&font_mono5, 64, 4, "GUMBALLS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "GUMBALLS");
 		trans_and_show ();
 	}
 
-	if (spiralawards_collected)
+	if (spiralawards_collected > 0)
 	{
 		calc_and_draw_bonus (SC_1M, spiralawards_collected);
-		font_render_string_center (&font_mono5, 64, 4, "SPIRALAWARDS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "SPIRALAWARDS");
 		trans_and_show ();
 	}	
 	
-	if (dead_end_count)
+	if (dead_end_count > 0)
 	{
 		calc_and_draw_bonus (SC_1M, dead_end_count);
-		font_render_string_center (&font_mono5, 64, 4, "DEAD ENDS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "DEAD ENDS");
 		trans_and_show ();
-
 	}
 
 	if (hitch_count > 0)
 	{
 		calc_and_draw_bonus (SC_1M, hitch_count);
-		font_render_string_center (&font_mono5, 64, 4, "HITCHHIKERS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "HITCHHIKERS");
 		trans_and_show ();
 
 	}
 	
-	if (rollover_count)
+	if (rollover_count > 0)
 	{
 		calc_and_draw_bonus (SC_1M, rollover_count);
-		font_render_string_center (&font_mono5, 64, 4, "ROLLOVERS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "ROLLOVERS");
 		trans_and_show ();
 		if (rollover_count > 9)
 		{
 			task_sleep_sec (2);
 			dmd_alloc_low_clean ();
-			font_render_string_center (&font_mono5, 64, 10, "KEEPING THOSE");
-			font_render_string_center (&font_mono5, 64, 20, "BUTTONS BUSY");
+			font_render_string_center (&font_nayupixel10, 64, 10, "KEEPING THOSE");
+			font_render_string_center (&font_nayupixel10, 64, 20, "BUTTONS BUSY");
 			dmd_sched_transition (&trans_sequential_boxfade);
 			dmd_show_low ();
 			sound_send (SND_GLASS_BREAKS);
@@ -507,7 +506,7 @@ void bonus_deff (void)
 	if (two_way_combos + three_way_combos)
 	{
 		calc_and_draw_bonus (SC_5M, two_way_combos + three_way_combos);
-		font_render_string_center (&font_mono5, 64, 4, "COMBOS");
+		font_render_string_center (&font_nayupixel10, 64, 4, "COMBOS");
 		trans_and_show ();
 		if (two_way_combos + three_way_combos > combo_master_hi)
 		{
@@ -515,14 +514,14 @@ void bonus_deff (void)
 			combo_master_initial_enter = player_up;
 			task_sleep_sec (1);
 			dmd_alloc_low_clean ();
-			font_render_string_center (&font_fixed10, 64, 16, "COMBO MASTER");
+			font_render_string_center (&font_quadrit, 64, 16, "COMBO MASTER");
 			dmd_sched_transition (&trans_sequential_boxfade);
 			dmd_show_low ();
 			sound_send (SND_GLASS_BREAKS);
 			task_sleep_sec (2);
 			dmd_alloc_low_clean ();
 			psprintf ("%d COMBO", "%d COMBOS", combo_master_hi);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 			dmd_show_low ();
 			task_sleep_sec (2);
 		}
@@ -532,13 +531,13 @@ void bonus_deff (void)
 	if (lucky_bounces)
 	{
 		calc_and_draw_bonus (SC_5M, lucky_bounces);
-		font_render_string_center (&font_mono5, 64, 4, "LUCKY BOUNCES");
+		font_render_string_center (&font_nayupixel10, 64, 4, "LUCKY BOUNCES");
 		trans_and_show ();
 		
 		if (lucky_bounces > 4 && lucky_bounces < spawny_get_hi)
 		{
 			dmd_alloc_low_clean ();
-			font_render_string_center (&font_fixed10, 64, 16, "SPAWNY GET");
+			font_render_string_center (&font_quadrit, 64, 16, "SPAWNY GET");
 			dmd_sched_transition (&trans_sequential_boxfade);
 			dmd_show_low ();
 			sound_send (SND_LUCKY);
@@ -548,7 +547,7 @@ void bonus_deff (void)
 		{
 			spawny_get_hi = lucky_bounces;
 			dmd_alloc_low_clean ();
-			font_render_string_center (&font_fixed10, 64, 16, "SPAWNIEST GET");
+			font_render_string_center (&font_quadrit, 64, 16, "SPAWNIEST GET");
 			dmd_sched_transition (&trans_sequential_boxfade);
 			dmd_show_low ();
 			sound_send (SND_GLASS_BREAKS);
@@ -563,9 +562,9 @@ void bonus_deff (void)
 		dmd_alloc_low_clean ();
 		score_add (total_bonus, score_table[SC_20M]);
 		sprintf ("BACKDOOR AWARD");
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+		font_render_string_center (&font_nayupixel10, 64, 4, sprintf_buffer);
 		sprintf ("20 MILLION");
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_fast);
 		dmd_show_low ();
 		sound_send (SND_SURVIVAL_IS_EVERYTHING);
@@ -591,7 +590,7 @@ void bonus_deff (void)
 		sprintf ("TOURIST AWARD");
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		sprintf ("100 MILLION");
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		task_sleep_sec (6);
@@ -601,9 +600,9 @@ void bonus_deff (void)
 	score_long (total_bonus);
 	/* Show total Bonus */	
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 6, "TOTAL BONUS");
+	font_render_string_center (&font_fireball, 64, 8, "TOTAL BONUS");
 	sprintf_score (total_bonus);
-	font_render_string_center (&font_fixed10, 64, 24, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 24, sprintf_buffer);
 	bonus_sched_transition ();
 	dmd_show_low ();
 	sound_send (SND_GREED_MODE_BOOM);
@@ -622,66 +621,79 @@ void bonus_deff (void)
 		sprintf_score (temp_score);
 	}
 
-	if (check_if_last_ball_of_multiplayer_game ())
+	if (system_config.lowest_goes_next == NO)
 	{
-		task_sleep_sec (2);
-	}
-	else if (num_players > 1 && player_up == num_players && ball_up != 1)
-	{
-		sound_send (SND_RABBLE_RABBLE);
-		dmd_alloc_low_clean ();
-		sprintf("PLAYER %d LEADS BY", find_player_ranked(1) + 1);
-		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf_score(temp_score);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		
-		if (num_players == 3)
+		if (check_if_last_ball_of_multiplayer_game ())
 		{
-			sprintf("2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1);
-			font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+			task_sleep_sec (2);
 		}
-		else if (num_players == 4)
+		/* Check if last ball of game */
+		else if (num_players > 1 && player_up == num_players && ball_up != 1)
 		{
-			sprintf("2ND P%d 3RD P%d 4TH P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1,
-				find_player_ranked(4) + 1);
-				font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
-		}
-		dmd_show_low ();
-		task_sleep_sec (3);
+			sound_send (SND_RABBLE_RABBLE);
+			dmd_alloc_low_clean ();
+			sprintf("PLAYER %d LEADS BY", find_player_ranked(1) + 1);
+			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			sprintf_score(temp_score);
+			font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
+			
+			if (num_players == 3)
+			{
+				sprintf("2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1);
+				font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+			}
+			else if (num_players == 4)
+			{
+				sprintf("2ND P%d 3RD P%d 4TH P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1,
+					find_player_ranked(4) + 1);
+					font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+			}
+			dmd_show_low ();
+			task_sleep_sec (3);
+			
 		
-	
+		}
+
+
+		if (check_if_last_ball_of_multiplayer_game ()
+			&& feature_config.adv_bonus_info == YES)
+
+		{
+			task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
+			sound_send (SND_PLAYER_PIANO_UNUSED);
+			dmd_alloc_low_clean ();
+				
+			sprintf("PLAYER %d WINS BY", find_player_ranked(1) + 1);
+			font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
+			sound_send (SND_GREED_MODE_BOOM);
+			sprintf_score (temp_score);
+			font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
+			if (score_compare (score_table[SC_10M], temp_score) == 1)
+			{
+				font_render_string_center (&font_mono5, 64, 29, "THAT WAS CLOSE");
+			}
+			else if (score_compare (temp_score, score_table[SC_100M]) == 1)
+			{
+				font_render_string_center (&font_mono5, 64, 29, "A LITTLE LOPSIDED");
+			}
+			else
+			{
+				font_render_string_center (&font_mono5, 64, 29, "CONGRATULATIONS");
+			}	
+			dmd_show_low ();
+			task_sleep_sec (5);
+		}
 	}
-
-
-	if (check_if_last_ball_of_multiplayer_game ()
-		&& feature_config.adv_bonus_info == YES)
-
+	else if (check_if_last_ball_for_multiplayer ())
 	{
-		task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
 		sound_send (SND_PLAYER_PIANO_UNUSED);
 		dmd_alloc_low_clean ();
-			
-		sprintf("PLAYER %d WINS BY", find_player_ranked(1) + 1);
-		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
-		sound_send (SND_GREED_MODE_BOOM);
-		sprintf_score (temp_score);
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		if (score_compare (score_table[SC_10M], temp_score) == 1)
-		{
-			font_render_string_center (&font_mono5, 64, 29, "THAT WAS CLOSE");
-		}
-		else if (score_compare (temp_score, score_table[SC_100M]) == 1)
-		{
-			font_render_string_center (&font_mono5, 64, 29, "A LITTLE LOPSIDED");
-		}
-		else
-		{
-			font_render_string_center (&font_mono5, 64, 29, "CONGRATULATIONS");
-		}	
+		font_render_string_center (&font_fireball, 64, 8, "GAME OVER!");
+		sprintf ("PLAYER %d", player_up);
+		font_render_string_center (&font_quadrit, 64, 22, sprintf_buffer);
 		dmd_show_low ();
-		task_sleep_sec (5);
+		task_sleep_sec (4);
 	}
-	
 	/* Show final score */
 	dmd_alloc_low_clean ();
 	scores_draw ();
@@ -701,6 +713,7 @@ void bonus_deff (void)
 CALLSET_ENTRY (bonus, serve_ball)
 {
 	if (check_if_last_ball_of_multiplayer_game ()
+		&& system_config.lowest_goes_next == NO
 		&& feature_config.adv_bonus_info == YES)
 		deff_start_sync (DEFF_SCORE_TO_BEAT);
 }
@@ -711,7 +724,7 @@ void score_to_beat_deff (void)
 	font_render_string_center (&font_mono5, 64, 19, "POINTS NEEDED");
 	if (find_player_ranked(1) + 1 == player_up)
 	{
-		font_render_string_center (&font_fixed10, 64, 8, "NO");
+		font_render_string_center (&font_quadrit, 64, 8, "NO");
 		if (check_if_last_ball_of_multiplayer_game ())
 		{
 			font_render_string_center (&font_mono5, 64, 26, "SHOWBOAT A LITTLE");
@@ -728,12 +741,13 @@ void score_to_beat_deff (void)
 		score_sub (temp_score, current_score);
 	
 		sprintf_score (temp_score);
-		font_render_string_center (&font_fixed10, 64, 8, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 8, sprintf_buffer);
 		if (player_up > current_hi_player)
 			sprintf ("TO BEAT PLAYER %d", current_hi_player);
 		else
 			sprintf ("TO CATCH UP TO P%d", current_hi_player);
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+		sound_send (SND_YOU_CAN_DO_IT);
 	}
 	dmd_show_low ();
 	task_sleep_sec (4);
@@ -784,9 +798,10 @@ CALLSET_ENTRY (bonus, valid_playfield)
 CALLSET_ENTRY (bonus, rank_change)
 {
 	/* Don't do anything if the player up isn't now in first place */
-	if (!in_live_game && (score_ranks[player_up - 1] != 1))
+	if (!in_live_game || (score_ranks[player_up - 1] != 1))
 		return;
-	 
+	if (system_config.lowest_goes_next == YES)
+       		return;
 	/* Check if last ball of game */
 	/* Don't count extra balls because we don't need to */
 	if (ball_up == system_config.balls_per_game 
@@ -812,7 +827,7 @@ CALLSET_ENTRY (bonus, status_report)
 		/* find_player_ranked returns from 0 */
 		if (find_player_ranked(1) + 1 == player_up)
 		{
-			font_render_string_center (&font_fixed10, 64, 8, "NO");
+			font_render_string_center (&font_quadrit, 64, 8, "NO");
 			if (check_if_last_ball_of_multiplayer_game ())
 			{
 				font_render_string_center (&font_mono5, 64, 26, "SHOWBOAT A LITTLE");
@@ -829,7 +844,7 @@ CALLSET_ENTRY (bonus, status_report)
 			score_sub (temp_score, current_score);
 		
 			sprintf_score (temp_score);
-			font_render_string_center (&font_fixed10, 64, 8, sprintf_buffer);
+			font_render_string_center (&font_quadrit, 64, 8, sprintf_buffer);
 			if (player_up > current_hi_player)
 				sprintf ("TO BEAT PLAYER %d", current_hi_player);
 			else
@@ -845,7 +860,7 @@ CALLSET_ENTRY (bonus, status_report)
 		score_sub (points_this_ball, start_ball_score);
 		font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
 		sprintf_score (points_this_ball);
-		font_render_string_center (&font_fixed10, 64, 24, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 24, sprintf_buffer);
 	}
 	status_page_complete ();
 }

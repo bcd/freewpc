@@ -1,0 +1,202 @@
+#include <freewpc.h>
+#define glyph_bitcube10_dollar_width 6
+#define glyph_bitcube10_dollar_height 8
+static char glyph_bitcube10_dollar_bits[] = { glyph_bitcube10_dollar_width, glyph_bitcube10_dollar_height,
+  0x3E, 0x3F, 0x33, 0x3D, 0x31, 0x37, 0x39, 0x1F, };
+#define glyph_bitcube10_minus_width 4
+#define glyph_bitcube10_minus_height 2
+static char glyph_bitcube10_minus_bits[] = { glyph_bitcube10_minus_width, glyph_bitcube10_minus_height,
+  0x0F, 0x00, };
+#define glyph_bitcube10_question_width 6
+#define glyph_bitcube10_question_height 8
+static char glyph_bitcube10_question_bits[] = { glyph_bitcube10_question_width, glyph_bitcube10_question_height,
+  0x3E, 0x3F, 0x31, 0x37, 0x31, 0x3F, 0x3B, 0x1F, };
+#define glyph_bitcube10_A_width 6
+#define glyph_bitcube10_A_height 8
+static char glyph_bitcube10_A_bits[] = { glyph_bitcube10_A_width, glyph_bitcube10_A_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x31, 0x35, 0x35, 0x1F, };
+#define glyph_bitcube10_B_width 6
+#define glyph_bitcube10_B_height 8
+static char glyph_bitcube10_B_bits[] = { glyph_bitcube10_B_width, glyph_bitcube10_B_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x31, 0x35, 0x31, 0x1F, };
+#define glyph_bitcube10_C_width 6
+#define glyph_bitcube10_C_height 8
+static char glyph_bitcube10_C_bits[] = { glyph_bitcube10_C_width, glyph_bitcube10_C_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x3D, 0x35, 0x31, 0x1F, };
+#define glyph_bitcube10_D_width 6
+#define glyph_bitcube10_D_height 8
+static char glyph_bitcube10_D_bits[] = { glyph_bitcube10_D_width, glyph_bitcube10_D_height,
+  0x3E, 0x3F, 0x39, 0x35, 0x35, 0x35, 0x39, 0x1F, };
+#define glyph_bitcube10_E_width 6
+#define glyph_bitcube10_E_height 8
+static char glyph_bitcube10_E_bits[] = { glyph_bitcube10_E_width, glyph_bitcube10_E_height,
+  0x3E, 0x3F, 0x31, 0x3D, 0x31, 0x3D, 0x31, 0x1F, };
+#define glyph_bitcube10_F_width 6
+#define glyph_bitcube10_F_height 8
+static char glyph_bitcube10_F_bits[] = { glyph_bitcube10_F_width, glyph_bitcube10_F_height,
+  0x3E, 0x3F, 0x31, 0x3D, 0x31, 0x3D, 0x3D, 0x1F, };
+#define glyph_bitcube10_G_width 6
+#define glyph_bitcube10_G_height 8
+static char glyph_bitcube10_G_bits[] = { glyph_bitcube10_G_width, glyph_bitcube10_G_height,
+  0x3E, 0x3F, 0x31, 0x3D, 0x3D, 0x35, 0x31, 0x1F, };
+#define glyph_bitcube10_H_width 6
+#define glyph_bitcube10_H_height 8
+static char glyph_bitcube10_H_bits[] = { glyph_bitcube10_H_width, glyph_bitcube10_H_height,
+  0x3E, 0x3F, 0x35, 0x35, 0x31, 0x35, 0x35, 0x1F, };
+#define glyph_bitcube10_I_width 6
+#define glyph_bitcube10_I_height 8
+static char glyph_bitcube10_I_bits[] = { glyph_bitcube10_I_width, glyph_bitcube10_I_height,
+  0x3E, 0x3F, 0x31, 0x3B, 0x3B, 0x3B, 0x31, 0x1F, };
+#define glyph_bitcube10_J_width 6
+#define glyph_bitcube10_J_height 8
+static char glyph_bitcube10_J_bits[] = { glyph_bitcube10_J_width, glyph_bitcube10_J_height,
+  0x3E, 0x3F, 0x31, 0x37, 0x37, 0x35, 0x31, 0x1F, };
+#define glyph_bitcube10_K_width 6
+#define glyph_bitcube10_K_height 8
+static char glyph_bitcube10_K_bits[] = { glyph_bitcube10_K_width, glyph_bitcube10_K_height,
+  0x3E, 0x3F, 0x35, 0x35, 0x39, 0x35, 0x35, 0x1F, };
+#define glyph_bitcube10_L_width 6
+#define glyph_bitcube10_L_height 8
+static char glyph_bitcube10_L_bits[] = { glyph_bitcube10_L_width, glyph_bitcube10_L_height,
+  0x3E, 0x3F, 0x3D, 0x3D, 0x3D, 0x3D, 0x31, 0x1F, };
+#define glyph_bitcube10_M_width 6
+#define glyph_bitcube10_M_height 8
+static char glyph_bitcube10_M_bits[] = { glyph_bitcube10_M_width, glyph_bitcube10_M_height,
+  0x3E, 0x3F, 0x35, 0x31, 0x35, 0x35, 0x35, 0x1F, };
+#define glyph_bitcube10_N_width 6
+#define glyph_bitcube10_N_height 8
+static char glyph_bitcube10_N_bits[] = { glyph_bitcube10_N_width, glyph_bitcube10_N_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x35, 0x35, 0x35, 0x1F, };
+#define glyph_bitcube10_O_width 6
+#define glyph_bitcube10_O_height 8
+static char glyph_bitcube10_O_bits[] = { glyph_bitcube10_O_width, glyph_bitcube10_O_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x35, 0x35, 0x31, 0x1F, };
+#define glyph_bitcube10_P_width 6
+#define glyph_bitcube10_P_height 8
+static char glyph_bitcube10_P_bits[] = { glyph_bitcube10_P_width, glyph_bitcube10_P_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x31, 0x3D, 0x3D, 0x1F, };
+#define glyph_bitcube10_Q_width 6
+#define glyph_bitcube10_Q_height 8
+static char glyph_bitcube10_Q_bits[] = { glyph_bitcube10_Q_width, glyph_bitcube10_Q_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x35, 0x35, 0x31, 0x17, };
+#define glyph_bitcube10_R_width 6
+#define glyph_bitcube10_R_height 8
+static char glyph_bitcube10_R_bits[] = { glyph_bitcube10_R_width, glyph_bitcube10_R_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x39, 0x35, 0x35, 0x1F, };
+#define glyph_bitcube10_S_width 6
+#define glyph_bitcube10_S_height 8
+static char glyph_bitcube10_S_bits[] = { glyph_bitcube10_S_width, glyph_bitcube10_S_height,
+  0x3E, 0x3F, 0x31, 0x3D, 0x31, 0x37, 0x31, 0x1F, };
+#define glyph_bitcube10_T_width 6
+#define glyph_bitcube10_T_height 8
+static char glyph_bitcube10_T_bits[] = { glyph_bitcube10_T_width, glyph_bitcube10_T_height,
+  0x3E, 0x3F, 0x31, 0x3B, 0x3B, 0x3B, 0x3B, 0x1F, };
+#define glyph_bitcube10_U_width 6
+#define glyph_bitcube10_U_height 8
+static char glyph_bitcube10_U_bits[] = { glyph_bitcube10_U_width, glyph_bitcube10_U_height,
+  0x3E, 0x3F, 0x35, 0x35, 0x35, 0x35, 0x31, 0x1F, };
+#define glyph_bitcube10_V_width 6
+#define glyph_bitcube10_V_height 8
+static char glyph_bitcube10_V_bits[] = { glyph_bitcube10_V_width, glyph_bitcube10_V_height,
+  0x3E, 0x3F, 0x35, 0x35, 0x35, 0x31, 0x3B, 0x1F, };
+#define glyph_bitcube10_W_width 6
+#define glyph_bitcube10_W_height 8
+static char glyph_bitcube10_W_bits[] = { glyph_bitcube10_W_width, glyph_bitcube10_W_height,
+  0x3E, 0x3F, 0x35, 0x35, 0x31, 0x31, 0x35, 0x1F, };
+#define glyph_bitcube10_X_width 6
+#define glyph_bitcube10_X_height 8
+static char glyph_bitcube10_X_bits[] = { glyph_bitcube10_X_width, glyph_bitcube10_X_height,
+  0x3E, 0x3F, 0x35, 0x31, 0x3B, 0x31, 0x35, 0x1F, };
+#define glyph_bitcube10_Y_width 6
+#define glyph_bitcube10_Y_height 8
+static char glyph_bitcube10_Y_bits[] = { glyph_bitcube10_Y_width, glyph_bitcube10_Y_height,
+  0x3E, 0x3F, 0x35, 0x35, 0x31, 0x3B, 0x3B, 0x1F, };
+#define glyph_bitcube10_Z_width 6
+#define glyph_bitcube10_Z_height 8
+static char glyph_bitcube10_Z_bits[] = { glyph_bitcube10_Z_width, glyph_bitcube10_Z_height,
+  0x3E, 0x3F, 0x31, 0x37, 0x31, 0x3D, 0x31, 0x1F, };
+#define glyph_bitcube10_0_width 6
+#define glyph_bitcube10_0_height 8
+static char glyph_bitcube10_0_bits[] = { glyph_bitcube10_0_width, glyph_bitcube10_0_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x35, 0x35, 0x31, 0x1F, };
+#define glyph_bitcube10_1_width 6
+#define glyph_bitcube10_1_height 8
+static char glyph_bitcube10_1_bits[] = { glyph_bitcube10_1_width, glyph_bitcube10_1_height,
+  0x3E, 0x3F, 0x3B, 0x39, 0x3B, 0x3B, 0x31, 0x1F, };
+#define glyph_bitcube10_2_width 6
+#define glyph_bitcube10_2_height 8
+static char glyph_bitcube10_2_bits[] = { glyph_bitcube10_2_width, glyph_bitcube10_2_height,
+  0x3E, 0x3F, 0x31, 0x37, 0x31, 0x3D, 0x31, 0x1F, };
+#define glyph_bitcube10_3_width 6
+#define glyph_bitcube10_3_height 8
+static char glyph_bitcube10_3_bits[] = { glyph_bitcube10_3_width, glyph_bitcube10_3_height,
+  0x3E, 0x3F, 0x31, 0x37, 0x31, 0x37, 0x31, 0x1F, };
+#define glyph_bitcube10_4_width 6
+#define glyph_bitcube10_4_height 8
+static char glyph_bitcube10_4_bits[] = { glyph_bitcube10_4_width, glyph_bitcube10_4_height,
+  0x3E, 0x3F, 0x35, 0x35, 0x31, 0x37, 0x37, 0x1F, };
+#define glyph_bitcube10_5_width 6
+#define glyph_bitcube10_5_height 8
+static char glyph_bitcube10_5_bits[] = { glyph_bitcube10_5_width, glyph_bitcube10_5_height,
+  0x3E, 0x3F, 0x31, 0x3D, 0x31, 0x37, 0x31, 0x1F, };
+#define glyph_bitcube10_6_width 6
+#define glyph_bitcube10_6_height 8
+static char glyph_bitcube10_6_bits[] = { glyph_bitcube10_6_width, glyph_bitcube10_6_height,
+  0x3E, 0x3F, 0x31, 0x3D, 0x31, 0x35, 0x31, 0x1F, };
+#define glyph_bitcube10_7_width 6
+#define glyph_bitcube10_7_height 8
+static char glyph_bitcube10_7_bits[] = { glyph_bitcube10_7_width, glyph_bitcube10_7_height,
+  0x3E, 0x3F, 0x31, 0x37, 0x37, 0x37, 0x37, 0x1F, };
+#define glyph_bitcube10_8_width 6
+#define glyph_bitcube10_8_height 8
+static char glyph_bitcube10_8_bits[] = { glyph_bitcube10_8_width, glyph_bitcube10_8_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x31, 0x35, 0x31, 0x1F, };
+#define glyph_bitcube10_9_width 6
+#define glyph_bitcube10_9_height 8
+static char glyph_bitcube10_9_bits[] = { glyph_bitcube10_9_width, glyph_bitcube10_9_height,
+  0x3E, 0x3F, 0x31, 0x35, 0x31, 0x37, 0x31, 0x1F, };
+static char *bitcube10_glyphs[] = {
+	['$'] = glyph_bitcube10_dollar_bits,
+	['-'] = glyph_bitcube10_minus_bits,
+	['?'] = glyph_bitcube10_question_bits,
+	['A'] = glyph_bitcube10_A_bits,
+	['B'] = glyph_bitcube10_B_bits,
+	['C'] = glyph_bitcube10_C_bits,
+	['D'] = glyph_bitcube10_D_bits,
+	['E'] = glyph_bitcube10_E_bits,
+	['F'] = glyph_bitcube10_F_bits,
+	['G'] = glyph_bitcube10_G_bits,
+	['H'] = glyph_bitcube10_H_bits,
+	['I'] = glyph_bitcube10_I_bits,
+	['J'] = glyph_bitcube10_J_bits,
+	['K'] = glyph_bitcube10_K_bits,
+	['L'] = glyph_bitcube10_L_bits,
+	['M'] = glyph_bitcube10_M_bits,
+	['N'] = glyph_bitcube10_N_bits,
+	['O'] = glyph_bitcube10_O_bits,
+	['P'] = glyph_bitcube10_P_bits,
+	['Q'] = glyph_bitcube10_Q_bits,
+	['R'] = glyph_bitcube10_R_bits,
+	['S'] = glyph_bitcube10_S_bits,
+	['T'] = glyph_bitcube10_T_bits,
+	['U'] = glyph_bitcube10_U_bits,
+	['V'] = glyph_bitcube10_V_bits,
+	['W'] = glyph_bitcube10_W_bits,
+	['X'] = glyph_bitcube10_X_bits,
+	['Y'] = glyph_bitcube10_Y_bits,
+	['Z'] = glyph_bitcube10_Z_bits,
+	['0'] = glyph_bitcube10_0_bits,
+	['1'] = glyph_bitcube10_1_bits,
+	['2'] = glyph_bitcube10_2_bits,
+	['3'] = glyph_bitcube10_3_bits,
+	['4'] = glyph_bitcube10_4_bits,
+	['5'] = glyph_bitcube10_5_bits,
+	['6'] = glyph_bitcube10_6_bits,
+	['7'] = glyph_bitcube10_7_bits,
+	['8'] = glyph_bitcube10_8_bits,
+	['9'] = glyph_bitcube10_9_bits,
+};
+const font_t font_bitcube10 = {
+	.height = 10,
+	.glyphs = bitcube10_glyphs,
+};

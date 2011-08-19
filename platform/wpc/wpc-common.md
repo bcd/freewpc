@@ -117,7 +117,7 @@ lucida9:
 tinynum:
 var5:
 fixed6:
-cu17:
+#cu17:
 fixed10:
 term6:
 times8:

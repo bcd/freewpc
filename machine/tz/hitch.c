@@ -38,8 +38,8 @@ struct timed_mode_ops hitch_mode = {
 	.music = MUS_FASTLOCK_ADDAMS_FAMILY,
 	.deff_running = DEFF_HITCH_MODE,
 	.prio = PRI_GAME_MODE6,
-	.timer = &hitch_mode_timer,
 	.init_timer = 30,
+	.timer = &hitch_mode_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
 };
@@ -57,15 +57,15 @@ void hitchhiker_deff (void)
 			
 		if (timed_mode_running_p (&hitch_mode))
 		{
-			sprintf("10M");
-			font_render_string_center (&font_fixed6, 98, 5, sprintf_buffer);
+			sprintf("10 MILLION");
+			font_render_string_center (&font_fireball, 64, 16, sprintf_buffer);
 		}
 		else
 		{
 			sprintf ("HITCHERS");
-			font_render_string_center (&font_mono5, 98, 5, sprintf_buffer);
+			font_render_string_center (&font_nayupixel10, 98, 5, sprintf_buffer);
 			sprintf ("%d", hitch_count);
-			font_render_string_center (&font_fixed6, 99, 24, sprintf_buffer);
+			font_render_string_center (&font_quadrit, 99, 24, sprintf_buffer);
 		}	
 	
 		dmd_text_outline ();
@@ -89,10 +89,10 @@ void hitch_mode_deff (void)
 	{
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_var5, 64, 5, "SHOOT HITCHHIKER");
+		font_render_string_center (&font_nayupixel10, 64, 5, "SHOOT HITCHHIKER");
 		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 27, "FOR 10M");
+		font_render_string_center (&font_antiqua, 64, 13, sprintf_buffer);
+		font_render_string_center (&font_nayupixel10, 64, 27, "FOR 10M");
 		sprintf ("%d", hitch_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
@@ -142,19 +142,8 @@ CALLSET_ENTRY (hitch, sw_hitchhiker)
 	}
 	bounded_increment (hitch_count, 99);
 	
-	/* Yes, I know it's ugly, I'll fix it at some point */
-	if (hitch_count == 5 ||
-		hitch_count == 10 ||
-		hitch_count == 15 ||
-		hitch_count == 20 ||
-		hitch_count == 30 ||
-		hitch_count == 40 ||
-		hitch_count == 50 ||
-		hitch_count == 60 ||
-		hitch_count == 70 ||
-		hitch_count == 80 ||
-		hitch_count == 90 ||
-		hitch_count == 99 )
+	if ((hitch_count < 20 && hitch_count % 5 == 0)
+		|| (hitch_count >= 20 && hitch_count % 10 == 0))
 	{
 		mpf_enable_count++;
 		sound_send (SND_ARE_YOU_READY_TO_BATTLE);

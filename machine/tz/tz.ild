@@ -1,4 +1,6 @@
 IMG_CITY: machine/tz/images/city.pgm
+IMG_EINSTEIN: images/einstein.pgm
+IMG_EINSTEIN2: images/einstein.pgm
 IMG_BCD: images/bcd.pgm
 IMG_SONNY_JIM: images/sonny_jim.pgm
 IMG_NEWCAR: !machine/tz/images/newcar.pgm
@@ -444,5 +446,4 @@ machine/tz/animation/oddchange/frame_0007.pgm
 machine/tz/animation/oddchange/frame_0008.pgm
 machine/tz/animation/oddchange/frame_0009.pgm
 IMG_ODDCHANGE_END: machine/tz/animation/oddchange/frame_0010.pgm
-
 

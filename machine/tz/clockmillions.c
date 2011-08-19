@@ -21,6 +21,7 @@
 /* CALLSET_SECTION (clockmillions, __machine3__) */
 
 #include <freewpc.h>
+#include <lamptimer.h>
 
 U8 clock_millions_mode_timer;
 U8 clock_mode_hits;
@@ -38,7 +39,7 @@ struct timed_mode_ops clock_millions_mode = {
 	.gid = GID_CLOCK_MILLIONS_MODE_RUNNING,
 	.music = MUS_CLOCK_CHAOS1,
 	.deff_running = DEFF_CLOCK_MILLIONS_MODE,
-	.deff_ending = DEFF_CLOCK_MILLIONS_MODE_TOTAL,
+	//.deff_ending = DEFF_CLOCK_MILLIONS_MODE_TOTAL,
 	.prio = PRI_GAME_MODE1,
 	.init_timer = 20,
 	.timer = &clock_millions_mode_timer,
@@ -143,30 +144,32 @@ void clock_millions_hit_deff (void)
 
 void clock_millions_mode_deff (void)
 {
-	U16 fno;
-	dmd_alloc_pair_clean ();
+	//U16 fno;
 	for (;;)
 	{
-		for (fno = IMG_CLOCK_START; fno <= IMG_CLOCK_END; fno += 2)
-		{
-			dmd_map_overlay ();
-			dmd_clean_page_low ();
+//		for (fno = IMG_CLOCK_START; fno <= IMG_CLOCK_END; fno += 2)
+//		{
+			dmd_alloc_pair_clean ();
+	//		dmd_map_overlay ();
+	//		dmd_clean_page_low ();
 	
-			font_render_string_center (&font_var5, 64, 5, "CLOCK MILLIONS");
+			font_render_string_center (&font_nayupixel10, 64, 5, "CLOCK MILLIONS");
 			sprintf_current_score ();
-			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_quadrit, 64, 16, sprintf_buffer);
 			psprintf ("SHOOT CLOCK 1 MORE TIME", "SHOOT CLOCK %d MORE TIMES", 6 - clock_mode_hits);
 			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 			sprintf ("%d", clock_millions_mode_timer);
 			font_render_string (&font_var5, 2, 2, sprintf_buffer);
 			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-			dmd_text_outline ();
-			dmd_alloc_pair ();
-			frame_draw (fno);
-			dmd_overlay_outline ();
+	//		dmd_text_outline ();
+		//	dmd_alloc_pair ();
+			//frame_draw (fno);
+			dmd_copy_low_to_high ();
+			callset_invoke (score_overlay);
+		//	dmd_overlay_outline ();
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
-		}
+//		}
 	}
 }
 
@@ -208,19 +211,22 @@ void clock_millions_mode_init (void)
 {
 	clock_mode_hits = 0;
 	score_zero (clock_mode_score);
-	lamp_tristate_flash (LM_CLOCK_MILLIONS);
+
+	struct lamptimer_args args = { .lamp = LM_CLOCK_MILLIONS, .secs = 20 };
+	lamp_timer_start (&args);
 	tz_clock_start_forward ();
 }
 
 void clock_millions_mode_expire (void)
 {
+	deff_start (DEFF_CLOCK_MILLIONS_MODE_TOTAL);
 	if (clock_mode_hits <= 2)
 		callset_invoke (start_hurryup);
 }
 
 void clock_millions_mode_exit (void)
 {
-	lamp_tristate_off (LM_CLOCK_MILLIONS);
+	lamp_timer_stop (LM_CLOCK_MILLIONS);
 	tz_clock_reset ();
 }
 

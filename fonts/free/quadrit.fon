@@ -1,0 +1,280 @@
+#include <freewpc.h>
+#define glyph_quadrit_period_width 2
+#define glyph_quadrit_period_height 2
+static char glyph_quadrit_period_bits[] = { glyph_quadrit_period_width, glyph_quadrit_period_height,
+  0x03, 0x03, };
+#define glyph_quadrit_atsign_width 14
+#define glyph_quadrit_atsign_height 14
+static char glyph_quadrit_atsign_bits[] = { glyph_quadrit_atsign_width, glyph_quadrit_atsign_height,
+  0xFC, 0x0F, 0xFE, 0x1F, 0x07, 0x38, 0x03, 0x30, 0xE3, 0x33, 0xF3, 0x33, 
+  0x33, 0x33, 0x33, 0x33, 0xF3, 0x3F, 0xE3, 0x1F, 0x03, 0x00, 0x07, 0x00, 
+  0xFE, 0x0F, 0xFC, 0x0F, };
+#define glyph_quadrit_dollar_width 6
+#define glyph_quadrit_dollar_height 14
+static char glyph_quadrit_dollar_bits[] = { glyph_quadrit_dollar_width, glyph_quadrit_dollar_height,
+  0x0C, 0x0C, 0x3E, 0x3F, 0x03, 0x03, 0x1F, 0x3E, 0x30, 0x30, 0x3F, 0x1F, 
+  0x0C, 0x0C, };
+#define glyph_quadrit_comma_width 2
+#define glyph_quadrit_comma_height 4
+static char glyph_quadrit_comma_bits[] = { glyph_quadrit_comma_width, glyph_quadrit_comma_height,
+  0x03, 0x03, 0x02, 0x02, };
+#define glyph_quadrit_plus_width 6
+#define glyph_quadrit_plus_height 6
+static char glyph_quadrit_plus_bits[] = { glyph_quadrit_plus_width, glyph_quadrit_plus_height,
+  0x0C, 0x0C, 0x3F, 0x3F, 0x0C, 0x0C, };
+#define glyph_quadrit_minus_width 6
+#define glyph_quadrit_minus_height 2
+static char glyph_quadrit_minus_bits[] = { glyph_quadrit_minus_width, glyph_quadrit_minus_height,
+  0x3F, 0x3F, };
+#define glyph_quadrit_semicolon_width 2
+#define glyph_quadrit_semicolon_height 8
+static char glyph_quadrit_semicolon_bits[] = { glyph_quadrit_semicolon_width, glyph_quadrit_semicolon_height,
+  0x03, 0x03, 0x00, 0x00, 0x03, 0x03, 0x02, 0x02, };
+#define glyph_quadrit_colon_width 2
+#define glyph_quadrit_colon_height 6
+static char glyph_quadrit_colon_bits[] = { glyph_quadrit_colon_width, glyph_quadrit_colon_height,
+  0x03, 0x03, 0x00, 0x00, 0x03, 0x03, };
+#define glyph_quadrit_amp_width 9
+#define glyph_quadrit_amp_height 10
+static char glyph_quadrit_amp_bits[] = { glyph_quadrit_amp_width, glyph_quadrit_amp_height,
+  0x3E, 0x00, 0x7F, 0x00, 0x63, 0x00, 0x03, 0x00, 0xEE, 0x00, 0xEE, 0x00, 
+  0x63, 0x00, 0x63, 0x00, 0xFF, 0x01, 0xDE, 0x01, };
+#define glyph_quadrit_bang_width 2
+#define glyph_quadrit_bang_height 10
+static char glyph_quadrit_bang_bits[] = { glyph_quadrit_bang_width, glyph_quadrit_bang_height,
+  0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x00, 0x00, 0x03, 0x03, };
+#define glyph_quadrit_question_width 6
+#define glyph_quadrit_question_height 10
+static char glyph_quadrit_question_bits[] = { glyph_quadrit_question_width, glyph_quadrit_question_height,
+  0x1F, 0x3F, 0x30, 0x30, 0x3C, 0x1C, 0x00, 0x00, 0x0C, 0x0C, };
+#define glyph_quadrit_lbrace_width 4
+#define glyph_quadrit_lbrace_height 10
+static char glyph_quadrit_lbrace_bits[] = { glyph_quadrit_lbrace_width, glyph_quadrit_lbrace_height,
+  0x0F, 0x0F, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x0F, 0x0F, };
+#define glyph_quadrit_rbrace_width 4
+#define glyph_quadrit_rbrace_height 10
+static char glyph_quadrit_rbrace_bits[] = { glyph_quadrit_rbrace_width, glyph_quadrit_rbrace_height,
+  0x0F, 0x0F, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0F, 0x0F, };
+#define glyph_quadrit_percent_width 15
+#define glyph_quadrit_percent_height 10
+static char glyph_quadrit_percent_bits[] = { glyph_quadrit_percent_width, glyph_quadrit_percent_height,
+  0x0C, 0x00, 0x1E, 0x03, 0xB3, 0x03, 0xB3, 0x01, 0xDE, 0x19, 0xCC, 0x3C, 
+  0xE0, 0x66, 0x60, 0x66, 0x70, 0x3C, 0x30, 0x18, };
+#define glyph_quadrit_lpar_width 4
+#define glyph_quadrit_lpar_height 10
+static char glyph_quadrit_lpar_bits[] = { glyph_quadrit_lpar_width, glyph_quadrit_lpar_height,
+  0x0E, 0x0E, 0x07, 0x03, 0x03, 0x03, 0x03, 0x07, 0x0E, 0x0E, };
+#define glyph_quadrit_rpar_width 4
+#define glyph_quadrit_rpar_height 10
+static char glyph_quadrit_rpar_bits[] = { glyph_quadrit_rpar_width, glyph_quadrit_rpar_height,
+  0x07, 0x07, 0x0E, 0x0C, 0x0C, 0x0C, 0x0C, 0x0E, 0x07, 0x07, };
+#define glyph_quadrit_hash_width 5
+#define glyph_quadrit_hash_height 5
+static char glyph_quadrit_hash_bits[] = { glyph_quadrit_hash_width, glyph_quadrit_hash_height,
+  0x0A, 0x1F, 0x0A, 0x1F, 0x0A, };
+#define glyph_quadrit_A_width 6
+#define glyph_quadrit_A_height 10
+static char glyph_quadrit_A_bits[] = { glyph_quadrit_A_width, glyph_quadrit_A_height,
+  0x1E, 0x3F, 0x33, 0x33, 0x3F, 0x3F, 0x33, 0x33, 0x33, 0x33, };
+#define glyph_quadrit_B_width 6
+#define glyph_quadrit_B_height 10
+static char glyph_quadrit_B_bits[] = { glyph_quadrit_B_width, glyph_quadrit_B_height,
+  0x1F, 0x3F, 0x33, 0x33, 0x1F, 0x1F, 0x33, 0x33, 0x3F, 0x1F, };
+#define glyph_quadrit_C_width 6
+#define glyph_quadrit_C_height 10
+static char glyph_quadrit_C_bits[] = { glyph_quadrit_C_width, glyph_quadrit_C_height,
+  0x3E, 0x3F, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x3F, 0x3E, };
+#define glyph_quadrit_D_width 6
+#define glyph_quadrit_D_height 10
+static char glyph_quadrit_D_bits[] = { glyph_quadrit_D_width, glyph_quadrit_D_height,
+  0x1F, 0x3F, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x3F, 0x1F, };
+#define glyph_quadrit_E_width 6
+#define glyph_quadrit_E_height 10
+static char glyph_quadrit_E_bits[] = { glyph_quadrit_E_width, glyph_quadrit_E_height,
+  0x3F, 0x3F, 0x03, 0x03, 0x3F, 0x3F, 0x03, 0x03, 0x3F, 0x3F, };
+#define glyph_quadrit_F_width 6
+#define glyph_quadrit_F_height 10
+static char glyph_quadrit_F_bits[] = { glyph_quadrit_F_width, glyph_quadrit_F_height,
+  0x3F, 0x3F, 0x03, 0x03, 0x3F, 0x3F, 0x03, 0x03, 0x03, 0x03, };
+#define glyph_quadrit_G_width 6
+#define glyph_quadrit_G_height 10
+static char glyph_quadrit_G_bits[] = { glyph_quadrit_G_width, glyph_quadrit_G_height,
+  0x3E, 0x3F, 0x03, 0x03, 0x33, 0x33, 0x33, 0x33, 0x3F, 0x1E, };
+#define glyph_quadrit_H_width 6
+#define glyph_quadrit_H_height 10
+static char glyph_quadrit_H_bits[] = { glyph_quadrit_H_width, glyph_quadrit_H_height,
+  0x33, 0x33, 0x33, 0x33, 0x3F, 0x3F, 0x33, 0x33, 0x33, 0x33, };
+#define glyph_quadrit_I_width 2
+#define glyph_quadrit_I_height 10
+static char glyph_quadrit_I_bits[] = { glyph_quadrit_I_width, glyph_quadrit_I_height,
+  0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, };
+#define glyph_quadrit_J_width 6
+#define glyph_quadrit_J_height 10
+static char glyph_quadrit_J_bits[] = { glyph_quadrit_J_width, glyph_quadrit_J_height,
+  0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x33, 0x33, 0x3F, 0x1E, };
+#define glyph_quadrit_K_width 6
+#define glyph_quadrit_K_height 10
+static char glyph_quadrit_K_bits[] = { glyph_quadrit_K_width, glyph_quadrit_K_height,
+  0x33, 0x33, 0x3B, 0x1B, 0x0F, 0x0F, 0x1B, 0x3B, 0x33, 0x33, };
+#define glyph_quadrit_L_width 6
+#define glyph_quadrit_L_height 10
+static char glyph_quadrit_L_bits[] = { glyph_quadrit_L_width, glyph_quadrit_L_height,
+  0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x3F, 0x3F, };
+#define glyph_quadrit_M_width 8
+#define glyph_quadrit_M_height 10
+static char glyph_quadrit_M_bits[] = { glyph_quadrit_M_width, glyph_quadrit_M_height,
+  0xC3, 0xE7, 0xFF, 0xFF, 0xDB, 0xC3, 0xC3, 0xC3, 0xC3, 0xC3, };
+#define glyph_quadrit_N_width 6
+#define glyph_quadrit_N_height 10
+static char glyph_quadrit_N_bits[] = { glyph_quadrit_N_width, glyph_quadrit_N_height,
+  0x33, 0x37, 0x3F, 0x3F, 0x3B, 0x33, 0x33, 0x33, 0x33, 0x33, };
+#define glyph_quadrit_O_width 6
+#define glyph_quadrit_O_height 10
+static char glyph_quadrit_O_bits[] = { glyph_quadrit_O_width, glyph_quadrit_O_height,
+  0x1E, 0x3F, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x3F, 0x1E, };
+#define glyph_quadrit_P_width 6
+#define glyph_quadrit_P_height 10
+static char glyph_quadrit_P_bits[] = { glyph_quadrit_P_width, glyph_quadrit_P_height,
+  0x1F, 0x3F, 0x33, 0x33, 0x3F, 0x1F, 0x03, 0x03, 0x03, 0x03, };
+#define glyph_quadrit_Q_width 6
+#define glyph_quadrit_Q_height 13
+static char glyph_quadrit_Q_bits[] = { glyph_quadrit_Q_width, glyph_quadrit_Q_height,
+  0x1E, 0x3F, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x3F, 0x1E, 0x0C, 0x3C, 
+  0x38, };
+#define glyph_quadrit_R_width 6
+#define glyph_quadrit_R_height 10
+static char glyph_quadrit_R_bits[] = { glyph_quadrit_R_width, glyph_quadrit_R_height,
+  0x1F, 0x3F, 0x33, 0x33, 0x3F, 0x1F, 0x33, 0x33, 0x33, 0x33, };
+#define glyph_quadrit_S_width 6
+#define glyph_quadrit_S_height 10
+static char glyph_quadrit_S_bits[] = { glyph_quadrit_S_width, glyph_quadrit_S_height,
+  0x3E, 0x3F, 0x03, 0x03, 0x1F, 0x3E, 0x30, 0x30, 0x3F, 0x1F, };
+#define glyph_quadrit_T_width 6
+#define glyph_quadrit_T_height 10
+static char glyph_quadrit_T_bits[] = { glyph_quadrit_T_width, glyph_quadrit_T_height,
+  0x3F, 0x3F, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, };
+#define glyph_quadrit_U_width 6
+#define glyph_quadrit_U_height 10
+static char glyph_quadrit_U_bits[] = { glyph_quadrit_U_width, glyph_quadrit_U_height,
+  0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x3F, 0x1E, };
+#define glyph_quadrit_V_width 6
+#define glyph_quadrit_V_height 10
+static char glyph_quadrit_V_bits[] = { glyph_quadrit_V_width, glyph_quadrit_V_height,
+  0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x3B, 0x1F, 0x0F, 0x07, };
+#define glyph_quadrit_W_width 10
+#define glyph_quadrit_W_height 10
+static char glyph_quadrit_W_bits[] = { glyph_quadrit_W_width, glyph_quadrit_W_height,
+  0x33, 0x03, 0x33, 0x03, 0x33, 0x03, 0x33, 0x03, 0x33, 0x03, 0x33, 0x03, 
+  0xBB, 0x03, 0xFF, 0x01, 0xFF, 0x00, 0x66, 0x00, };
+#define glyph_quadrit_X_width 6
+#define glyph_quadrit_X_height 10
+static char glyph_quadrit_X_bits[] = { glyph_quadrit_X_width, glyph_quadrit_X_height,
+  0x33, 0x33, 0x33, 0x1E, 0x0C, 0x0C, 0x1E, 0x33, 0x33, 0x33, };
+#define glyph_quadrit_Y_width 6
+#define glyph_quadrit_Y_height 10
+static char glyph_quadrit_Y_bits[] = { glyph_quadrit_Y_width, glyph_quadrit_Y_height,
+  0x33, 0x33, 0x33, 0x33, 0x3F, 0x1E, 0x0C, 0x0C, 0x0C, 0x0C, };
+#define glyph_quadrit_Z_width 6
+#define glyph_quadrit_Z_height 10
+static char glyph_quadrit_Z_bits[] = { glyph_quadrit_Z_width, glyph_quadrit_Z_height,
+  0x3F, 0x3F, 0x30, 0x30, 0x1C, 0x0E, 0x03, 0x03, 0x3F, 0x3F, };
+#define glyph_quadrit_0_width 6
+#define glyph_quadrit_0_height 10
+static char glyph_quadrit_0_bits[] = { glyph_quadrit_0_width, glyph_quadrit_0_height,
+  0x1E, 0x3F, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x3F, 0x1E, };
+#define glyph_quadrit_1_width 4
+#define glyph_quadrit_1_height 10
+static char glyph_quadrit_1_bits[] = { glyph_quadrit_1_width, glyph_quadrit_1_height,
+  0x0C, 0x0C, 0x0F, 0x0F, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, };
+#define glyph_quadrit_2_width 6
+#define glyph_quadrit_2_height 10
+static char glyph_quadrit_2_bits[] = { glyph_quadrit_2_width, glyph_quadrit_2_height,
+  0x1F, 0x3F, 0x30, 0x30, 0x3E, 0x1F, 0x03, 0x03, 0x3F, 0x3F, };
+#define glyph_quadrit_3_width 6
+#define glyph_quadrit_3_height 10
+static char glyph_quadrit_3_bits[] = { glyph_quadrit_3_width, glyph_quadrit_3_height,
+  0x1F, 0x3F, 0x30, 0x30, 0x1F, 0x1F, 0x30, 0x30, 0x3F, 0x1F, };
+#define glyph_quadrit_4_width 6
+#define glyph_quadrit_4_height 10
+static char glyph_quadrit_4_bits[] = { glyph_quadrit_4_width, glyph_quadrit_4_height,
+  0x33, 0x33, 0x33, 0x33, 0x3F, 0x3E, 0x30, 0x30, 0x30, 0x30, };
+#define glyph_quadrit_5_width 6
+#define glyph_quadrit_5_height 10
+static char glyph_quadrit_5_bits[] = { glyph_quadrit_5_width, glyph_quadrit_5_height,
+  0x3F, 0x3F, 0x03, 0x03, 0x1F, 0x3F, 0x30, 0x30, 0x3F, 0x1F, };
+#define glyph_quadrit_6_width 6
+#define glyph_quadrit_6_height 10
+static char glyph_quadrit_6_bits[] = { glyph_quadrit_6_width, glyph_quadrit_6_height,
+  0x3E, 0x3F, 0x03, 0x03, 0x1F, 0x3F, 0x33, 0x33, 0x3F, 0x1E, };
+#define glyph_quadrit_7_width 6
+#define glyph_quadrit_7_height 10
+static char glyph_quadrit_7_bits[] = { glyph_quadrit_7_width, glyph_quadrit_7_height,
+  0x1F, 0x3F, 0x30, 0x30, 0x18, 0x18, 0x0C, 0x0C, 0x0C, 0x0C, };
+#define glyph_quadrit_8_width 6
+#define glyph_quadrit_8_height 10
+static char glyph_quadrit_8_bits[] = { glyph_quadrit_8_width, glyph_quadrit_8_height,
+  0x1E, 0x3F, 0x33, 0x33, 0x1E, 0x1E, 0x33, 0x33, 0x3F, 0x1E, };
+#define glyph_quadrit_9_width 6
+#define glyph_quadrit_9_height 10
+static char glyph_quadrit_9_bits[] = { glyph_quadrit_9_width, glyph_quadrit_9_height,
+  0x1E, 0x3F, 0x33, 0x33, 0x3F, 0x3E, 0x30, 0x30, 0x3F, 0x1F, };
+static char *quadrit_glyphs[] = {
+	['.'] = glyph_quadrit_period_bits,
+	['@'] = glyph_quadrit_atsign_bits,
+	['$'] = glyph_quadrit_dollar_bits,
+	[','] = glyph_quadrit_comma_bits,
+	['+'] = glyph_quadrit_plus_bits,
+	['-'] = glyph_quadrit_minus_bits,
+	[';'] = glyph_quadrit_semicolon_bits,
+	[':'] = glyph_quadrit_colon_bits,
+	['&'] = glyph_quadrit_amp_bits,
+	['!'] = glyph_quadrit_bang_bits,
+	['?'] = glyph_quadrit_question_bits,
+	['['] = glyph_quadrit_lbrace_bits,
+	[']'] = glyph_quadrit_rbrace_bits,
+	['%'] = glyph_quadrit_percent_bits,
+	['('] = glyph_quadrit_lpar_bits,
+	[')'] = glyph_quadrit_rpar_bits,
+	['#'] = glyph_quadrit_hash_bits,
+	['A'] = glyph_quadrit_A_bits,
+	['B'] = glyph_quadrit_B_bits,
+	['C'] = glyph_quadrit_C_bits,
+	['D'] = glyph_quadrit_D_bits,
+	['E'] = glyph_quadrit_E_bits,
+	['F'] = glyph_quadrit_F_bits,
+	['G'] = glyph_quadrit_G_bits,
+	['H'] = glyph_quadrit_H_bits,
+	['I'] = glyph_quadrit_I_bits,
+	['J'] = glyph_quadrit_J_bits,
+	['K'] = glyph_quadrit_K_bits,
+	['L'] = glyph_quadrit_L_bits,
+	['M'] = glyph_quadrit_M_bits,
+	['N'] = glyph_quadrit_N_bits,
+	['O'] = glyph_quadrit_O_bits,
+	['P'] = glyph_quadrit_P_bits,
+	['Q'] = glyph_quadrit_Q_bits,
+	['R'] = glyph_quadrit_R_bits,
+	['S'] = glyph_quadrit_S_bits,
+	['T'] = glyph_quadrit_T_bits,
+	['U'] = glyph_quadrit_U_bits,
+	['V'] = glyph_quadrit_V_bits,
+	['W'] = glyph_quadrit_W_bits,
+	['X'] = glyph_quadrit_X_bits,
+	['Y'] = glyph_quadrit_Y_bits,
+	['Z'] = glyph_quadrit_Z_bits,
+	['0'] = glyph_quadrit_0_bits,
+	['1'] = glyph_quadrit_1_bits,
+	['2'] = glyph_quadrit_2_bits,
+	['3'] = glyph_quadrit_3_bits,
+	['4'] = glyph_quadrit_4_bits,
+	['5'] = glyph_quadrit_5_bits,
+	['6'] = glyph_quadrit_6_bits,
+	['7'] = glyph_quadrit_7_bits,
+	['8'] = glyph_quadrit_8_bits,
+	['9'] = glyph_quadrit_9_bits,
+};
+const font_t font_quadrit = {
+	.height = 10,
+	.spacing = 1,
+	.glyphs = quadrit_glyphs,
+};

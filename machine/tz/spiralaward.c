@@ -36,11 +36,13 @@
 #include <freewpc.h>
 #include <eb.h>
 #include <status.h>
+#include <lamptimer.h>
 
 U8 spiralaward;
 __local__ U8 spiralawards_collected; 
 __local__ bool spiralaward_set_completed; 
 extern __local__ U8 mpf_enable_count;
+extern __local__ U8 door_panels_started;
 
 const char *spiralaward_names[] = {
 	"2 MILLION",
@@ -63,8 +65,8 @@ static void write_spiralaward_text (void)
 {
 	if (spiralawards_collected < 6)
 	{
-		font_render_string_center (&font_var5, 64, 20, spiralaward_names[spiralaward]);
-		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL AWARD");
+		font_render_string_center (&font_quadrit, 64, 20, spiralaward_names[spiralaward]);
+		font_render_string_center_ytop (&font_bitcube10, 64, 1, "SPIRAL AWARD");
 	}
 	else 
 	{
@@ -92,12 +94,15 @@ void spiralaward_collected_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	dmd_alloc_pair_clean ();
-	write_spiralaward_text ();
-	dmd_copy_low_to_high ();
-	callset_invoke (score_overlay);
-	dmd_show2 ();
-	task_sleep_sec (2);
+	for (fno = 0; fno < 20; fno++)
+	{
+		dmd_alloc_pair_clean ();
+		write_spiralaward_text ();
+		dmd_copy_low_to_high ();
+		callset_invoke (score_overlay);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 	deff_exit ();
 }
 
@@ -128,6 +133,8 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 		 */
 		if (!global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY))
 			magnet_disable_catch (MAG_RIGHT);
+		struct lamptimer_args args = { .lamp = LM_RIGHT_SPIRAL, .secs = 3 };
+		lamp_timer_start (&args);
 		leff_start (LEFF_SPIRALAWARD);
 		/* Only show the hint the first two times */
 		if (spiralawards_collected < 1 && !spiralaward_set_completed);
@@ -139,6 +146,7 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 
 static void award_spiralaward (void)
 {	
+	lamp_timer_stop (LM_RIGHT_SPIRAL);
 	bounded_increment (spiralawards_collected, 6);
 	
 	/* Pick a random award, random_scaled returns N-1 */
@@ -170,9 +178,13 @@ static void award_spiralaward (void)
 			break;
 		case 4:
 			sound_send (SND_TEN_MILLION_POINTS);
-			/* Light the 10M door panel */
-			lamp_on (LM_PANEL_10M);
 			score (SC_10M);
+			/* Light the 10M door panel */
+			if (!lamp_test (LM_PANEL_10M))
+			{
+				lamp_on (LM_PANEL_10M);
+				door_panels_started++;
+			}
 			break;
 		case 5:
 			sound_send (SND_GET_THE_EXTRA_BALL);

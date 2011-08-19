@@ -28,6 +28,7 @@ extern void mball_start_3_ball (void);
 extern U8 unlit_shot_count;
 extern U8 jackpot_level;
 extern U8 mball_locks_lit;
+extern U8 mball_locks_made;
 extern U8 gumball_enable_count;
 extern U8 chaosmb_level;
 extern U8 chaosmb_hits_to_relight;
@@ -35,6 +36,7 @@ extern U8 three_way_combos;
 extern U8 left_ramps;
 extern U8 mball_locks_lit;
 extern struct timed_mode_ops hitch_mode;
+extern __local__ U8 door_panels_started;
 
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
@@ -60,24 +62,24 @@ void left_ramp_lights_camera_deff (void)
 			&& !global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 	{
 		sprintf ("%d MORE TO", camera_hits_to_relight_jackpot);
-		font_render_string_center (&font_fixed6, 64, 6, sprintf_buffer);
-		font_render_string_center (&font_fixed6, 64, 22, "RELIGHT JACKPOT");
+		font_render_string_center (&font_quadrit, 64, 6, sprintf_buffer);
+		font_render_string_center (&font_quadrit, 64, 22, "RELIGHT JACKPOT");
 	}
 	else if (timed_mode_running_p (&hitch_mode))
 	{
-		font_render_string_center (&font_fixed6, 64, 6, "TRY A");
-		font_render_string_center (&font_fixed6, 64, 22, "BIT LOWER");
+		font_render_string_center (&font_quadrit, 64, 6, "TRY A");
+		font_render_string_center (&font_quadrit, 64, 22, "BIT LOWER");
 	
 	}
 	else if (left_ramps < 3)
 	{
-		font_render_string_center (&font_fixed6, 64, 6, "LEFT RAMP");
-		font_render_string_center (&font_fixed6, 64, 22, "LIGHTS CAMERA");
+		font_render_string_center (&font_quadrit, 64, 8, "LEFT RAMP");
+		font_render_string_center (&font_quadrit, 64, 22, "LIGHTS CAMERA");
 	}
 	else
 	{
-		font_render_string_center (&font_fixed6, 64, 6, "4 ROLLOVERS");
-		font_render_string_center (&font_fixed6, 64, 22, "LIGHTS CAMERA");
+		font_render_string_center (&font_quadrit, 64, 8, "4 ROLLOVERS");
+		font_render_string_center (&font_quadrit, 64, 22, "LIGHTS CAMERA");
 	}
 	dmd_show_low ();
 	task_sleep_sec (1);
@@ -105,8 +107,8 @@ void camera_award_deff (void)
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
 	/* camera_award_count_stored starts from 0 */
-	sprintf ("CAMERA AWARD %d", camera_award_count_stored + 1);
-	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
+	sprintf ("CAMERA %d", camera_award_count_stored + 1);
+	font_render_string_center (&font_bitoutline, 64, 9, sprintf_buffer);
 	switch (camera_award_count_stored)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
@@ -127,11 +129,11 @@ void camera_award_deff (void)
 		default:
 			break;
 	}
-	font_render_string_center (&font_fixed6, 64, 23, sprintf_buffer);
+	font_render_string_center (&font_quadrit, 64, 23, sprintf_buffer);
 	dmd_sched_transition (&trans_scroll_down_fast);
 	dmd_show_low ();
 	sound_send (SND_GUMBALL_LOADED);
-	task_sleep_sec (1);
+	task_sleep_sec (2);
 	deff_exit ();
 }
 
@@ -180,11 +182,11 @@ static void do_camera_award (void)
 {
 	magnet_disable_catch (MAG_RIGHT);
 	unlit_shot_count = 0;
+	/* Don't light the lock if unable to do so */
+	if (mball_locks_lit + mball_locks_made >= 2 && camera_award_count == CAMERA_AWARD_LIGHT_LOCK)
+		camera_award_count = CAMERA_AWARD_10_MILLION;
 	camera_award_count_stored = camera_award_count;
-	/* Don't light the lock if already lit */
-	if (mball_locks_lit == 2 && camera_award_count == CAMERA_AWARD_LIGHT_LOCK)
-		camera_award_count = CAMERA_AWARD_DOOR_PANEL;
-	deff_start (DEFF_CAMERA_AWARD);
+	deff_start_sync (DEFF_CAMERA_AWARD);
 	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
@@ -195,7 +197,11 @@ static void do_camera_award (void)
 			sound_send (SND_TEN_MILLION_POINTS);
 			score (SC_10M);	
 			/* Spot door panel if not lit */
-			lamp_on (LM_PANEL_10M);
+			if (!lamp_test (LM_PANEL_10M))
+			{
+				lamp_on (LM_PANEL_10M);
+				door_panels_started++;
+			}
 			break;
 		case CAMERA_AWARD_DOOR_PANEL:
 			/* Spot Door Panel */
@@ -205,10 +211,9 @@ static void do_camera_award (void)
 			/* Quick Multiball */
 			task_create_anon (mball_start_2ball_task);
 			break;
+		default:
 		case CAMERA_AWARD_20_MILLION:
 			score (SC_20M);
-			break;
-		default:
 			break;
 	}
 	bounded_decrement (cameras_lit, 0);

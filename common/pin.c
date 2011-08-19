@@ -45,7 +45,7 @@ static const unsigned char pin_chars[] = "0123456789ABCDEF";
 #endif
 #define MAX_INITIAL_INITIAL (sizeof (pin_chars) - MAX_LETTERS_SHOWN)
 
-#define SELECT_OFFSET 2
+#define SELECT_OFFSET 0
 #define FONT_WIDTH 8
 #define ALPHABET_LEN 16
 

@@ -35,10 +35,9 @@ void select_mode_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
-			font_render_string_center (&font_fixed10, 64, 6, "CHOOSE PANEL");
-			font_render_string_center (&font_mono5, 64, 17, "USE FLIPPER BUTTONS");
-			font_render_string_left (&font_var5, 10, 24, "LEFT: COLLECT");
-			font_render_string_right (&font_var5, 118, 24, "RIGHT: SELECT");
+			font_render_string_center (&font_fireball, 64, 8, "CHOOSE PANEL");
+			font_render_string_left (&font_var5, 5, 24, "LEFT:COLLECT");
+			font_render_string_right (&font_var5, 128, 24, "RIGHT:MOVE");
 			dmd_text_outline ();
 
 			dmd_alloc_pair ();

@@ -1,0 +1,282 @@
+#include <freewpc.h>
+#define glyph_fipps_period_width 4
+#define glyph_fipps_period_height 4
+static char glyph_fipps_period_bits[] = { glyph_fipps_period_width, glyph_fipps_period_height,
+  0x06, 0x0D, 0x0F, 0x0E, };
+#define glyph_fipps_atsign_width 10
+#define glyph_fipps_atsign_height 10
+static char glyph_fipps_atsign_bits[] = { glyph_fipps_atsign_width, glyph_fipps_atsign_height,
+  0xF8, 0x00, 0x84, 0x01, 0x7A, 0x03, 0x1D, 0x03, 0x6D, 0x03, 0x1D, 0x03, 
+  0xFB, 0x03, 0x06, 0x03, 0xFC, 0x03, 0xF8, 0x03, };
+#define glyph_fipps_dollar_width 8
+#define glyph_fipps_dollar_height 12
+static char glyph_fipps_dollar_bits[] = { glyph_fipps_dollar_width, glyph_fipps_dollar_height,
+  0x18, 0x74, 0xC2, 0xF5, 0xF5, 0x63, 0xD7, 0xD6, 0xE1, 0xF7, 0x7E, 0x18, 
+  };
+#define glyph_fipps_comma_width 5
+#define glyph_fipps_comma_height 6
+static char glyph_fipps_comma_bits[] = { glyph_fipps_comma_width, glyph_fipps_comma_height,
+  0x0C, 0x1A, 0x1A, 0x1D, 0x0F, 0x06, };
+#define glyph_fipps_plus_width 6
+#define glyph_fipps_plus_height 6
+static char glyph_fipps_plus_bits[] = { glyph_fipps_plus_width, glyph_fipps_plus_height,
+  0x0C, 0x1A, 0x31, 0x3B, 0x1E, 0x0C, };
+#define glyph_fipps_minus_width 6
+#define glyph_fipps_minus_height 4
+static char glyph_fipps_minus_bits[] = { glyph_fipps_minus_width, glyph_fipps_minus_height,
+  0x1E, 0x31, 0x3F, 0x3E, };
+#define glyph_fipps_semicolon_width 5
+#define glyph_fipps_semicolon_height 8
+static char glyph_fipps_semicolon_bits[] = { glyph_fipps_semicolon_width, glyph_fipps_semicolon_height,
+  0x0C, 0x1A, 0x1E, 0x1A, 0x1A, 0x1D, 0x0F, 0x06, };
+#define glyph_fipps_colon_width 4
+#define glyph_fipps_colon_height 6
+static char glyph_fipps_colon_bits[] = { glyph_fipps_colon_width, glyph_fipps_colon_height,
+  0x06, 0x0D, 0x0F, 0x0D, 0x0F, 0x0E, };
+#define glyph_fipps_amp_width 8
+#define glyph_fipps_amp_height 10
+static char glyph_fipps_amp_bits[] = { glyph_fipps_amp_width, glyph_fipps_amp_height,
+  0x1C, 0x32, 0x3D, 0x6D, 0xC3, 0xED, 0x6D, 0xD3, 0xFE, 0xFC, };
+#define glyph_fipps_bang_width 4
+#define glyph_fipps_bang_height 10
+static char glyph_fipps_bang_bits[] = { glyph_fipps_bang_width, glyph_fipps_bang_height,
+  0x06, 0x0D, 0x0D, 0x0D, 0x0D, 0x0D, 0x0F, 0x0D, 0x0F, 0x0E, };
+#define glyph_fipps_question_width 9
+#define glyph_fipps_question_height 10
+static char glyph_fipps_question_bits[] = { glyph_fipps_question_width, glyph_fipps_question_height,
+  0x7C, 0x00, 0xC2, 0x00, 0xBD, 0x01, 0xBF, 0x01, 0xDE, 0x01, 0xE8, 0x00, 
+  0x78, 0x00, 0x68, 0x00, 0x78, 0x00, 0x70, 0x00, };
+#define glyph_fipps_lbrace_width 5
+#define glyph_fipps_lbrace_height 10
+static char glyph_fipps_lbrace_bits[] = { glyph_fipps_lbrace_width, glyph_fipps_lbrace_height,
+  0x0F, 0x19, 0x1D, 0x0D, 0x0D, 0x0D, 0x0D, 0x19, 0x1F, 0x1E, };
+#define glyph_fipps_rbrace_width 5
+#define glyph_fipps_rbrace_height 10
+static char glyph_fipps_rbrace_bits[] = { glyph_fipps_rbrace_width, glyph_fipps_rbrace_height,
+  0x0E, 0x19, 0x1B, 0x1A, 0x1A, 0x1A, 0x1A, 0x19, 0x1F, 0x1E, };
+#define glyph_fipps_percent_width 9
+#define glyph_fipps_percent_height 10
+static char glyph_fipps_percent_bits[] = { glyph_fipps_percent_width, glyph_fipps_percent_height,
+  0x7C, 0x00, 0xC2, 0x00, 0xBD, 0x01, 0xBF, 0x01, 0xDE, 0x01, 0xE8, 0x00, 
+  0x78, 0x00, 0x68, 0x00, 0x78, 0x00, 0x70, 0x00, };
+#define glyph_fipps_lpar_width 5
+#define glyph_fipps_lpar_height 10
+static char glyph_fipps_lpar_bits[] = { glyph_fipps_lpar_width, glyph_fipps_lpar_height,
+  0x0C, 0x1A, 0x1D, 0x0D, 0x0D, 0x0D, 0x0D, 0x1B, 0x1E, 0x1C, };
+#define glyph_fipps_rpar_width 5
+#define glyph_fipps_rpar_height 10
+static char glyph_fipps_rpar_bits[] = { glyph_fipps_rpar_width, glyph_fipps_rpar_height,
+  0x06, 0x0D, 0x1B, 0x1A, 0x1A, 0x1A, 0x1A, 0x1D, 0x0F, 0x06, };
+#define glyph_fipps_hash_width 8
+#define glyph_fipps_hash_height 8
+static char glyph_fipps_hash_bits[] = { glyph_fipps_hash_width, glyph_fipps_hash_height,
+  0x3C, 0x6A, 0xC1, 0xEB, 0xC1, 0xEB, 0x7E, 0x3C, };
+#define glyph_fipps_A_width 8
+#define glyph_fipps_A_height 10
+static char glyph_fipps_A_bits[] = { glyph_fipps_A_width, glyph_fipps_A_height,
+  0x3C, 0x62, 0xDD, 0xDD, 0xC1, 0xDD, 0xDD, 0xDD, 0xFF, 0xEE, };
+#define glyph_fipps_B_width 8
+#define glyph_fipps_B_height 10
+static char glyph_fipps_B_bits[] = { glyph_fipps_B_width, glyph_fipps_B_height,
+  0x3E, 0x61, 0xDD, 0xDD, 0xE1, 0xDD, 0xDD, 0xE1, 0xFF, 0x7E, };
+#define glyph_fipps_C_width 8
+#define glyph_fipps_C_height 10
+static char glyph_fipps_C_bits[] = { glyph_fipps_C_width, glyph_fipps_C_height,
+  0x7C, 0xC2, 0xFD, 0xFD, 0x1D, 0x1D, 0x7D, 0xC3, 0xFE, 0xFC, };
+#define glyph_fipps_D_width 8
+#define glyph_fipps_D_height 10
+static char glyph_fipps_D_bits[] = { glyph_fipps_D_width, glyph_fipps_D_height,
+  0x3E, 0x61, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xE1, 0xFF, 0x7E, };
+#define glyph_fipps_E_width 7
+#define glyph_fipps_E_height 10
+static char glyph_fipps_E_bits[] = { glyph_fipps_E_width, glyph_fipps_E_height,
+  0x3E, 0x61, 0x7D, 0x3D, 0x61, 0x7D, 0x3D, 0x61, 0x7F, 0x7E, };
+#define glyph_fipps_F_width 7
+#define glyph_fipps_F_height 10
+static char glyph_fipps_F_bits[] = { glyph_fipps_F_width, glyph_fipps_F_height,
+  0x3E, 0x61, 0x7D, 0x3D, 0x61, 0x7D, 0x7D, 0x0D, 0x0F, 0x0E, };
+#define glyph_fipps_G_width 8
+#define glyph_fipps_G_height 10
+static char glyph_fipps_G_bits[] = { glyph_fipps_G_width, glyph_fipps_G_height,
+  0x7C, 0xC2, 0xFD, 0xFD, 0xCD, 0xDD, 0xDD, 0xE3, 0xFE, 0x7C, };
+#define glyph_fipps_H_width 8
+#define glyph_fipps_H_height 10
+static char glyph_fipps_H_bits[] = { glyph_fipps_H_width, glyph_fipps_H_height,
+  0x66, 0xDD, 0xDD, 0xDD, 0xC1, 0xDD, 0xDD, 0xDD, 0xFF, 0xEE, };
+#define glyph_fipps_I_width 4
+#define glyph_fipps_I_height 10
+static char glyph_fipps_I_bits[] = { glyph_fipps_I_width, glyph_fipps_I_height,
+  0x06, 0x0D, 0x0D, 0x0D, 0x0D, 0x0D, 0x0D, 0x0D, 0x0F, 0x0E, };
+#define glyph_fipps_J_width 8
+#define glyph_fipps_J_height 10
+static char glyph_fipps_J_bits[] = { glyph_fipps_J_width, glyph_fipps_J_height,
+  0x60, 0xD0, 0xD0, 0xD0, 0xD6, 0xDD, 0xDD, 0xE3, 0xFE, 0x7C, };
+#define glyph_fipps_K_width 8
+#define glyph_fipps_K_height 10
+static char glyph_fipps_K_bits[] = { glyph_fipps_K_width, glyph_fipps_K_height,
+  0x66, 0xDD, 0xDD, 0xDD, 0xE1, 0xDD, 0xDD, 0xDD, 0xFF, 0xEE, };
+#define glyph_fipps_L_width 7
+#define glyph_fipps_L_height 10
+static char glyph_fipps_L_bits[] = { glyph_fipps_L_width, glyph_fipps_L_height,
+  0x06, 0x0D, 0x0D, 0x0D, 0x0D, 0x0D, 0x3D, 0x61, 0x7F, 0x7E, };
+#define glyph_fipps_M_width 10
+#define glyph_fipps_M_height 10
+static char glyph_fipps_M_bits[] = { glyph_fipps_M_width, glyph_fipps_M_height,
+  0x86, 0x01, 0x4D, 0x03, 0x39, 0x03, 0x55, 0x03, 0x6D, 0x03, 0x7D, 0x03, 
+  0x7D, 0x03, 0x4D, 0x03, 0xCF, 0x03, 0x8E, 0x03, };
+#define glyph_fipps_N_width 8
+#define glyph_fipps_N_height 10
+static char glyph_fipps_N_bits[] = { glyph_fipps_N_width, glyph_fipps_N_height,
+  0x66, 0xDD, 0xD9, 0xD5, 0xCD, 0xDD, 0xDD, 0xDD, 0xFF, 0xEE, };
+#define glyph_fipps_O_width 8
+#define glyph_fipps_O_height 10
+static char glyph_fipps_O_bits[] = { glyph_fipps_O_width, glyph_fipps_O_height,
+  0x3C, 0x62, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xE3, 0xFE, 0x7C, };
+#define glyph_fipps_P_width 8
+#define glyph_fipps_P_height 10
+static char glyph_fipps_P_bits[] = { glyph_fipps_P_width, glyph_fipps_P_height,
+  0x3E, 0x61, 0xDD, 0xDD, 0xE1, 0x7D, 0x3D, 0x0D, 0x0F, 0x0E, };
+#define glyph_fipps_Q_width 8
+#define glyph_fipps_Q_height 11
+static char glyph_fipps_Q_bits[] = { glyph_fipps_Q_width, glyph_fipps_Q_height,
+  0x3C, 0x62, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0x63, 0xDE, 0xFC, 0xE0, };
+#define glyph_fipps_R_width 8
+#define glyph_fipps_R_height 10
+static char glyph_fipps_R_bits[] = { glyph_fipps_R_width, glyph_fipps_R_height,
+  0x3E, 0x61, 0xDD, 0xDD, 0x61, 0xDD, 0xDD, 0xDD, 0xFF, 0xEE, };
+#define glyph_fipps_S_width 8
+#define glyph_fipps_S_height 10
+static char glyph_fipps_S_bits[] = { glyph_fipps_S_width, glyph_fipps_S_height,
+  0x7C, 0xC2, 0xFD, 0xFD, 0x63, 0xDE, 0xDE, 0xE1, 0xFF, 0x7E, };
+#define glyph_fipps_T_width 8
+#define glyph_fipps_T_height 10
+static char glyph_fipps_T_bits[] = { glyph_fipps_T_width, glyph_fipps_T_height,
+  0x7E, 0xC1, 0xF7, 0xF6, 0x34, 0x34, 0x34, 0x34, 0x3C, 0x38, };
+#define glyph_fipps_U_width 8
+#define glyph_fipps_U_height 10
+static char glyph_fipps_U_bits[] = { glyph_fipps_U_width, glyph_fipps_U_height,
+  0x66, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xE3, 0xFE, 0x7C, };
+#define glyph_fipps_V_width 9
+#define glyph_fipps_V_height 10
+static char glyph_fipps_V_bits[] = { glyph_fipps_V_width, glyph_fipps_V_height,
+  0xC6, 0x00, 0xAD, 0x01, 0xAD, 0x01, 0xBD, 0x01, 0xDB, 0x01, 0xDA, 0x00, 
+  0xDA, 0x00, 0xE6, 0x00, 0x7C, 0x00, 0x38, 0x00, };
+#define glyph_fipps_W_width 10
+#define glyph_fipps_W_height 10
+static char glyph_fipps_W_bits[] = { glyph_fipps_W_width, glyph_fipps_W_height,
+  0x86, 0x01, 0x4D, 0x03, 0x4D, 0x03, 0x4D, 0x03, 0x7D, 0x03, 0x6D, 0x03, 
+  0x55, 0x03, 0xBB, 0x03, 0xFE, 0x03, 0xDC, 0x01, };
+#define glyph_fipps_X_width 9
+#define glyph_fipps_X_height 10
+static char glyph_fipps_X_bits[] = { glyph_fipps_X_width, glyph_fipps_X_height,
+  0xC6, 0x00, 0xAD, 0x01, 0xBD, 0x01, 0xDB, 0x01, 0xE6, 0x00, 0xDA, 0x00, 
+  0xBD, 0x01, 0xBD, 0x01, 0xEF, 0x01, 0xC6, 0x01, };
+#define glyph_fipps_Y_width 10
+#define glyph_fipps_Y_height 10
+static char glyph_fipps_Y_bits[] = { glyph_fipps_Y_width, glyph_fipps_Y_height,
+  0x86, 0x01, 0x4D, 0x03, 0x5D, 0x03, 0xBB, 0x03, 0xC6, 0x01, 0xEC, 0x00, 
+  0x68, 0x00, 0x68, 0x00, 0x78, 0x00, 0x70, 0x00, };
+#define glyph_fipps_Z_width 8
+#define glyph_fipps_Z_height 10
+static char glyph_fipps_Z_bits[] = { glyph_fipps_Z_width, glyph_fipps_Z_height,
+  0x7E, 0xC1, 0xDF, 0xEC, 0x74, 0x3A, 0x7D, 0xC1, 0xFF, 0xFE, };
+#define glyph_fipps_0_width 8
+#define glyph_fipps_0_height 10
+static char glyph_fipps_0_bits[] = { glyph_fipps_0_width, glyph_fipps_0_height,
+  0x3C, 0x62, 0xDD, 0xDD, 0xD5, 0xDD, 0xDD, 0xE3, 0xFE, 0x7C, };
+#define glyph_fipps_1_width 5
+#define glyph_fipps_1_height 10
+static char glyph_fipps_1_bits[] = { glyph_fipps_1_width, glyph_fipps_1_height,
+  0x0C, 0x1A, 0x19, 0x1B, 0x1A, 0x1A, 0x1A, 0x1A, 0x1E, 0x1C, };
+#define glyph_fipps_2_width 8
+#define glyph_fipps_2_height 10
+static char glyph_fipps_2_bits[] = { glyph_fipps_2_width, glyph_fipps_2_height,
+  0x3E, 0x61, 0xDF, 0xDC, 0x6C, 0x32, 0x7D, 0xC1, 0xFF, 0xFE, };
+#define glyph_fipps_3_width 8
+#define glyph_fipps_3_height 10
+static char glyph_fipps_3_bits[] = { glyph_fipps_3_width, glyph_fipps_3_height,
+  0x3E, 0x61, 0xDF, 0xDE, 0x64, 0xDC, 0xDE, 0xE1, 0x7F, 0x3E, };
+#define glyph_fipps_4_width 8
+#define glyph_fipps_4_height 10
+static char glyph_fipps_4_bits[] = { glyph_fipps_4_width, glyph_fipps_4_height,
+  0x66, 0xDD, 0xDD, 0xDD, 0xC1, 0xDF, 0xDE, 0xD0, 0xF0, 0xE0, };
+#define glyph_fipps_5_width 8
+#define glyph_fipps_5_height 10
+static char glyph_fipps_5_bits[] = { glyph_fipps_5_width, glyph_fipps_5_height,
+  0x7F, 0xC1, 0xFD, 0x3D, 0x61, 0xDF, 0xDE, 0xE1, 0x7F, 0x3E, };
+#define glyph_fipps_6_width 8
+#define glyph_fipps_6_height 10
+static char glyph_fipps_6_bits[] = { glyph_fipps_6_width, glyph_fipps_6_height,
+  0x3C, 0x62, 0x7D, 0x1D, 0x61, 0xDD, 0xDD, 0xE3, 0x7E, 0x3C, };
+#define glyph_fipps_7_width 8
+#define glyph_fipps_7_height 10
+static char glyph_fipps_7_bits[] = { glyph_fipps_7_width, glyph_fipps_7_height,
+  0x7E, 0xC1, 0xDF, 0xE8, 0x74, 0x34, 0x3A, 0x1A, 0x1E, 0x1C, };
+#define glyph_fipps_8_width 8
+#define glyph_fipps_8_height 10
+static char glyph_fipps_8_bits[] = { glyph_fipps_8_width, glyph_fipps_8_height,
+  0x3C, 0x62, 0xDD, 0xDD, 0x63, 0xDD, 0xDD, 0xE3, 0x7E, 0x3C, };
+#define glyph_fipps_9_width 8
+#define glyph_fipps_9_height 10
+static char glyph_fipps_9_bits[] = { glyph_fipps_9_width, glyph_fipps_9_height,
+  0x3C, 0x62, 0xDD, 0xDD, 0xC3, 0xDE, 0xDC, 0xE2, 0x7E, 0x3C, };
+static char *fipps_glyphs[] = {
+	['.'] = glyph_fipps_period_bits,
+	['@'] = glyph_fipps_atsign_bits,
+	['$'] = glyph_fipps_dollar_bits,
+	[','] = glyph_fipps_comma_bits,
+	['+'] = glyph_fipps_plus_bits,
+	['-'] = glyph_fipps_minus_bits,
+	[';'] = glyph_fipps_semicolon_bits,
+	[':'] = glyph_fipps_colon_bits,
+	['&'] = glyph_fipps_amp_bits,
+	['!'] = glyph_fipps_bang_bits,
+	['?'] = glyph_fipps_question_bits,
+	['['] = glyph_fipps_lbrace_bits,
+	[']'] = glyph_fipps_rbrace_bits,
+	['%'] = glyph_fipps_percent_bits,
+	['('] = glyph_fipps_lpar_bits,
+	[')'] = glyph_fipps_rpar_bits,
+	['#'] = glyph_fipps_hash_bits,
+	['A'] = glyph_fipps_A_bits,
+	['B'] = glyph_fipps_B_bits,
+	['C'] = glyph_fipps_C_bits,
+	['D'] = glyph_fipps_D_bits,
+	['E'] = glyph_fipps_E_bits,
+	['F'] = glyph_fipps_F_bits,
+	['G'] = glyph_fipps_G_bits,
+	['H'] = glyph_fipps_H_bits,
+	['I'] = glyph_fipps_I_bits,
+	['J'] = glyph_fipps_J_bits,
+	['K'] = glyph_fipps_K_bits,
+	['L'] = glyph_fipps_L_bits,
+	['M'] = glyph_fipps_M_bits,
+	['N'] = glyph_fipps_N_bits,
+	['O'] = glyph_fipps_O_bits,
+	['P'] = glyph_fipps_P_bits,
+	['Q'] = glyph_fipps_Q_bits,
+	['R'] = glyph_fipps_R_bits,
+	['S'] = glyph_fipps_S_bits,
+	['T'] = glyph_fipps_T_bits,
+	['U'] = glyph_fipps_U_bits,
+	['V'] = glyph_fipps_V_bits,
+	['W'] = glyph_fipps_W_bits,
+	['X'] = glyph_fipps_X_bits,
+	['Y'] = glyph_fipps_Y_bits,
+	['Z'] = glyph_fipps_Z_bits,
+	['0'] = glyph_fipps_0_bits,
+	['1'] = glyph_fipps_1_bits,
+	['2'] = glyph_fipps_2_bits,
+	['3'] = glyph_fipps_3_bits,
+	['4'] = glyph_fipps_4_bits,
+	['5'] = glyph_fipps_5_bits,
+	['6'] = glyph_fipps_6_bits,
+	['7'] = glyph_fipps_7_bits,
+	['8'] = glyph_fipps_8_bits,
+	['9'] = glyph_fipps_9_bits,
+};
+const font_t font_fipps = {
+	.height = 8,
+	.spacing = 1,
+	.glyphs = fipps_glyphs,
+};

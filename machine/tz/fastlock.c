@@ -89,6 +89,7 @@ void fastlock_mode_deff (void)
 			
 			dmd_alloc_pair ();
 			frame_draw (fno);
+			callset_invoke (score_overlay);
 			dmd_overlay_outline ();
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
@@ -98,12 +99,19 @@ void fastlock_mode_deff (void)
 
 void fastlock_award_deff (void)
 {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 5, "FASTLOCK JACKPOT");
-	sprintf("%d MILLION", fastlock_award_stored);
-	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
+	timer_restart_free (GID_FASTLOCK_DEFF, TIME_5S);
+	while (task_find_gid (GID_FASTLOCK_DEFF))
+	{
+		dmd_alloc_pair_clean ();
+		callset_invoke (score_overlay);
+		font_render_string_center (&font_bitoutline, 64, 3, "FASTLOCK");
+		sprintf("%d MILLION", fastlock_award_stored);
+		font_render_string_center (&font_quadrit, 64, 24, sprintf_buffer);
+		dmd_copy_low_to_high ();
+		font_render_string_center (&font_fireball, 64, 10, "JACKPOT");
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 	deff_exit ();
 }
 

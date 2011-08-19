@@ -77,7 +77,7 @@ void tz_flipcode_entered_deff (void)
 	dmd_clean_page_low ();
 
 	sprintf ("HI %s", initials_data);
-	font_render_string_center (&font_times10, 40, 11, sprintf_buffer);
+	font_render_string_center (&font_fireball, 40, 11, sprintf_buffer);
 	font_render_string_center (&font_var5, 40, 24, tz_flipcodes[tz_flipcode_number].text);
 
 	dmd_text_outline ();

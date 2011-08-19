@@ -240,7 +240,7 @@ static char *term6_glyphs[] = {
    ['@' - BASECHAR] = glyph_term6_at_bits,
 };
 const font_t font_term6 = {
-	.spacing = 2,
+	.spacing = 1,
 	.height = 8,
 	.glyphs = term6_glyphs,
 	.basechar = BASECHAR,
