@@ -329,14 +329,6 @@ This is equal to or less than the trough size.
 
 The ID for the outhole switch, if there is one.
 
-@item	MACHINE_REPLAY_CODE_TO_SCORE
-
-Defines how to translate a replay code into an actual score.
-The adjustment system can only store 256 different values for
-a single adjustment.  This macro says how to translate those
-codes into score values, which will depend on the nature of the
-scoring for that machine.
-
 @item	MACHINE_SHOOTER_SWITCH
 
 The ID for the shooter switch.

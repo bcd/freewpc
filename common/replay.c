@@ -32,11 +32,11 @@
 
 /* At present, only debug in simulation since we run out of ROM space
    on the 6809 */
-#ifndef __m6809__
+//#ifndef __m6809__
 #define REPLAY_DEBUG
-#endif
+//#endif
 
-#ifdef REPLAY_DEBUG
+#if defined(REPLAY_DEBUG) && defined(DEBUGGER)
 #define rp_debug(fmt, rest...) dbprintf(fmt, ## rest)
 #else
 #define rp_debug(fmt, rest...)
@@ -270,8 +270,6 @@ void replay_info_update (void)
 	U8 level;
 	U8 multiplier;
 
-	rp_debug ("replay_info_update\n");
-
 	/* Repeat for each of the possible replay levels. */
 	for (level = 0; level < NUM_REPLAY_LEVELS; level++)
 	{
@@ -279,13 +277,13 @@ void replay_info_update (void)
 		 * This depends on the replay system in effect (auto or fixed). */
 		if (system_config.replay_system == REPLAY_AUTO)
 		{
-			if (system_config.replay_levels >= level)
+			if (level >= system_config.replay_levels)
 			{
-				rp_debug ("#%d skipping\n", level);
+				rp_debug ("rp #%d skip\n", level);
 				continue;
 			}
 			replay_code = replay_info.auto_adj;
-			multiplier = level;
+			multiplier = level + 1;
 		}
 		else
 		{
@@ -296,7 +294,7 @@ void replay_info_update (void)
 		}
 
 		/* Convert and store in BCD form */
-		rp_debug ("#%d : code = %d mult = %d\n", level, replay_code, multiplier);
+		rp_debug ("rp #%d code=%d mult=%d \n", level, replay_code, multiplier);
 		pinio_nvram_unlock ();
 		score_zero (replay_info.score_array[level]);
 		replay_code_to_score (replay_info.score_array[level], replay_code);
@@ -315,18 +313,15 @@ void replay_info_update (void)
 void replay_boost_reset (void)
 {
 	/* Copy base levels into score array */
-	rp_debug ("replay_boost_reset\n");
 }
 
 void replay_boost_now (void)
 {
-	rp_debug ("replay_boost_now\n");
 	/* Increment each score array entry by the boost value */
 }
 
 void replay_info_reset (void)
 {
-	rp_debug ("replay_info_reset\n");
 	replay_boost_reset ();
 }
 
@@ -383,13 +378,20 @@ CALLSET_ENTRY (replay, adjustment_changed)
 {
 	/* Handle changes to any replay-related adjustments. */
 
+	if (last_adjustment_changed == &system_config.replay_start)
+	{
+		pinio_nvram_unlock ();
+		replay_info.auto_adj = system_config.replay_start;
+		pinio_nvram_lock ();
+	}
+
 	if (last_adjustment_changed == &system_config.replay_system ||
 		last_adjustment_changed == &system_config.replay_start ||
 		last_adjustment_changed == &system_config.replay_levels ||
 		last_adjustment_changed == &system_config.replay_boost)
 	{
-		rp_debug ("Replay adjustment changed.\n");
 		replay_info_update ();
 	}
+
 }
 
