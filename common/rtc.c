@@ -466,7 +466,9 @@ CALLSET_ENTRY (rtc, init_complete)
 	{
 		if (!date_verify (d))
 		{
+			pinio_nvram_unlock ();
 			memset (d, 0, sizeof (struct date));
+			pinio_nvram_lock ();
 		}
 		d++;
 	}
