@@ -318,7 +318,7 @@ CALLSET_ENTRY (mb, sw_motor_bank_1, sw_motor_bank_2, sw_motor_bank_3)
 	}
 }
 
-CALLSET_ENTRY (mb, sw_left_saucer_target, sw_right_saucer_target, drop_target_down)
+CALLSET_ENTRY (mb, sw_l_saucer_tgt, sw_r_saucer_tgt, drop_target_down)
 {
 	if (mb_running_p ())
 		mb_target_award ();

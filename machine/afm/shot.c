@@ -73,7 +73,7 @@ CALLSET_ENTRY (shot, sw_center_trough)
 	free_timer_restart (TIM_CENTER_TROUGH_ENTERED, TIME_3S);
 }
 
-CALLSET_ENTRY (shot, dev_left_popper_enter)
+CALLSET_ENTRY (shot, dev_left_hole_enter)
 {
 	if (free_timer_test (TIM_CENTER_TROUGH_ENTERED))
 	{
@@ -89,12 +89,18 @@ CALLSET_ENTRY (shot, dev_left_popper_enter)
  * Stroke of Luck front/back
  */
 
-CALLSET_ENTRY (shot, sw_left_jet, sw_bottom_jet, sw_right_jet, sw_left_top_lane, sw_right_top_lane)
+CALLSET_ENTRY (shot, sw_left_jet, sw_bottom_jet, sw_right_jet)
 {
-	free_timer_restart (TIM_BALL_IN_JETS, TIME_3S);
+	callset_invoke (any_jet);
+	free_timer_restart (TIM_BALL_IN_JETS, TIME_4S);
 }
 
-CALLSET_ENTRY (shot, dev_right_popper_enter)
+CALLSET_ENTRY (shot, sw_left_top_lane, sw_right_top_lane)
+{
+	free_timer_restart (TIM_BALL_IN_JETS, TIME_4S);
+}
+
+CALLSET_ENTRY (shot, dev_right_hole_enter)
 {
 	if (free_timer_test (TIM_BALL_IN_JETS))
 	{
@@ -110,52 +116,18 @@ CALLSET_ENTRY (shot, dev_right_popper_enter)
  * Standup targets
  */
 
-CALLSET_ENTRY (shot, sw_motor_bank_1)
+CALLSET_ENTRY (shot, sw_motor_bank_1, sw_motor_bank_2, sw_motor_bank_3)
 {
 	callset_invoke (any_motor_bank);
 }
 
-CALLSET_ENTRY (shot, sw_motor_bank_2)
-{
-	callset_invoke (any_motor_bank);
-}
 
-CALLSET_ENTRY (shot, sw_motor_bank_3)
-{
-	callset_invoke (any_motor_bank);
-}
-
-CALLSET_ENTRY (shot, sw_martian_1)
+CALLSET_ENTRY (shot, sw_martian_1, sw_martian_2, sw_martian_3, sw_martian_4)
 {
 	callset_invoke (any_martian);
 }
 
-CALLSET_ENTRY (shot, sw_martian_2)
-{
-	callset_invoke (any_martian);
-}
-
-CALLSET_ENTRY (shot, sw_martian_3)
-{
-	callset_invoke (any_martian);
-}
-
-CALLSET_ENTRY (shot, sw_martian_4)
-{
-	callset_invoke (any_martian);
-}
-
-CALLSET_ENTRY (shot, sw_martian_5)
-{
-	callset_invoke (any_martian);
-}
-
-CALLSET_ENTRY (shot, sw_martian_6)
-{
-	callset_invoke (any_martian);
-}
-
-CALLSET_ENTRY (shot, sw_martian_7)
+CALLSET_ENTRY (shot, sw_martian_5, sw_martian_6, sw_martian_7)
 {
 	callset_invoke (any_martian);
 }
