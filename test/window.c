@@ -601,12 +601,13 @@ struct audit timestamp_audit_info[] = {
 	{ "AUDITS CLEARED", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.audits_cleared },
 	{ "COINS CLEARED", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.coins_cleared },
 	{ "FACTORY RESET", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.factory_reset },
-	{ "LAST GAME START", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_game_start },
+	{ "LAST GAME STRT.", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_game_start },
 	{ "LAST REPLAY", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_replay },
-	{ "LAST H.S.T.D. RESET", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_hstd_reset },
+	{ "LAST H.S.T.D. RST.", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_hstd_reset },
 	{ "CHAMPION RESET", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.champion_reset },
 	{ "LAST PRINTOUT", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_printout },
-	{ "LAST SERV. CREDIT", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_service_credit },
+	{ "LAST SRV. CRED.", AUDIT_TYPE_TIMESTAMP, (audit_t *)&system_timestamps.last_service_credit },
+	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
 
