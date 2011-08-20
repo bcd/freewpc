@@ -3619,46 +3619,6 @@ struct menu empty_balls_test_item = {
 };
 
 
-/******* Fliptronic Flipper Test ***********************/
-
-#if MACHINE_FLIPTRONIC
-
-
-void flipper_item_number (U8 val)
-{
-	sprintf ("F%d", val+1);
-}
-
-
-void flipper_test_init (void)
-{
-	browser_init ();
-	browser_max = NUM_FLIPTRONIC_SWITCHES-1;
-	browser_item_number = flipper_item_number;
-}
-
-
-void flipper_test_draw (void)
-{
-	browser_draw ();
-}
-
-
-struct window_ops flipper_test_window = {
-	INHERIT_FROM_BROWSER,
-	.init = flipper_test_init,
-	.draw = flipper_test_draw,
-};
-
-
-struct menu flipper_test_item = {
-	.name = "FLIPPER TEST",
-	.flags = M_ITEM,
-	.var = { .subwindow = { &flipper_test_window, NULL } },
-};
-
-#endif /* MACHINE_FLIPTRONIC */
-
 /************   Display Test   **************************/
 
 #if (MACHINE_DMD == 1)
@@ -3728,9 +3688,6 @@ struct menu *test_menu_items[] = {
 	&lamp_flasher_test_item,
 #if (MACHINE_DMD == 1)
 	&display_test_item,
-#endif
-#if MACHINE_FLIPTRONIC
-	&flipper_test_item,
 #endif
 	/* TODO : ordered_lamp_test_item */
 	&lamp_row_col_test_item,
