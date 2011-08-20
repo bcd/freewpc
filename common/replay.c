@@ -378,6 +378,7 @@ CALLSET_ENTRY (replay, adjustment_changed)
 {
 	/* Handle changes to any replay-related adjustments. */
 
+	/* Copy the new replay start value into the working area. */
 	if (last_adjustment_changed == &system_config.replay_start)
 	{
 		pinio_nvram_unlock ();
@@ -385,13 +386,12 @@ CALLSET_ENTRY (replay, adjustment_changed)
 		pinio_nvram_lock ();
 	}
 
-	if (last_adjustment_changed == &system_config.replay_system ||
-		last_adjustment_changed == &system_config.replay_start ||
-		last_adjustment_changed == &system_config.replay_levels ||
-		last_adjustment_changed == &system_config.replay_boost)
+	/* Recalculate all replay levels if any replay-related adjustment
+	   changes */
+	if (last_adjustment_changed >= &system_config.replay_system &&
+		last_adjustment_changed <= &system_config.replay_boost)
 	{
 		replay_info_update ();
 	}
-
 }
 
