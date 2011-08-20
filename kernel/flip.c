@@ -128,7 +128,7 @@ void flipper_override_pulse (U8 switches)
 
 
 /** Perform real-time processing for a single flipper.
- * This is executed once per flipper every 2ms.
+ * This is executed once per flipper every 4ms.
  */
 static inline void flipper_service (
 	const U8 sw_button, const U8 sw_eos,
