@@ -15,6 +15,18 @@ define MACHINE_NUMBER 541
 define MACHINE_CUSTOM_AMODE
 define MACHINE_BALL_SAVE_LAMP LM_RETURN_TO_BATTLE
 
+# Replay level ranges from 50M-500M (default is 100M).
+# Replay boost ranges from 10-100M (default is 25M).
+define REPLAY_MILLIONS
+define REPLAY_SCORE_MIN 50
+define REPLAY_SCORE_STEP 5
+define REPLAY_SCORE_MAX 500
+define REPLAY_SCORE_DEFAULT 100
+define REPLAY_BOOST_MIN 10
+define REPLAY_BOOST_STEP 1
+define REPLAY_BOOST_MAX 100
+define REPLAY_BOOST_DEFAULT 25
+
 # For Challenge rules
 define MACHINE_BALL_SAVE_TIME 0
 
