@@ -27,24 +27,6 @@
 
 __local__ U8 rudy_hits;
 
-static inline U8 decimal_to_bcd_byte (U8 decimal)
-{
-#ifdef __m6809__
-	U8 quot, rem;
-	DIV10 (decimal, quot, rem);
-	return (quot << 4) + rem;
-#else
-	return ((decimal / 10) << 4) + (decimal % 10);
-#endif
-}
-
-
-void replay_code_to_score (score_t s, U8 val)
-{
-	/* Replay ranges from 1 = 5M to 11 = 15M */
-	s[1] = decimal_to_bcd_byte (val + 4);
-}
-
 
 void bonus_deff (void)
 {

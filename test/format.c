@@ -29,6 +29,7 @@
 
 #include <freewpc.h>
 #include <test.h>
+#include <replay.h>
 
 void decimal_render (U8 val) { sprintf ("%d", val); }
 void hexadecimal_render (U8 val) { sprintf ("%02X", val); }
@@ -99,34 +100,43 @@ void percent_render (U8 val)
  * The adjustment system only allows for at most 256 different settings per
  * adjustment.  For replay scores, 0 means the replay level is OFF, and
  * 1-255 refer to specific replay values.
- *
- * The machine should define a function that returns the score associated
- * with a certain level, and then define MACHINE_REPLAY_CODE_TO_SCORE
- * as an alias to that function.  It should be placed in the __machine__
- * region.
- *
- * You should also define MACHINE_REPLAY_SCORE_CHOICES as the number of
- * valid, non-zero replay levels that are acceptable as input.
  */
 void replay_score_render (U8 val)
 {
 	if (val == 0)
 	{
 		sprintf ("OFF");
-		return;
 	}
-#ifdef MACHINE_REPLAY_CODE_TO_SCORE
-	extern __machine__ void MACHINE_REPLAY_CODE_TO_SCORE (score_t, U8);
-	score_t score;
-	score_zero (score);
-	MACHINE_REPLAY_CODE_TO_SCORE (score, val);
-	sprintf_score (score);
-#else
-#warning "machine does not define replay levels"
-	sprintf ("CODE %d", val);
-#endif
+	else
+	{
+		score_t score;
+		score_zero (score);
+		replay_code_to_score (score, val);
+		sprintf_score (score);
+	}
 }
 
+
+#ifndef CONFIG_REPLAY_BOOST_BOOLEAN
+/**
+ * Likewise, format a replay boost value (non-boolean)
+ */
+void replay_boost_render (U8 val)
+{
+	if (val == 0)
+	{
+		sprintf ("OFF");
+		return;
+	}
+	else
+	{
+		score_t score;
+		score_zero (score);
+		replay_code_to_boost (score, val);
+		sprintf_score (score);
+	}
+}
+#endif
 
 void minutes_render (U8 val)
 {

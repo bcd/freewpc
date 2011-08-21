@@ -21,6 +21,19 @@
 #ifndef _COIN_H
 #define _COIN_H
 
+struct coin_state
+{
+	/* The number of raw coin units paid */
+	U8 units;
+
+	/* The number of credits accumulated.  Units are converted
+	to credits based on the "units per credit" adjustment. */
+	U8 credits;
+
+	/* The total number of units earned for "units per bonus". */
+	U8 total_units;
+};
+
 __common__ void credits_render (void);
 __common__ void credits_draw (void);
 __common__ void lamp_start_update (void);
@@ -29,5 +42,11 @@ __common__ bool has_credits_p (void);
 __common__ void remove_credit (void);
 __common__ void credits_clear (void);
 __common__ void units_clear (void);
+
+extern inline U8 get_credits (void)
+{
+	extern struct coin_state coin_state;
+	return coin_state.credits;
+}
 
 #endif /* _COIN_H */

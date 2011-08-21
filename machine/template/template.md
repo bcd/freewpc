@@ -46,9 +46,7 @@ WPC95: Yes/No
 #define MACHINE_SCORE_DIGITS
 #define MACHINE_MUSIC_GAME
 #define MACHINE_MUSIC_PLUNGER
-#define MACHINE_REPLAY_CODE_TO_SCORE
 #define MACHINE_DEBUGGER_HOOK
-#define MACHINE_REPLAY_SCORE_CHOICES 10
 #define MACHINE_OUTHOLE_KICK_HOOK
 
 ##########################################################################

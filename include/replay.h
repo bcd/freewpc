@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,14 +21,117 @@
 #ifndef _REPLAY_H
 #define _REPLAY_H
 
+/* The maximum number of replays per player per game */
+#ifndef NUM_REPLAY_LEVELS
+#define NUM_REPLAY_LEVELS 4
+#endif
+
+/* The number of games after which the auto replay score is recalculated */
+#define AUTO_REPLAY_ADJUST_RATE 50
+
+/* The maximum number of different replay score values that can be set. */
+#define MAX_REPLAY_SCORES 32
+
+/* The type of a replay score.  We only store at most 2 bytes of
+   BCD; the least significant digits of the score are not saved
+   and do not affect comparisons. */
+typedef U8 replay_score_t[2];
+
+/* Because of the size of replay_score_t, the maximum possible replay
+   value is limited. */
+#define MAX_REPLAY_VALUE 9999UL
+#define MAX_REPLAY_VALUE_BCD 0x9999UL
+
+
+/* Convert a constant, 16-bit decimal value to 2 byte BCD at
+   compile-time. */
+#define __U16_TO_BCD2(u16) \
+	((((u16 % 10000UL) / 1000UL) * 0x1000UL) + \
+	 (((u16 % 1000UL) / 100) * 0x100) + \
+	 (((u16 % 100) / 10) * 0x10) + \
+	 (u16 % 10))
+#ifdef __m6809__
+#define U16_TO_BCD2(u16) __U16_TO_BCD2(u16)
+#else
+#define U16_TO_BCD2(u16) ((__U16_TO_BCD2(u16) >> 8) | ((__U16_TO_BCD2(u16) & 0xFF) << 8))
+#endif
+
+extern __local__ U8 replay_total_this_player;
 __common__ void replay_draw (void);
 __common__ void replay_award (void);
 __common__ void replay_check_current (void);
-__common__ void replay_reset (void);
+__common__ void replay_info_reset (void);
 __common__ bool replay_can_be_awarded (void);
+__common__ void replay_code_to_score (score_t score, U8 code);
+#ifndef CONFIG_REPLAY_BOOST_BOOLEAN
+__common__ void replay_code_to_boost (score_t, U8);
+#endif
 
-#ifdef MACHINE_REPLAY_CODE_TO_SCORE
-__machine__ void MACHINE_REPLAY_CODE_TO_SCORE (score_t, U8);
+
+/* Provide default parameters to the replay system.
+   Machines should normally override these values in the md file.
+   All values are given in decimal; use U16_TO_BCD2 when you
+   need a BCD-value.
+
+	First, the machine should define either REPLAY_MILLIONS or
+	REPLAY_TEN_THOUSANDS.  These determine the granularity of the
+	replay scores.  Generally you should use REPLAY_MILLIONS, unless
+	you're using 4-byte scores.
+
+	Then define REPLAY_SCORE_MIN, REPLAY_SCORE_STEP, REPLAY_SCORE_MAX,
+	and REPLAY_SCORE_DEFAULT.  These are in millions or 10K units,
+	depending on the above setting.
+
+	Likewise, define REPLAY_BOOST_xxx values to say how the REPLAY BOOST
+	adjustment should work. */
+
+#if !defined(REPLAY_MILLIONS) && !defined(REPLAY_TEN_THOUSANDS)
+#if (BYTES_PER_SCORE >= 5)
+#define REPLAY_MILLIONS
+#else
+#define REPLAY_TEN_THOUSANDS
+#endif
+#endif
+
+#ifndef REPLAY_SCORE_DEFAULT
+#define REPLAY_SCORE_MIN 10
+#define REPLAY_SCORE_STEP 2
+#define REPLAY_SCORE_MAX 50
+#define REPLAY_SCORE_DEFAULT 20
+#define REPLAY_BOOST_MIN 1
+#define REPLAY_BOOST_STEP 1
+#define REPLAY_BOOST_MAX 10
+#define REPLAY_BOOST_DEFAULT 5
+#endif
+
+/* Compute other constants based on the above configuration.
+   The REPLAY_SCORE_TYPE_xxx constants mean the same thing
+   as the parameters above, but they express the encoding as
+   the adjustment system stores them. */
+
+#define REPLAY_SCORE_TO_TYPE(score) \
+	(1 + ((score - REPLAY_SCORE_MIN) / REPLAY_SCORE_STEP))
+
+#define REPLAY_SCORE_TYPE_MIN 0
+#define REPLAY_SCORE_TYPE_MAX (1 + REPLAY_SCORE_TO_TYPE(REPLAY_SCORE_MAX))
+#define REPLAY_SCORE_TYPE_DEFAULT REPLAY_SCORE_TO_TYPE(REPLAY_SCORE_DEFAULT)
+
+#define REPLAY_BOOST_TO_TYPE(boost) \
+	(1 + ((boost - REPLAY_BOOST_MIN) / REPLAY_BOOST_STEP))
+
+#define REPLAY_BOOST_TYPE_MIN 0
+#define REPLAY_BOOST_TYPE_MAX (1 + REPLAY_BOOST_TO_TYPE(REPLAY_BOOST_MAX))
+#define REPLAY_BOOST_TYPE_DEFAULT REPLAY_BOOST_TO_TYPE(REPLAY_BOOST_DEFAULT)
+
+/* Define the offset within a score_t at which the replay value
+   can be compared.  This depends on the units of the replay, and
+   the length of scores. */
+#ifdef REPLAY_MILLIONS
+#define REPLAY_SCORE_OFFSET (BYTES_PER_SCORE - 5)
+#endif
+#ifdef REPLAY_TEN_THOUSANDS
+#define REPLAY_SCORE_OFFSET (BYTES_PER_SCORE - 4)
 #endif
 
 #endif /* _REPLAY_H */
+
