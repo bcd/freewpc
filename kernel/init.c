@@ -139,6 +139,10 @@ __noreturn__ void freewpc_init (void)
 	task_init ();
 	pinio_watchdog_reset ();
 
+	/* log_init needs to run early, before any callset_invokes are
+	   made. */
+	log_init ();
+
 #ifdef CONFIG_NATIVE
 	/* Notify the simulator when the core OS is up and running. */
 	sim_init ();
@@ -165,7 +169,6 @@ __noreturn__ void freewpc_init (void)
 	leff_init ();
 	test_init ();
 	adj_init ();
-	log_init ();
 	callset_invoke (init);
 
 	/* Enable periodic processing. */
