@@ -55,9 +55,11 @@ void ll_score_draw_ball (void)
 void ll_score_strobe_novalid (void)
 {
 	seg_show_other ();
+	score_deff_sleep (TIME_133MS);
 }
 
 void ll_score_strobe_valid (void)
 {
+	score_deff_sleep (TIME_133MS);
 }
 
