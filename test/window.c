@@ -98,7 +98,6 @@ struct window win_stack[MAX_WIN_STACK];
 void window_push_first (void)
 {
 	set_test_mode (TEST_DEFAULT);
-	task_setgid (GID_TEST_MODE_STARTING);
 #ifdef CONFIG_TEST_DURING_GAME
 	if (!switch_poll_logical (SW_LEFT_BUTTON))
 #endif
@@ -179,10 +178,7 @@ void window_push (struct window_ops *ops, void *priv)
 		if (!in_test)
 			window_push_first ();
 		else
-		{
-			task_kill_gid (GID_TEST_STARTING);
 			task_kill_gid (GID_DIAG_RUNNING);
-		}
 		win_top = &win_stack[0];
 	}
 	else if (win_top < &win_stack[MAX_WIN_STACK])
