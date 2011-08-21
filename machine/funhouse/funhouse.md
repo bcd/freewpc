@@ -30,7 +30,20 @@ include platform/wpc/wpc89.md
 #define MACHINE_MUSIC_PLUNGER
 #define MACHINE_DEBUGGER_HOOK
 #define MACHINE_OUTHOLE_KICK_HOOK
-define MACHINE_BALL_SAVE_TIME             0
+define MACHINE_BALL_SAVE_TIME 0
+
+# Define replay values
+# Replay ranges from 3M-20M in 500K steps
+# Replay boost ranges from 500K-5M in 500K steps
+define REPLAY_TEN_THOUSANDS
+define REPLAY_SCORE_MIN 300
+define REPLAY_SCORE_STEP 50
+define REPLAY_SCORE_MAX 2000
+define REPLAY_SCORE_DEFAULT 500
+define REPLAY_BOOST_MIN 50
+define REPLAY_BOOST_STEP 50
+define REPLAY_BOOST_MAX 500
+define REPLAY_BOOST_DEFAULT 100
 
 define MACHINE_CUSTOM_AMODE
 define MACHINE_GRAND_CHAMPION_INITIALS { 'L', 'E', 'D' }
