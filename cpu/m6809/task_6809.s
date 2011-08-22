@@ -213,9 +213,6 @@ _task_restore:
 	negb                         ; 2 cycles
 	leau	b,u                    ; 5 cycles
 
-	;;; Disable interrupts during stack restore
-	orcc	#80
-
 	;;; Reset the stack pointer.  Copy all bytes out of the
 	;;; save area back to the stack.  At the end, S has the
 	;;; correct value (points to top of stack).
@@ -233,9 +230,6 @@ _task_restore:
 	pshs	x,y                    ; 9 cycles
 	addb	#8	                    ; 4 cycles
 	bne	1$                     ; 2 cycles
-
-	;;; Enable interrupts again
-	andcc	#-81
 
 	; x was killed in the core copy loop, need to restore it
 	ldx	*_task_current         ; 5 cycles
