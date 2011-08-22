@@ -68,5 +68,6 @@ void platform_init (void)
 	writeb (WPC_LAMP_ROW_OUTPUT, 0);
 	writeb (WPC_LAMP_COL_STROBE, 0);
 	writeb (WPC_GI_TRIAC, 0);
+	pinio_write_timer (0, 0);
 }
 
