@@ -30,21 +30,19 @@
 __permanent__ U16 alarm_time;
 
 extern U8 mute_and_pause_timeout;
-extern U8 hour;
-extern U8 minute;
 
 /* returns how many minutes from midnight we are */
 static U16 rtc_minutes_from_midnight (void)
 {
 	U16 minutes;
-	if (hour)
+	if (current_date.hour)
 	{
-		minutes = hour * 60;
-		minutes += minute;
+		minutes = current_date.hour * 60UL;
+		minutes += current_date.minute;
 		return minutes;
 	}
 	else
-		return minute;
+		return current_date.minute;
 }
 
 static void render_minutes_to_alarm (void)
@@ -132,7 +130,7 @@ static void alarm_task (void)
 
 static inline bool check_alarm_time (void)
 {
-	if (hour >= ALARM_DISABLED)
+	if (current_date.hour >= ALARM_DISABLED)
 		return FALSE;
 	/* This should cover cases where the machine was switched off before the
 	 * alarm could sound */

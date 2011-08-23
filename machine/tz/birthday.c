@@ -44,8 +44,6 @@ const struct {
 	{ 1, 1, "HAPPY", "NEW YEAR", NULL },
 };
 
-extern U8 month;
-extern U8 day;
 extern bool amode_show_scores_long;
 
 static void draw_birthday_msg (U8 birthday_msg)
@@ -79,13 +77,13 @@ static void draw_birthday_msg (U8 birthday_msg)
 void check_birthdays (void)
 {
 	/* Don't bother checking if the date hasn't been set */
-	extern U8 year;
-	if (year == 0)
+	if (current_date.year == 0)
 		return;
 	U8 i;
 	for (i = 0; i < NUM_BIRTHDAYS; i++)
 	{
-		if (month == birthday_msgs[i].month && day == birthday_msgs[i].day)
+		if (current_date.month == birthday_msgs[i].month &&
+		    current_date.day == birthday_msgs[i].day)
 		{
 			draw_birthday_msg (i);
 			/* Only show one message per date */

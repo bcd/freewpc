@@ -96,9 +96,6 @@ U8 clock_hour;
 U8 mech_speed_stored;
 extern struct timed_mode_ops mpf_mode;
 
-/* rtc hour and minute */
-extern U8 hour;
-extern U8 minute;
 
 void tz_dump_clock (void)
 {
@@ -530,7 +527,7 @@ CALLSET_ENTRY (tz_clock, amode_start)
 		clock_mech_start_forward ();
 	}
 	else if (global_flag_test (GLOBAL_FLAG_CLOCK_HOME))
-		tz_clock_show_time (hour, minute);
+		tz_clock_show_time (current_date.hour, current_date.minute);
 	else	
 		tz_clock_reset ();
 }

@@ -44,10 +44,8 @@ extern U8 lucky_bounces;
 
 bool check_for_midnight (void)
 {
-	extern U8 hour;
-	extern U8 minute;
-	if ((hour == 0 && minute < 15)
-		|| (hour == 23 && minute > 45))
+	if ((current_date.hour == 0 && current_date.minute < 15)
+		|| (current_date.hour == 23 && current_date.minute > 45))
 		return TRUE;
 	else
 		return FALSE;

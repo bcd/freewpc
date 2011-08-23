@@ -129,15 +129,14 @@ CALLSET_ENTRY (deffs2, amode_page)
 {
 	if (amode_show_scores_long)
 		return;
-	extern U8 hour;
 	dmd_map_overlay ();
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
-	if (hour < 12)
+	if (current_date.hour < 12)
 		sprintf ("GOOD MORNING");
-	else if (hour < 18)
+	else if (current_date.hour < 18)
 		sprintf ("GOOD AFTERNOON");
-	else if (hour < 21)
+	else if (current_date.hour < 21)
 		sprintf ("GOOD EVENING");
 	else
 		sprintf ("THE TWILIGHT HOUR");
