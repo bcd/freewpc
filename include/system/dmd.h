@@ -312,4 +312,7 @@ __transition__ void dmd_rough_erase1 (void);
 
 __transition__ void dmd_rough_invert1 (void);
 
+__transition__ void dmd_row_copy (U8 *dst);
+__transition__ void dmd_column_copy (U8 *dst);
+
 #endif /* _SYS_DMD_H */

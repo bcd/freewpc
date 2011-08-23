@@ -102,3 +102,34 @@ __attribute__((noinline)) void dmd_rough_invert1 (void)
 	} while (dmd_rough_args.height > 0);
 }
 
+
+/**
+ * Copy a row of data from one DMD page to another.
+ */
+void dmd_row_copy (U8 *dst)
+{
+	register U16 *src asm ("u") = (U16 *)(dst - DMD_PAGE_SIZE);
+	((U16 *)dst)[0] = src[0];
+	((U16 *)dst)[1] = src[1];
+	((U16 *)dst)[2] = src[2];
+	((U16 *)dst)[3] = src[3];
+}
+
+
+/**
+ * Copy a column of data from one DMD page to another.
+ */
+void dmd_column_copy (U8 *dst)
+{
+	register U8 *src asm ("u") = dst - DMD_PAGE_SIZE;
+	register U8 count = 8;
+	do {
+		dst[0 * DMD_BYTE_WIDTH] = src[0 * DMD_BYTE_WIDTH];
+		dst[1 * DMD_BYTE_WIDTH] = src[1 * DMD_BYTE_WIDTH];
+		dst[2 * DMD_BYTE_WIDTH] = src[2 * DMD_BYTE_WIDTH];
+		dst[3 * DMD_BYTE_WIDTH] = src[3 * DMD_BYTE_WIDTH];
+		dst += 4 * DMD_BYTE_WIDTH;
+		src += 4 * DMD_BYTE_WIDTH;
+		count--;
+	} while (count != 0);
+}
