@@ -33,7 +33,7 @@
 /* At present, only debug in simulation since we run out of ROM space
    on the 6809 */
 //#ifndef __m6809__
-#define REPLAY_DEBUG
+//#define REPLAY_DEBUG
 //#endif
 
 #if defined(REPLAY_DEBUG) && defined(DEBUGGER)
