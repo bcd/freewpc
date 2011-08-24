@@ -1667,13 +1667,23 @@ void dev_trans_test_task (void)
 
 void dev_trans_test_enter (void)
 {
-	task_create_gid1 (GID_TRANS_TEST, dev_trans_test_task);
+	task_kill_gid (GID_WINDOW_THREAD);
+	dmd_reset_transition ();
+	task_create_gid1 (GID_WINDOW_THREAD, dev_trans_test_task);
+}
+
+void dev_trans_test_escape (void)
+{
+	task_kill_gid (GID_WINDOW_THREAD);
+	dmd_reset_transition ();
+	window_pop ();
 }
 
 struct window_ops dev_trans_test_window = {
 	INHERIT_FROM_BROWSER,
 	.init = dev_trans_test_init,
 	.enter = dev_trans_test_enter,
+	.escape = dev_trans_test_escape,
 };
 
 struct menu dev_trans_test_item = {
