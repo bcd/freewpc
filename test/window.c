@@ -2432,20 +2432,19 @@ void presets_init (void)
 {
 	browser_init ();
 	browser_max = preset_count () - 1;
-}
-
-void presets_draw_finish (void)
-{
-	task_sleep (TIME_500MS);
+#if (MACHINE_DMD == 1)
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+	font_render_string_left (&font_mono5, 1, 1, "PRESETS");
 	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO INSTALL");
 	font_render_string_center (&font_var5, 64, 27, "PRESS START TO VIEW DETAILS");
-	task_exit ();
+#endif
 }
+
 
 void presets_draw (void)
 {
 #if (MACHINE_DMD == 1)
-	font_render_string_left (&font_mono5, 1, 1, "PRESETS");
 	sprintf ("%d.", menu_selection+1);
 	font_render_string_left (&font_mono5, 1, 9, sprintf_buffer);
 	preset_render_name (menu_selection);
@@ -2455,7 +2454,7 @@ void presets_draw (void)
 	font_render_string_right (&font_mono5, 127, 9,
 		preset_installed_p (menu_selection) ? "YES" : "NO");
 
-	task_recreate_gid (GID_SLOW_DRAW_FINISH, presets_draw_finish);
+	dmd_overlay ();
 #else
 	sprintf ("%d.", menu_selection+1);
 	seg_write_string (1, 0, sprintf_buffer);
