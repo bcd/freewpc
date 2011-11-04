@@ -780,5 +780,6 @@ CALLSET_ENTRY (game, init)
 	in_tilt = FALSE;
 	valid_playfield = FALSE;
 	player_up = 0;
+	ball_up = 0;
 }
 
