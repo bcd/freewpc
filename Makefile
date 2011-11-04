@@ -412,7 +412,6 @@ $(eval $(call PAGE_ALLOC, 54, MACHINE3))
 endif
 CONFIG_EVENT_PAGE ?= 59
 $(eval $(call PAGE_ALLOC, 55, MACHINE2))
-$(eval $(call PAGE_ALLOC, 55, COMMON2))
 $(eval $(call PAGE_ALLOC, 56, COMMON))
 $(eval $(call PAGE_ALLOC, 57, EFFECT))
 $(eval $(call PAGE_ALLOC, 57, DEFF))
@@ -425,6 +424,7 @@ $(eval $(call PAGE_ALLOC, 59, MACHINE))
 $(eval $(call PAGE_ALLOC, $(CONFIG_EVENT_PAGE), EVENT))
 $(eval $(call PAGE_ALLOC, 60, PAGED_MD, MD))
 $(eval $(call PAGE_ALLOC, 60, TEST2))
+$(eval $(call PAGE_ALLOC, 60, COMMON2))
 $(eval $(call PAGE_ALLOC, 61, FONT))
 $(eval $(call PAGE_ALLOC, 61, FON))
 
