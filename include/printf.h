@@ -40,7 +40,7 @@ do { \
 
 /** Access the next argument in the va_list 'va' with type 'type'. */
 #ifdef CONFIG_NATIVE
-#define va_arg(va, type)	((va += sizeof (int)), (type *)(((int *)va)[-1]))
+#define va_arg(va, type)	((va += sizeof (int)), (type)(((int *)va)[-1]))
 #else
 #define va_arg(va, type)	((va += sizeof (type)), ((type *)va)[-1])
 #endif

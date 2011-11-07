@@ -154,7 +154,7 @@ const enum score_font_key score_font_info_key[MAX_PLAYERS][MAX_PLAYERS+1][MAX_PL
 };
 
 
-const U8 *dmd_score_info_base;
+const enum score_font_key *dmd_score_info_base;
 
 U16 ll_dmd_sweep_addr;
 

@@ -125,8 +125,11 @@ static U8 rtc_days_in_current_month (struct date *d)
 
 
 /** Calculate the day of the week (0=Sunday, 6=Saturday)
-from the current values of year, month, and day. */
-static enum day_of_week rtc_calc_day_of_week (struct date *d)
+ * from the current values of year, month, and day.
+ * This should only be called when needing to display a
+ * date; the date structure does not maintain this.
+ */
+enum day_of_week rtc_calc_day_of_week (struct date *d)
 {
 	static U8 day_of_week_month_code[] = {
 		0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5
@@ -143,22 +146,7 @@ static enum day_of_week rtc_calc_day_of_week (struct date *d)
 	if (!(d->year % 4) && d->month <= 2)
 		day_of_week--;
 	day_of_week --;
-
-	/* The mod 7 is the hard part to do on the 6809.
-	 * The technique used here is to do repeated subtraction.
-	 * For values larger than 64, subtract 63 at a time to speed up
-	 * the computation. */
-#ifndef __m6809__
 	day_of_week %= DAYS_PER_WEEK;
-#else
-	while (day_of_week >= DAYS_PER_WEEK)
-	{
-		if (day_of_week > 64)
-			day_of_week -= (64 - 1);
-		else
-			day_of_week -= DAYS_PER_WEEK;
-	}
-#endif
 	return day_of_week;
 }
 
@@ -189,8 +177,6 @@ static void rtc_normalize (struct date *d)
 		the year 2000; therefore, this won't overflow until
 		the year 2256. */
 	}
-
-	//rtc_calc_day_of_week ();
 
 	/* Update checksums and save */
 	csum_area_update (&rtc_csum_info);
@@ -263,7 +249,6 @@ void rtc_reset (void)
 	current_date.hour = 0;
 	current_date.minute = 0;
 	last_minute = 0;
-	//rtc_calc_day_of_week (&current_date);
 }
 
 

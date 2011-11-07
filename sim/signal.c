@@ -290,7 +290,6 @@ void signal_write (void)
 void signal_update (signal_number_t signo, unsigned int state)
 {
 	signal_readings_t *sigrd;
-	simulated_time_interval_t last_change_time;
 
 	/* Update last state */
 	if (state)
@@ -316,10 +315,16 @@ void signal_update (signal_number_t signo, unsigned int state)
 
 	/* See what time the signal last changed state.  By comparing this
 	to the current time, we can say how long it held its last value. */
+#if 0
+	simulated_time_interval_t last_change_time;
 	if (sigrd->count == 0)
 		last_change_time = 0;
 	else
 		last_change_time = sigrd->t[sigrd->count - 1];
+	/* Print the last signal state */
+	simlog (SLC_DEBUG, "Signo(%d) was %s for %ldms", signo, !state ? "high" : "low",
+		realtime_read () - last_change_time);
+#endif
 
 	/* Allocate a new block if the previous block is full. */
 	if (sigrd->count == MAX_READINGS)
@@ -330,11 +335,6 @@ void signal_update (signal_number_t signo, unsigned int state)
 		sigrd = sigrd->next = new_sigrd;
 	}
 
-#if 0
-	/* Print the last signal state */
-	simlog (SLC_DEBUG, "Signo(%d) was %s for %ldms", signo, !state ? "high" : "low",
-		realtime_read () - last_change_time);
-#endif
 
 	/* Save the new state along with the timestamp of the change */
 	sigrd->t[sigrd->count++] = realtime_read ();
