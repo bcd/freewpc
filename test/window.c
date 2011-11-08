@@ -3136,9 +3136,7 @@ void driver_test_init (void)
 	}
 	browser_item_number = browser_decimal_item_number;
 	browser_action = sol_get_time (menu_selection);
-#ifdef NUM_POWER_DRIVES
 	browser_max = NUM_POWER_DRIVES-1;
-#endif
 	driver_update_duty ();
 }
 
