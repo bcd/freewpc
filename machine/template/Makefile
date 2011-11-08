@@ -67,18 +67,3 @@ GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
 	mpf.o powerball.o clocktarget.o vmode.o deffs.o bonus.o star.o \
 	multiball.o loop.o sssmb.o chaosmb.o leffs.o
 
-cow1 : build/cow1.xbm
-
-cow2 : build/cow2.o
-
-build/cow1.xbm build/cow2.prg: build/pgmtest
-	build/pgmtest
-
-build/pgmtest : build/pgmtest.o tools/pgmlib/pgmlib2.o
-	$(HOSTCC) -o $@ build/pgmtest.o tools/pgmlib/pgmlib2.o
-
-build/pgmtest.o : machine/tz/pgmtest.c
-	$(HOSTCC) -o $@ -Itools/pgmlib -c $<
-
-tools/pgmlib/pgmlib2.o : tools/pgmlib/pgmlib.c
-	$(HOSTCC) -o $@ -DNO_MAIN -Itools/pgmlib -Iinclude -c $<
