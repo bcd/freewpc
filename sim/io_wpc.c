@@ -64,7 +64,7 @@ struct wpc_debug_port wpc_debug_port;
 struct sim_triac wpc_triac;
 
 /** The flipper relay on non-Fliptronic games */
-#ifdef CONFIG_FLIPTRONIC
+#if (MACHINE_FLIPTRONIC == 1)
 static U8 wpc_flipper_relay;
 #endif
 
