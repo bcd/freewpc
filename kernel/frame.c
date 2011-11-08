@@ -28,7 +28,6 @@
  */
 
 #include <freewpc.h>
-#include <xbmprog.h>
 
 /**
  * The way that images are accessed is very different in 6809 vs. native mode.
