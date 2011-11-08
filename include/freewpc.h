@@ -158,16 +158,12 @@ __noreturn__ void freewpc_init (void);
 
 /* Platform specifics */
 #ifdef CONFIG_PLATFORM_WHITESTAR
-#define CPU_BOARD
 #include <platform/whitestar.h>
+#define __CPU_BOARD
 #endif
 #ifdef CONFIG_PLATFORM_WPC
-#define CPU_BOARD
 #include <platform/wpc.h>
-#endif
-#ifdef CONFIG_PLATFORM_WPCSOUND
-#define SOUND_BOARD
-#include <platform/wpcsound.h>
+#define __CPU_BOARD
 #endif
 
 /* Core software structures */
@@ -185,8 +181,8 @@ __noreturn__ void freewpc_init (void);
 //#include <list.h>
 #include <log.h>
 
-#ifdef CPU_BOARD
 /* Hardware modules */
+#ifdef __CPU_BOARD
 #include <system/ac.h>
 #include <system/sol.h>
 #include <system/lamp.h>
@@ -253,9 +249,7 @@ __noreturn__ void freewpc_init (void);
 #endif
 #endif
 #endif
-
-#endif /* CPU_BOARD */
-
+#endif /* __CPU_BOARD */
 
 /* This is ugly, but I can't figure out any other way to get 
  * pragmas working */

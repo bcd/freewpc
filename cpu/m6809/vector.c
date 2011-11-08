@@ -38,12 +38,6 @@ extern void do_swi (void);
 extern void do_nmi (void);
 #endif
 
-#ifdef CONFIG_PLATFORM_WPCSOUND
-extern void wpcs_invalid_interrupt (void);
-extern void wpcs_host_interrupt (void);
-extern void wpcs_periodic_interrupt (void);
-#endif
-
 /** The 6809 vector table structure */
 typedef struct
 {
@@ -86,15 +80,6 @@ __attribute__((section("vector"))) m6809_vector_table_t vectors = {
 
 	/* NMI also shouldn't happen, but log it if it does. */
 	.nmi = do_nmi,
-#endif
-#ifdef CONFIG_PLATFORM_WPCSOUND
-	.unused = wpcs_invalid_interrupt,
-	.swi3 = wpcs_invalid_interrupt,
-	.swi2 = wpcs_invalid_interrupt,
-	.irq = wpcs_host_interrupt,
-	.firq = wpcs_periodic_interrupt,
-	.swi = wpcs_invalid_interrupt,
-	.nmi = wpcs_invalid_interrupt,
 #endif
 	.reset = start,
 };

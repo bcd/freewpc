@@ -68,7 +68,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <imglib.h>
-#include <pgmlib.h>
 
 #define MAX_FRAMES 2048
 
