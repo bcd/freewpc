@@ -148,17 +148,17 @@ verified/initialized correctly because of this */
 struct adjustment feature_adjustments[] = {
 	/* The first few feature adjustments are provided by the core
 	system but only enabled if the game supports it. */
-
+#ifdef CONFIG_BUYIN
 	{ "BUY EXTRA BALL", &yes_no_value, NO, &system_config.buy_extra_ball },
-
+#endif
 #ifdef MACHINE_LAUNCH_SWITCH
 	{ "TIMED PLUNGER", &on_off_value, OFF, &system_config.timed_plunger },
 	{ "FLIPPER PLUNGER", &on_off_value, OFF, &system_config.flipper_plunger },
 #endif
-
+#ifdef CONFIG_FAMILY_MODE
 	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
-
-#ifdef MACHINE_HAS_NOVICE_MODE
+#endif
+#ifdef CONFIG_NOVICE_MODE
 	{ "NOVICE MODE", &yes_no_value, NO, &system_config.novice_mode },
 #endif
 
