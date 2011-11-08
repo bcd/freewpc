@@ -24,16 +24,12 @@
 
 static void sound_ext_reset (void)
 {
-#ifdef CONFIG_UI
 	ui_write_sound_reset ();
-#endif
 }
 
 void sound_ext_command (U16 cmd)
 {
-#ifdef CONFIG_UI
 	ui_write_sound_command (cmd);
-#endif
 }
 
 static void sound_ext_write_data (U8 val)

@@ -26,9 +26,6 @@
  * is redirected to function calls here that simulate the behavior.  This
  * allows FreeWPC to be tested directly on a Linux or Windows development machine,
  * even when there is no PinMAME.
- *
- * If CONFIG_UI is also defined, then various activities are displayed to the
- * user.  Several different UIs are available.
  */
 
 #include <sys/types.h>
@@ -96,17 +93,12 @@ void simlog (enum sim_log_class class, const char *format, ...)
 	vsprintf (buf, format, ap);
 	va_end (ap);
 
-#ifdef CONFIG_UI
 	ui_write_debug (class, buf);
 
 	if (sim_output_stream == stdout)
 		ofp = NULL;
 	else
 		ofp = sim_output_stream;
-
-#else
-	ofp = sim_output_stream;
-#endif
 
 	if (ofp)
 	{
@@ -129,9 +121,7 @@ __noreturn__ void sim_exit (U8 error_code)
 {
 	simlog (SLC_DEBUG, "Shutting down simulation.");
 	protected_memory_save ();
-#ifdef CONFIG_UI
 	ui_exit ();
-#endif
 	if (crash_on_error && error_code)
 		*(int *)0 = 1;
 	exit (error_code);
@@ -286,13 +276,12 @@ int main (int argc, char *argv[])
 		}
 	}
 
-#ifdef CONFIG_UI
-	/* Initialize the user interface */
+	/* Initialize the user interface.  GTK gets initialized
+	separately as it wants to see argc/argv. */
 #ifdef CONFIG_GTK
 	gtk_init (&argc, &argv);
 #endif
 	ui_init ();
-#endif
 
 	/* Initialize signal tracker */
 	signal_init ();

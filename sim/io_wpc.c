@@ -148,10 +148,8 @@ void mux_write (mux_ui ui_update, int index, U8 *memp, U8 newval, unsigned int s
 		if ((newval & (1 << n)) != (oldval & (1 << n)))
 		{
 			/* Update the user interface to reflect the change in output */
-#ifdef CONFIG_UI
 			if (ui_update)
 				ui_update (index + n, newval & (1 << n));
-#endif
 
 			/* Notify the signal tracker that the output changed */
 			signal_update (sigbase+index+n, newval & (1 << n));

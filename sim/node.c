@@ -139,9 +139,7 @@ void node_insert (struct ball_node *node, struct ball *ball)
 	ball->pos = offset;
 	if (node->type->insert)
 		node->type->insert (node, ball);
-#ifdef CONFIG_UI
 	ui_update_ball_tracker (ball->index, node->name);
-#endif
 	simlog (SLC_DEBUG, "node_insert: added %s to %s, count=%d", ball->name, node->name, node->count);
 
 	if (node->unlocked && !node_full_p (node->next))
@@ -174,9 +172,7 @@ struct ball *node_remove (struct ball_node *node)
 	ball->node = NULL;
 	if (node->type->remove)
 		node->type->remove (node, ball);
-#ifdef CONFIG_UI
 	ui_update_ball_tracker (ball->index, "Free");
-#endif
 	simlog (SLC_DEBUG, "node_remove: took %s from %s", ball->name, node->name);
 
 	if (node->prev && node->prev->unlocked && node->prev->count != 0)
@@ -249,9 +245,7 @@ void node_move (struct ball_node *dst, struct ball_node *src)
 		node_insert (dst, ball);
 	else
 	{
-#ifdef CONFIG_UI
-	ui_update_ball_tracker (ball->index, src->name);
-#endif
+		ui_update_ball_tracker (ball->index, src->name);
 		node_insert_delay (dst, ball, src->delay);
 	}
 }

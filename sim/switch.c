@@ -45,12 +45,10 @@ static void sim_switch_update (int sw)
 	U8 level = sim_switch_matrix[sw/8] & (1 << (sw%8));
 
 	/* Redraw the switch */
-#ifdef CONFIG_UI
 	if (show_switch_levels)
 		ui_write_switch (sw, level);
 	else
 		ui_write_switch (sw, level ^ switch_is_opto (sw));
-#endif
 
 	/* Update the signal tracker */
 	signal_update (SIGNO_SWITCH + sw, !!level);
