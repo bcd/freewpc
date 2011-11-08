@@ -762,8 +762,8 @@ CALLSET_ENTRY (switch, diagnostic_check)
 		diag_post_error ("12V SWITCH POWER\nIS NOT PRESENT\n", SYS_PAGE);
 #endif
 
-#ifdef SW_SLAM_TILT
-	if (unlikely (rt_switch_poll (SW_SLAM_TILT)))
+#ifdef MACHINE_SLAM_TILT_SWITCH
+	if (unlikely (rt_switch_poll (MACHINE_SLAM_TILT_SWITCH)))
 		diag_post_error ("SLAM TILT IS\nSTUCK CLOSED\n", SYS_PAGE);
 #endif
 }
