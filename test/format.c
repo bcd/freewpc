@@ -457,9 +457,6 @@ void render_audit (audit_t val, audit_format_type_t type)
 		case AUDIT_TYPE_AVG_PER_BALL:
 			average_per_ball_audit (val);
 			break;
-		case AUDIT_TYPE_LONGINT:
-			/* TODO long_integer_audit (val); */
-			break;
 #ifndef CONFIG_NATIVE
 	/* Timestamp audits are broken in native mode because we are using
 	a 16-bit as a pointer, which only works on the 6809. */
