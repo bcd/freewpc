@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -33,9 +33,18 @@ struct preset preset_ ## N = {  \
 	.comps = preset_ ## N ## _comps \
 };
 
+#ifndef FREE_ONLY
+#define PRESET_FREE_PLAY \
+	{ pricing_adjustments, &price_config.free_play, YES },
+#else
+#define PRESET_FREE_PLAY
+#endif
+
 extern struct adjustment standard_adjustments[];
 extern struct adjustment feature_adjustments[];
 extern struct adjustment pricing_adjustments[];
+
+struct preset_component *preset_component_ptr;
 
 
 PRESET_BEGIN (3ball)
@@ -49,10 +58,10 @@ PRESET_END (5ball, "5-BALL")
 
 
 PRESET_BEGIN (tournament)
+	PRESET_FREE_PLAY
 	{ standard_adjustments, &system_config.balls_per_game, 3 },
 	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
 	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
-	{ pricing_adjustments, &price_config.free_play, YES },
 	{ standard_adjustments, &system_config.game_restart, GAME_RESTART_NEVER },
 	{ standard_adjustments, &system_config.max_ebs, 0 },
 	{ standard_adjustments, &system_config.match_feature, OFF },
@@ -63,7 +72,7 @@ PRESET_END (tournament, "TOURNAMENT")
 
 
 PRESET_BEGIN (show)
-	{ pricing_adjustments, &price_config.free_play, YES },
+	PRESET_FREE_PLAY
 	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
 	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
 	{ standard_adjustments, &system_config.match_feature, OFF },
@@ -136,7 +145,7 @@ PRESET_BEGIN (eu)
 PRESET_END (eu, "E.U.")
 
 PRESET_BEGIN (dev)
-	{ pricing_adjustments, &price_config.free_play, YES },
+	PRESET_FREE_PLAY
 PRESET_END (dev, "DEVELOPER")
 
 PRESET_BEGIN (buyin_test)
@@ -258,60 +267,41 @@ bool preset_installed_p (U8 index)
 }
 
 
-void preset_show_components (void)
+void preset_select (void)
 {
 	struct preset *pre = preset_table[menu_selection];
-	struct preset_component *comps = pre->comps;
-
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_left);
-	font_render_string_center (&font_mono5, 64, 5, pre->name);
-	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 11);
-	sound_send (SND_TEST_SCROLL);
-	dmd_show_low ();
-	task_sleep (TIME_1S + TIME_500MS);
-
-	while (comps->nvram != NULL)
-	{
-		struct adjustment *info = comps->info;
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_mono5, 64, 5, pre->name);
-		dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 11);
-
-		if (info == NULL)
-		{
-			sprintf ("SET %p TO %02X", comps->nvram, comps->value);
-			font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
-		}
-#ifdef CONFIG_DMD /* TODO */
-		else
-		{
-			union dmd_coordinate coord;
-			/* WARNING - you cannot make a farcall when some of the args
-			 * are on the stack!  The called function sees the saved
-			 * value of the page instead of the args.  This has to be
-			 * fixed in the compiler itself.
-			 * So for now, we split into two function calls... */
-			adj_prepare_lookup (info);
-			adj_name_for_preset (comps->nvram, comps->value);
-			coord.x = 24;
-			coord.y = 24;
-			if (*comps->nvram == comps->value)
-			{
-				bitmap_draw (coord, BM_X5);
-			}
-			else
-			{
-				bitmap_draw (coord, BM_BOX5);
-			}
-		}
-#endif
-
-		dmd_show_low ();
-		sound_send (SND_TEST_CONFIRM);
-		task_sleep (TIME_1S + TIME_500MS);
-		comps++;
-	}
-	task_exit ();
+	preset_component_ptr = pre->comps;
 }
+
+
+#if (MACHINE_DMD == 1)
+void preset_draw_component (void)
+{
+	struct adjustment *info;
+
+	if (!preset_component_ptr || !preset_component_ptr->nvram)
+		return;
+
+	info = preset_component_ptr->info;
+	if (!info)
+		return;
+
+	/* WARNING - you cannot make a farcall when some of the args
+	 * are on the stack!  The called function sees the saved
+	 * value of the page instead of the args.  This has to be
+	 * fixed in the compiler itself.
+	 * So for now, we split into two function calls... */
+	adj_prepare_lookup (info);
+	adj_name_for_preset (preset_component_ptr->nvram, preset_component_ptr->value);
+
+	if (*preset_component_ptr->nvram == preset_component_ptr->value)
+	{
+		dmd_rough_invert (0, 18, 128, 5);
+	}
+
+	preset_component_ptr++;
+	if (preset_component_ptr->nvram == NULL)
+		preset_select ();
+}
+#endif
 

@@ -336,18 +336,15 @@ void adj_name_for_preset (U8 * const nvram, const U8 value)
 	if (adj_lookup == NULL)
 		return;
 
-	/* Searching through all adjustments, and then printing was known
-	to be slow at one point, so these sleeps were added.  It may not
-	be necessary now that printing is done in assembly. */
-	task_sleep (TIME_16MS);
 	while (adj_lookup->nvram != NULL)
 	{
 		if (adj_lookup->nvram == nvram)
 		{
-			task_sleep (TIME_16MS);
-			font_render_string_center (&font_mono5, 64, 16, adj_lookup->name);
+			if (adj_lookup->name[0] == '\0')
+				return;
+			font_render_string_center (&font_var5, 48, 20, adj_lookup->name);
 			adj_lookup->values->render (value);
-			print_row_center (&font_mono5, 24);
+			font_render_string_center (&font_var5, 96, 20, sprintf_buffer);
 			return;
 		}
 		adj_lookup++;

@@ -2443,9 +2443,9 @@ void presets_init (void)
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_left (&font_mono5, 1, 1, "PRESETS");
-	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO INSTALL");
-	font_render_string_center (&font_var5, 64, 27, "PRESS START TO VIEW DETAILS");
+	font_render_string_center (&font_var5, 64, 27, "PRESS ENTER TO INSTALL");
 #endif
+	SECTION_VOIDCALL (__test2__, preset_select);
 }
 
 
@@ -2461,6 +2461,8 @@ void presets_draw (void)
 	font_render_string_right (&font_mono5, 127, 9,
 		preset_installed_p (menu_selection) ? "YES" : "NO");
 
+	task_sleep (TIME_16MS);
+	SECTION_VOIDCALL (__test2__, preset_draw_component);
 	dmd_overlay ();
 #else
 	sprintf ("%d.", menu_selection+1);
@@ -2478,19 +2480,43 @@ void presets_draw (void)
 
 void presets_enter (void)
 {
+	window_stop_thread ();
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 8, "INSTALLING PRESET");
+	font_render_string_center (&font_mono5, 64, 8, "INSTALLING");
 	preset_render_name (menu_selection);
 	print_row_center (&font_mono5, 16);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	sound_send (SND_TEST_CONFIRM);
 	preset_install_from_test ();
+	window_start_thread ();
 }
 
-void presets_start (void)
+void presets_up (void)
 {
-	far_task_create_gid (GID_WINDOW_THREAD, preset_show_components, TEST2_PAGE);
+	browser_up ();
+	SECTION_VOIDCALL (__test2__, preset_select);
+}
+
+void presets_down (void)
+{
+	browser_down ();
+	SECTION_VOIDCALL (__test2__, preset_select);
+}
+
+
+void presets_thread (void)
+{
+#if (MACHINE_DMD == 1)
+	for (;;)
+	{
+		task_sleep (TIME_700MS);
+		dmd_alloc_low_clean ();
+		presets_draw ();
+	}
+#else
+	task_exit ();
+#endif
 }
 
 struct window_ops presets_window = {
@@ -2498,7 +2524,12 @@ struct window_ops presets_window = {
 	.init = presets_init,
 	.draw = presets_draw,
 	.enter = presets_enter,
-	.start = presets_start,
+	.up = presets_up,
+	.down = presets_down,
+	.left = window_stop_thread,
+	.right = window_stop_thread,
+	.start = window_stop_thread,
+	.thread = presets_thread,
 };
 
 struct menu presets_menu_item = {
