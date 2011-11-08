@@ -71,7 +71,7 @@ struct ball_node_type open_type_node =  {
 void switch_type_insert_or_remove (struct ball_node *node, struct ball *ball)
 {
 	simlog (SLC_DEBUG, "Switch %d holds %d balls", node->index, node->count);
-#ifdef CONFIG_TZ
+#ifdef MACHINE_TZ
 	if (ball->flags & 0x01)
 	{
 		simlog (SLC_DEBUG, "Slot prox ignored by Powerball");
