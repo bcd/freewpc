@@ -601,7 +601,7 @@ void start_game (void)
 /**
  * stop_game is called whenever a game is restarted, or test mode
  * is entered.  It is functionally equivalent to end_game aside
- * from normal end * game features like match, high score check, etc.
+ * from normal end game features like match, high score check, etc.
  */
 void stop_game (void)
 {
@@ -625,6 +625,12 @@ void stop_game (void)
 	callset_invoke (stop_game);
 	deff_stop_all ();
 	leff_stop_all ();
+
+	/* Forcibly stop tasks that should run only during a game.
+	Do this last, so that the stop_game event handlers gives modules
+	a chance to do cleanup before this happens. */
+	task_remove_duration (TASK_DURATION_GAME);
+	task_duration_expire (TASK_DURATION_GAME);
 }
 
 
