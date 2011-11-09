@@ -33,13 +33,6 @@
 #define HAVE_INTERRUPT_ATTRIBUTE
 #endif
 
-/* Only CPU game ROMs have nvram and locals */
-#ifdef CONFIG_PLATFORM_WPC
-#define HAVE_NVRAM_SECTION
-#define HAVE_LOCAL_SECTION
-#define HAVE_PERMANENT_SECTION
-#endif
-
 /** noreturn is a standard GCC attribute and is always
  * available.  This is just shorthand. */
 #define __noreturn__ __attribute__((noreturn))
@@ -48,30 +41,10 @@
  * or may not be available depending on the compiler
  * version used. */
 
-#ifdef HAVE_FASTRAM_ATTRIBUTE
 #define __fastram__ __attribute__((section("direct")))
-#else
-#define __fastram__
-#endif
-
-#ifdef HAVE_NVRAM_SECTION
 #define __nvram__ __attribute__((section ("nvram")))
-#else
-#define __nvram__
-#endif
-
-#ifdef HAVE_LOCAL_SECTION
 #define __local__ __attribute__((section ("local")))
-#else
-#define __local__
-#endif
-
-#ifdef HAVE_PERMANENT_SECTION
 #define __permanent__ __attribute__((section ("permanent")))
-#else
-#define __permanent__
-#endif
-
 
 /** Section declaration modifiers.  These attributes are used
  * on function prototypes and data externs to denote which

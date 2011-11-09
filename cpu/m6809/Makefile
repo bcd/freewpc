@@ -32,7 +32,7 @@ endif
 
 # Optimization flags
 CFLAGS += -O2 -fomit-frame-pointer -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove -fgcse-after-reload -fgcse-sm -fgcse-las -ffreestanding
-CFLAGS += -DCONFIG_BIG_ENDIAN -DHAVE_FASTRAM_ATTRIBUTE
+CFLAGS += -DCONFIG_BIG_ENDIAN
 # TODO : should -funroll-loops be given?
 CFLAGS += $(if $(CONFIG_MALLOC), -DCONFIG_MALLOC)
 
