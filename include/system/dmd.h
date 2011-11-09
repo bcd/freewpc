@@ -238,15 +238,14 @@ extern inline void dmd_map_overlay (void)
 
 /*
  * The parameters to a rough copy or erase operation.
- * The user parameters are given in terms of pixels, however these
- * must be converted into byte coordinates.
+ * The user parameters are completely given in terms of pixels.
+ * The x position and size are converted into a byte-based offset.
  */
 
 struct dmd_rough_args
 {
 	U8 *dst;
-	U8 bwidth;
-	U8 height;
+	union dmd_coordinate size;
 };
 
 
@@ -263,8 +262,7 @@ struct dmd_rough_args
 		extern struct dmd_rough_args dmd_rough_args; \
 		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1) + \
 			((x) / CHAR_BIT) + (U16)(y) * DMD_BYTE_WIDTH; \
-		dmd_rough_args.bwidth = (w) / CHAR_BIT; \
-		dmd_rough_args.height = h; \
+		dmd_rough_args.size.xy = MKCOORD1 ((w) / CHAR_BIT, (h)); \
 		dmd_rough_copy1 (); \
 	} while (0)
 
@@ -283,8 +281,7 @@ __transition__ void dmd_rough_copy1 (void);
 		extern struct dmd_rough_args dmd_rough_args; \
 		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0) + \
 			((x) / CHAR_BIT) + (U16)(y) * DMD_BYTE_WIDTH; \
-		dmd_rough_args.bwidth = (w) / CHAR_BIT; \
-		dmd_rough_args.height = h; \
+		dmd_rough_args.size.xy = ((w) / CHAR_BIT, (h)); \
 		dmd_rough_erase1 (); \
 	} while (0)
 
@@ -305,8 +302,7 @@ __transition__ void dmd_rough_erase1 (void);
 		extern struct dmd_rough_args dmd_rough_args; \
 		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0) + \
 			((x) / CHAR_BIT) + (y) * DMD_BYTE_WIDTH; \
-		dmd_rough_args.bwidth = (w) / CHAR_BIT; \
-		dmd_rough_args.height = h; \
+		dmd_rough_args.size.xy = ((w) / CHAR_BIT, (h)); \
 		dmd_rough_invert1 (); \
 	} while (0)
 

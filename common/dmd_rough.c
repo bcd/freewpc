@@ -46,14 +46,14 @@ __attribute__((noinline)) void dmd_rough_copy1 (void)
 	do {
 		dst = dmd_rough_args.dst;
 		src = dst - DMD_PAGE_SIZE;
-		U8 bytes = dmd_rough_args.bwidth;
+		U8 bytes = dmd_rough_args.size.x;
 		do {
 			*dst++ = *src++;
 			bytes--;
 		} while (bytes > 0);
 		dmd_rough_args.dst += DMD_BYTE_WIDTH;
-		dmd_rough_args.height--;
-	} while (dmd_rough_args.height > 0);
+		dmd_rough_args.size.y--;
+	} while (dmd_rough_args.size.y > 0);
 }
 
 
@@ -69,14 +69,14 @@ __attribute__((noinline)) void dmd_rough_erase1 (void)
 
 	do {
 		dst = dmd_rough_args.dst;
-		U8 bytes = dmd_rough_args.bwidth;
+		U8 bytes = dmd_rough_args.size.x;
 		do {
 			*dst++ = 0;
 			bytes--;
 		} while (bytes > 0);
 		dmd_rough_args.dst += DMD_BYTE_WIDTH;
-		dmd_rough_args.height--;
-	} while (dmd_rough_args.height > 0);
+		dmd_rough_args.size.y--;
+	} while (dmd_rough_args.size.y > 0);
 }
 
 
@@ -92,14 +92,14 @@ __attribute__((noinline)) void dmd_rough_invert1 (void)
 
 	do {
 		dst = dmd_rough_args.dst;
-		U8 bytes = dmd_rough_args.bwidth;
+		U8 bytes = dmd_rough_args.size.x;
 		do {
 			*dst++ ^= 0xFF;
 			bytes--;
 		} while (bytes > 0);
 		dmd_rough_args.dst += DMD_BYTE_WIDTH;
-		dmd_rough_args.height--;
-	} while (dmd_rough_args.height > 0);
+		dmd_rough_args.size.y--;
+	} while (dmd_rough_args.size.y > 0);
 }
 
 
