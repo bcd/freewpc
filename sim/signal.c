@@ -65,7 +65,7 @@ signal_readings_t *signal_readings[MAX_SIGNALS] = { NULL, };
  * The last known value of each signal.  This does not
  * provide any history.  Each signal is stored as a single bit.
  */
-uint32_t signal_states[(MAX_SIGNALS + 32) / 32] = { 0, };
+uint32_t signal_states[(MAX_SIGNALS + 31) / 32] = { 0, };
 
 
 /** A list of the signals currently being captured */

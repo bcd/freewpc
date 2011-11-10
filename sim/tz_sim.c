@@ -49,6 +49,7 @@ struct ball_node autofire_node;
 struct ball_node shooter_diverter_node;
 
 
+/* TODO - not used */
 void node_clone (struct ball_node *dst, struct ball_node *src)
 {
 	dst->name = src->name;
@@ -59,6 +60,8 @@ void node_clone (struct ball_node *dst, struct ball_node *src)
 }
 
 
+/* Construct a node where a switch is located, but the ball does not
+   automatically move from it when it lands there. */
 void locked_switch_node_init (struct ball_node *node, unsigned int swno)
 {
 	node->name = names_of_switches[swno];
@@ -71,13 +74,18 @@ void locked_switch_node_init (struct ball_node *node, unsigned int swno)
 
 void open_node_init (struct ball_node *node, const char *name)
 {
-	node->name = "Gumball";
+	node->name = name;
 	node->type = &open_type_node;
 	node->size = MAX_BALLS_PER_NODE;
 	node->unlocked = 0;
 }
 
 
+/* Initialize a multiplex point.
+   mux_node is the node for the multiplexor itself.  When a ball reaches
+	here, and the given solenoid is active, the ball will transition to
+	the active node; otherwise to the inactive node.  It will not remain
+	at the multiplexer very long. */
 void diverting_node_init (struct ball_node *mux_node, unsigned int sol,
 	struct ball_node *inactive_node, struct ball_node *active_node)
 {
@@ -106,7 +114,8 @@ void diverting_node_init (struct ball_node *mux_node, unsigned int sol,
 }
 
 
-
+/* Construct a kicking node.  This is used for one-ball devices
+   where the game code does not define a proper "device" for it. */
 void kicking_node_init (struct ball_node *node, unsigned int sol)
 {
 	device_coil_init (sol, node);
@@ -119,6 +128,9 @@ void kicking_node_init (struct ball_node *node, unsigned int sol)
 }
 
 
+/* Construct a magnet node.  This is a special case of a diverter,
+   where the ball is held at the multiplexing point when the magnet
+	is active. */
 void magnet_node_init (struct ball_node *magnet_node, unsigned int sol,
 	struct ball_node *exit_node)
 {

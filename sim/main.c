@@ -133,7 +133,7 @@ __noreturn__ void sim_exit (U8 error_code)
  *
  * This event simulates an elapsed 1ms.
  */
-CALLSET_ENTRY (native, realtime_tick)
+CALLSET_ENTRY (sim, realtime_tick)
 {
 #define FIRQ_FREQ 8
 #define PERIODIC_FREQ 16
