@@ -424,6 +424,7 @@ void sim_coil_init (void)
 		char item_name[32];
 		struct sim_coil_state *c = coil_states + sol;
 		memset (c, 0, sizeof (struct sim_coil_state));
+		ui_write_solenoid (sol, 0);
 		if (MACHINE_SOL_FLASHERP (sol))
 			c->type = &flasher_type_coil;
 		else

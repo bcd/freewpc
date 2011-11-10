@@ -129,5 +129,7 @@ void sim_switch_init (void)
 		{
 			sim_switch_toggle (sw);
 		}
+		else
+			sim_switch_update (sw);
 }
 
