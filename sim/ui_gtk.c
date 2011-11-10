@@ -49,13 +49,11 @@ void ui_print_command (const char *cmdline)
 {
 }
 
-void ui_write_debug (enum sim_log_class c, const char *format, va_list ap)
+void ui_write_debug (enum sim_log_class c, const char *buf)
 {
-	char buf[256];
 	GtkTextBuffer *gtk_buf;
 	GtkAdjustment *gtk_adj;
 
-	vsprintf (buf, format, ap);
 	gtk_buf = (c == SLC_DEBUG_PORT) ? debug_text_buffer : msg_text_buffer;
 	gtk_adj = (c == SLC_DEBUG_PORT) ? debug_adj : msg_adj;
 
@@ -113,9 +111,8 @@ void ui_refresh_display (unsigned int x, unsigned int y, char c)
 #endif
 
 
-void ui_update_ball_tracker (unsigned int ballno, unsigned int location)
+void ui_update_ball_tracker (unsigned int ballno, const char *location)
 {
-	extern const char *sim_ball_location_name (unsigned int location);
 }
 
 void sw_toggle_cb (GtkObject *sw, gpointer user)

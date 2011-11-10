@@ -53,6 +53,13 @@ CFLAGS += -DCONFIG_UI -DCONFIG_UI_REMOTE
 NATIVE_OBJS += $(D)/ui_remote.o
 endif
 
+ifeq ($(CONFIG_UI), sdl)
+CFLAGS += -DCONFIG_UI -DCONFIG_UI_SDL
+UI_CFLAGS += $(shell sdl-config --cflags)
+HOST_LIBS += $(shell sdl-config --libs)
+NATIVE_OBJS += $(D)/ui_sdl.o
+endif
+
 ifeq ($(CONFIG_SOFT_REALTIME), y)
 NATIVE_OBJS += $(C)/realtime.o
 endif

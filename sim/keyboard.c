@@ -148,23 +148,34 @@ static void sim_interface_thread (void)
 	int simulator_keys = 1;
 	int toggle_mode = 1;
 
+#ifndef CONFIG_UI_SDL
 	/* Put stdin in raw mode so that 'enter' doesn't have to
 	be pressed after each keystroke. */
 	keybuffering (0);
 
 	/* Let the system initialize before accepting keystrokes */
 	task_sleep_sec (3);
+#endif
 
 	if (exec_file && exec_late_flag)
 		exec_script_file (exec_file);
 
 	for (;;)
 	{
+		task_yield ();
 #ifdef CONFIG_GTK
 		gtk_poll ();
-		task_yield ();
+#endif
+#ifdef CONFIG_UI_SDL
+		ui_refresh_all ();
+		*inbuf = ui_poll_events ();
 #else
 		*inbuf = sim_getchar ();
+#endif
+
+		/* Try again if no character was read */
+		if (*inbuf == '\0')
+			continue;
 
 		/* If switch simulation is turned off, then keystrokes
 		are fed into the simulated serial port... meaning it is interpreted
@@ -308,7 +319,6 @@ static void sim_interface_thread (void)
 					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)",
 						*inbuf, *inbuf);
 			}
-#endif
 	}
 }
 
