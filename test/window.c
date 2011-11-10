@@ -3697,6 +3697,27 @@ struct menu display_test_item = {
 
 #endif
 
+#ifdef LAMPLIST_ORDERED_TEST
+
+void ordered_lamp_test_init (void)
+{
+	browser_init ();
+	browser_max = PINIO_NUM_LAMPS-1;
+}
+
+struct window_ops ordered_lamp_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = ordered_lamp_test_init,
+};
+
+struct menu ordered_lamp_test_item = {
+	.name = "ORDERED LAMPS",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &ordered_lamp_test_window, NULL } },
+};
+
+#endif
+
 /****************** TEST MENU **************************/
 
 struct menu *test_menu_items[] = {
@@ -3720,7 +3741,9 @@ struct menu *test_menu_items[] = {
 #if (MACHINE_DMD == 1)
 	&display_test_item,
 #endif
-	/* TODO : ordered_lamp_test_item */
+#ifdef LAMPLIST_ORDERED_TEST
+	&ordered_lamp_test_item,
+#endif
 	&lamp_row_col_test_item,
 	&dipsw_test_item,
 #ifdef MACHINE_TEST_MENU_ITEMS
