@@ -58,3 +58,4 @@ NATIVE_OBJS += $(C)/realtime.o
 endif
 
 NATIVE_OBJS += $(C)/bits.o
+NATIVE_OBJS += $(C)/bcd_string.o
