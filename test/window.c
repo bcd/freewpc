@@ -3890,7 +3890,7 @@ void sysinfo_stats1 (void) {
 }
 
 void sysinfo_stats2 (void) {
-#ifdef TASKCOUNT
+#ifdef CONFIG_DEBUG_TASKCOUNT
 	extern U16 task_max_count;
 	sprintf ("MAX TASKS %d", task_max_count);
 #else
