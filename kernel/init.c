@@ -39,10 +39,6 @@ U8 periodic_ok;
 running.  The splash screen is kept until this reverts to zero. */
 U8 sys_init_pending_tasks;
 
-#ifdef CONFIG_PLATFORM_WPC
-const U8 wpc_machine_type = WPC_TYPE;
-#endif
-
 
 /**
  * Handle a warm reboot.

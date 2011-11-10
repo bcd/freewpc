@@ -27,6 +27,9 @@ __fastram__ U8 wpc_rom_bank;
 /** The last value written to the WPC_LEDS register */
 U8 wpc_led_reg;
 
+/** The type of WPC board (DCS, WPC95, etc.) */
+const U8 wpc_machine_type = WPC_TYPE;
+
 
 /**
  * Initialize the WPC platform.
