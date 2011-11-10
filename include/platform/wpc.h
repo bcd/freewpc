@@ -304,12 +304,6 @@ extern U8 *linux_dmd_high_page;
 #endif
 
 
-/* Define addresses for the two page buffer locations we
- * call low and high.  This define is DEPRECATED. */
-#define DMD_LOW_BASE pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0)
-#define DMD_HIGH_BASE pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1)
-
-
 /**
  * Set the given page as visible.  It may or may not be
  * mapped to one of the windows.
