@@ -81,7 +81,7 @@ __fastram__ switch_bits_t sw_logical;
 /** Nonzero for each switch that is in the switch queue.
  * This is not strictly needed, but it provides a fast way to
  * see if a switch is already in the queue without having to
- * can the entire array. */
+ * scan the entire array. */
 switch_bits_t sw_queued;
 
 /* An array of pending switches which have not fully debounced yet.
