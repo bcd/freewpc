@@ -106,6 +106,9 @@ struct ball
 	char name[32];
 };
 
+#define BALL_NORMAL 0x0
+#define BALL_CERAMIC 0x1
+
 extern struct ball_node open_node;
 extern struct ball_node device_nodes[];
 extern struct ball_node switch_nodes[];
@@ -122,8 +125,11 @@ extern struct ball_node switch_nodes[];
 #endif
 
 extern struct ball_node_type switch_type_node;
+extern struct ball_node_type proximity_switch_type_node;
 extern struct ball_node_type mux_type_node;
 extern struct ball_node_type open_type_node;
+
+extern struct ball the_ball[];
 
 void node_insert (struct ball_node *node, struct ball *ball);
 void node_kick (struct ball_node *node);

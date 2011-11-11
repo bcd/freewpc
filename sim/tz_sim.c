@@ -190,7 +190,12 @@ void mach_node_init (void)
 	open_node_init (&gumball_machine_node, "Gumball Mech.");
 	open_node_init (&powerfield_node, "Powerfield");
 
-	/* Mark the Powerball */
-	//the_ball[0].flags |= 0x1;
+	/* Mark one of the balls as the Powerball */
+	the_ball[0].flags |= BALL_CERAMIC;
+
+	/* Change the types of the proximity switches, so that they do not cause any
+	   action on ceramic balls. */
+	switch_nodes[SW_FAR_LEFT_TROUGH].type = &proximity_switch_type_node;
+	switch_nodes[SW_SLOT_PROXIMITY].type = &proximity_switch_type_node;
 }
 

@@ -75,20 +75,30 @@ struct ball_node_type open_type_node =  {
 void switch_type_insert_or_remove (struct ball_node *node, struct ball *ball)
 {
 	simlog (SLC_DEBUG, "Switch %d holds %d balls", node->index, node->count);
-#ifdef MACHINE_TZ
-	if (ball->flags & 0x01)
-	{
-		simlog (SLC_DEBUG, "Slot prox ignored by Powerball");
-		sim_switch_set (node->index, 0);
-	}
-	else
-#endif
 	sim_switch_set (node->index, node->count);
 }
 
 struct ball_node_type switch_type_node = {
 	.insert = switch_type_insert_or_remove,
 	.remove = switch_type_insert_or_remove,
+};
+
+
+/* Proximity switches have a separate type, for which ceramic balls do not
+   cause any action. */
+
+void prox_switch_insert_or_remove (struct ball_node *node, struct ball *ball)
+{
+	if (ball->flags & BALL_CERAMIC)
+		sim_switch_set (node->index, 0);
+	else
+		switch_type_insert_or_remove (node, ball);
+}
+
+
+struct ball_node_type proximity_switch_type_node = {
+	.insert = prox_switch_insert_or_remove,
+	.remove = prox_switch_insert_or_remove,
 };
 
 
