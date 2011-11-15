@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -205,11 +205,16 @@ void gi_disable (U8 triac)
 
 #ifdef CONFIG_TRIAC
 /** Enable dimming for a GI string. */
-void gi_dim (U8 triac, U8 intensity)
+void gi_dim (U8 triac, U8 brightness)
 {
 	gi_clear_dimming (triac, gi_dimming);
 	triac_output &= ~triac;
-	gi_dimming[intensity] |= triac;
+	if (brightness == 0)
+		;
+	else if (brightness < 7 && system_config.allow_dim_illum == YES)
+		gi_dimming[7 - brightness] |= triac;
+	else
+		triac_output |= triac;
 	triac_update ();
 }
 #endif
