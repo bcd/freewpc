@@ -276,6 +276,14 @@ void deff_queue_service (void)
 		}
 	}
 
+	/* Delay updating background effect briefly, to allow
+	synchronous callers to do something else */
+	if (task_getgid () == GID_DEFF_EXITING)
+	{
+		dbprintf ("deff_update delayed on exit\n");
+		task_sleep (TIME_133MS);
+	}
+
 	/* No queued effect can run now, so try a background update */
 	deff_update ();
 }
@@ -517,11 +525,16 @@ void deff_update (void)
 /** Start a display effect and wait for it to finish before returning. */
 void deff_start_sync (deffnum_t dn)
 {
-	deff_start (dn);
-	if (deff_get_active () != dn)
-		nonfatal (ERR_FAILED_DEFF);
+	U8 n;
+	for (n=0; n < 24; n++)
+	{
+		deff_start (dn);
+		if (deff_get_active () == dn)
+			break;
+		task_sleep (TIME_166MS);
+	}
 	while (deff_get_active () == dn)
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_66MS);
 }
 
 
