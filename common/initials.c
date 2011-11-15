@@ -30,6 +30,8 @@
 
 #define NUM_INITIALS_ALLOWED 3
 
+#define INITIALS_TIMER_INIT 30
+
 /** The array of characters that can be entered.
  * Keep the length of this as a power of 2 (32) so that
  * the circular buffer implementation is simple.
@@ -59,9 +61,6 @@ U8 initials_selection;
 /* The array of initials */
 char initials_data[NUM_INITIALS_ALLOWED+1];
 
-/* The callback function to invoke when initials are entered OK */
-void (*initials_enter_complete) (void);
-
 
 /**
  * The display effect for the enter initials screen.
@@ -79,7 +78,11 @@ void enter_initials_deff (void)
 			U8 n;
 			dmd_alloc_low_clean ();
 			font_render_string_left (&font_var5, 0, 1, "ENTER INITIALS");
-			font_render_string_left (&font_fixed10, 0, 9, initials_data);
+			for (n=0; n < 3; n++)
+			{
+				font_render_glyph (&font_bitmap8, n * 8, 9,
+					initials_data[n] ? initials_data[n] : '_');
+			}
 
 			if (initials_selection < MAX_INITIAL_INITIAL+1)
 			{
@@ -106,8 +109,6 @@ void enter_initials_deff (void)
 				dmd_low_buffer[16UL * n + SELECT_OFFSET] ^= 0x7F;
 			}
 
-			sprintf ("%d", initials_enter_timer);
-			font_render_string_right (&font_fixed6, 126, 3, sprintf_buffer);
 			dmd_show_low ();
 #else
 			seg_alloc_clean ();
@@ -115,8 +116,6 @@ void enter_initials_deff (void)
 			sprintf ("%c", initial_chars[initials_selection]);
 			seg_write_string (0, 15, sprintf_buffer);
 			seg_write_string (1, 0, initials_data);
-			sprintf ("%d", initials_enter_timer);
-			seg_write_string (1, 14, sprintf_buffer);
 			seg_show ();
 #endif
 		}
@@ -136,15 +135,10 @@ void initials_stop (void)
 
 static void initials_running (void)
 {
-	task_sleep_sec (1);
-	initials_enter_timer = 30;
+	initials_enter_timer = INITIALS_TIMER_INIT;
 	memset (initials_data, 0, sizeof (initials_data));
 	initials_index = 0;
-	initials_selection = 0;
-
-#if 1
-	initials_enter_complete = null_function;
-#endif
+	initials_selection = ALPHABET_LEN - SELECT_OFFSET;
 
 	while (initials_enter_timer > 0)
 	{
@@ -199,10 +193,9 @@ CALLSET_ENTRY (initials, start_button_handler)
 			initial_chars[(initials_selection + SELECT_OFFSET) % ALPHABET_LEN];
 		score_update_request ();
 		if (++initials_index == NUM_INITIALS_ALLOWED)
-		{
-			(*initials_enter_complete) ();
 			initials_stop ();
-		}
+		else
+			initials_enter_timer = INITIALS_TIMER_INIT;
 	}
 }
 

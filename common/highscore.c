@@ -396,6 +396,7 @@ void high_score_enter_initials (U8 position)
 		csum_area_update (&high_csum_info);
 
 		/* Award credits */
+		deff_start (DEFF_HSCREDITS);
 		if (position == 0)
 		{
 			high_score_award_credits (&hstd_config.champion_credits);
@@ -404,7 +405,7 @@ void high_score_enter_initials (U8 position)
 		{
 			high_score_award_credits (&hstd_config.hstd_credits[position-1]);
 		}
-		deff_start_sync (DEFF_HSCREDITS);
+		task_sleep (TIME_1500MS);
 	}
 }
 
@@ -445,5 +446,16 @@ void high_score_check (void)
 CALLSET_ENTRY (high_score, file_register)
 {
 	file_register (&high_csum_info);
+}
+
+
+CALLSET_ENTRY (high_score, sw_buyin_button)
+{
+#if 0
+	high_score_table[4].initials[0] = 0;
+	high_score_table[3].initials[0] = 1;
+	high_score_enter_initials (4);
+	high_score_enter_initials (3);
+#endif
 }
 
