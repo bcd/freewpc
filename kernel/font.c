@@ -415,6 +415,12 @@ void fontargs_render_string_right (const char *s)
 	fontargs_render_string ();
 }
 
+void fontargs_render_glyph (U8 c)
+{
+	sprintf_buffer[0] = c;
+	sprintf_buffer[1] = '\0';
+	fontargs_render_string ();
+}
 
 /** Draw a bitmap from the 'symbol' font onto the display.
 The character selects which symbol to be drawn. */
