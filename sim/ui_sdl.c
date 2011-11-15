@@ -1,13 +1,43 @@
+/*
+ * Copyright 2011 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#define TTF
 
 #include <SDL/SDL.h>
+#ifdef TTF
+#include <SDL/SDL_ttf.h>
+#endif
 #include <freewpc.h>
 #include <simulation.h>
+
+#define FONT_PATH "/usr/share/fonts/truetype/freefont/"
 
 SDL_Surface *screen;
 Uint32 color_pixels[4];
 Uint32 on_color;
 Uint32 off_color;
 Uint32 black;
+TTF_Font *font;
+SDL_Color text_fg = { 255, 255, 255 };
+SDL_Color text_bg = { 0, 0, 0 };
+SDL_Rect loc;
 
 int sdl_sol_history[NUM_POWER_DRIVES] = {};
 
@@ -24,10 +54,10 @@ int sdl_sol_history[NUM_POWER_DRIVES] = {};
 #define LAMP_XPOS 0
 #define LAMP_YPOS 120
 
-#define SW_XPOS 180
+#define SW_XPOS 200
 #define SW_YPOS 120
 
-#define SOL_XPOS 360
+#define SOL_XPOS 400
 #define SOL_YPOS 120
 
 static void box (unsigned int x, unsigned int y, unsigned int width, unsigned int height, Uint32 color)
@@ -47,6 +77,17 @@ static void box (unsigned int x, unsigned int y, unsigned int width, unsigned in
 	}
 }
 
+static void text_redraw (SDL_Rect rect, const char *string, SDL_Color color)
+{
+	SDL_Surface *surf;
+
+	box (rect.x, rect.y, rect.w, rect.h, black);
+	surf = TTF_RenderText_Blended (font, string, color);
+	SDL_BlitSurface (surf, NULL, screen, &rect);
+	SDL_FreeSurface (surf);
+}
+
+
 void ui_print_command (const char *cmdline)
 {
 }
@@ -64,8 +105,7 @@ void ui_write_solenoid (int solno, int on_flag)
 {
 	int x = solno / 8;
 	int y = solno % 8;
-	if (on_flag)
-		box (SOL_XPOS + x * BOX_DIM, SOL_YPOS + y * BOX_DIM, BOX_SIZE, BOX_SIZE, on_flag ? on_color : off_color);
+	box (SOL_XPOS + x * BOX_DIM, SOL_YPOS + y * BOX_DIM, BOX_SIZE, BOX_SIZE, on_flag ? on_color : off_color);
 	//sdl_sol_history[solno] = on_flag ? 0 : 254;
 }
 
@@ -122,6 +162,12 @@ void ui_refresh_display (unsigned int x, unsigned int y, char c)
 
 void ui_update_ball_tracker (unsigned int ballno, const char *location)
 {
+	SDL_Rect r;
+	r.x = 540;
+	r.y = ballno * 20;
+	r.w = 100;
+	r.h = 20;
+	text_redraw (r, location, text_fg);
 }
 
 U8 ui_poll_events (void)
@@ -141,6 +187,8 @@ U8 ui_poll_events (void)
 
 void ui_init (void)
 {
+	SDL_Surface *surf;
+
 	printf ("Initializing SDL UI\n");
 
 	if (SDL_Init (SDL_INIT_AUDIO | SDL_INIT_VIDEO) < 0) {
@@ -148,6 +196,14 @@ void ui_init (void)
 		exit (1);
 	}
 	atexit (SDL_Quit);
+
+#ifdef TTF
+	if (TTF_Init () < 0) {
+		fprintf (stderr, "error: unable to initialize TTF\n");
+		exit (1);
+	}
+	atexit (TTF_Quit);
+#endif
 
 	SDL_WM_SetCaption ("FreeWPC Simulation - " MACHINE_NAME, NULL);
 
@@ -164,6 +220,37 @@ void ui_init (void)
 	color_pixels[1] = SDL_MapRGB (screen->format, 128, 128, 128);
 	color_pixels[2] = SDL_MapRGB (screen->format, 192, 192, 192);
 	on_color = color_pixels[3] = SDL_MapRGB (screen->format, 255, 255, 255);
+
+#ifdef TTF
+	font = TTF_OpenFont (FONT_PATH "FreeSerif.ttf", 16);
+	if (font == NULL) {
+		fprintf (stderr, "error: cannot open font\n");
+		exit (1);
+	}
+
+	loc.x = LAMP_XPOS;
+	loc.y = LAMP_YPOS + 10 * BOX_DIM;
+	surf = TTF_RenderText_Blended (font, "LAMPS", text_fg);
+	SDL_BlitSurface (surf, NULL, screen, &loc);
+	SDL_FreeSurface (surf);
+
+	loc.y += 3 * BOX_DIM;
+	surf = TTF_RenderText_Blended (font, "G.I. STRINGS", text_fg);
+	SDL_BlitSurface (surf, NULL, screen, &loc);
+	SDL_FreeSurface (surf);
+
+	loc.x = SW_XPOS;
+	loc.y = SW_YPOS + 130;
+	surf = TTF_RenderText_Blended (font, "SWITCHES", text_fg);
+	SDL_BlitSurface (surf, NULL, screen, &loc);
+	SDL_FreeSurface (surf);
+
+	loc.x = SOL_XPOS;
+	loc.y = SOL_YPOS + 130;
+	surf = TTF_RenderText_Blended (font, "COILS", text_fg);
+	SDL_BlitSurface (surf, NULL, screen, &loc);
+	SDL_FreeSurface (surf);
+#endif
 }
 
 void ui_refresh_all (void)
@@ -190,5 +277,6 @@ void ui_refresh_all (void)
 
 void ui_exit (void)
 {
+	TTF_CloseFont (font);
 }
 

@@ -56,7 +56,7 @@ endif
 ifeq ($(CONFIG_UI), sdl)
 CFLAGS += -DCONFIG_UI -DCONFIG_UI_SDL
 UI_CFLAGS += $(shell sdl-config --cflags)
-HOST_LIBS += $(shell sdl-config --libs)
+HOST_LIBS += $(shell sdl-config --libs) -lSDL_ttf
 NATIVE_OBJS += $(D)/ui_sdl.o
 endif
 
