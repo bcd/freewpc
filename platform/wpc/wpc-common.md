@@ -123,6 +123,7 @@ fixed10:
 term6:
 times8:
 bitmap8:
+symbol:
 
 [timers]
 Ignore Tilt:

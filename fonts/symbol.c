@@ -42,7 +42,7 @@ static char bitmap_common_right_arrow5[] = { 3, 5, 0x1, 0x3, 0x7, 0x3, 0x1 };
 
 /* A table of all bitmaps grouped together in this 'font'.  The index
 is used to retrieve the bitmap later. */
-static char *bitmap_common_glyphs[] = {
+static char *font_symbol_glyphs[] = {
    [BM_BOX3] = bitmap_common_box3,
    [BM_X3] = bitmap_common_x3,
    [BM_PLUS3] = bitmap_common_plus3,
@@ -53,9 +53,9 @@ static char *bitmap_common_glyphs[] = {
 };
 
 /* The font descriptor */
-const font_t font_bitmap_common = {
+const font_t font_symbol = {
 	.spacing = 0,
 	.height = 0,
-	.glyphs = bitmap_common_glyphs,
+	.glyphs = font_symbol_glyphs,
 };
 

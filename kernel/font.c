@@ -71,9 +71,6 @@ __fastram__ const U8 *bitmap_src;
 #endif
 
 
-extern const font_t font_bitmap_common;
-
-
 /* Returns a pointer to the glyph data for a character 'c'
  * in the font 'font'.  This points directly to the raw bytes
  * that can be ORed into the display.
@@ -419,17 +416,6 @@ void fontargs_render_glyph (U8 c)
 {
 	sprintf_buffer[0] = c;
 	sprintf_buffer[1] = '\0';
-	fontargs_render_string ();
-}
-
-/** Draw a bitmap from the 'symbol' font onto the display.
-The character selects which symbol to be drawn. */
-void bitmap_draw (union dmd_coordinate coord, U8 c)
-{
-	sprintf_buffer[0] = c;
-	sprintf_buffer[1] = '\0';
-	font_args.font = &font_bitmap_common;
-	font_args.coord = coord;
 	fontargs_render_string ();
 }
 
