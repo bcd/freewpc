@@ -1285,42 +1285,6 @@ struct menu dev_deff_stress_test_item = {
 };
 
 
-/************ Symbol Test *****************/
-
-#if (MACHINE_DMD == 1)
-
-void symbol_test_init (void)
-{
-	browser_init ();
-	menu_selection = browser_min = 1;
-	browser_max = BM_LAST-1;
-}
-
-void symbol_test_draw (void)
-{
-	union dmd_coordinate coord;
-
-	browser_draw ();
-	coord.x = 96;
-	coord.y = 20;
-	bitmap_draw (coord, menu_selection);
-}
-
-struct window_ops symbol_test_window = {
-	INHERIT_FROM_BROWSER,
-	.init = symbol_test_init,
-	.draw = symbol_test_draw,
-};
-
-struct menu symbol_test_item = {
-	.name = "SYMBOL BROWSER",
-	.flags = M_ITEM,
-	.var = { .subwindow = { &symbol_test_window, NULL } },
-};
-
-#endif /* MACHINE_DMD == 1 */
-
-
 /*********** Lampsets **********************/
 
 U8 lamplist_update_mode;
@@ -2184,9 +2148,6 @@ struct menu *dev_menu_items[] = {
 #endif
 	&dev_force_error_item,
 	&dev_deff_stress_test_item,
-#if (MACHINE_DMD == 1)
-	&symbol_test_item,
-#endif
 	&sched_test_item,
 #ifndef CONFIG_NATIVE
 	&irqload_test_item,
