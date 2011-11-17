@@ -165,7 +165,7 @@ void ui_update_ball_tracker (unsigned int ballno, const char *location)
 	SDL_Rect r;
 	r.x = 540;
 	r.y = ballno * 20;
-	r.w = 100;
+	r.w = 200;
 	r.h = 20;
 	text_redraw (r, location, text_fg);
 }
