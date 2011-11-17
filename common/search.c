@@ -36,10 +36,6 @@
  * legitimiately free the ball.  This logic avoids drives attached
  * to flashers or to any game-defined devices that should be avoided,
  * like the knocker or device kickout coils.
- *
- * Ball search is currently indefinite and will gladly run forever.
- * A real machine would give up after a while, or kick another ball
- * into play.
  */
 
 
