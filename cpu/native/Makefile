@@ -66,3 +66,7 @@ endif
 
 NATIVE_OBJS += $(C)/bits.o
 NATIVE_OBJS += $(C)/bcd_string.o
+
+.PHONY : run
+run: $(NATIVE_PROG)
+	$(NATIVE_PROG)

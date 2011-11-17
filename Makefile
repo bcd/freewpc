@@ -480,38 +480,6 @@ clean_err:
 .PHONY : check_prereqs
 check_prereqs : $(BLDDIR) tools sched
 
-.PHONY : run
-run:
-	# Start pinmame up and let it run indefinitely.
-	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
-
-.PHONY : debug
-debug:
-	# Start pinmame up and let it run indefinitely.
-	$(PINMAME) $(PINMAME_MACHINE) -d $(PINMAME_FLAGS) &
-
-.PHONY : rund
-rund: run $(DBCON)
-	xterm -e "$(DBCON) -1" &
-
-.PHONY : rund-file
-rund-file: run $(DBCON)
-	xterm -e "$(DBCON) -1 > $(DBCON_FILE) 2>&1" &
-
-.PHONY : endrun
-endrun :
-	kill $(shell pidof $(PINMAME))
-
-.PHONY : timedrun
-timedrun:
-	$(MAKE) rund-file DBCON_FILE="test.log"
-	sleep 30
-	$(MAKE) endrun
-
-.PHONY : runcon
-runcon: $(BLDDIR)/$(GAME_ROM)
-	wpc-run $(BLDDIR)/$(GAME_ROM)
-
 .PHONY : install
 install : $(TARGET_ROMPATH)/$(PINMAME_MACHINE).zip
 
