@@ -282,6 +282,7 @@ _task_create:
 	puls	u,pc
 
 
+#ifdef CONFIG_TASK_FORK
 	;-----------------------------------------------------
 	; task_fork - an implementation of the UNIX fork()
 	; system call.  It is similar to task_create,
@@ -334,6 +335,7 @@ _task_fork_entry:
 	ldx	UREG_SAVE_OFF,x
 	clrb
 	jmp	,x
+#endif /* CONFIG_TASK_FORK */
 
 
 	;-----------------------------------------------------

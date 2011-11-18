@@ -227,10 +227,12 @@ void task_dump (void)
 				malloc_chunk_dump (tp);
 			}
 #endif
+#ifdef CONFIG_EXPAND_STACK
 			else if (tp->state & BLOCK_STACK)
 			{
 				dbprintf ("aux stack\n");
 			}
+#endif
 			else
 			{
 				dbprintf ("???\n");
@@ -746,7 +748,7 @@ void task_dispatcher (task_t *tp)
 		{
 			/* Call the debugger.  This is not implemented as a true
 			'idle' event below because it should _always_ be called,
-			even when 'sys_init_complete' is not true.  This lets us
+			even when 'periodic_ok' is not true.  This lets us
 			debug very early initialization. */
 			db_periodic ();
 
