@@ -136,7 +136,7 @@ void initials_stop (void)
 static void initials_running (void)
 {
 	initials_enter_timer = INITIALS_TIMER_INIT;
-	memset (initials_data, 0, sizeof (initials_data));
+	memset (initials_data, ' ', sizeof (initials_data));
 	initials_index = 0;
 	initials_selection = ALPHABET_LEN - SELECT_OFFSET;
 
