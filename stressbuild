@@ -38,6 +38,9 @@ case $option in
 	--nobpt)
 		bpt_options="n"
 		;;
+	--sys*)
+		machines="tester"
+		;;
 	--fast)
 		machines="funhouse t2 tz wcs afm"
 		sim_options="n"
