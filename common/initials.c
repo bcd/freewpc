@@ -138,7 +138,7 @@ static void initials_running (void)
 {
 	task_sleep_sec (1);
 	initials_enter_timer = 30;
-	memset (initials_data, 0, sizeof (initials_data));
+	memset (initials_data, ' ', sizeof (initials_data));
 	initials_index = 0;
 	initials_selection = 0;
 
