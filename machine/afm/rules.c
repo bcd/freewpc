@@ -41,8 +41,11 @@ __local__ score_t jackpot_value[S_COUNT];
 
 void jackpot_reset (void)
 {
+	U8 i;
 	lamplist_apply (LAMPLIST_JACKPOTS, lamp_off);
 	lamplist_apply (LAMPLIST_JACKPOTS, lamp_flash_on);
+	for (i=0; i < S_COUNT; i++)
+		score_copy (jackpot_value[i], score_table[SC_100K]);
 }
 
 void jackpot_shot (enum shot_id id)
