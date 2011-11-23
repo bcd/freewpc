@@ -20,10 +20,11 @@
 
 #include <freewpc.h>
 
+#ifndef CONFIG_STRESS_DRAIN_PROB
+#define CONFIG_STRESS_DRAIN_PROB 30
+#endif
+
 U8 switch_stress_enable;
-
-U8 switch_stress_drain_prob;
-
 
 /**
  * Pulse the flippers periodically during stress test.
@@ -112,7 +113,7 @@ void switch_stress_task (void)
 				more frequently.
 					We need to do this occasionally so that multiball modes
 				will eventually end, else nothing else gets tested. */
-				if (random () < switch_stress_drain_prob * live_balls)
+				if (random () < CONFIG_STRESS_DRAIN_PROB * live_balls)
 					switch_stress_drain ();
 			}
 			else if (dev->max_count < dev->size)
@@ -147,8 +148,25 @@ CALLSET_ENTRY (stress, init)
 #else
 	switch_stress_enable = NO;
 #endif
-	switch_stress_drain_prob = 30;
 }
+
+static void stress_start_button_task (void)
+{
+	callset_invoke (sw_start_button);
+	task_exit ();
+}
+
+CALLSET_ENTRY (stress, minute_elapsed)
+{
+#ifdef CONFIG_STRESS_AUTO
+	if (switch_stress_enable && !in_game && deff_get_active () == DEFF_AMODE)
+	{
+		dbprintf ("Stress auto start.\n");
+		task_create_anon (stress_start_button_task);
+	}
+#endif
+}
+
 
 /**
  * Start the simulation as soon as valid playfield is declared,
