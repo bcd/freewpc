@@ -1,21 +1,21 @@
 # The configuration for the WPC platform
 
-CONFIG_GAME_ROM := y
-
 # Root directory for the platform files
 P := platform/wpc
 
 # Common 6809 configuration
+ifndef CPU
 CPU := m6809
 $(eval $(call have,CONFIG_PERIODIC_IRQ))
 CONFIG_TASK := y
 include cpu/$(CPU)/Makefile
+$(eval $(call have,CONFIG_MMIO))
+endif
 
 # Subplatform support
 # Eventually, this section will contain conditionals for building on the
 # different WPC variations.  For now, all of these are mandatory though.
 $(eval $(call have,CONFIG_PLATFORM_WPC))
-$(eval $(call have,CONFIG_MMIO))
 CONFIG_FONT ?= $(CONFIG_DMD)
 $(eval $(call have,CONFIG_AC))
 $(eval $(call have,CONFIG_GI))
@@ -47,21 +47,26 @@ CONFIG_SYSTEM_CODE_PAGE := 62
 # This is non-standard but it generates much better code.  It should be
 # possible to build without this, though.
 #
+ifeq ($(CPU),m6809)
 INT_CFLAGS = -mint8
-# TODO : Don't hardcode code/data sections here like this!
-CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -mwpc -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format -Werror=implicit-function-declaration
+CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -mwpc -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram
 EXTRA_ASFLAGS += -D__int8__
+# TODO : should these next two be common?
+CFLAGS += -Wno-format -Werror=implicit-function-declaration
+endif
 
 # Say which source files need to be compiled in for the WPC platform only.
 # Use KERNEL_HW_OBJS for C sources, and KERNEL_ASM_OBJS for assembler files.
-KERNEL_HW_OBJS += $(P)/main.o
 KERNEL_HW_OBJS += $(P)/interrupt.o
 KERNEL_HW_OBJS += $(P)/init-wpc.o
+ifeq ($(CPU),m6809)
+KERNEL_HW_OBJS += $(P)/main.o
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/bitmap.o)
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/dmd.o)
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/dot.o)
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/shadow.o)
 KERNEL_ASM_OBJS += $(P)/start.o
+endif
 
 # Import images that are common to all games.
 ifeq ($(CONFIG_DMD),y)

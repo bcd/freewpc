@@ -4,34 +4,18 @@
 # redefines those things which are necessarily different for simulation.
 
 D := sim
-P := platform/wpc
 NATIVE_OBJS :=
 
-# Common native mode CPU configuration
+# Common simulation CPU configuration
 CPU := native
 $(eval $(call have,CONFIG_PTH))
 CONFIG_UI ?= curses
 $(eval $(call have,CONFIG_SOFT_REALTIME))
 include cpu/$(CPU)/Makefile
-
-# Subplatform support
-# Eventually, this section will contain conditionals for building on the
-# different WPC variations.  For now, all of these are mandatory though.
-$(eval $(call have,CONFIG_PLATFORM_WPC))
-CONFIG_FONT ?= $(CONFIG_DMD)
-$(eval $(call have,CONFIG_AC))
-$(eval $(call have,CONFIG_GI))
-$(eval $(call have,CONFIG_TRIAC))
-$(eval $(call have,CONFIG_RTC))
-$(eval $(call have,CONFIG_BUYIN))
-CONFIG_ANIMATION ?= $(CONFIG_DMD)
-CONFIG_SCORE_RANK := y
-
-# Platform dependent files
-KERNEL_HW_OBJS += $(P)/interrupt.o
-KERNEL_HW_OBJS += $(P)/init-wpc.o
+include $(PMAKEFILE)
 
 # Additional defines
+# TODO : Is CONFIG_PLATFORM_WPC needed?
 CFLAGS += -I$(D) -DCONFIG_PLATFORM_WPC -DPAGE=0
 
 # Additional object files to be linked into the kernel region
@@ -72,14 +56,8 @@ CFLAGS += $(if $(CONFIG_DMD), -DMACHINE_DMD=1)
 
 CFLAGS += -DMACHINE_SHORTNAME=\"$(MACHINE)\"
 
-ifeq ($(CONFIG_DMD),y)
-IMAGE_MAP += platform/wpc/wpc.ild
-endif
-
 # CALLSET_ENTRYs in the simulator directory work too!
 CALLSET_FLAGS += -D $(D)
-
-FIRST_BANK=0
 
 # Invoke 'make attach' to start up a GDB session that attaches itself to
 # a running instance of the native mode program.

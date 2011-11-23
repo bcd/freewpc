@@ -96,13 +96,11 @@ check_prereqs : clean_err
 KERNEL_OBJS :=
 COMMON_BASIC_OBJS :=
 
-# TODO : include the real, non-sim Makefile after the simulation
-# Makefile too.
+PMAKEFILE := platform/$(PLATFORM)/Makefile
 ifeq ($(CONFIG_SIM), y)
 include sim/Makefile
 else
-PMAKEFILE := platform/$(PLATFORM)/Makefile
--include $(PMAKEFILE)
+include $(PMAKEFILE)
 endif
 
 
@@ -328,6 +326,7 @@ TOP_BANK = $(lastword $(CONFIG_CODE_PAGE_LIST))
 else
 BLANK_SIZE := 512
 CONFIG_SYSTEM_CODE_PAGE := 0
+FIRST_BANK := 0
 endif
 
 #
