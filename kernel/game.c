@@ -176,6 +176,7 @@ void end_game (void)
 		deff_start (DEFF_GAME_OVER);
 		amode_start ();
 	}
+	task_exit ();
 }
 
 
@@ -327,8 +328,12 @@ void end_ball (void)
 	}
 
 	/* After the max balls per game have been played, go into
-	 * end game */
-	end_game ();
+	 * end game.  To limit stack size, spawn this in a separate
+	 * task context.  We are already nested pretty deeply here, and
+	 * end game effects will need to sleep to do synchronous deffs.  I've
+	 * observed stack overflow here when running the stress test. */
+	task_create_gid1 (GID_END_GAME, end_game);
+	task_sleep (TIME_16MS);
 
 done:
 #ifdef DEBUGGER
@@ -568,7 +573,7 @@ void start_game (void)
 {
 	if (!in_game)
 	{
-		task_kill_gid (GID_END_BALL);
+		task_kill_gid (GID_END_GAME);
 		in_game = TRUE;
 		in_bonus = FALSE;
 		in_tilt = FALSE;
