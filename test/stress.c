@@ -84,6 +84,8 @@ void switch_stress_task (void)
 	for (;;)
 	{
 		task_sleep (TIME_100MS);
+		if (in_test)
+			continue;
 
 		/* Choose a switch at random.  Skip certain well-known switches that are
 		 * never to be activated. */

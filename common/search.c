@@ -222,7 +222,7 @@ void ball_search_monitor_task (void)
 		 * - ball is on the shooter switch
 		 * - either flipper button is held
 		 */
-		if (in_game && !in_bonus && (live_balls || !valid_playfield)
+		if (in_game && !in_test && !in_bonus && (live_balls || !valid_playfield)
 #ifdef MACHINE_SHOOTER_SWITCH
 				&& !switch_poll_logical (MACHINE_SHOOTER_SWITCH)
 #endif
