@@ -67,6 +67,7 @@ PRESET_BEGIN (tournament)
 	{ standard_adjustments, &system_config.match_feature, OFF },
 	{ standard_adjustments, &system_config.tournament_mode, ON },
 	{ standard_adjustments, &system_config.no_bonus_flips, NO },
+	{ standard_adjustments, &system_config.allow_chase_ball, NO },
 	{ feature_adjustments, &system_config.buy_extra_ball, NO },
 PRESET_END (tournament, "TOURNAMENT")
 
