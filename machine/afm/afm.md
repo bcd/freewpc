@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # AFM machine description for FreeWPC
-# (C) Copyright 2006, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+# (C) Copyright 2006, 2009, 2010, 2011 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
