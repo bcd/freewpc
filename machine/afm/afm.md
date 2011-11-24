@@ -239,6 +239,7 @@ Free Luck: yes_no, YES
 Luck Time: integer, 15
 Max. Balls: integer, 4
 Saucer Carryover: yes_no, YES
+EB Percent: integer, 10
 
 [audits]
 

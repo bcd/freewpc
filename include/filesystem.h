@@ -46,6 +46,9 @@ enum file_type
 	FT_VERSION,
 	FT_ROTEST,
 	FT_DATE,
+	FT_FLEX1,
+	FT_FLEX2,
+	FT_FLEX3,
 };
 
 
