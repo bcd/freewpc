@@ -7,8 +7,7 @@ description file (same basename as the directory, with suffix .md).
 
 For WPC, the top of the .md should define the generation of
 machine used.  Here are the values to use and the games that they
-apply to (taken from information at http://www.pinrepair.com/wpc/index1.htm).
-Games with "+" already have at least a basic machine description.
+apply to.  Games with "+" already have at least a basic machine description.
 
 1. WPC Alphanumeric
 
