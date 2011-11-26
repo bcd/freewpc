@@ -162,6 +162,35 @@ do { \
 } while (0)
 
 
+/* Far data accessor functions
+ *
+ * Inside any banked function which needs to access caller data
+ * that might be in a different bank, first call far_read_access()
+ * as the very first statement in the function.  Thereafter, you
+ * can use far_read() to get access to caller data through a paged
+ * pointer.
+ *
+ * The syntax is far_read (ptr, field), where ptr is a pointer
+ * to a struct in a banked area, and field identifies which part
+ * of the struct needs to be read.
+ */
+
+#define __fardata__
+
+#ifdef __m6809__
+#define far_read_access() \
+	U8 __caller_page; asm ("sta\t%0" : "=m"(__caller_page))
+#else
+#define far_read_access()
+#define __caller_page 0
+#endif
+
+#define far_read(ptr, __field) \
+	(__builtin_choose_expr ( (sizeof (ptr->__field) == 1), \
+		(far_read8 (&ptr->__field, __caller_page)), \
+		(typeof (ptr->__field))(far_read16 (&ptr->__field, __caller_page))))
+
+
 /***************************************************************
  * I/O accessor functions
  *
