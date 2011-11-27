@@ -110,16 +110,6 @@ struct {
 
 
 /**
- * Dump the state of the solenoid request driver.
- */
-#ifdef DEBUGGER
-void sol_req_dump (void)
-{
-}
-#endif
-
-
-/**
  * Pulse a solenoid with a specific duty/time.
  */
 void

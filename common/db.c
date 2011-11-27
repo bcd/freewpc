@@ -60,7 +60,6 @@ void db_dump_all (void)
 	VOIDCALL (dump_game);
 	VOIDCALL (dump_deffs);
 	switch_queue_dump ();
-	VOIDCALL (sol_req_dump);
 	VOIDCALL (triac_dump);
 	SECTION_VOIDCALL (__common__, device_debug_all);
 }
