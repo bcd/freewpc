@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009, 2010, 2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,11 +20,7 @@
 
 #include <string.h>
 #include <stdarg.h>
-#ifdef CONFIG_HOST_CYGWIN
-#include <ncurses/ncurses.h>
-#else
 #include <ncurses.h>
-#endif
 #include <freewpc.h>
 #include <simulation.h>
 

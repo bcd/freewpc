@@ -32,6 +32,7 @@ endif
 
 ifeq ($(CONFIG_UI), curses)
 CFLAGS += -DCONFIG_UI -DCURSES
+CFLAGS += -I$(shell ncurses5-config --includedir)
 HOST_LIBS += -lncurses
 NATIVE_OBJS += $(D)/ui_curses.o
 endif
