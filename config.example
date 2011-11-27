@@ -3,14 +3,30 @@
 # If you don't already have a .config, you can rename this one
 # and change anything you don't like.
 #
+# Some features must be enabled using an "eval-call-have" command.
+# This ensures that the conditional is seen by makefiles, C
+# files, and assembly language files.  Failure to do so may
+# cause features to be only partially enabled.  There are
+# exceptions, for example, when a conditional is only needed
+# by the makefiles.  Use this example config to guide you.
+#
 
-# If you want to simulate, define CONFIG_SIM.  This builds a
-# program you can run on your build system instead of a ROM.
+
+# Parallel make will speed up compiles slightly.  In general
+# the argument to -j should be the number of processors you have,
+# plus one.
+#MAKEFLAGS := -j2
+#MAKEFLAGS := -j3
+
+# If you want to simulate, enable CONFIG_SIM.  This builds a
+# program you can run on your build system, instead of a ROM.
 # You should also choose a UI for how the system will be displayed;
-# we recommended 'curses', but there is also 'console'.
-#CONFIG_SIM := y
+# 'curses' is the most complete, but there are alternatives.
+# $(eval $(call have,CONFIG_SIM))
 #CONFIG_UI := curses
 #CONFIG_UI := console
+#CONFIG_UI := sdl
+#CONFIG_UI := remote
 
 # Set the machine you are trying to build.
 # If you are primarily working with a single machine type, it is
@@ -22,7 +38,6 @@
 #MACHINE := t2
 #MACHINE := fh
 #MACHINE := tester
-#MACHINE := tzsound
 #MACHINE := tspp
 #MACHINE := afm
 #MACHINE := tom
@@ -32,23 +47,33 @@
 #
 # Set this to the directory in which MAME roms should be installed.
 # If you don't have MAME, then you can leave this undefined.
+# If it is set, then by default, your newly compiled game ROM will
+# temporarily overwrite one of the PinMAME ROMs, so that running
+# PinMAME will test our version instead of the factory.  Which ROM
+# gets overwritten is set in the machine's Makefile.
 #
-# Under Cygwin use something like the following.  make has trouble
-# with filenames that have spaces or colons in them.
+# To restore the factory ROM, run "make uninstall".
+#
+# Under Windows+Cygwin, use something like the following.  make has
+# trouble with filenames that have spaces or colons in them.
 #TARGET_ROMPATH := "/cygdrive/c/Progra~1/VPinmame/roms"
 
 #
-# Set FREEWPC_DEBUGGER if you want to enable printf() statements throughout
-# the code.  This will be written to the serial/parallel port.
+# Set FREEWPC_DEBUGGER if you want to enable dbprintf() statements throughout
+# the code.  They will be written to the serial/parallel port.  This requires
+# a patched PinMAME in order to view the messages.  This has no effect in
+# a real machine.  In simulation, these messages get written to a log file.
 #
 #FREEWPC_DEBUGGER := y
 
 #
 # Enable CONFIG_BPT if you want to enable breakpoints.  You can press
 # Escape anytime and the non-interrupt driven part of the system will
-# pause, and you can inspect memory addresses.
+# pause, and you can inspect memory addresses.  This also lets you
+# set breakpoints at specific adddresses.  When enabled, this
+# automatically enables FREE ONLY.
 #
-#CONFIG_BPT := y
+#$(eval $(call have,CONFIG_BPT))
 
 
 #
@@ -63,17 +88,19 @@
 
 # Set to the version of gcc6809 installed.
 # The 4.3.x releases are recommended, although 4.2.x releases
-# should still work.
+# should still work.  This option is ignored when simulating; your
+# local 'gcc' will be used instead.
 #GCC_VERSION := 4.2.3
 GCC_VERSION := 4.3.4
+#GCC_VERSION := 4.3.6
 
-# If you have special flags to pass to the compiler, define them here.
+# If you have other flags to pass to the compiler, define them here.
 #EXTRA_CFLAGS += -save-temps
-#EXTRA_CFLAGS += -DCONFIG_DEBUG_STACK
-#EXTRA_CFLAGS += -DCONFIG_PARALLEL_DEBUG
+# $(eval $(call have,CONFIG_DEBUG_STACK))
 #EXTRA_CFLAGS += -DFREE_ONLY
 
-# For debugging the compiler itself.
+# For debugging the compiler itself.  Do not define this unless you
+# working on gcc6809.
 #DEBUG_COMPILER := y
 
 # vim: set filetype=make:
