@@ -1,0 +1,13 @@
+vbox 8
+valign top
+print "MULTIBALL"
+vbox 16
+font fixed6
+print current_score
+vbox 8
+valign bottom
+print "SHOOT RIGHT RAMP"
+flash TIME_66MS
+end
+run forever
+exit

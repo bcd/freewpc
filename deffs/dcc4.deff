@@ -1,0 +1,18 @@
+name count
+border
+print "%d HITS TO GO", hits_to_go
+run TIME_1500MS
+exit
+
+name count_zero
+border
+print "JACKPOT IS LIT"
+run TIME_1500MS
+exit
+
+name super_lit
+print "SUPER JACKPOT LIT"
+transition trans_scroll_up
+run TIME_2500MS
+flash TIME_66MS
+exit

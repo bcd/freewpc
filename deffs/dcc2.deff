@@ -1,0 +1,13 @@
+name tilt_warning
+U8 tilt_warning_count
+font fixed10
+cond (tilt_warning_count == 1)
+print "DANGER"
+cond (tilt_warning_count == 2)
+vbox 16
+print "DANGER"
+vbox 16
+print "DANGER"
+run TIME_1500MS
+exit
+

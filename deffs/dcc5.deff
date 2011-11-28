@@ -1,0 +1,11 @@
+
+name dark_bright
+vbox 50%
+color 1
+print "DARK"
+vbox 50%
+color 3
+print "BRIGHT"
+end
+run TIME_2S
+exit
