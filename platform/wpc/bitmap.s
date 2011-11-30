@@ -128,7 +128,7 @@ loop8:
 	orb	1,x				; Merge into DMD page (2nd byte)
 	std	,x					; Save 16-bits to DMD memory in one shot
 	leax	16,x
-	dec	_bitmap_height
+	dec	*_bitmap_height
 	bne	loop8
 	stu	_bitmap_src
 	puls	u,y,pc
@@ -146,7 +146,7 @@ loop16:
 	orb	1,x
 	std	,x					; Save to DMD memory
 	leax	16,x
-	dec	_bitmap_height
+	dec	*_bitmap_height
 	bne	loop16
 	stu	_bitmap_src
 	puls	u,y,pc
@@ -220,7 +220,7 @@ large_middle_loop:
 	comb
 	andb	#15
 	abx
-	dec	_bitmap_height
+	dec	*_bitmap_height
 	bne	large_row_loop
 	stu	_bitmap_src
 	puls	u,y,pc
@@ -349,7 +349,7 @@ erase_large_middle_loop:
 	comb
 	andb	#15
 	abx
-	dec	_bitmap_height
+	dec	*_bitmap_height
 	bne	erase_large_row_loop
 	puls	y,pc
 
