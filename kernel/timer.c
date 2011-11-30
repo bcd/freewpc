@@ -78,13 +78,16 @@ void timer_unlock (void)
  *
  * Returns TRUE if timers should not run for some reason.
  * Returns FALSE if timers should continue to run.
+ *
+ * In a game, timers will normally run, so most of the time, this
+ * entire function will be executed; thus, it is mostly useless to
+ * try to optimize this by moving things around.  The best way to
+ * optimize this is to reduce the total number of checks by
+ * usign timer locks.
  */
 bool system_timer_pause (void)
 {
-	if (!in_game || in_bonus || !valid_playfield)
-		return TRUE;
-
-	if (timer_lock_count)
+	if (!in_game || !valid_playfield || timer_lock_count)
 		return TRUE;
 
 	if (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER) && single_ball_play ())
