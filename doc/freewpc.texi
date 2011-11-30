@@ -1210,9 +1210,27 @@ nothing special happens.  One common use is for detecting certain
 playfield shots when a series of switches needs to activate within
 a certain amount of time, say 1 second apart.
 
+Free timers can only be started in multiples of 1/3 second, up to 8
+seconds.
+
 @subsection Periodic Functions
 
+Periodic functions can be declared to do timing.  Your choices for
+frequency are limited to 16ms, 100ms, 1 second, or 10 seconds; if you
+need other timing, you'll have to implement it yourself.  For example,
+display effects get updated every 500ms by scheduling a 100ms periodic
+function, but only acting every 5 calls.
+
+These functions are statically scheduled and so run continuously; you
+cannot directly start or stop them.  However, you can use variables
+to control whether they do anything or not; but note that there is
+overhead in calling them all the time.
+
 @subsection Realtime Functions
+
+Precision timing should use realtime functions.  They give you the most
+accurate timing and allow measuring down to 1ms, but they can be high
+overhead.  They should be used carefully when no alternative works.
 
 @node Bank Switching
 @section Bank Switching
@@ -1432,7 +1450,8 @@ and act accordingly.
 In addition to polling their levels, the switch driver will detect
 when switches have @emph{changed state}, and invoke their event handlers.
 The switch entry in the config file names a function to be called when
-these changes occur.
+these changes occur.  These functions are always called from within
+their own task context.
 
 The driver performs debouncing, so that rapid open and close
 are not considered.  By default, a switch is processed if it remains
@@ -1447,8 +1466,8 @@ flicker of the lamp.
 
 @item switch_poll
 
-Read the stable, physical state of a switch.  Returns 1 if it has
-a high level, or 0 for a low level.
+Read the stable, physical state of a switch.  Returns nonzero if it has
+a high level, or zero for a low level.
 
 Switch readings are polled by the switch driver continuously; this
 API just returns the results of the last time the switch was
@@ -1457,8 +1476,8 @@ on WPC, it is every 2ms.
 
 @item switch_poll_logical
 
-Read the stable, logical state of a switch.  Returns 1 if it is
-active, or 0 for inactive.  This is the same as @code{switch_poll}
+Read the stable, logical state of a switch.  Returns nonzero if it is
+active, or zero for inactive.  This is the same as @code{switch_poll}
 but it inverts its result for optos.
 
 @item rt_switch_poll
@@ -1848,21 +1867,20 @@ any changes.  The battery provides power to the ASIC even when the game is off
 so the real-time clock remains updated.
 
 Game code does not need to call the following APIs.  The current date and time
-can simply be read from memory.
+can simply be read from memory, in the variable @var{current_date}.
 
 @table @code
-@item rtc_read
+@item rtc_hw_read
 
-Update memory based on the current value of the RTC registers.
+Update the hour/minute in memory from the value in the hardware registers.
 
-@item rtc_write
+@item rtc_hw_write
 
-Update the RTC chip.
+Update the hour/memory in the hardware from the value in memory.  This is
+only used when setting the time.
 
 @end table
 
-@node Debug Port
-@section Debug Port
 
 @c ======================================================
 @node Effects
@@ -2693,7 +2711,8 @@ For example, on Funhouse, the Rudy saucer eject needs to make sure that
 the mouth is open before kicking.
 
 Solenoids associated with ball devices will be skipped unless they are empty,
-except after several ball searches have failed.
+except after several ball searches have failed.  The chase ball/lost ball
+recovery feature is also implemented and can be enabled by menu adjustment.
 
 Game code can call @code{ball_search_timeout_set} to set the amount of
 idle time that must expire before a ball search will occur.  The default
@@ -2713,6 +2732,8 @@ Adjustments are 8-bit variables kept in persistent storage.  Each group
 of related adjustments is checksummed to verify integrity.  Adjustments
 can be checked by just reading the variable; there is no special API to do so.
 
+Machines can define their own @emph{feature adjustments} in the machine config.
+
 @section Audits
 
 Audits are 16-bit variables kept in the non-volatile area of memory.  They
@@ -2721,6 +2742,8 @@ They can also be incremented by an arbitrary value, via @code{audit_add}; or
 they can be assigned via @code{audit_assign}.  They will not overflow if the
 maximum value is reached, but instead will just stop counting up.
 
+Machines can define their own @emph{feature audits} in the machine config.
+
 @section Scoring
 
 A global playfield multiplier is supported; use @code{score_multiplier_set} to
@@ -2728,7 +2751,7 @@ change it.  It is automatically set to 1 at the beginning of each ball.
 
 Scores can be stated in two ways: as a 5-byte, binary-coded decimal value, or
 as an 8-bit "score code".  The long values allow for arbitrary values up to
-one billion points.  The short values are more compact and index a table of
+10 billion points.  The short values are more compact and index a table of
 common score values, which are listed in the machine config.
 
 The first set of APIs operate on arbitary BCD score buffers:
@@ -2824,24 +2847,24 @@ moves into a new place.  It is up to each game to decide how to handle it.
 To write a timed mode, you need to do two things:
 
 First, create a structure of type @code{struct timed_mode_ops} and fill out
-all of the required information:
+all of the required information.  Use the DEFAULT_MODE macro in the initializer
+to set suitable values before declaring your own values.  The fields are:
 
 @itemize @bullet
-@item An initialization function.  This is called when the mode is started.
-@item An exit function.  This is called when the mode is stopped or times out.
-@item A task group ID.  Choose any name you want begin with @code{GID}.
-When the mode is started, a task will be created with this group ID.
-@item A music code.  Use MUS_NONE if the mode should not update the background music.
-@item The background display effect ID.  Use DEFF_NULL if none is needed.
-@item The mode end display effect ID.  Use DEFF_NULL if none is needed.
-@item A priority value.  Use one of the PRI values.
-@item The initial mode timer, in seconds.
-@item A pointer to a timer variable.  You must declare the variable yourself.
-@item The length of the grace period, in seconds.  It may be zero.
-@item A pause function.  This function is called occasionally while the mode
-is running.  If it returns TRUE, the timer is not advanced.
+@item @var{init}, an initialization function.  This is called when the mode is started.
+@item @var{exit}, an exit function.  This is called when the mode is stopped or times out.
+@item @var{gid}, a task group ID.  Choose any name you want begin with @code{GID}.
+This field is mandatory and has no default.  When the mode is started, a task will be created with this group ID.
+@item @var{music}, the background music code.  Use MUS_NONE if the mode should not update the background music.
+@item @var{deff_running}, the running display effect ID.  Use DEFF_NULL if none is needed.
+@item @var{deff_ending}, the ending display effect ID.  Use DEFF_NULL if none is needed.
+@item @var{prio}, a priority value.  Use one of the PRI values.
+@item @var{init_timer}, tThe initial mode timer, in seconds.
+@item @var{timer}, a pointer to a timer variable.  You must declare the variable yourself.
+@item @var{grace_timer}, the length of the grace period, in seconds.  It may be zero.
+@item @var{pause}, the pause function.  This function is called occasionally while the mode is running.  If it returns TRUE, the timer is not advanced.
 Use @code{system_timer_pause} when the mode should pause for the "usual cases" only.
-Use @code{null_false_function} if the mode should not pause at all.  You can
+Use @code{null_false_function} if the mode should not pause at all.  You can also
 supply your own function if you need custom behavior.
 @end itemize
 
@@ -2901,11 +2924,12 @@ The base API @code{serve_ball} simply kicks a ball out of the trough.
 It also resets the valid playfield flag and refreshes background effects.
 This is the same call made by the game state machine during start ball.
 
-Use @code{serve_ball_auto} instead if you want to ball to be autolaunched
-as soon as it is served successful.  Otherwise, it is identical.  If
+Use @code{serve_ball_auto} instead if you want the ball to be autolaunched
+as soon as it is served successfully.  Otherwise, it is identical to
+@code{serve_ball}.  If
 a ball is served without autolaunch, it can be launched later by calling
 @code{launch_ball}.  This happens automatically when the launch button is
-pressed.
+pressed and a ball is detected in the shooter lane.
 
 You normally do not need to call either of those APIs, except in some
 rare cases.
@@ -2927,6 +2951,14 @@ will ever be placed in the shooter at a time.
 @section Multiball Modes
 @cindex Multiball
 
+Multiball modes can be implemented by defining a structure of type
+@code{struct mb_mode_ops}.  They are modeled after the way that timed
+modes are constructed.  Use the DEFAULT_MBMODE macro in the initializer
+to set suitable values before declaring your own values.
+
+The key difference is how the mode ends; here, we examine the number
+of balls in play and end the mode when it reduces to 1.
+
 @section Mute and Pause Mode
 
 FreeWPC implements the Mute and Pause feature that was included
@@ -2934,12 +2966,19 @@ in the Twilight Zone home ROM.  It is optional at compile-time.
 The machine must have an extra-ball buyin button for it to work.
 
 When compiled in, and the adjustment "MUTE/PAUSE" is set to YES,
-then pressing buytin during a game will hold the flippers,
-disable ball kickouts, and turn off the background music.  To
+then pressing buyin during a game will hold the flippers,
+disable ball kickouts, pause timers, and turn off the background music.  To
 continue, press the button again.  It will also timeout automatically
 after 15 minutes.
 
 @section Status Report
+
+A default status report is builtin which shows basic game information.
+To activate it in a game, hold in either flipper button for about 5
+seconds.
+
+Machines can customize the report by defining their own status pages.
+Modules should declare a handler for the @code{status_report} event.
 
 @c ======================================================
 @node Fonts and Graphics
