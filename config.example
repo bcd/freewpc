@@ -64,7 +64,7 @@
 # a patched PinMAME in order to view the messages.  This has no effect in
 # a real machine.  In simulation, these messages get written to a log file.
 #
-#FREEWPC_DEBUGGER := y
+#$(eval $(call have,DEBUGGER))
 
 #
 # Enable CONFIG_BPT if you want to enable breakpoints.  You can press
