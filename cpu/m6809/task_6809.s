@@ -204,8 +204,8 @@ _task_restore:
 
 	; Compute the number of extra bytes that were saved
 	; for adjusting the stack pointer
-	pshs	b
-	suba	,s+
+	stb	*m0
+	suba	*m0
 	nega
 
 	; Set the destination address
