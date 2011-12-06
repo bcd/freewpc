@@ -241,22 +241,8 @@ static __attribute__((noinline)) dmd_pagenum_t dmd_alloc (void)
 }
 
 
-/**
- * Allocate and map a single page, for a mono image.
- *
- * Since the image is mono, we map the same page into both the low
- * and high pages.
- */
-void dmd_alloc_low (void)
-{
-	pinio_dmd_window_set (PINIO_DMD_WINDOW_0,
-		dmd_alloc ());
-	pinio_dmd_window_set (PINIO_DMD_WINDOW_1,
-		pinio_dmd_window_get (PINIO_DMD_WINDOW_0));
-}
-
-
 /** Map a consecutive display page pair into windows 0 & 1 */
+__attribute__((noinline))
 void dmd_map_low_high (dmd_pagenum_t page)
 {
 	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, page);
@@ -269,10 +255,23 @@ void dmd_map_low_high (dmd_pagenum_t page)
  */
 void dmd_alloc_pair (void)
 {
-	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dmd_alloc ());
-	pinio_dmd_window_set (PINIO_DMD_WINDOW_1,
-		pinio_dmd_window_get (PINIO_DMD_WINDOW_0) + 1);
+	dmd_pagenum_t page = dmd_alloc ();
+	dmd_map_low_high (page);
 }
+
+/**
+ * Allocate and map a single page, for a mono image.
+ */
+void dmd_alloc_low (void)
+{
+	if (0) {
+		dmd_pagenum_t page = dmd_alloc ();
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_0, page);
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_1, page);
+	}
+	dmd_alloc_pair ();
+}
+
 
 
 /**

@@ -29,7 +29,6 @@
 #define display_init            dmd_init
 #define display_alloc_low       dmd_alloc_low
 #define display_alloc_low_high  dmd_alloc_pair
-#define display_map_low_high    dmd_map_low_high
 #define display_show_low        dmd_show_low
 #define display_show_high       dmd_show_high
 #define display_show_other      dmd_show_other
@@ -54,7 +53,6 @@
 #define display_init            seg_init
 #define display_alloc_low       seg_alloc_low
 #define display_alloc_low_high  seg_alloc_low_high
-#define display_map_low_high    seg_map_low_high
 #define display_show_low        seg_show_low
 #define display_show_high       seg_show_high
 #define display_show_other      seg_show_other
@@ -119,7 +117,6 @@ text and centered it well. */
 #define display_init            remote_dmd_init
 #define display_alloc_low       remote_dmd_alloc_low
 #define display_alloc_low_high  remote_dmd_alloc_pair
-#define display_map_low_high    remote_dmd_map_low_high
 #define display_show_low        remote_dmd_show_low
 #define display_show_high       remote_dmd_show_high
 #define display_show_other      remote_dmd_show_other
@@ -136,7 +133,6 @@ text and centered it well. */
 #define dmd_init()
 #define dmd_alloc_low(args...)
 #define dmd_alloc_pair(args...)
-#define dmd_map_low_high(args...)
 #define dmd_show_low()
 #define dmd_show_high()
 #define dmd_show_other(args...)
