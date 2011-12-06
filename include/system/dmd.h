@@ -176,7 +176,6 @@ extern inline dmd_pagenum_t dmd_get_blank (const U8 num)
 void dmd_init (void);
 extern __fastram__ void (*dmd_rtt) (void);
 void dmd_alloc_low (void);
-void dmd_alloc_high (void);
 void dmd_alloc_pair (void);
 void dmd_map_low_high (dmd_pagenum_t page);
 void dmd_show_low (void);

@@ -256,13 +256,6 @@ void dmd_alloc_low (void)
 }
 
 
-/** Allocate and map a single page, into the 'high' region. */
-void dmd_alloc_high (void)
-{
-	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, dmd_alloc ());
-}
-
-
 /** Map a consecutive display page pair into windows 0 & 1 */
 void dmd_map_low_high (dmd_pagenum_t page)
 {
