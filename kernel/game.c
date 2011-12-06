@@ -138,7 +138,7 @@ void dump_game (void)
 /** Handles the end game condition.
  * This is called directly from the trough update function during
  * endball.  It is also called by test mode when it starts up. */
-void end_game (void)
+static void end_game_task (void)
 {
 	U8 was_in_game = in_game;
 
@@ -177,6 +177,19 @@ void end_game (void)
 		amode_start ();
 	}
 	task_exit ();
+}
+
+void end_game (void)
+{
+	/* To limit stack size, spawn this in a separate
+	 * task context.  We are already nested pretty deeply here, and
+	 * end game effects will need to sleep to do synchronous deffs.  I've
+	 * observed stack overflow here when running the stress test.
+	 * Ensure that this task doesn't get killed due to any duration
+	 * change - notably entering test mode. */
+	task_remove_duration (TASK_DURATION_GAME);
+	task_create_gid1 (GID_END_GAME, end_game_task);
+	task_sleep (TIME_16MS);
 }
 
 
@@ -327,14 +340,8 @@ void end_ball (void)
 		}
 	}
 
-	/* After the max balls per game have been played, go into
-	 * end game.  To limit stack size, spawn this in a separate
-	 * task context.  We are already nested pretty deeply here, and
-	 * end game effects will need to sleep to do synchronous deffs.  I've
-	 * observed stack overflow here when running the stress test. */
-	task_create_gid1 (GID_END_GAME, end_game);
-	task_sleep (TIME_16MS);
-
+	/* After the max balls per game have been played, go into end game */
+	end_game ();
 done:
 #ifdef DEBUGGER
 	/* Dump the game state */
