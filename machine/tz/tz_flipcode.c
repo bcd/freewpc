@@ -205,3 +205,9 @@ CALLSET_ENTRY (tz_flipcode, machine_unpaused)
 		tz_flipcode_entry_stop ();
 	}
 }
+
+CALLSET_BOOL_ENTRY (tz_flipcode, allow_high_scores)
+{
+	return !flipcode_used;
+}
+
