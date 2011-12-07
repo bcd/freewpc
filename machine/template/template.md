@@ -46,7 +46,6 @@ WPC95: Yes/No
 #define MACHINE_SCORE_DIGITS
 #define MACHINE_MUSIC_GAME
 #define MACHINE_MUSIC_PLUNGER
-#define MACHINE_OUTHOLE_KICK_HOOK
 
 ##########################################################################
 # Lamp Description
