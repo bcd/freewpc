@@ -207,8 +207,6 @@ void bpt_hit (void)
 /** Check for debug input periodically */
 void db_periodic (void)
 {
-	extern void MACHINE_DEBUGGER_HOOK (U8);
-
 #ifdef CONFIG_BPT
 	if (!in_test && button_check (SW_ESCAPE))
 		bpt_stop ();
@@ -234,11 +232,6 @@ void db_periodic (void)
 #endif
 
 			default:
-#ifdef MACHINE_DEBUGGER_HOOK
-				/* Allow the machine to define additional commands.
-				 * This function must reside in the system page. */
-				MACHINE_DEBUGGER_HOOK (c);
-#endif
 				break;
 		}
 	}
