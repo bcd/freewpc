@@ -46,8 +46,16 @@ from EVENT_PAGE. */
  * The default is for this to do nothing, but sometimes for debugging it
  * is nice to have this print a message or log the event.
  */
-#if defined(DEBUG_CALLSET_MSG)
-#define callset_debug(id) do { dbprintf ("C%04lX\n", id); } while (0)
+
+#ifdef __m6809__
+#define callset_debug(id) \
+	do { \
+		extern U16 log_callset; \
+		if ((id & 0x3F) == 0) \
+			log_callset = id; \
+		else \
+			asm ("inc\t_log_callset+1"); \
+	} while (0)
 #else
 #define callset_debug(id) do { extern U16 log_callset; log_callset = id; } while (0)
 #endif

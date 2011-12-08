@@ -261,6 +261,8 @@ foreach $set (keys %functionhash) {
 			print FH "   ${module}_$primary (); /* $modulehash{$module} */\n";
 		}
 	}
+	$debug_id = $debug_id & 0xFFC0;
+	$debug_id += 0x40;
 	if ($rettype eq $bool_type) {
 		print FH "   return TRUE;\n";
 	}
