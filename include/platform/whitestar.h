@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -83,16 +83,16 @@ AREA_DECL(nvram)
 #define WS_FLIP0                0x2004
 #define WS_FLIP1                0x2005
 #define WS_AUX_OUT              0x2006
-   #define WS_AUX_GI_RELAY   0x1
+#define WS_AUX_IN               0x2007
+#define WS_LAMP_COLUMN_STROBE   0x2008
+#define WS_LAMP_ROW_OUTPUT      0x200A
+#define WS_AUX_CTRL             0x200B
+   #define WS_AUX_GI         0x1   /* 0=GI on, 1=GI off */
 	#define WS_AUX_BSTB       0x8
 	#define WS_AUX_CSTB       0x10
 	#define WS_AUX_DSTB       0x20
 	#define WS_AUX_ESTB       0x40
 	#define WS_AUX_ASTB       0x80
-#define WS_AUX_IN               0x2007
-#define WS_LAMP_COLUMN_STROBE   0x2008
-#define WS_LAMP_ROW_OUTPUT      0x200A
-#define WS_AUX_CTRL             0x200B
 #define WS_SW_DEDICATED         0x3000
    #define WS_DED_LEFT       0x1
 	#define WS_DED_LEFT_EOS   0x2
@@ -107,13 +107,14 @@ AREA_DECL(nvram)
    #define WS_LED_MASK       0x80
 #define WS_SW_COLUMN_STROBE     0x3300
 #define WS_SW_ROW_INPUT         0x3400
-#define WS_PLASMA_IN            0x3500
-#define WS_PLASMA_OUT           0x3600
+#define WS_PLASMA_STROBE        0x3500
+#define WS_PLASMA_DATA          0x3600
 #define WS_PLASMA_RESET         0x3601
 #define WS_PLASMA_STATUS        0x3700
-   #define WS_SOUND_BUSY     0x1
-	#define WS_DMD_BUSY       0x80
+	#define WS_PLASMA_BUSY      0x80
+	#define WS_PLASMA_TX_READY  0x10  /* 1=ok to send */
 #define WS_SOUND_OUT            0x3800
+   #define WS_SOUND_BUSY       0x1
 
 
 /********************************************/
@@ -188,6 +189,14 @@ extern inline void wpc_write_flippers (U8 val)
 {
 }
 
+extern inline void pinio_enable_flippers (void)
+{
+}
+
+extern inline void pinio_disable_flippers (void)
+{
+}
+
 
 /********************************************/
 /* Locale                                   */
@@ -196,7 +205,7 @@ extern inline void wpc_write_flippers (U8 val)
 
 extern inline U8 wpc_get_jumpers (void)
 {
-	return 0;
+	return ~readb (WS_SW_DIP);
 }
 
 extern inline U8 pinio_read_locale (void)
@@ -204,16 +213,6 @@ extern inline U8 pinio_read_locale (void)
 	return 0;
 }
 
-
-extern inline U8 wpc_read_ticket (void)
-{
-	return 0;
-}
-
-
-extern inline void wpc_write_ticket (U8 val)
-{
-}
 
 /********************************************/
 /* Lamps                                    */
@@ -232,6 +231,8 @@ extern inline void pinio_write_lamp_data (U8 val)
 /********************************************/
 /* Solenoids                                */
 /********************************************/
+
+#define PINIO_NUM_SOLS 32
 
 extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 {
@@ -263,6 +264,7 @@ extern inline void pinio_reset_sound (void)
 
 extern inline void pinio_write_sound (U8 val)
 {
+	writeb (WS_SOUND_OUT, val);
 }
 
 extern inline bool pinio_sound_ready_p (void)
@@ -292,12 +294,12 @@ extern inline void pinio_write_switch_column (U8 val)
 
 extern inline U8 pinio_read_switch_rows (void)
 {
-	return 0;
+	return ~readb (WS_SW_ROW_INPUT);
 }
 
 extern inline U8 pinio_read_dedicated_switches (void)
 {
-	return 0;
+	return ~readb (WS_SW_DEDICATED);
 }
 
 
@@ -305,9 +307,22 @@ extern inline U8 pinio_read_dedicated_switches (void)
 /* Triacs                                   */
 /********************************************/
 
-extern inline void pinio_write_triac (U8 val)
+extern inline void pinio_write_gi (U8 val)
 {
 }
+
+/********************************************/
+/* Miscellaneous                            */
+/********************************************/
+
+extern inline void pinio_watchdog_reset (void)
+{
+}
+
+extern inline void pinio_clear_periodic (void)
+{
+}
+
 
 #endif /* _WHITESTAR_H */
 
