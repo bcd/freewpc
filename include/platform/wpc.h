@@ -287,10 +287,10 @@ extern inline void pinio_dmd_window_flip (void)
 #ifdef CONFIG_NATIVE
 /* In native mode, the DMD is emulated using ordinary character
    buffers. */
-extern U8 *linux_dmd_low_page;
-extern U8 *linux_dmd_high_page;
+extern U8 *pinio_dmd_low_page;
+extern U8 *pinio_dmd_high_page;
 #define pinio_dmd_window_ptr(w) \
-	((w == PINIO_DMD_WINDOW_0) ? linux_dmd_low_page : linux_dmd_high_page)
+	((w == PINIO_DMD_WINDOW_0) ? pinio_dmd_low_page : pinio_dmd_high_page)
 #else
 /* WPC can map up to 2 of the DMD pages into address space at
  * 0x3800 and 0x3A00.  Additionally, on WPC-95, 4 more pages
