@@ -3242,20 +3242,11 @@ struct menu flasher_test_item = {
 
 U8 gi_test_brightness;
 
-U8 gi_test_values[] = {
-	0,
-	TRIAC_GI_STRING(0),
-	TRIAC_GI_STRING(1),
-	TRIAC_GI_STRING(2),
-	TRIAC_GI_STRING(3),
-	TRIAC_GI_STRING(4),
-	PINIO_GI_STRINGS,
-};
-
-
 void gi_test_init (void)
 {
 	browser_init ();
+	/* menu_selection ranges from 0 to the number of strings+1; the last value
+	represnts all strings on */
 	browser_max = NUM_GI_TRIACS+1;
 	gi_test_brightness = 8;
 	gi_disable (PINIO_GI_STRINGS);
@@ -3269,25 +3260,32 @@ void gi_test_exit (void)
 void gi_test_draw (void)
 {
 	browser_draw ();
+	U8 gi;
 
 	if (menu_selection == 0)
+	{
 		browser_print_operation ("ALL OFF");
+		gi = 0;
+	}
 	else if (menu_selection == NUM_GI_TRIACS+1)
+	{
 		browser_print_operation ("ALL ON");
+		gi = PINIO_GI_STRINGS;
+	}
 	else
 	{
 		sprintf_far_string (names_of_gi + menu_selection - 1);
 		browser_print_operation (sprintf_buffer);
+		gi = 1 << (menu_selection - 1);
 	}
-
-	sprintf ("BRIGHTNESS %d", gi_test_brightness);
-	print_row_center (&font_mono5, 29);
 
 	gi_disable (PINIO_GI_STRINGS);
 #ifdef CONFIG_TRIAC
-	gi_dim (gi_test_values[menu_selection], gi_test_brightness);
+	sprintf ("BRIGHTNESS %d", gi_test_brightness);
+	print_row_center (&font_mono5, 29);
+	gi_dim (gi, gi_test_brightness);
 #else
-	gi_enable (gi_test_values[menu_selection]);
+	gi_enable (gi);
 #endif
 }
 
