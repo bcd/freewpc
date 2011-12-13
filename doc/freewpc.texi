@@ -67,91 +67,6 @@ Also, knowledge of WPC pinball machines is very helpful.
 * Concept Index::
 @end menu
 
-@ignore
-* Frame Rate::
-* Simulating Color::
-* 6809 Instruction Set::
-* The Fastest Copy in Town::
-* Bit Alignment::
-* Compression Techniques::
-* Binary Packages::
-* Source Code Packages::
-* Directory Layout::
-* Configuration::
-* Making the ROM::
-
-@menu
-* Switches::
-* Lamps::
-* Power Drivers::
-* Zerocross Detector::
-* Dot-Matrix Display (DMD)::
-* Sound Board::
-* Triacs and General Illumination::
-* Real-Time Clock::
-* High Precision Timer::
-* Miscellaneous::
-* Debug Port::
-* Paging and Locking::
-* Bit Shifting::
-@end menu
-
-@menu
-* Device Status::
-* Global Status::
-* Events::
-* The Trough Device::
-@end menu
-
-* Adjustments::
-* Audits::
-* Tests::
-* Development::
-
-* Coins and Pricing::
-* Ball Devices::
-* Extra Balls::
-* High Scores::
-* Enter Initials::
-* Tournament Mode::
-* Ball Search::
-* Knocker Driver::
-* PIC Driver::
-* Player Local Data::
-* Adjustments::
-* Audits::
-* Scoring::
-
-* Compression::
-* Using TrueType Fonts::
-* Frame List::
-
-* @command{wpcdebug} and @command{PinMAME}::
-* @command{gdb}::
-* @command{exec09}::
-* @command{Breakpoints}::
-* @command{csum} : ROM Checksum Tool::
-* @command{srec2bin} : S-Record Converter::
-* @command{sched} : Static Scheduler::
-* @command{fontgen2} : TrueType Font Generator::
-
-* Overview::
-* CPU Board::
-* Power Driver Board::
-* Sound Board::
-* Fliptronic Board::
-* Auxiliary Driver Board::
-* Dot Matrix Controller Board::
-* Memory Map::
-
-* Syntax::
-* Fixed Objects::
-* Variable Objects::
-* Directives::
-* Global Configuration::
-* Section Summary::
-* How genmachine works::
-@end ignore
 
 @node Overview
 @chapter Overview
@@ -1372,7 +1287,6 @@ normal task context at any time.
 * Sound Board::           How to talk to the sound board
 * General Illumination::  How to control the general illumination strings
 * Real-Time Clock::       How to control the realtime clock
-* Debug Port::            How to write to the debugger port
 @end menu
 
 @node Switches
