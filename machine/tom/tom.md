@@ -304,14 +304,6 @@ misctype:
 lithograph:
 retroville:
 
-[timers]
-Combo:
-Right Ramp Entered:
-Left Ramp Entered:
-Loop to Lock:
-Pause Hurryup:
-Subway to Popper:
-
 [templates]
 Left Sling: driver(sling), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING
 Right Sling: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING

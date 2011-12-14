@@ -43,6 +43,11 @@
 	callsets, order cannot be specified.
 	*/
 
+free_timer_id_t timer_left_ramp_entered;
+free_timer_id_t timer_right_ramp_entered;
+free_timer_id_t timer_loop_to_lock;
+free_timer_id_t timer_subway_to_popper;
+
 const char *shot_name;
 
 void shot_deff (void)
@@ -100,13 +105,13 @@ CALLSET_ENTRY (shot, sw_center_ramp_exit)
 
 CALLSET_ENTRY (shot, sw_right_ramp_enter)
 {
-	if (!free_timer_test (TIM_RIGHT_RAMP_ENTERED))
+	if (!free_timer_test (timer_right_ramp_entered))
 	{
-		free_timer_start (TIM_RIGHT_RAMP_ENTERED, TIME_4S);
+		free_timer_start (timer_right_ramp_entered, TIME_4S);
 	}
 	else
 	{
-		free_timer_stop (TIM_RIGHT_RAMP_ENTERED);
+		free_timer_stop (timer_right_ramp_entered);
 	}
 }
 
@@ -153,7 +158,7 @@ CALLSET_ENTRY (shot, sw_loop_left)
 		combo_detect (5);
 		callset_invoke (left_loop_shot);
 		timer_restart_free (GID_LEFT_LOOP_DEBOUNCE, TIME_3S);
-		free_timer_restart (TIM_LOOP_TO_LOCK, TIME_3S);
+		free_timer_restart (timer_loop_to_lock, TIME_3S);
 	}
 }
 
@@ -163,13 +168,13 @@ CALLSET_ENTRY (shot, sw_spinner_start)
 	the right loop - spinner by itself is not enough */
 	if (!task_kill_gid (GID_LEFT_LOOP_DEBOUNCE) &&
 			!task_find_gid (GID_RIGHT_LOOP_DEBOUNCE) &&
-			!free_timer_test (TIM_RIGHT_RAMP_ENTERED))
+			!free_timer_test (timer_right_ramp_entered))
 	{
 		shot_define ("RIGHT LOOP");
 		combo_detect (6);
 		callset_invoke (right_loop_shot);
 		timer_restart_free (GID_RIGHT_LOOP_DEBOUNCE, TIME_3S);
-		free_timer_restart (TIM_LOOP_TO_LOCK, TIME_3S);
+		free_timer_restart (timer_loop_to_lock, TIME_3S);
 	}
 }
 
@@ -193,12 +198,12 @@ CALLSET_ENTRY (shot, sw_trunk_hit)
 
 CALLSET_ENTRY (shot, sw_subway_opto)
 {
-	free_timer_start (TIM_LOOP_TO_LOCK, TIME_4S);
+	free_timer_start (timer_loop_to_lock, TIME_4S);
 }
 
 CALLSET_ENTRY (shot, sw_subway_micro)
 {
-	if (free_timer_test (TIM_LOOP_TO_LOCK))
+	if (free_timer_test (timer_loop_to_lock))
 		return;
 	else if (task_find_gid (GID_TRUNK_DEBOUNCE))
 	{
@@ -212,7 +217,7 @@ CALLSET_ENTRY (shot, sw_subway_micro)
 
 CALLSET_ENTRY (shot, dev_subway_enter)
 {
-	if (free_timer_test (TIM_LOOP_TO_LOCK))
+	if (free_timer_test (timer_loop_to_lock))
 	{
 		shot_define ("TRUNK BACK");
 		callset_invoke (trunk_back_shot);
@@ -228,12 +233,12 @@ CALLSET_BOOL_ENTRY (shot, dev_subway_kick_request)
 
 CALLSET_ENTRY (shot, dev_subway_kick_attempt)
 {
-	free_timer_restart (TIM_SUBWAY_TO_POPPER, TIME_3S);
+	free_timer_restart (timer_subway_to_popper, TIME_3S);
 }
 
 CALLSET_ENTRY (shot, dev_popper_enter)
 {
-	if (!free_timer_test (TIM_SUBWAY_TO_POPPER))
+	if (!free_timer_test (timer_subway_to_popper))
 	{
 		shot_define ("BASEMENT");
 		callset_invoke (basement_shot);

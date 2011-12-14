@@ -582,9 +582,11 @@ U8 hurryup_multiplier;
 
 score_t hurryup_value;
 
+free_timer_id_t hurryup_pause_timer;
+
 bool hurryup_timer_pause (void)
 {
-	if (free_timer_test (TIM_PAUSE_HURRYUP))
+	if (free_timer_test (hurryup_pause_timer))
 		return TRUE;
 	return system_timer_pause ();
 }
@@ -1888,6 +1890,8 @@ U8 combo_count;
 
 U8 combo_multiplier;
 
+free_timer_id_t combo_timer;
+
 void combo_set_multiplier (U8 mult)
 {
 	combo_multiplier = mult;
@@ -1910,10 +1914,10 @@ void combo_detect (U8 id)
 {
 	if (id == last_combo_shot)
 		return;
-	if (!free_timer_test (TIM_COMBO))
+	if (!free_timer_test (combo_timer))
 		combo_reset ();
 
-	free_timer_restart (TIM_COMBO, TIME_4S);
+	free_timer_restart (combo_timer, TIME_4S);
 	last_combo_shot = id;
 	if (++combo_count == 3)
 	{
@@ -1925,7 +1929,7 @@ void combo_detect (U8 id)
 void combo_stop (void)
 {
 	last_combo_shot = 0xFF;
-	free_timer_stop (TIM_COMBO);
+	free_timer_stop (combo_timer);
 }
 
 CALLSET_ENTRY (combo, sw_left_sling, sw_right_sling)
