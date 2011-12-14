@@ -56,13 +56,22 @@ my $attr = {
 };
 
 
-# A list of font heights.  Ideally this should be generated from the
-# font files themselves.
+# A list of font heights, taken from the .fon files
 my %fontheight = (
+	"cu17" => 22,
 	"var5" => 5,
 	"mono5" => 5,
-	"fixed6" => 8,
-	"fixed10" => 10,
+	"fixed6" => 9,
+	"fixed10" => 12,
+	"fixed12" => 18,
+	"lucida9" => 13,
+	"luctype" => 10,
+	"miscfixed" => 10,
+	"schu" => 10,
+	"term6" => 8,
+	"times10" => 12,
+	"times8" => 12,
+	"utopia" => 10,
 );
 
 
@@ -206,6 +215,11 @@ sub emit_deff {
 	sub pr { for (my $i=0; $i < $indent; $i++) { print " "; } print (shift); print "\n"; }
 	sub block { pr ("{"); $indent += 3; }
 	sub endblock { $indent -= 3; pr ("}"); }
+
+	if (!$header_emitted) {
+		pr "#include <freewpc.h>\n";
+		$header_emitted = 1;
+	}
 
 	# Sort the final list of elements.
 	@elements = sort { $a->{"sort_order"} <=> $b->{"sort_order"} } @elements;
@@ -427,7 +441,6 @@ sub cmd {
 }
 
 # Main loop.  Parse the entire source file.
-
 while (<>) {
 	$lineno++;
 	chomp;
