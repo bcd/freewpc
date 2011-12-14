@@ -160,29 +160,25 @@ static void mb_award_super_jackpot (void)
 	}
 }
 
-static void mb_award_lock (U8 flag, U8 devno)
+static void mb_award_lock (U8 devno)
 {
-	if (!flag_test (flag))
-	{
-		flag_on (flag);
-		device_lock_ball (device_entry (devno));
-		sound_start (ST_SAMPLE, SND_LOCK_MAGNET, SL_4S, PRI_GAME_QUICK5);
-		deff_start (DEFF_BALL_LOCKED);
-		lock_count++;
-	}
+	device_lock_ball (device_entry (devno));
+	sound_start (ST_SAMPLE, SND_LOCK_MAGNET, SL_4S, PRI_GAME_QUICK5);
+	deff_start (DEFF_BALL_LOCKED);
+	lock_count++;
 }
 
 
 CALLSET_ENTRY (mb, dev_left_eject_enter)
 {
-	if (!flag_test (FLAG_MULTIBALL_RUNNING))
-		mb_award_lock (FLAG_LEFT_EJECT_LOCK, DEVNO_LEFT_EJECT);
+	if (!flag_test (FLAG_MULTIBALL_RUNNING) && !flag_test_and_set (FLAG_LEFT_EJECT_LOCK))
+		mb_award_lock (DEVNO_LEFT_EJECT);
 }
 
 CALLSET_ENTRY (mb, dev_right_eject_enter)
 {
-	if (!flag_test (FLAG_MULTIBALL_RUNNING))
-		mb_award_lock (FLAG_RIGHT_EJECT_LOCK, DEVNO_RIGHT_EJECT);
+	if (!flag_test (FLAG_MULTIBALL_RUNNING) && !flag_test_and_set (FLAG_RIGHT_EJECT_LOCK))
+		mb_award_lock (DEVNO_RIGHT_EJECT);
 }
 
 CALLSET_ENTRY (mb, dev_left_eject_surprise_release)

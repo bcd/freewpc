@@ -128,6 +128,8 @@ extern inline bool flag_test (const U8 f)
 	return bitarray_test (bit_matrix, f);
 }
 
+#define flag_test_and_set(f) \
+	({ U8 result = flag_test (f); if (!result) { flag_on (f); } result; })
 
 #define global_flag_on(lamp)		bitarray_set (global_bits, lamp)
 #define global_flag_off(lamp)		bitarray_clear (global_bits, lamp)
