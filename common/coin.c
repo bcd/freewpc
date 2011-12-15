@@ -171,7 +171,7 @@ void credits_deff (void)
 void lamp_start_update (void)
 {
 #ifdef MACHINE_START_LAMP
-	if (has_credits_p ())
+	if (!in_test && has_credits_p ())
 	{
 		if (!in_game)
 			lamp_tristate_flash (MACHINE_START_LAMP);

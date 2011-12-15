@@ -687,8 +687,8 @@ CALLSET_ENTRY (game, start_button_handler)
 	}
 
 	/* If a game is already in progress and is tilted, do not allow
-	further players to be added */
-	if (in_tilt)
+	further players to be added.  Also do not allow when in test mode. */
+	if (in_test || in_tilt)
 		return;
 
 	/* See if a game is already in progress. */

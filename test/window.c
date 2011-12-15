@@ -104,6 +104,9 @@ void window_push_first (void)
 #ifdef LEFF_AMODE
 	leff_stop (LEFF_AMODE);
 #endif
+#ifdef MACHINE_START_LAMP
+	lamp_tristate_off (MACHINE_START_LAMP);
+#endif
 	sound_reset ();
 
 	/* After resetting sound, delay a little to allow the reset
