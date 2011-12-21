@@ -25,7 +25,7 @@ checkpage ()
 {
 	section=$1; shift
 	addr=$1; shift
-	sz=`grep " l_${section}" ${mapfile} | awk '{print $1}'`
+	sz=`grep " l_${section} " ${mapfile} | awk '{print $1}'`
 	max=$(($addr));
 	used=$((0x$sz));
 	avail=$(($max - 0x$sz));
