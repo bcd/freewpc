@@ -171,8 +171,6 @@ _stack_large_error:
 	stb	,x+
 	clr	,x
 	jsr	_dbprintf1
-	cmps	#STACK_BASE
-	blt	_stack_large_error
 #endif
 	ldb	#ERR_TASK_STACK_OVERFLOW
 	jmp	_fatal
