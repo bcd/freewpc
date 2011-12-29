@@ -128,7 +128,7 @@ the target CPU */
 
 /* barrier() is used in several places to tell the compiler not
 to perform certain optimizations across both sides of the barrier. */
-#define barrier() asm ("; nop" ::: "memory")
+#define barrier() asm ("; barrier" ::: "memory")
 
 
 /* Some versions of the 6809 C compiler have issues.
