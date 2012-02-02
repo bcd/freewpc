@@ -34,8 +34,8 @@ struct coin_state
 	U8 total_units;
 };
 
-__common__ void credits_render (void);
-__common__ void credits_draw (void);
+__effect__ void credits_render (void);
+__effect__ void credits_draw (void);
 __common__ void lamp_start_update (void);
 __common__ void add_credit (void);
 __common__ bool has_credits_p (void);

@@ -38,48 +38,6 @@ bool buyin_passed;
 /** The number of buyins each player has had */
 __local__ U8 buyin_count;
 
-/** Display effect that runs during the extra ball buyin */
-void buyin_offer_deff (void)
-{
-	U8 prev_timer;
-
-#if (MACHINE_DMD == 1)
-	dmd_sched_transition (&trans_bitfade_slow);
-#else
-	seg_sched_transition (&seg_trans_fast_center_out);
-#endif
-	while (buyin_offer_timer > 0)
-	{
-		prev_timer = buyin_offer_timer;
-		dmd_alloc_low_clean ();
-		dmd_draw_border (dmd_low_buffer);
-		font_render_string_center (&font_term6, 64, 5, "CONTINUE GAME");
-#if (MACHINE_DMD == 1)
-		sprintf ("%d", buyin_offer_timer);
-		font_render_string_left (&font_mono5, 4, 3, sprintf_buffer);
-		font_render_string_right (&font_mono5, 123, 3, sprintf_buffer);
-		if (buyin_offer_timer % 2)
-		{
-			font_render_string_center (&font_bitmap8, 64, 16, "INSERT COINS");
-			font_render_string_center (&font_bitmap8, 64, 26, "FOR EXTRA BALL");
-		}
-		else
-		{
-			font_render_string_center (&font_bitmap8, 64, 16, "THEN PRESS");
-			font_render_string_center (&font_bitmap8, 64, 26, "BUY EXTRA BALL");
-		}
-#else
-		sprintf ("%d SECS", buyin_offer_timer);
-		seg_write_row_center (1, sprintf_buffer);
-#endif
-		dmd_show_low ();
-		while (prev_timer == buyin_offer_timer)
-			task_sleep (TIME_133MS);
-	}
-	task_sleep (TIME_1500MS);
-	deff_exit ();
-}
-
 /*	Start/restart the buyin feature */
 static void buyin_init (void)
 {

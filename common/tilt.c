@@ -52,44 +52,6 @@ void tilt_warning_leff (void)
 }
 
 
-/** The tilt display effect runs until explicitly cancelled. */
-void tilt_deff (void)
-{
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_cu17, 64, 13, "TILT");
-	dmd_show_low ();
-	for (;;)
-		task_sleep_sec (10);
-}
-
-
-void tilt_warning_deff (void)
-{
-	dmd_alloc_pair_clean ();
-	if (tilt_warnings % 2)
-	{
-		font_render_string_center (&font_fixed10, 64, 16, "DANGER");
-	}
-	else
-	{
-		font_render_string_center (&font_fixed10, 64, 7, "DANGER");
-		font_render_string_center (&font_fixed10, 64, 23, "DANGER");
-	}
-	deff_swap_low_high (24, TIME_66MS);
-	deff_exit ();
-}
-
-
-void slam_tilt_deff (void)
-{
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 13, "SLAM TILT");
-	dmd_show_low ();
-	task_sleep_sec (3);
-	deff_exit ();
-}
-
-
 CALLSET_ENTRY (tilt, sw_tilt)
 {
 	extern U8 in_tilt;

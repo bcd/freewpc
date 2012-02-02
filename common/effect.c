@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,6 +21,8 @@
 #include <freewpc.h>
 #include <highscore.h>
 #include <replay.h>
+#include <coin.h>
+#include <diag.h>
 
 extern U8 last_nonfatal_error_code;
 extern task_gid_t last_nonfatal_error_gid;
@@ -229,4 +231,231 @@ void plunge_ball_deff (void)
 	deff_swap_low_high (13, TIME_300MS);
 	deff_exit ();
 }
+
+
+void coin_door_buttons_deff (void)
+{
+	dmd_alloc_low_clean ();
+#if (MACHINE_DMD == 1)
+	font_render_string_center (&font_var5, 64, 3, "COIN DOOR IS CLOSED");
+#endif
+	font_render_string_center (&font_var5, 64, 10, "OPEN COIN DOOR");
+	font_render_string_center (&font_var5, 64, 17, "TO USE BUTTONS");
+	dmd_show_low ();
+	task_sleep_sec (3);
+	deff_exit ();
+}
+
+
+void coin_door_power_deff (void)
+{
+	U8 n;
+	for (n=0; n < 5; n++)
+	{
+		dmd_alloc_low_clean ();
+		dmd_show_low ();
+		task_sleep (TIME_200MS);
+
+		dmd_alloc_low_clean ();
+#if (MACHINE_DMD == 1)
+		font_render_string_center (&font_fixed6, 64, 6, "COIN DOOR IS OPEN");
+		font_render_string_center (&font_fixed6, 64, 16, "HIGH POWER");
+		font_render_string_center (&font_fixed6, 64, 26, "IS DISABLED");
+#else
+		font_render_string_center (&font_fixed6, 64, 10, "HIGH POWER");
+		font_render_string_center (&font_fixed6, 64, 21, "IS DISABLED");
+#endif
+		dmd_show_low ();
+		sound_send (SND_TEST_ALERT);
+		task_sleep (TIME_300MS);
+	}
+	task_sleep_sec (3);
+	deff_exit ();
+}
+
+
+/** The tilt display effect runs until explicitly cancelled. */
+void tilt_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_cu17, 64, 13, "TILT");
+	dmd_show_low ();
+	for (;;)
+		task_sleep_sec (10);
+}
+
+
+void tilt_warning_deff (void)
+{
+	extern U8 tilt_warnings;
+	dmd_alloc_pair_clean ();
+	if (tilt_warnings % 2)
+	{
+		font_render_string_center (&font_fixed10, 64, 16, "DANGER");
+	}
+	else
+	{
+		font_render_string_center (&font_fixed10, 64, 7, "DANGER");
+		font_render_string_center (&font_fixed10, 64, 23, "DANGER");
+	}
+	deff_swap_low_high (24, TIME_66MS);
+	deff_exit ();
+}
+
+
+void slam_tilt_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed10, 64, 13, "SLAM TILT");
+	dmd_show_low ();
+	task_sleep_sec (3);
+	deff_exit ();
+}
+
+/** Render the number of credits */
+void credits_render (void)
+{
+#ifdef FREE_ONLY
+	sprintf ("FREE ONLY");
+#else
+	if (price_config.free_play)
+		sprintf ("FREE PLAY");
+	else
+	{
+		if (coin_state.units != 0)
+		{
+			U8 units = coin_state.units;
+			U8 units_per_credit = price_config.units_per_credit;
+
+			/* There are fractional credits.  Reduce to the
+			 * lowest common denominator before printing. */
+
+			reduce_unit_fraction (&units, &units_per_credit);
+
+			if (coin_state.credits == 0)
+				sprintf ("%d/%d CREDIT", units, units_per_credit);
+			else
+				sprintf ("%d %d/%d CREDITS",
+					coin_state.credits, units, units_per_credit);
+		}
+		else
+		{
+			if (coin_state.credits == 1)
+				sprintf ("%d CREDIT", coin_state.credits);
+			else
+				sprintf ("%d CREDITS", coin_state.credits);
+		}
+	}
+#endif
+	if (diag_get_error_count ())
+	{
+		sprintf ("%E.");
+	}
+}
+
+
+/** Draw the current credits full screen */
+void credits_draw (void)
+{
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+
+	credits_render ();
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+	dmd_copy_low_to_high ();
+
+	if (!has_credits_p ())
+	{
+		if (price_config.payment_method == PAY_COIN)
+			sprintf ("INSERT COINS");
+		else if (price_config.payment_method == PAY_TOKEN)
+			sprintf ("INSERT TOKENS");
+		else if (price_config.payment_method == PAY_CARD)
+			sprintf ("SWIPE CARD");
+		else if (price_config.payment_method == PAY_BILL)
+			sprintf ("INSERT BILLS");
+	}
+	else
+	{
+		sprintf ("PRESS START");
+	}
+	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
+}
+
+
+void credits_deff (void)
+{
+	credits_draw ();
+	deff_swap_low_high (in_live_game ? 12 : 20, 2 * TIME_100MS);
+	deff_delay_and_exit (TIME_1S);
+}
+
+
+/** Display effect that runs during the extra ball buyin */
+void buyin_offer_deff (void)
+{
+	U8 prev_timer;
+	extern U8 buyin_offer_timer;
+
+#if (MACHINE_DMD == 1)
+	dmd_sched_transition (&trans_bitfade_slow);
+#else
+	seg_sched_transition (&seg_trans_fast_center_out);
+#endif
+	while (buyin_offer_timer > 0)
+	{
+		prev_timer = buyin_offer_timer;
+		dmd_alloc_low_clean ();
+		dmd_draw_border (dmd_low_buffer);
+		font_render_string_center (&font_term6, 64, 5, "CONTINUE GAME");
+#if (MACHINE_DMD == 1)
+		sprintf ("%d", buyin_offer_timer);
+		font_render_string_left (&font_mono5, 4, 3, sprintf_buffer);
+		font_render_string_right (&font_mono5, 123, 3, sprintf_buffer);
+		if (buyin_offer_timer % 2)
+		{
+			font_render_string_center (&font_bitmap8, 64, 16, "INSERT COINS");
+			font_render_string_center (&font_bitmap8, 64, 26, "FOR EXTRA BALL");
+		}
+		else
+		{
+			font_render_string_center (&font_bitmap8, 64, 16, "THEN PRESS");
+			font_render_string_center (&font_bitmap8, 64, 26, "BUY EXTRA BALL");
+		}
+#else
+		sprintf ("%d SECS", buyin_offer_timer);
+		seg_write_row_center (1, sprintf_buffer);
+#endif
+		dmd_show_low ();
+		while (prev_timer == buyin_offer_timer)
+			task_sleep (TIME_133MS);
+	}
+	task_sleep (TIME_1500MS);
+	deff_exit ();
+}
+
+void player_tournament_ready_deff (void)
+{
+	U8 timer;
+
+	dmd_alloc_low_clean ();
+#if (MACHINE_DMD == 1)
+	font_render_string_center (&font_fixed6, 64, 5, "TOURNAMENT");
+	font_render_string_center (&font_fixed6, 64, 16, "MODE ENABLED");
+#else
+	font_render_string_center (&font_var5, 64, 5, "TOURNAMENT MODE");
+#endif
+	font_render_string_center (&font_var5, 64, 28, "PRESS START NOW");
+	dmd_show_low ();
+
+	timer = 7;
+	do {
+		task_sleep_sec (1);
+	} while (--timer != 0);
+
+	tournament_mode_enabled = OFF;
+	deff_exit ();
+}
+
+
 

@@ -15,25 +15,25 @@ Amode: page(COMMON_PAGE), c_decl(system_amode_deff), runner, PRI_AMODE
 Scores: runner, page(EFFECT_PAGE), PRI_SCORES
 Scores Important: page(EFFECT_PAGE), PRI_SCORES_IMPORTANT, D_RESTARTABLE
 Score Goal: page(EFFECT_PAGE), PRI_SCORE_GOAL, D_TIMEOUT
-Credits: page(COMMON_PAGE), PRI_CREDITS
-Tilt Warning: page(COMMON_PAGE), PRI_TILT_WARNING
-Tilt: runner, page(COMMON_PAGE), PRI_TILT
+Credits: page(EFFECT_PAGE), PRI_CREDITS
+Tilt Warning: page(EFFECT_PAGE), PRI_TILT_WARNING
+Tilt: runner, page(EFFECT_PAGE), PRI_TILT
 Game Over: page(EFFECT_PAGE), PRI_GAME_OVER
 Volume Change: page(EFFECT_PAGE), runner, PRI_VOLUME_CHANGE_DISPLAY, D_PAUSE
-Slam Tilt: page(COMMON_PAGE), runner, PRI_SLAMTILT
+Slam Tilt: page(EFFECT_PAGE), runner, PRI_SLAMTILT
 Status Report: page(COMMON_PAGE), runner, PRI_STATUS
 Nonfatal Error: page(EFFECT_PAGE), PRI_DEBUGGER
 HSEntry: page(COMMON_PAGE), runner, PRI_HSENTRY
 HSCredits: page(COMMON_PAGE), runner, PRI_HSENTRY
 Match: page(COMMON_PAGE), runner, PRI_MATCH
-Buyin Offer: page(COMMON_PAGE), PRI_MATCH
+Buyin Offer: page(EFFECT_PAGE), PRI_MATCH
 Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
-Player Tournament Ready: page(COMMON_PAGE), PRI_STATUS
+Player Tournament Ready: page(EFFECT_PAGE), PRI_STATUS
 System Reset: PRI_RESET, page(COMMON_PAGE)
 # TODO : priority below?
-Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
+Coin Door Buttons: page(EFFECT_PAGE), PRI_JACKPOT
 Plunge Ball: page(EFFECT_PAGE), PRI_SCORE_GOAL
-Coin Door Power: page(COMMON_PAGE), PRI_JACKPOT
+Coin Door Power: page(EFFECT_PAGE), PRI_JACKPOT
 Ball Save: page(EFFECT_PAGE), c_decl(ball_save_deff), PRI_BALLSAVE
 Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
 Enter PIN: page(COMMON_PAGE), PRI_PIN_ENTRY
