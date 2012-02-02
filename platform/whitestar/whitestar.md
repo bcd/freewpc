@@ -5,6 +5,8 @@
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
 
+include platform/generic.md
+
 [lamps]
 11: First Lamp
 88: Last Lamp
@@ -69,40 +71,6 @@ A8: Aux. Sol. 8
 ALL: 11..88
 Ball Save: MACHINE_BALL_SAVE_LAMP
 
-[deffs]
-NULL: c_decl(deff_exit), 0
-Amode: page(EFFECT_PAGE), c_decl(default_amode_deff), runner, PRI_AMODE
-Inspector: page(COMMON_PAGE), runner, PRI_DEBUGGER
-Scores: runner, PRI_SCORES
-Scores Important: PRI_SCORES_IMPORTANT
-Score Goal: page(EFFECT_PAGE), runner, PRI_SCORE_GOAL
-Credits: page(COMMON_PAGE), PRI_CREDITS
-Tilt Warning: page(COMMON_PAGE), PRI_TILT_WARNING
-Tilt: runner, page(COMMON_PAGE), PRI_TILT
-Game Over: page(EFFECT_PAGE), PRI_GAME_OVER
-Volume Change: page(EFFECT_PAGE), runner, PRI_VOLUME_CHANGE_DISPLAY
-Slam Tilt: page(COMMON_PAGE), runner, PRI_SLAMTILT
-Status Report: page(COMMON_PAGE), runner, PRI_STATUS
-Nonfatal Error: page(EFFECT_PAGE), PRI_DEBUGGER
-HSEntry: page(COMMON_PAGE), runner, PRI_HSENTRY
-Match: page(COMMON_PAGE), runner, PRI_MATCH
-Buyin Offer: page(COMMON_PAGE), PRI_MATCH
-Onecoin Buyin: page(COMMON_PAGE), PRI_MATCH
-Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
-Player Tournament Ready: page(COMMON_PAGE), PRI_STATUS
-System Reset: PRI_RESET, page(COMMON_PAGE)
-Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
-Plunge Ball: page(EFFECT_PAGE), PRI_SCORE_GOAL
-Coin Door Power: page(COMMON_PAGE), PRI_JACKPOT
-Ball Save: page(EFFECT_PAGE), c_decl(ball_save_deff), PRI_BALLSAVE
-Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
-
-[leffs]
-NULL: 0
-Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
-Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
-Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE), page(COMMON_PAGE)
-
 [fonts]
 mono5:
 lucida9:
@@ -114,8 +82,3 @@ fixed10:
 term6:
 times8:
 
-[timers]
-Ignore Tilt:
-
-[globalflags]
-Ball At Plunger:

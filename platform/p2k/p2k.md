@@ -1,17 +1,11 @@
 #--------------------------------------------------------------------------
-# System description for FreeWPC
+# Platform description for Pinball 2000
 # (C) Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
 
-
-#--------------------------------------------------------------------------
-# This file contains definitions that are common to every WPC generation.
-# You should *NOT* include this file from your machine description;
-# rather include the file for the generation applicable to your machine.
-# It will include this for you.
-#--------------------------------------------------------------------------
+include platform/generic.md
 
 [lamps]
 11: First Lamp
@@ -91,41 +85,6 @@ F8: U.L. Flip Hold, time(TIME_100MS)
 ALL: 11..88
 Ball Save: MACHINE_BALL_SAVE_LAMP
 
-[deffs]
-NULL: c_decl(deff_exit), PRI_NULL
-Amode: page(COMMON_PAGE), c_decl(system_amode_deff), runner, PRI_AMODE
-Scores: runner, page(EFFECT_PAGE), PRI_SCORES
-Scores Important: page(EFFECT_PAGE), PRI_SCORES_IMPORTANT
-Score Goal: page(EFFECT_PAGE), PRI_SCORE_GOAL, D_TIMEOUT
-Credits: page(COMMON_PAGE), PRI_CREDITS
-Tilt Warning: page(COMMON_PAGE), PRI_TILT_WARNING
-Tilt: runner, page(COMMON_PAGE), PRI_TILT
-Game Over: page(EFFECT_PAGE), PRI_GAME_OVER
-Volume Change: page(EFFECT_PAGE), runner, PRI_VOLUME_CHANGE_DISPLAY
-Slam Tilt: page(COMMON_PAGE), runner, PRI_SLAMTILT
-Status Report: page(COMMON_PAGE), runner, PRI_STATUS
-Nonfatal Error: page(EFFECT_PAGE), PRI_DEBUGGER
-HSEntry: page(COMMON_PAGE), runner, PRI_HSENTRY
-HSCredits: page(COMMON_PAGE), runner, PRI_HSENTRY
-Match: page(COMMON_PAGE), runner, PRI_MATCH
-# Buyin Offer: page(COMMON_PAGE), PRI_MATCH
-Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
-Player Tournament Ready: page(COMMON_PAGE), PRI_STATUS
-System Reset: PRI_RESET, page(COMMON_PAGE)
-# TODO : priority below?
-# Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
-Plunge Ball: page(EFFECT_PAGE), PRI_SCORE_GOAL
-# Coin Door Power: page(COMMON_PAGE), PRI_JACKPOT
-Ball Save: page(EFFECT_PAGE), c_decl(ball_save_deff), PRI_BALLSAVE
-Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
-
-[leffs]
-NULL: PRI_NULL
-Amode: runner, PRI_AMODE, c_decl(system_amode_leff), page(COMMON_PAGE)
-Tilt Warning: PRI_TILT_WARNING, GI(ALL), c_decl(tilt_warning_leff), page(COMMON_PAGE)
-Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
-Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE), page(COMMON_PAGE)
-
 [fonts]
 mono5:
 num5x7:
@@ -139,10 +98,4 @@ term6:
 times8:
 bitmap8:
 
-[timers]
-Ignore Tilt:
-
-[globalflags]
-Ball At Plunger:
-Coin Door Opened:
 
