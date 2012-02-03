@@ -50,6 +50,9 @@ score_t deff_score;
 /** The last multiplier as displayed */
 U8 deff_multiplier;
 
+/** Nonzero if the current score has changed and needs to be redrawn */
+bool score_update_needed;
+
 
 /** Clears a score */
 void score_zero (score_t s)

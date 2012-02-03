@@ -27,10 +27,6 @@
 #include <coin.h>
 
 
-/** Nonzero if the current score has changed and needs to be redrawn */
-bool score_update_needed;
-
-
 /** Draw the current ball number at the bottom of the display. */
 void scores_draw_status_bar (void)
 {
