@@ -207,11 +207,12 @@ void print_header (void)
 	 */
 	if (printer_config.pause_every_page == YES)
 	{
+#ifdef CONFIG_DMD_OR_ALPHA
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_mono5, 64, 11, "PRESS ENTER");
 		font_render_string_center (&font_mono5, 64, 21, "FOR NEXT PAGE");
 		dmd_show_low ();
-
+#endif
 		while (!switch_poll (SW_ENTER))
 			task_sleep (TIME_66MS);
 		while (switch_poll (SW_ENTER))

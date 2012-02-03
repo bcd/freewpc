@@ -105,6 +105,7 @@ static U8 default_high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ] = {
 
 extern U8 initials_data[];
 
+#ifdef CONFIG_DMD_OR_ALPHA
 
 /** Renders a single high score table entry.
  * If pos is zero, then no position is drawn. */
@@ -169,6 +170,7 @@ void high_score_draw_34 (void)
 	dmd_show_low ();
 }
 
+#endif
 
 void high_score_check_reset (void)
 {
@@ -207,7 +209,7 @@ void high_score_reset (void)
 	high_score_check_reset ();
 }
 
-
+#ifdef CONFIG_DMD_OR_ALPHA
 void hsentry_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -264,7 +266,7 @@ void hscredits_deff (void)
 	task_sleep_sec (2);
 	deff_exit ();
 }
-
+#endif
 
 /** Check if the high scores need to be reset automatically.
  * Called during game start. */

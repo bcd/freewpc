@@ -111,6 +111,7 @@ void game_time_histogram_add (U16 val)
 	histogram_add (&game_time_histogram, val);
 }
 
+#ifdef CONFIG_DMD_OR_ALPHA
 void histogram_browser_draw_1 (void)
 {
 	extern U8 browser_max;
@@ -141,3 +142,4 @@ void histogram_browser_init_1 (void)
 	browser_max = browser_histogram->count - 1;
 }
 
+#endif

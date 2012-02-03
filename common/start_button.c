@@ -59,10 +59,12 @@ CALLSET_ENTRY (start_button, sw_start_button)
 	{
 		SECTION_VOIDCALL (__common__, pin_start_button_handler);
 	}
+#ifdef CONFIG_TEST
 	else if (in_test)
 	{
 		SECTION_VOIDCALL (__test__, test_mode_start_button_handler);
 	}
+#endif
 	else
 	{
 		VOIDCALL (game_start_button_handler);

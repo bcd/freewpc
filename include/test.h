@@ -118,6 +118,7 @@ enum test_mode
 #endif
 };
 
+
 extern enum test_mode in_test;
 
 extern inline void set_test_mode (enum test_mode mode)

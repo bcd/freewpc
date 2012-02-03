@@ -75,8 +75,10 @@ CALLSET_ENTRY (service, sw_down)
 	else if (!in_test)
 		button_invoke (SW_VOLUME_DOWN, volume_down, TIME_500MS, TIME_100MS);
 		/* callset_invoke (volume_down) */
+#ifdef CONFIG_DMD_OR_ALPHA
 	else	
 		test_down_button ();
+#endif
 }
 
 CALLSET_ENTRY (service, sw_up)
@@ -86,8 +88,10 @@ CALLSET_ENTRY (service, sw_up)
 	else if (!in_test)
 		button_invoke (SW_VOLUME_UP, volume_up, TIME_500MS, TIME_100MS);
 		/* callset_invoke (volume_up) */
+#ifdef CONFIG_DMD_OR_ALPHA
 	else
 		test_up_button ();
+#endif
 }
 
 /**************************************************************/

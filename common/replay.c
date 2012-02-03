@@ -170,6 +170,7 @@ void replay_code_to_boost (score_t score, U8 code)
 #endif
 
 
+#ifdef CONFIG_DMD_OR_ALPHA
 /** Draw the replay screen */
 void replay_draw (void)
 {
@@ -197,6 +198,7 @@ void replay_draw (void)
 	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 }
+#endif
 
 
 /** Award a single replay to the player up */

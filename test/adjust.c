@@ -342,6 +342,7 @@ void adj_prepare_lookup (struct adjustment *table)
 /** Render the name of the adjustment that is located at the given
 protected memory address, and its current value, to the display.
 If there is no match, nothing is printed. */
+#ifdef CONFIG_DMD_OR_ALPHA
 void adj_name_for_preset (U8 * const nvram, const U8 value)
 {
 	if (adj_lookup == NULL)
@@ -361,7 +362,7 @@ void adj_name_for_preset (U8 * const nvram, const U8 value)
 		adj_lookup++;
 	}
 }
-
+#endif
 
 void adj_reset_all (void)
 {

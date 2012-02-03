@@ -55,7 +55,9 @@ void scores_draw_credits (void)
 	credits_render ();
 	/* TODO - this could also be moved into a ll_ routine, but
 	it just happens to work for alphanumeric as well. */
+#ifdef CONFIG_DMD_OR_ALPHA
 	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
+#endif
 }
 
 
@@ -98,6 +100,7 @@ void scores_draw (void)
 	scores_draw_current (SCORE_DRAW_ALL);
 }
 
+#ifdef CONFIG_DMD_OR_ALPHA
 
 /** A display effect for showing all the scores, without
 flashing.  This is used when new players are added or
@@ -146,3 +149,4 @@ void scores_deff (void)
 	}
 }
 
+#endif

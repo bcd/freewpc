@@ -112,8 +112,10 @@ U8 deff_get_active (void)
 static void deff_stop_task (void)
 {
 	deff_debug ("deff_stop_task\n");
+#ifdef CONFIG_DMD
 	/* TODO : if (!task_find_gid (GID_DEFF_EXITING)) -- not working yet */
 		dmd_reset_transition ();
+#endif
 	kickout_unlock (KLOCK_DEFF);
 }
 
@@ -443,8 +445,10 @@ void deff_stop_all (void)
 	deff_running = deff_prio = 0;
 	deff_queue_reset ();
 
+#ifdef CONFIG_DMD_OR_ALPHA
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
+#endif
 
 	deff_init ();
 }

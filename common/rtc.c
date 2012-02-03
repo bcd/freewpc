@@ -326,6 +326,7 @@ const char *rtc_edit_field_name[] = {
 #endif
 };
 
+#ifdef CONFIG_DMD_OR_ALPHA
 
 void rtc_render (struct date *d)
 {
@@ -358,6 +359,8 @@ void rtc_show_date_time (struct date *d)
 	rtc_render (d);
 	dmd_show_low ();
 }
+
+#endif
 
 
 void rtc_begin_modify (void)

@@ -73,7 +73,11 @@ void burnin_flasher_thread (void)
 
 void burnin_lamp_thread (void)
 {
+#ifdef CONFIG_TEST
 	SECTION_VOIDCALL (__test__, all_lamp_test_thread);
+#else
+/* TODO */
+#endif
 }
 
 #if (MACHINE_FLIPTRONIC == 1)
@@ -87,18 +91,22 @@ void burnin_flipper_thread (void)
 }
 #endif
 
+#ifdef CONFIG_DMD_OR_ALPHA
 void burnin_draw (void)
 {
 	time_audit_format (&burnin_duration);
 	font_render_string_left (&font_mono5, 4, 20, sprintf_buffer);
 }
+#endif
 
 void burnin_time_audit_thread (void)
 {
 	for (;;)
 	{
 		time_audit_add_sec (&burnin_duration, 1);
+#ifdef CONFIG_DMD_OR_ALPHA
 		SECTION_VOIDCALL (__test__, window_redraw);
+#endif
 		task_sleep_sec (1);
 	}
 }

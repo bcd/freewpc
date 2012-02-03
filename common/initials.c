@@ -110,7 +110,7 @@ void enter_initials_deff (void)
 			}
 
 			dmd_show_low ();
-#else
+#elif (MACHINE_ALPHANUMERIC == 1)
 			seg_alloc_clean ();
 			seg_write_string (0, 0, "ENTER INITIALS");
 			sprintf ("%c", initial_chars[initials_selection]);

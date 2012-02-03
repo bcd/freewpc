@@ -24,6 +24,17 @@ $(eval $(call have,CONFIG_RTC))
 $(eval $(call have,CONFIG_BUYIN))
 CONFIG_SCORE_RANK := y
 
+# Some features are dependent on having a working display
+# module (DMD or alphanumeric), and are excluded otherwise.
+ifeq ($(CONFIG_DMD), y)
+$(eval $(call have,CONFIG_DMD_OR_ALPHA))
+$(eval $(call have,CONFIG_TEST))
+endif
+ifeq ($(CONFIG_ALPHA), y)
+$(eval $(call have,CONFIG_DMD_OR_ALPHA))
+$(eval $(call have,CONFIG_TEST))
+endif
+
 # ROM bank switching
 CONFIG_ROM_BANK_SIZE := 16
 CONFIG_FIXED_PAGE_COUNT := 2

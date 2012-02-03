@@ -38,7 +38,8 @@ NATIVE_OBJS += $(D)/tz_sim.o
 endif
 
 # For ASCII DMD
-NATIVE_OBJS += $(if $(CONFIG_DMD), $(D)/asciidmd.o, $(D)/segment.o)
+NATIVE_OBJS += $(if $(CONFIG_DMD), $(D)/asciidmd.o)
+NATIVE_OBJS += $(if $(CONFIG_ALPHA), $(D)/segment.o)
 NATIVE_OBJS += $(if $(CONFIG_DMD), tools/imglib/imglib.o)
 NATIVE_OBJS += $(if $(CONFIG_DMD), cpu/native/dot.o)
 $(D)/asciidmd.o : CFLAGS += -Itools/imglib

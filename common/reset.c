@@ -89,10 +89,12 @@ void factory_reset_if_required (void)
 	if (!callset_invoke_boolean (init_ok))
 	{
 		deff_stop (DEFF_SYSTEM_RESET);
+#ifdef CONFIG_DMD_OR_ALPHA
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_mono5, 64, 10, "FACTORY SETTINGS");
 		font_render_string_center (&font_mono5, 64, 20, "RESTORED");
 		dmd_show_low ();
+#endif
 		factory_reset ();
 		task_sleep_sec (4);
 		warm_reboot ();
@@ -107,6 +109,7 @@ void system_accept_freewpc (void)
 		 (freewpc_accepted[2] == ACCEPT_3))
 		return;
 
+#ifdef CONFIG_DMD
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
 	font_render_string_center (&font_mono5, 64, 9, "WARNING... BALLY WMS");
@@ -137,6 +140,7 @@ void system_accept_freewpc (void)
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 	task_sleep_sec (1);
+#endif
 
 	pinio_nvram_unlock ();
 	freewpc_accepted[0] = ACCEPT_1;
@@ -161,16 +165,16 @@ void system_reset_deff (void)
 	font_render_string_center (&font_var5, 64, 17, "SUPPORTED BY BALLY/WILLIAMS");
 	font_render_string_center (&font_var5, 64, 25, "WWW.ODDCHANGE.COM/FREEWPC");
 	dmd_show_low ();
-#else
+#endif
+#if (MACHINE_ALPHANUMERIC == 1)
 	seg_alloc_clean ();
 	seg_write_row_center (0, "FREEWPC <C>" C_STRING(BUILD_YEAR));
 	seg_write_row_center (1, "WWW.ODDCHANGE.COM");
 	seg_show ();
 #endif
 	task_sleep_sec (3);
-
+#ifdef CONFIG_DMD_OR_ALPHA
 	dmd_alloc_low_clean ();
-
 	font_render_string_left (&font_mono5, 1, 1, MACHINE_NAME);
 
 #ifdef DEBUGGER
@@ -190,6 +194,7 @@ void system_reset_deff (void)
 
 	font_render_string_left (&font_mono5, 1, 26, "TESTING...");
 	dmd_show_low ();
+#endif
 
 	/* Keep the reset display for at least 3 seconds (so
 	 * it is readable), keep it longer if any of the

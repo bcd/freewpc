@@ -33,6 +33,7 @@
 U8 status_report_cancel_delay;
 
 
+#ifdef CONFIG_DMD_OR_ALPHA
 void status_page_init (void)
 {
 	dmd_alloc_low_clean ();
@@ -83,6 +84,7 @@ void status_report_deff (void)
 	deff_exit ();
 }
 
+#endif
 
 /** Task that is restarted anytime a flipper button is initially
  * pressed.  It polls the flipper switches continously to

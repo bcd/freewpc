@@ -143,6 +143,7 @@ extern inline void deff_call_components (void)
 }
 
 
+#ifdef CONFIG_DMD_OR_ALPHA
 extern inline __noreturn__ void generic_deff (
 	const char *line1, const char *line2)
 {
@@ -164,7 +165,7 @@ extern inline __noreturn__ void generic_deff (
 	task_sleep_sec (2);
 	deff_exit ();
 }
-
+#endif
 
 #ifndef MACHINE_CUSTOM_AMODE
 void default_amode_deff (void);

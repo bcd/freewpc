@@ -109,8 +109,10 @@ __noreturn__ void freewpc_init (void)
 	gi_init ();
 	pinio_watchdog_reset ();
 #endif
+#ifdef CONFIG_DMD_OR_ALPHA
 	display_init ();
 	pinio_watchdog_reset ();
+#endif
 	switch_init ();
 	pinio_watchdog_reset ();
 	flipper_init ();
@@ -163,7 +165,9 @@ __noreturn__ void freewpc_init (void)
 	order of invocation.  For most things the order doesn't matter. */
 	deff_init ();
 	leff_init ();
+#ifdef CONFIG_TEST
 	test_init ();
+#endif
 	adj_init ();
 	callset_invoke (init);
 

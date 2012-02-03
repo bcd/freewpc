@@ -35,7 +35,7 @@ U8 diag_error_count;
  * as they are found */
 U8 diag_announce_flag;
 
-
+#ifdef CONFIG_DMD_OR_ALPHA
 static void
 diag_message_start (void)
 {
@@ -70,6 +70,7 @@ diag_message_scroll (void)
 	task_sleep_sec (5);
 	barrier ();
 }
+#endif
 
 
 /**
@@ -93,6 +94,7 @@ diag_post_error (char *message, U8 page)
 	/* Increment total error count */
 	diag_error_count++;
 
+#ifdef CONFIG_DMD_OR_ALPHA
 	/* If announcements are on, then write a message.
 	If it is the first such error detected, then print the
 	initial "TEST REPORT" message too. */
@@ -108,6 +110,7 @@ diag_post_error (char *message, U8 page)
 		message_write (message, page);
 		diag_message_scroll ();
 	}
+#endif
 }
 
 
@@ -137,10 +140,12 @@ diag_announce_if_errors (void)
 {
 	if (diag_error_count > 0)
 	{
+#ifdef CONFIG_DMD_OR_ALPHA
 		diag_message_start ();
 		font_render_string_center (&font_mono5, 64, 10, "PRESS ENTER");
 		font_render_string_center (&font_mono5, 64, 21, "FOR TEST REPORT");
 		diag_message_flash ();
+#endif
 	}
 }
 

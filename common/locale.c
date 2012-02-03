@@ -90,9 +90,10 @@ CALLSET_ENTRY (locale, init)
 	if (current_locale != locale_code
 		|| ~locale_code != locale_code_csum)
 	{
+#ifdef CONFIG_TEST
 		/* Install locale-specific adjustments */
 		preset_install_country_code (current_locale);
-
+#endif
 		/* Save the current locale so that install does not
 		need to be performed on the next reboot, unless
 		the DIP switches are changed. */

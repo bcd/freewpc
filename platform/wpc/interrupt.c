@@ -61,11 +61,13 @@ void do_firq (void)
 		here... */
 		interrupt_dbprintf ("Timer interrupt.\n");
 	}
+#ifdef CONFIG_DMD
 	else if (WPC_HAS_CAP (WPC_CAP_DMD))
 	{
 		/* It is a DMD interrupt. */
 		dmd_rtt ();
 	}
+#endif
 
 #ifdef __m6809__
 	m6809_firq_restore_regs ();

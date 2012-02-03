@@ -62,6 +62,7 @@ void amode_flipper_sound (void)
 	}
 }
 
+#ifdef CONFIG_DMD_OR_ALPHA
 
 void amode_sleep_sec (U8 secs)
 {
@@ -176,9 +177,11 @@ void amode_kill_music (void)
 	amode_page_end (0);
 }
 
+#endif
 
 
 void (*amode_page_table[]) (void) = {
+#ifdef CONFIG_DMD_OR_ALPHA
 	amode_score_page,
 #if (MACHINE_DMD == 1)
 	amode_logo_page,
@@ -193,6 +196,7 @@ void (*amode_page_table[]) (void) = {
 #ifdef MACHINE_AMODE_EFFECTS
 	MACHINE_AMODE_EFFECTS
 #endif
+#endif /* CONFIG_DMD_OR_ALPHA */
 };
 
 
@@ -225,7 +229,6 @@ __attribute__((noinline)) void amode_page_change (S8 delta)
 
 	amode_page_changed = 1;
 }
-
 
 CALLSET_ENTRY (amode, sw_left_button)
 {

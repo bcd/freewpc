@@ -44,6 +44,8 @@ match_award (void)
 	knocker_fire ();
 }
 
+#ifdef CONFIG_DMD_OR_ALPHA
+
 /*
  * Draw the constant part of the match animation once.
  */
@@ -119,6 +121,7 @@ match_deff (void)
 	deff_exit ();
 }
 
+#endif
 
 /**
  * Return a score that says how good a particular two-digit number
