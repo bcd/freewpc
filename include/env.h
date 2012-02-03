@@ -128,8 +128,11 @@ the target CPU */
 
 /* barrier() is used in several places to tell the compiler not
 to perform certain optimizations across both sides of the barrier. */
+#ifdef __m6809__
 #define barrier() asm ("; barrier" ::: "memory")
-
+#else
+#define barrier()
+#endif
 
 /* Some versions of the 6809 C compiler have issues.
  * Use __GCC6809_AT_LEAST__ to test for a minimum version. */
