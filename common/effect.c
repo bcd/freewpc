@@ -312,6 +312,36 @@ void slam_tilt_deff (void)
 	deff_exit ();
 }
 
+
+/** Reduce a credit fraction to simplest terms. */
+static inline void reduce_unit_fraction (U8 *units, U8 *units_per_credit)
+{
+	switch (*units_per_credit)
+	{
+		case 4:
+			if (*units == 2)
+			{
+				*units = 1;
+				*units_per_credit = 2;
+			}
+			break;
+
+		case 6:
+			switch (*units)
+			{
+				case 2:
+					*units = 1;
+					*units_per_credit = 3;
+					break;
+				case 4:
+					*units = 2;
+					*units_per_credit = 3;
+					break;
+			}
+			break;
+	}
+}
+
 /** Render the number of credits */
 void credits_render (void)
 {
@@ -322,9 +352,9 @@ void credits_render (void)
 		sprintf ("FREE PLAY");
 	else
 	{
-		if (coin_state.units != 0)
+		if (get_units () != 0)
 		{
-			U8 units = coin_state.units;
+			U8 units = get_units ();
 			U8 units_per_credit = price_config.units_per_credit;
 
 			/* There are fractional credits.  Reduce to the
@@ -332,18 +362,18 @@ void credits_render (void)
 
 			reduce_unit_fraction (&units, &units_per_credit);
 
-			if (coin_state.credits == 0)
+			if (get_credits () == 0)
 				sprintf ("%d/%d CREDIT", units, units_per_credit);
 			else
 				sprintf ("%d %d/%d CREDITS",
-					coin_state.credits, units, units_per_credit);
+					get_credits (), units, units_per_credit);
 		}
 		else
 		{
-			if (coin_state.credits == 1)
-				sprintf ("%d CREDIT", coin_state.credits);
+			if (get_credits () == 1)
+				sprintf ("%d CREDIT", get_credits ());
 			else
-				sprintf ("%d CREDITS", coin_state.credits);
+				sprintf ("%d CREDITS", get_credits ());
 		}
 	}
 #endif

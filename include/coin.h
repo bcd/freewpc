@@ -49,4 +49,11 @@ extern inline U8 get_credits (void)
 	return coin_state.credits;
 }
 
+extern inline U8 get_units (void)
+{
+	extern struct coin_state coin_state;
+	return coin_state.units;
+}
+
+
 #endif /* _COIN_H */

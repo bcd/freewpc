@@ -55,35 +55,6 @@ const struct area_csum coin_csum_info = {
 extern __common__ void buyin_coin_insert (void);
 
 
-/** Reduce a credit fraction to simplest terms. */
-static inline void reduce_unit_fraction (U8 *units, U8 *units_per_credit)
-{
-	switch (*units_per_credit)
-	{
-		case 4:
-			if (*units == 2)
-			{
-				*units = 1;
-				*units_per_credit = 2;
-			}
-			break;
-
-		case 6:
-			switch (*units)
-			{
-				case 2:
-					*units = 1;
-					*units_per_credit = 3;
-					break;
-				case 4:
-					*units = 2;
-					*units_per_credit = 3;
-					break;
-			}
-			break;
-	}
-}
-
 
 /** Update the start button lamp.  It will flash when a new game
  * can be started, or be solid on during a game.   It will be
