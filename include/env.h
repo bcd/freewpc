@@ -186,14 +186,16 @@ do { \
 	U8 __caller_page; asm ("sta\t%0" : "=m"(__caller_page))
 #else
 #define far_read_access()
-#define __caller_page 0
 #endif
 
+#ifdef __m6809__
 #define far_read(ptr, __field) \
 	(__builtin_choose_expr ( (sizeof (ptr->__field) == 1), \
 		(far_read8 (&ptr->__field, __caller_page)), \
 		(typeof (ptr->__field))(far_read16 (&ptr->__field, __caller_page))))
-
+#else
+#define far_read(__ptr, __field) (__ptr->__field)
+#endif
 
 /* Types for linker variables.
    You can declare flags, global flags, and timers using the types below.
