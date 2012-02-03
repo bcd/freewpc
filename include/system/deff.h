@@ -28,6 +28,11 @@ typedef U8 deffnum_t;
 /** Type for a display effect function */
 typedef void (*deff_function_t) (void);
 
+#ifdef CONFIG_NO_DEFFS
+#define DEFF_FUNCTION(_func,_page) .fn=null_function, .page=SYS_PAGE
+#else
+#define DEFF_FUNCTION(_func,_page) .fn=_func, .page=_page
+#endif
 
 /** The flags for a normal display effect with no special requirements */
 #define D_NORMAL	0x0

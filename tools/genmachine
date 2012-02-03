@@ -1413,8 +1413,7 @@ sub machine_write_deff_decls {
 		print "   [" . $deff->{'c_ident'} . "] = {\n";
 		print "      .flags = $flags,\n";
 		print "      .prio = $prio,\n";
-		print "      .fn = " . $deff->{'c_decl'} . ",\n";
-		print "      .page = $page\n";
+		print "      DEFF_FUNCTION (" . $deff->{'c_decl'} . ", " . $page . ")\n";
 		print "   },\n";
 	}
 	print "};\n";
