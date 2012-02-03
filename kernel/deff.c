@@ -408,21 +408,6 @@ __noreturn__ void deff_delay_and_exit (task_ticks_t ticks)
 }
 
 
-/** Called from a deff when it wants to toggle between two images
- * on the low and high mapped pages, both in mono mode.
- * COUNT is the number of times to toggle.
- * DELAY is how long to wait between each change. */
-void deff_swap_low_high (S8 count, task_ticks_t delay)
-{
-	dmd_show_low ();
-	while (--count >= 0)
-	{
-		dmd_show_other ();
-		task_sleep (delay);
-	}
-}
-
-
 /** Lower the priority of the currently running display effect.
 This may cause it to be preempted by something more important. */
 void deff_nice (enum _priority prio)

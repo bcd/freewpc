@@ -102,7 +102,6 @@ void deff_restart (deffnum_t dn);
 void deff_start_highest_priority (void);
 __noreturn__ void deff_exit (void);
 __noreturn__ void deff_delay_and_exit (task_ticks_t ticks);
-void deff_swap_low_high (S8 count, task_ticks_t delay);
 void deff_start_bg (deffnum_t dn, enum _priority prio);
 void deff_update (void);
 void deff_start_sync (deffnum_t dn);

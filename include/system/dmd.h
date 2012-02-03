@@ -181,6 +181,7 @@ void dmd_map_low_high (dmd_pagenum_t page);
 void dmd_show_low (void);
 void dmd_show_high (void);
 void dmd_show_other (void);
+void deff_swap_low_high (S8 count, task_ticks_t delay);
 void dmd_flip_low_high (void);
 void dmd_show2 (void);
 void dmd_clean_page (dmd_buffer_t dbuf);
