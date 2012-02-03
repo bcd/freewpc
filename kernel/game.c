@@ -65,6 +65,11 @@ __fastram__ U8 in_bonus;
 /** Nonzero if the current game is currently in tilt mode */
 __fastram__ U8 in_tilt;
 
+/* Equivalent to (win_top != NULL), but as a byte, this can
+ * be tested with a single instruction.
+ * IDEA: these two variables could be overlapped into a union. */
+__fastram__ enum test_mode in_test;
+
 /** Nonzero if the current ball has reached valid playfield; i.e.
  * ball loss is allowed to end the ball.  When zero,
  * ball loss is not allowed and will result in a new ball being

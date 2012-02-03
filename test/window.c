@@ -80,12 +80,6 @@
  * no window is open. */
 struct window *win_top;
 
-/* Equivalent to (win_top != NULL), but as a byte, this can
- * be tested with a single instruction.
- * IDEA: these two variables could be overlapped into a union. */
-__fastram__ enum test_mode in_test;
-
-
 /* The window stack keeps track of where you came from, so when you
  * exit a menu/window/whatever, you can go back to where you started.
  * There is a maximum depth here, which should be sufficient. */
