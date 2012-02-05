@@ -1,5 +1,6 @@
 
 #include <freewpc.h>
+#include <system/platform.h>
 
 /** Runs periodically to update the physical lamp state. */
 void lamp_rtt (void)
