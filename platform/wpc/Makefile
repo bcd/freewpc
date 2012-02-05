@@ -70,6 +70,8 @@ endif
 # Use KERNEL_HW_OBJS for C sources, and KERNEL_ASM_OBJS for assembler files.
 KERNEL_HW_OBJS += $(P)/interrupt.o
 KERNEL_HW_OBJS += $(P)/init-wpc.o
+KERNEL_HW_OBJS += $(P)/wpc-switch.o
+KERNEL_HW_OBJS += $(P)/wpc-lamp.o
 ifeq ($(CPU),m6809)
 KERNEL_HW_OBJS += $(P)/main.o
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/bitmap.o)
