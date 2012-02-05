@@ -452,12 +452,14 @@ bool adj_current_hidden_p (void)
 			std_adj_p (replay_levels)))
 		return TRUE;
 
+#ifdef CONFIG_DMD_OR_ALPHA
 	/* Allow other things to be added too.  Machines or other
 	modules should return FALSE if the current adjustment should
 	not be visible.  (Note this is inverted logic from the rest of
 	this function.) */
 	if (!callset_invoke_boolean (adjustment_visible))
 		return TRUE;
+#endif
 
 	/* Otherwise, this adjustment is OK to show */
 	return FALSE;

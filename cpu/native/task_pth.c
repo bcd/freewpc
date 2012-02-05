@@ -62,8 +62,8 @@ aux_task_data_t task_data_table[NUM_TASKS];
 
 void task_dump (void)
 {
+#ifdef DEBUGGER
 	int i;
-
 	dbprintf ("PID         GID   ARG    FLAGS\n");
 	for (i=0; i < NUM_TASKS; i++)
 	{
@@ -77,6 +77,7 @@ void task_dump (void)
 				td->gid, td->arg.u16, td->duration);
 		}
 	}
+#endif
 }
 
 

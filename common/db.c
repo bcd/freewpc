@@ -60,7 +60,9 @@ void db_dump_all (void)
 	VOIDCALL (dump_game);
 	VOIDCALL (dump_deffs);
 	switch_queue_dump ();
+#ifdef CONFIG_TRIAC
 	VOIDCALL (triac_dump);
+#endif
 	SECTION_VOIDCALL (__common__, device_debug_all);
 }
 #endif

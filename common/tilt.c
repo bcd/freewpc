@@ -98,6 +98,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 
 CALLSET_ENTRY (tilt, sw_slam_tilt)
 {
+#ifdef SW_COIN_DOOR_CLOSED
 	/* Ignore slam tilt switch entirely while coin door is open,
 	and configured for tournament mode.  This is to avoid inadvertent slam tilts
 	while dealing with problems. */
@@ -107,6 +108,7 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	/* Ignore right after a coin door open/close */
 	if (nonball_event_did_follow (sw_coin_door_closed, sw_slam_tilt))
 		return;
+#endif
 
 	/* Kill the current game */
 	stop_game ();

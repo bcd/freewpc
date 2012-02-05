@@ -189,10 +189,12 @@ static void sim_interface_thread (void)
 				simlog (SLC_DEBUG, "Input directed to switch matrix.");
 				simulator_keys ^= 1;
 			}
+#ifdef CONFIG_PLATFORM_WPC
 			else
 			{
 				wpc_key_press (*inbuf);
 			}
+#endif
 			continue;
 		}
 
@@ -341,6 +343,7 @@ void keyboard_init (void)
 #ifdef MACHINE_BUYIN_SWITCH
 	sim_key_install ('2', MACHINE_BUYIN_SWITCH);
 #endif
+#ifdef CONFIG_PLATFORM_WPC
 	sim_key_install ('3', SW_LEFT_COIN);
 	sim_key_install ('4', SW_CENTER_COIN);
 	sim_key_install ('5', SW_RIGHT_COIN);
@@ -349,6 +352,7 @@ void keyboard_init (void)
 	sim_key_install ('8', SW_DOWN);
 	sim_key_install ('9', SW_UP);
 	sim_key_install ('0', SW_ENTER);
+#endif
 	sim_key_install (',', SW_LEFT_BUTTON);
 	sim_key_install ('.', SW_RIGHT_BUTTON);
 #ifdef SW_COIN_DOOR_CLOSED
