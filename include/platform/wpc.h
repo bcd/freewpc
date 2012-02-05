@@ -732,6 +732,13 @@ extern inline void pinio_write_gi (U8 val)
 /********************************************/
 
 #define PINIO_NUM_SOLS 48
+#define SOL_BASE_HIGH 0
+#define SOL_BASE_LOW 8
+#define SOL_BASE_GENERAL 16
+#define SOL_BASE_AUXILIARY 24
+#define SOL_BASE_FLIPTRONIC 32
+#define SOL_BASE_EXTENDED 40
+#define SOL_MIN_FLASHER 16
 
 extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 {

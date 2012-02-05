@@ -29,15 +29,9 @@ typedef U8 solnum_t;
 
 #define SOL_REG_COUNT (PINIO_NUM_SOLS / 8)
 
-/* TODO - these are WPC specific */
-#define SOL_BASE_HIGH 0
-#define SOL_BASE_LOW 8
-#define SOL_BASE_GENERAL 16
-#define SOL_BASE_AUXILIARY 24
-#define SOL_BASE_FLIPTRONIC 32
-#define SOL_BASE_EXTENDED 40
-
-#define SOL_MIN_FLASHER 16
+#ifndef SOL_MIN_FLASHER
+#define SOL_MIN_FLASHER 0
+#endif
 
 extern __fastram__ U8 sol_timers[];
 extern U8 sol_duty_state[];
