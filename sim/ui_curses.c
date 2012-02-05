@@ -189,7 +189,8 @@ void ui_refresh_asciidmd (unsigned char *data)
 	}
 	wrefresh (display_win);
 }
-#else
+#endif
+#if (MACHINE_ALPHANUMERIC == 1)
 void ui_refresh_display (unsigned int x, unsigned int y, char c)
 {
 	wmove (display_win, y+1, x+1);
@@ -240,10 +241,12 @@ void ui_init (void)
 	x += 130 + 1;
 	y = 0;
 	debug_win = ui_window_create (64, 46, x, y, NULL);
-#else
+#elif (MACHINE_ALPHANUMERIC == 1)
 	display_win = ui_window_create (20, 4, x, y, " Display Panel ");
 	x = 0;
 	y += 4 + 1;
+	debug_win = ui_window_create (80, 25, x, y, NULL);
+#else
 	debug_win = ui_window_create (80, 25, x, y, NULL);
 #endif
 
