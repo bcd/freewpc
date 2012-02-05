@@ -15,8 +15,7 @@ include cpu/$(CPU)/Makefile
 include $(PMAKEFILE)
 
 # Additional defines
-# TODO : Is CONFIG_PLATFORM_WPC needed?
-CFLAGS += -I$(D) -DCONFIG_PLATFORM_WPC -DPAGE=0
+CFLAGS += -I$(D) -DPAGE=0
 
 # Additional object files to be linked into the kernel region
 NATIVE_OBJS += $(D)/main.o $(D)/switch.o $(D)/section.o \
