@@ -29,7 +29,7 @@ typedef U8 deffnum_t;
 typedef void (*deff_function_t) (void);
 
 #ifdef CONFIG_NO_DEFFS
-#define DEFF_FUNCTION(_func,_page) .fn=null_function, .page=SYS_PAGE
+#define DEFF_FUNCTION(_func,_page) .fn=deff_exit, .page=SYS_PAGE
 #else
 #define DEFF_FUNCTION(_func,_page) .fn=_func, .page=_page
 #endif
