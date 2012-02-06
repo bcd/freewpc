@@ -771,13 +771,37 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 	}
 }
 
-extern inline void pinio_write_solenoid (U8 solno, U8 val)
-{
-}
 
-extern inline U8 pinio_read_solenoid (U8 solno)
+/** Return the hardware register that can be written
+to enable/disable a coil driver. */
+extern inline IOPTR sol_get_write_reg (U8 sol)
 {
-	return 0;
+	switch (sol / 8)
+	{
+#ifdef CONFIG_PLATFORM_WPC
+		case 0:
+			return (IOPTR)WPC_SOL_HIGHPOWER_OUTPUT;
+		case 1:
+			return (IOPTR)WPC_SOL_LOWPOWER_OUTPUT;
+		case 2:
+			return (IOPTR)WPC_SOL_FLASHER_OUTPUT;
+		case 3:
+			return (IOPTR)WPC_SOL_GEN_OUTPUT;
+		case 4:
+#if (MACHINE_WPC95 == 1)
+			return (IOPTR)WPC95_FLIPPER_COIL_OUTPUT;
+#elif (MACHINE_FLIPTRONIC == 1)
+			return (IOPTR)WPC_FLIPTRONIC_PORT_A;
+#endif
+#ifdef MACHINE_SOL_EXTBOARD1
+		case 5:
+			return (IOPTR)WPC_EXTBOARD1;
+#endif
+#endif /* CONFIG_PLATFORM_WPC */
+		default:
+			fatal (ERR_SOL_REQUEST);
+			return (IOPTR)0;
+	}
 }
 
 

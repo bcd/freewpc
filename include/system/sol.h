@@ -27,7 +27,7 @@ typedef U8 solnum_t;
 #error "SOL_COUNT renamed to PINIO_NUM_SOLS"
 #endif
 
-#define SOL_REG_COUNT (PINIO_NUM_SOLS / 8)
+#define SOL_REG_COUNT ((PINIO_NUM_SOLS + 7) / 8)
 
 #ifndef SOL_MIN_FLASHER
 #define SOL_MIN_FLASHER 0
@@ -120,39 +120,6 @@ extern inline U8 *sol_get_read_reg (const solnum_t sol)
 {
 	extern U8 sol_reg_readable[SOL_REG_COUNT];
 	return &sol_reg_readable[sol / 8];
-}
-
-
-/** Return the hardware register that can be written
-to enable/disable a coil driver. */
-extern inline IOPTR sol_get_write_reg (solnum_t sol)
-{
-	switch (sol / 8)
-	{
-#ifdef CONFIG_PLATFORM_WPC
-		case 0:
-			return (IOPTR)WPC_SOL_HIGHPOWER_OUTPUT;
-		case 1:
-			return (IOPTR)WPC_SOL_LOWPOWER_OUTPUT;
-		case 2:
-			return (IOPTR)WPC_SOL_FLASHER_OUTPUT;
-		case 3:
-			return (IOPTR)WPC_SOL_GEN_OUTPUT;
-		case 4:
-#if (MACHINE_WPC95 == 1)
-			return (IOPTR)WPC95_FLIPPER_COIL_OUTPUT;
-#elif (MACHINE_FLIPTRONIC == 1)
-			return (IOPTR)WPC_FLIPTRONIC_PORT_A;
-#endif
-#ifdef MACHINE_SOL_EXTBOARD1
-		case 5:
-			return (IOPTR)WPC_EXTBOARD1;
-#endif
-#endif /* CONFIG_PLATFORM_WPC */
-		default:
-			fatal (ERR_SOL_REQUEST);
-			return (IOPTR)0;
-	}
 }
 
 
