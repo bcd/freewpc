@@ -145,6 +145,7 @@ CALLSET_ENTRY (coin_door, amode_start)
 
 CALLSET_ENTRY (coin_door, sw_coin_door_closed)
 {
+#ifdef SW_COIN_DOOR_CLOSED
 	/* Be kind and ignore slam tilt switch briefly after the
 	coin door is opened/closed */
 	event_can_follow (sw_coin_door_closed, sw_slam_tilt, TIME_5S);
@@ -153,6 +154,7 @@ CALLSET_ENTRY (coin_door, sw_coin_door_closed)
 		coin_door_closed ();
 	else
 		coin_door_opened ();
+#endif
 }
 
 CALLSET_BOOL_ENTRY (coin_door, ball_drain)
