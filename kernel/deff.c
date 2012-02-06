@@ -487,6 +487,10 @@ void deff_update (void)
 {
 	deffnum_t previous;
 
+#ifdef CONFIG_NO_DEFFS
+	return;
+#endif
+
 	/* If there is a transient effect running, then
 	don't try anything.  We'll update the background automatically
 	when the foreground exits. */
