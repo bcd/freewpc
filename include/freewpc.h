@@ -191,6 +191,7 @@ __noreturn__ void freewpc_init (void);
 #include <system/switch.h>
 #include <system/flip.h>
 #include <system/display.h>
+#include <system/watchdog.h>
 #ifdef CONFIG_GI
 #include <system/triac.h>
 #endif
