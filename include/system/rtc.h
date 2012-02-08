@@ -59,6 +59,8 @@ __common__ void rtc_begin_modify (void);
 __common__ void rtc_end_modify (U8 cancel_flag);
 __common__ void rtc_next_field (void);
 __common__ void rtc_modify_field (U8 up_flag);
+#ifndef timestamp_update
 __common__ void timestamp_update (struct date *timestamp);
+#endif
 
 #endif /* _RTC_H */

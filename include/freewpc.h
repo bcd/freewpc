@@ -166,6 +166,14 @@ __noreturn__ void freewpc_init (void);
 #include <platform/wpc.h>
 #define __CPU_BOARD
 #endif
+#ifdef CONFIG_PLATFORM_P2K
+#include <platform/p2k.h>
+#define __CPU_BOARD
+#endif
+#ifdef CONFIG_PLATFORM_MIN
+#include <platform/min.h>
+#define __CPU_BOARD
+#endif
 
 /* Core software structures */
 #include <system/bitarray.h>
@@ -177,14 +185,14 @@ __noreturn__ void freewpc_init (void);
 #endif
 
 /* Basic data structures */
-
 #include <misc.h>
-//#include <list.h>
 #include <log.h>
 
 /* Hardware modules */
 #ifdef __CPU_BOARD
+#ifdef CONFIG_AC
 #include <system/ac.h>
+#endif
 #include <system/sol.h>
 #include <system/lamp.h>
 #include <system/sound.h>
@@ -195,7 +203,7 @@ __noreturn__ void freewpc_init (void);
 #ifdef CONFIG_GI
 #include <system/triac.h>
 #endif
-#include <system/rtc.h>
+#include <system/rtc.h> // CONFIG_RTC?
 
 /* Common software structures */
 #include <priority.h>
@@ -222,9 +230,7 @@ __noreturn__ void freewpc_init (void);
 #include <deffdata.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
-#ifdef CONFIG_PLATFORM_WPC
 #include <system/debug.h>
-#endif
 #include <test.h> /* this one HAS to be here for now, for callset.c */
 
 /* Game-specific defines.  'mach' should point to the machine-specific 

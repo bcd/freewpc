@@ -32,6 +32,8 @@ __common__ void db_periodic (void);
 extern void (*puts_handler) (const char *s);
 void puts_debug (const char *s);
 void puts_parallel (const char *s);
+void puts_sim (const char *s);
+
 
 /**
  * CONFIG_BPT is used to turn on the embedded debugger.

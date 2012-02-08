@@ -214,7 +214,7 @@ void db_periodic (void)
 		bpt_stop ();
 #endif
 
-#ifdef DEBUGGER
+#ifdef CONFIG_DEBUG_INPUT
 	if (pinio_debug_read_ready ())
 	{
 		char c = pinio_debug_read ();
@@ -250,7 +250,7 @@ void db_init (void)
 	bpt_debounce_timer = 0x1C00;
 #endif
 
-#ifdef DEBUGGER
+#ifdef CONFIG_DEBUG_INPUT
 	/* Signal the debugger that the system has just reset. */
 	if (pinio_debug_read_ready ())
 	{
@@ -261,7 +261,11 @@ void db_init (void)
 	{
 		puts_handler = puts_parallel;
 	}
+#elif defined(CONFIG_SIM)
+	puts_handler = puts_sim;
+#endif
 
+#ifdef DEBUGGER
 	/* Announce myself to the world. */
 	dbprintf ("FreeWPC\n");
 	dbprintf ("System Version %s.%s\n",

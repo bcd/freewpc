@@ -7,6 +7,7 @@ P := platform/wpc
 ifndef CPU
 CPU := m6809
 $(eval $(call have,CONFIG_PERIODIC_IRQ))
+$(eval $(call have,CONFIG_FIRQ))
 CONFIG_TASK := y
 include cpu/$(CPU)/Makefile
 $(eval $(call have,CONFIG_MMIO))
@@ -22,6 +23,10 @@ $(eval $(call have,CONFIG_GI))
 $(eval $(call have,CONFIG_TRIAC))
 $(eval $(call have,CONFIG_RTC))
 $(eval $(call have,CONFIG_BUYIN))
+$(eval $(call have,CONFIG_VOLUME_CONTROL))
+$(eval $(call have,CONFIG_HW_WATCHDOG))
+$(eval $(call have,CONFIG_DEBUG_INPUT))
+$(eval $(call have,CONFIG_DEBUG_OUTPUT))
 CONFIG_SCORE_RANK := y
 
 # Some features are dependent on having a working display
@@ -60,6 +65,7 @@ CONFIG_SYSTEM_CODE_PAGE := 62
 #
 ifeq ($(CPU),m6809)
 INT_CFLAGS = -mint8
+# TODO : Don't hardcode code/data sections here like this!
 CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -mwpc -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram
 EXTRA_ASFLAGS += -D__int8__
 # TODO : should these next two be common?
