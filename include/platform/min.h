@@ -14,18 +14,21 @@
 #define IO_SOL 2
 #define IO_DIAG 3
 
+/* TODO : we shouldn't need to declare anything if there is no banking... */
+
 #define PINIO_BANK_ROM 0
 #define PINIO_BANK_RAM 1
 extern inline void pinio_set_bank (U8 bankno, U8 val) { }
 extern inline U8 pinio_get_bank (U8 bankno) { return 0; }
 
+/* TODO : why do I have to say this? */
 #define LOCAL_SIZE 64
 #define AREA_SIZE(name) 0
 
 extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 {
 	if (set == 0)
-		writeb (IO_SOL, val);	
+		writeb (IO_SOL, val & 0xF);
 }
 
 extern inline IOPTR sol_get_write_reg (U8 sol)
