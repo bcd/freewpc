@@ -160,8 +160,7 @@ extern inline U8 pinio_read_ac_zerocross (void)
 	return p2k_read (P2K_SYS_INPUT) & P2K_SYS_ZERO_CROSS;
 }
 
-#define PINIO_LAMP_MATRIX 1
-#define PINIO_LAMP_ROWS 16
+#define PINIO_NUM_LAMPS 128
 
 extern inline void pinio_write_lamp_strobe (U8 val)
 {
@@ -173,6 +172,8 @@ extern inline void pinio_write_lamp_data (U16 val)
 	p2k_write (P2K_LAMP_ROW_A_OUTPUT, val & 0xFF);
 	p2k_write (P2K_LAMP_ROW_B_OUTPUT, val << 8);
 }
+
+#define PINIO_NUM_SOLS 48
 
 extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 {
@@ -199,6 +200,8 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 	}
 }
 
+#define PINIO_NUM_SWITCHES 88
+
 extern inline void pinio_write_switch_column (U8 val)
 {
 	p2k_write (P2K_SWITCH_COL_OUTPUT, 1 << val);
@@ -224,11 +227,6 @@ extern inline void pinio_disable_flippers (void)
 
 extern inline void pinio_clear_periodic (void)
 {
-}
-
-extern inline U8 pinio_read_ticket (void)
-{
-	return 0xFF;
 }
 
 extern inline void pinio_watchdog_reset (void)
@@ -260,7 +258,5 @@ extern inline U8 pinio_read_locale (void)
 
 #define pinio_nvram_unlock()
 #define pinio_nvram_lock()
-
-#undef HAVE_PARALLEL_PORT /* pinio_parport_write() will not be called */
 
 #endif /* P2K_H */
