@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -148,6 +148,7 @@ extern U8 periodic_ok;
 
 /* Build system information */
 #include <env.h>
+#include <system/io.h>
 
 /* CPU specifics */
 #include <system/irq.h>
