@@ -45,9 +45,6 @@ struct wpc_debug_port
 };
 
 
-/** The simulated solenoid outputs */
-static U8 sim_sols[PINIO_NUM_SOLS / 8];
-
 /** Pointer to the current switch matrix element */
 static U8 *sim_switch_data_ptr;
 
@@ -103,64 +100,6 @@ static U8 wpc_read_debug_status (struct wpc_debug_port *port, unsigned int addr)
 }
 
 
-
-/*	A generic I/O handler that plugs into a configuration variable.
-	VALP points to an 'int' which has been passed to conf_add to
-	allow it to be set using a conf file or the 'set' command.
-	ADDR is not used.  Pass this as the reader argument to io_add()
-	to allow the running CPU to get to the config data. */
-static U8 io_conf_reader (int *valp, unsigned int addr)
-{
-	return (U8)*valp;
-}
-
-
-/* A generic I/O handlers that plugs into a simple byte variable.
-	The CPU "reads" and "writes" the value of the memory directly. */
-
-static U8 io_mem_reader (U8 *valp, unsigned int addr)
-{
-	return valp[addr];
-}
-
-static void io_mem_writer (U8 *valp, unsigned int addr, U8 val)
-{
-	valp[addr] = val;
-}
-
-
-/* Generic lamp and switch matrix handling */
-
-/** Write to a multiplexed output; i.e. a register in which distinct
- * outputs are multiplexed together into a single 8-bit I/O location.
- * UI_UPDATE provides a function for displaying the contents of a single
- * output; it takes the output number and a zero(off)/non-zero(on) state.
- * INDEX gives the output number of the first bit of the byte of data.
- * MEMP points to the data byte, containing 8 outputs.
- * NEWVAL is the value to be written; it is assigned to *MEMP.
- */
-void mux_write (mux_ui ui_update, int index, U8 *memp, U8 newval, unsigned int sigbase)
-{
-	U8 oldval = *memp;
-	int n;
-	for (n = 0; n < 8; n++)
-	{
-		if ((newval & (1 << n)) != (oldval & (1 << n)))
-		{
-			/* Update the user interface to reflect the change in output */
-			if (ui_update)
-				ui_update (index + n, newval & (1 << n));
-
-			/* Notify the signal tracker that the output changed */
-			signal_update (sigbase+index+n, newval & (1 << n));
-		}
-	}
-
-	/* Latch the write; save the value written */
-	*memp = newval;
-}
-
-
 void io_matrix_strobe (struct io_matrix *mx, U8 val, mux_ui ui_update, unsigned int signo)
 {
 	if (val == 0)
@@ -187,6 +126,16 @@ U8 io_matrix_reader (struct io_matrix *mx, unsigned int addr)
 	return mx->rowlatch;
 }
 
+/** Update the output side of the triac/flipper relay register.
+ * This becomes zero when a zerocrossing occurs.  When the input side of the latch
+ * is written, GI strings can be turned on but not turned off.
+ */
+void sim_triac_update (U8 val)
+{
+	mux_write (ui_write_triac, 0, &linux_triac_outputs, val, SIGNO_TRIAC);
+}
+
+
 
 
 struct io_switch_matrix sim_switch_matrix;
@@ -208,43 +157,6 @@ void wpc_key_press (char val)
 	}
 }
 
-
-/** Update the output side of the triac/flipper relay register.
- * This becomes zero when a zerocrossing occurs.  When the input side of the latch
- * is written, GI strings can be turned on but not turned off.
- */
-void sim_triac_update (U8 val)
-{
-	mux_write (ui_write_triac, 0, &linux_triac_outputs, val, SIGNO_TRIAC);
-}
-
-
-/** Simulate writing to a set of 8 solenoids. */
-static void sim_sol_write (int index, U8 *memp, U8 val)
-{
-	int n;
-
-	/* Update the state of each solenoid from the signal coming
-	into it. */
-	for (n = 0; n < 8; n++)
-	{
-		unsigned int solno = index+n;
-
-		if (solno < PINIO_NUM_SOLS)
-			sim_coil_change (solno, val & (1 << n));
-	}
-
-	/* Commit the new state */
-	mux_write (ui_write_solenoid, index, memp, val, SIGNO_SOL);
-}
-
-
-/* Handle solenoid writes */
-static void wpc_write_sol (U8 *memp, unsigned int addr, U8 val)
-{
-	int bankno = memp - sim_sols;
-	sim_sol_write (bankno * 8, memp, val);
-}
 
 /* Handle the diagnostic LED */
 static void wpc_write_led (void *unused1, unsigned int unused2, U8 val)

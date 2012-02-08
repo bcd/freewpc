@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -181,6 +181,7 @@ static void sim_interface_thread (void)
 		are fed into the simulated serial port... meaning it is interpreted
 		by the game program itself, and not the simulator.  Use the
 		tilde to toggle between the two modes. */
+#ifdef CONFIG_DEBUG_INPUT
 		if (simulator_keys == 0)
 		{
 			/* Except tilde turns it off as usual. */
@@ -197,6 +198,7 @@ static void sim_interface_thread (void)
 #endif
 			continue;
 		}
+#endif /* CONFIG_DEBUG_INPUT */
 
 		switch (*inbuf)
 		{
@@ -255,12 +257,14 @@ static void sim_interface_thread (void)
 				node_kick (&open_node);
 				break;
 
+#ifdef CONFIG_DEBUG_INPUT
 			case '`':
 				/* The tilde toggles between keystrokes being treated as switches,
 				and as input into the runtime debugger. */
 				simulator_keys ^= 1;
 				simlog (SLC_DEBUG, "Input directed to built-in debugger.");
 				break;
+#endif
 
 			case '\x1b':
 				sim_exit (0);

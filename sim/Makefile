@@ -9,6 +9,7 @@ NATIVE_OBJS :=
 # Common simulation CPU configuration
 CPU := native
 $(eval $(call have,CONFIG_PTH))
+$(eval $(call have,CONFIG_CALLIO))
 CONFIG_UI ?= curses
 $(eval $(call have,CONFIG_SOFT_REALTIME))
 include cpu/$(CPU)/Makefile
@@ -30,6 +31,7 @@ NATIVE_OBJS += $(D)/node.o
 NATIVE_OBJS += $(D)/io.o
 NATIVE_OBJS += $(D)/keyboard.o
 NATIVE_OBJS += $(if $(CONFIG_PLATFORM_WPC), $(D)/io_wpc.o)
+NATIVE_OBJS += $(if $(CONFIG_PLATFORM_MIN), $(D)/io_min.o)
 NATIVE_OBJS += $(if $(CONFIG_PIC), $(D)/wpc-pic.o)
 ifeq ($(MACHINE),tz)
 $(eval $(call have,CONFIG_MACHINE_SIM))

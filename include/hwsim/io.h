@@ -25,7 +25,9 @@
 #define MIN_IO_ADDR 0x0
 #define MAX_IO_ADDR 0x4000
 #else
-#error
+#warning "simulation I/O not configured, taking defaults"
+#define MIN_IO_ADDR 0x0
+#define MAX_IO_ADDR 0x100
 #endif
 #define NUM_IO_ADDRS (MAX_IO_ADDR - MIN_IO_ADDR)
 
@@ -46,6 +48,10 @@ void io_null_writer (void *data, unsigned int offset, U8 val);
 void writeb (IOPTR addr, U8 val);
 U8 readb (IOPTR addr);
 void io_add_1 (IOPTR addr, unsigned int len, io_reader reader, io_writer writer, void *data);
+U8 io_mem_reader (U8 *valp, unsigned int addr);
+void io_mem_writer (U8 *valp, unsigned int addr, U8 val);
+
+void io_write_sol (U8 *memp, unsigned int addr, U8 val);
 
 #define io_add(addr, len, reader, writer, data) \
 	io_add_1 (addr, len, (io_reader)reader, (io_writer)writer, data)
@@ -61,6 +67,9 @@ void io_add_1 (IOPTR addr, unsigned int len, io_reader reader, io_writer writer,
 void io_init (void);
 #ifdef CONFIG_PLATFORM_WPC
 void io_wpc_init (void);
+#endif
+#ifdef CONFIG_PLATFORM_MIN
+void io_min_init (void);
 #endif
 
 #endif /*  _HWSIM_IO_H */

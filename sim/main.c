@@ -114,6 +114,11 @@ void simlog (enum sim_log_class class, const char *format, ...)
 
 }
 
+void puts_sim (const char *s)
+{
+	simlog (SLC_DEBUG_PORT, "%s", s);
+}
+
 
 /*	Called to shutdown the simulation.
 	This performs all cleanup before exiting back to the native OS. */
@@ -148,6 +153,7 @@ CALLSET_ENTRY (sim, realtime_tick)
 	if (linux_irq_enable)
 		tick_driver ();
 
+#ifdef CONFIG_FIRQ
 	/* Simulate an FIRQ every 8ms */
 	if (linux_firq_enable)
 	{
@@ -157,6 +163,7 @@ CALLSET_ENTRY (sim, realtime_tick)
 			next_firq_time += FIRQ_FREQ;
 		}
 	}
+#endif
 
 	/* Call periodic processes every 16ms */
 	if (realtime_read () >= next_periodic_time)
