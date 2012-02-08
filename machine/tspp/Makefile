@@ -41,8 +41,8 @@ ROM_PAGE_COUNT = 8
 #################################################
 
 PINMAME_MACHINE = simpprty
-PINMAME_GAME_ROM = spp-cpu.400
-PINMAME_OTHER_ROMS = spp1* sppdspa.400
+PINMAME_GAME_ROM = spp-cpu.500
+PINMAME_OTHER_ROMS = spp1* sppdispa.500
 
 #
 # Object files exported by this game

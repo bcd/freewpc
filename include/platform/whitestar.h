@@ -134,10 +134,6 @@ extern inline void pinio_active_led_toggle (void)
 
 #undef HAVE_PARALLEL_PORT
 
-extern inline void pinio_parport_write (U8 data)
-{
-}
-
 /********************************************/
 /* NVRAM Protection Circuit                 */
 /********************************************/
@@ -218,6 +214,8 @@ extern inline U8 pinio_read_locale (void)
 /* Lamps                                    */
 /********************************************/
 
+#define PINIO_NUM_LAMPS 80
+
 extern inline void pinio_write_lamp_strobe (U8 val)
 {
 	writeb (WS_LAMP_COLUMN_STROBE, val);
@@ -250,6 +248,21 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 	case 3:
 		writeb (WS_FLASHERS, val);
 		break;
+	}
+}
+
+extern inline IOPTR sol_get_write_reg (U8 sol)
+{
+	switch (sol / 8)
+	{
+		case 0:
+			return WS_SOLA;
+		case 1:
+			return WS_SOLB;
+		case 2:
+			return WS_SOLC;
+		case 3:
+			return WS_FLASHERS;
 	}
 }
 
@@ -307,6 +320,7 @@ extern inline U8 pinio_read_dedicated_switches (void)
 /* Triacs                                   */
 /********************************************/
 
+#define PINIO_GI_STRINGS 0x1
 extern inline void pinio_write_gi (U8 val)
 {
 }
@@ -323,6 +337,7 @@ extern inline void pinio_clear_periodic (void)
 {
 }
 
+#define timestamp_update(x)
 
 #endif /* _WHITESTAR_H */
 
