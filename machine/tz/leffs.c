@@ -96,6 +96,7 @@ void no_gi_leff (void)
 void turn_on_gi_leff (void)
 {
 	gi_leff_enable (PINIO_GI_STRINGS);
+	task_sleep_sec (1);
 	leff_exit ();
 }
 
