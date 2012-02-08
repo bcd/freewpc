@@ -72,6 +72,7 @@ KERNEL_HW_OBJS += $(P)/interrupt.o
 KERNEL_HW_OBJS += $(P)/init-wpc.o
 KERNEL_HW_OBJS += $(P)/wpc-switch.o
 KERNEL_HW_OBJS += $(P)/wpc-lamp.o
+KERNEL_HW_OBJS += $(P)/wpc-sol.o
 ifeq ($(CPU),m6809)
 KERNEL_HW_OBJS += $(P)/main.o
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/bitmap.o)
