@@ -179,7 +179,11 @@ void triac_update (void)
 	latch = triac_output;
 	latch &= ~gi_leff_alloc;
 	latch |= gi_leff_output;
+#ifdef CONFIG_TRIAC
+	pinio_write_triac (latch);
+#else
 	pinio_write_gi (latch);
+#endif
 }
 
 

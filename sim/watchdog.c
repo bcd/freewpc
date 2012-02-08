@@ -80,6 +80,8 @@ void sim_watchdog_reset (void)
 void sim_watchdog_init (void)
 {
 	signal_update (SIGNO_BLANKING, 0);
+#ifdef CONFIG_PLATFORM_WPC
 	sim_time_register (8, TRUE, sim_watchdog_periodic, NULL);
+#endif
 }
 

@@ -213,10 +213,7 @@ include common/Makefile
 ifeq ($(CONFIG_FONT),y)
 include fonts/Makefile
 endif
-ifdef CONFIG_PLATFORM_WPC
 include test/Makefile
-endif
-# FUTURE : include effect/Makefile
 
 
 EVENT_OBJS = $(BLDDIR)/callset.o
@@ -311,7 +308,7 @@ MD_OBJS = $(PAGED_MD_OBJS) $(SYSTEM_MD_OBJS)
 ###	Object File Distribution
 #######################################################################
 
-ifneq ($(CONFIG_SIM), y)
+ifeq ($(CPU), m6809)
 NUM_PAGED_SECTIONS := $(words $(CONFIG_CODE_PAGE_LIST))
 NUM_BLANK_PAGES := $(shell echo $$(($(ROM_PAGE_COUNT) - $(CONFIG_FIXED_PAGE_COUNT) - $(NUM_PAGED_SECTIONS))))
 BLANK_SIZE := $(shell echo $$(( $(NUM_BLANK_PAGES) * $(CONFIG_ROM_BANK_SIZE))))

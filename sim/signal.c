@@ -84,12 +84,13 @@ uint64_t signal_trace_start_time;
 double signal_value (uint32_t signo);
 
 
+#ifdef CONFIG_AC
 double signal_ac_angle_value (uint32_t offset)
 {
 	extern double sim_zc_angle (void);
 	return sim_zc_angle ();
 }
-
+#endif
 
 double signal_sol_voltage_value (uint32_t offset)
 {
@@ -109,10 +110,12 @@ const value_signal signal_value_table[] = {
 	to 1.0, depending on the current phase of the AC cycle. */
 	signal_sol_voltage_value,
 
+#ifdef CONFIG_AC
 	/* SIGNO_AC_ANGLE is similar, but just returns the -1.0 to 1.0 value
 	that represents the phase angle, without consideration for any particular
 	solenoid line. */
 	signal_ac_angle_value,
+#endif
 };
 
 

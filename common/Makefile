@@ -30,7 +30,7 @@ COMMON_BASIC_OBJS +=	$(if $(CONFIG_PLATFORM_WPC), common/service.o)
 COMMON_BASIC_OBJS +=	common/start_button.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_TICKET), common/ticket.o)
 COMMON_BASIC_OBJS +=	common/tilt.o
-COMMON_BASIC_OBJS +=	$(if $(CONFIG_WHITESTAR),,common/tournament.o)
+COMMON_BASIC_OBJS +=	common/tournament.o
 COMMON_BASIC_OBJS +=	common/trough.o
 
 # The 'init' objects are only used during startup.

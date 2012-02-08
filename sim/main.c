@@ -290,7 +290,9 @@ int main (int argc, char *argv[])
 	 * the reset vector is invoked. */
 	signal_update (SIGNO_RESET, 1);
 	disable_interrupts ();
+#ifdef CONFIG_AC
 	sim_zc_init ();
+#endif
 #if (MACHINE_PIC == 1)
 	simulation_pic_init ();
 #endif
@@ -303,9 +305,11 @@ int main (int argc, char *argv[])
 	io_init ();
 
 	/* Set the hardware registers to their initial values. */
+#ifdef CONFIG_PLATFORM_WPC
 	writeb (WPC_LAMP_COL_STROBE, 0);
 #if !(MACHINE_PIC == 1)
 	writeb (WPC_SW_COL_STROBE, 0);
+#endif
 #endif
 
 	/* Initialize the state of the switches; optos are backwards */
