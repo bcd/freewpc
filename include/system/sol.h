@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,7 +24,7 @@
 typedef U8 solnum_t;
 
 #ifndef PINIO_NUM_SOLS
-#error "SOL_COUNT renamed to PINIO_NUM_SOLS"
+#error "PINIO_NUM_SOLS undefined"
 #endif
 
 #define SOL_REG_COUNT ((PINIO_NUM_SOLS + 7) / 8)
