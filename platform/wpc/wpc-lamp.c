@@ -34,35 +34,8 @@ void lamp_rtt (void)
 		return;
 	}
 
-	/* Grab the default lamp values */
-	bits = lamp_matrix[lamp_strobe_column];
-
-	/* OR in the flashing lamp values.  These are guaranteed to be
-	 * zero for any lamps where the flash is turned off.
-	 * Otherwise, these bits are periodically inverted by the
-	 * (slower) flash rtt function above.
-	 * This means that for the flash to work, the default bit
-	 * must be OFF when the flash bit is ON.  (Use the tristate
-	 * macros to ensure this.)
-	 */
-	bits |= lamp_flash_matrix_now[lamp_strobe_column];
-
-	/* TODO : implement lamp strobing, like the newer Stern games
-	do.  Implement like DMD page flipping, alternating between 2
-	different lamp matrices rapidly to present 4 different
-	intensities.  A background task, like the flash_rtt above,
-	would toggle the intensities at a slower rate. */
-
-	/* Override with the lamp effect lamps.
-	 * Leff2 bits are low priority and used for long-running
-	 * lamp effects.  Leff1 is higher priority and used
-	 * for quick effects.  Therefore leff2 is applied first,
-	 * and leff1 may override it.
-	 */
-	bits &= lamp_leff2_allocated[lamp_strobe_column];
-	bits |= lamp_leff2_matrix[lamp_strobe_column];
-	bits &= lamp_leff1_allocated[lamp_strobe_column];
-	bits |= lamp_leff1_matrix[lamp_strobe_column];
+	/* Compute the lamps to be turned on. */
+	bits = platform_lamp_compute (lamp_strobe_column);
 
 	/* Write the result to the hardware */
 	pinio_write_lamp_data (bits);
