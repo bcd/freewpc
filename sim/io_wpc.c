@@ -183,15 +183,6 @@ void wpc_write (void *unused, unsigned int addr, U8 val)
 {
 	switch (addr)
 	{
-#if (MACHINE_WPC95 == 1)
-		case WPC95_FLIPPER_COIL_OUTPUT:
-			sim_sol_write (32, &sim_sols[4], val);
-#elif (MACHINE_FLIPTRONIC == 1)
-		case WPC_FLIPTRONIC_PORT_A:
-			sim_sol_write (32, &sim_sols[4], ~val);
-#endif
-			break;
-
 		case WPC_GI_TRIAC:
 			/* The input side of the triac has a latch; store only the G.I.
 			related bits there */
@@ -316,16 +307,6 @@ static void io_add_lamp_matrix (IOPTR addr_strobe, IOPTR addr_output, U8 lampno)
 }
 
 
-/**
- * Map a range of solenoid sets.
- * ADDR gives the CPU's register that it uses to write to the set.
- * SOLNO gives the solenoid number of the first solenoid in the set.
- */
-static void io_add_sol_bank (IOPTR addr, U8 solno)
-{
-	io_add_wo (addr, wpc_write_sol, &sim_sols[solno / 8]);
-}
-
 /* Handle writes to map a page of DMD memory into a CPU window.
 	ADDR identifies the mapping number.  VAL is the physical page.
 	Each window points to page 0 on reset. */
@@ -378,6 +359,12 @@ void io_wpc_init (void)
 	io_add_sol_bank (WPC_SOL_LOWPOWER_OUTPUT, SOL_BASE_LOW);
 	io_add_sol_bank (WPC_SOL_FLASHER_OUTPUT, SOL_BASE_GENERAL);
 	io_add_sol_bank (WPC_SOL_GEN_OUTPUT, SOL_BASE_AUXILIARY);
+#if (MACHINE_WPC95 == 1)
+	io_add_sol_bank (WPC95_FLIPPER_COIL_OUTPUT, 32);
+#endif
+#if (MACHINE_FLIPTRONIC == 1)
+	io_add_sol_bank (WPC_FLIPTRONIC_PORT_A, 32);
+#endif
 #ifdef MACHINE_SOL_EXTBOARD1
 	io_add_sol_bank (WPC_EXTBOARD1, SOL_BASE_EXTENDED);
 #endif

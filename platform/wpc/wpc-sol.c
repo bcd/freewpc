@@ -1,6 +1,6 @@
 
 #include <freewpc.h>
-#include <platform.h>
+#include <system/platform.h>
 
 /** Return 0 if the given solenoid/flasher should be off,
 else return the bitmask that reflects that solenoid's
@@ -75,7 +75,7 @@ extern inline void sol_update_fliptronic_powered (void)
 
 extern inline void platform_sol_update_direct (const U8 sol_set)
 {
-	pinio_write_solenoid_set (set, *sol_get_read_reg (set));
+	pinio_write_solenoid_set (sol_set, *sol_get_read_reg (sol_set));
 }
 
 

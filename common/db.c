@@ -221,10 +221,12 @@ void db_periodic (void)
 		puts_handler = puts_debug;
 		switch (c)
 		{
+#ifdef DEBUGGER
 			case 'a':
 				/* Dump all debugging information */
 				db_dump_all ();
 				break;
+#endif
 
 #ifdef CONFIG_BPT
 			case 'p':

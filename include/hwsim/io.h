@@ -72,4 +72,6 @@ void io_wpc_init (void);
 void io_min_init (void);
 #endif
 
+U8 io_conf_reader (int *valp, unsigned int addr);
+
 #endif /*  _HWSIM_IO_H */

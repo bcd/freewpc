@@ -71,3 +71,9 @@ NATIVE_OBJS += $(C)/bcd_string.o
 .PHONY : run
 run: $(NATIVE_PROG)
 	$(NATIVE_PROG)
+
+# Invoke 'make attach' to start up a GDB session that attaches itself to
+# a running instance of the native mode program.
+.PHONY : attach
+attach:
+	gdb -p `ps -ef | grep $(NATIVE_PROG) | head -n 1 | grep -o "[0-9].*" | awk '{print $$1}'` -x gdbmacros

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -778,7 +778,6 @@ extern inline IOPTR sol_get_write_reg (U8 sol)
 {
 	switch (sol / 8)
 	{
-#ifdef CONFIG_PLATFORM_WPC
 		case 0:
 			return (IOPTR)WPC_SOL_HIGHPOWER_OUTPUT;
 		case 1:
@@ -787,21 +786,19 @@ extern inline IOPTR sol_get_write_reg (U8 sol)
 			return (IOPTR)WPC_SOL_FLASHER_OUTPUT;
 		case 3:
 			return (IOPTR)WPC_SOL_GEN_OUTPUT;
-		case 4:
 #if (MACHINE_WPC95 == 1)
+		case 4:
 			return (IOPTR)WPC95_FLIPPER_COIL_OUTPUT;
 #elif (MACHINE_FLIPTRONIC == 1)
+		case 4:
 			return (IOPTR)WPC_FLIPTRONIC_PORT_A;
 #endif
 #ifdef MACHINE_SOL_EXTBOARD1
 		case 5:
 			return (IOPTR)WPC_EXTBOARD1;
 #endif
-#endif /* CONFIG_PLATFORM_WPC */
-		default:
-			fatal (ERR_SOL_REQUEST);
-			return (IOPTR)0;
 	}
+	return 0;
 }
 
 
@@ -859,6 +856,12 @@ extern inline U8 pinio_read_sound (void)
 /********************************************/
 /* Switches                                 */
 /********************************************/
+
+#if (MACHINE_FLIPTRONIC == 1)
+#define PINIO_NUM_SWITCHES 80
+#else
+#define PINIO_NUM_SWITCHES 72
+#endif
 
 extern inline void pinio_write_switch_column (U8 val)
 {

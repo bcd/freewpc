@@ -69,7 +69,7 @@ static void flex_recalc (__fardata__ const struct flex_config *fconf)
 	fdata->level = level-1;
 	fdata->games = 0;
 	pinio_nvram_lock ();
-	csum_area_update (far_read (fconf, csum));
+	csum_area_update (far_read (fconf, csum)); // FIXME
 }
 
 void flex_end_game (__fardata__ const struct flex_config *fconf)

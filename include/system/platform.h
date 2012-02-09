@@ -66,4 +66,6 @@ extern inline U8 platform_lamp_compute (const U8 col)
 	return bits;
 }
 
+extern __fastram__ U8 sol_duty_mask;
+
 #endif /* __SYS_PLATFORM_H */

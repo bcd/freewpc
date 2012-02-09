@@ -61,7 +61,3 @@ CFLAGS += -DMACHINE_SHORTNAME=\"$(MACHINE)\"
 # CALLSET_ENTRYs in the simulator directory work too!
 CALLSET_FLAGS += -D $(D)
 
-# Invoke 'make attach' to start up a GDB session that attaches itself to
-# a running instance of the native mode program.
-attach:
-	gdb -p `ps -ef | grep $(NATIVE_PROG) | head -n 1 | grep -o "[0-9].*" | awk '{print $$1}'` -x gdbmacros
