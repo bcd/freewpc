@@ -34,11 +34,19 @@ extern bool task_dispatching_ok;
 #define TASK_DURATION_TEST 0x8
 
 #ifdef CONFIG_NATIVE
-
 #include <sys/time.h>
+#if defined(CONFIG_PTH)
 #include <pth.h>
-
 typedef pth_t task_pid_t;
+#elif defined(CONFIG_PTHREADS)
+#undef __noreturn__
+#include <pthread.h>
+#define __noreturn__ __attribute__((noreturn))
+typedef pthread_t task_pid_t;
+#else
+typedef int task_pid_t;
+#endif
+
 typedef unsigned int task_gid_t;
 typedef unsigned int task_ticks_t;
 typedef void (*task_function_t) (void);
@@ -248,10 +256,12 @@ void do_periodic (void);
 #define task_kill_peers()			task_kill_gid (task_getgid ())
 
 /** Yield control to another task, but do not impose a minimum sleep time. */
-#ifdef CONFIG_NATIVE
-#define task_yield()             pth_yield(0)
+#if defined(CONFIG_PTH)
+#define task_yield() pth_yield(0)
+#elif defined(CONFIG_PTHREADS)
+#define task_yield() sched_yield()
 #else
-#define task_yield()					task_sleep (0)
+#define task_yield() task_sleep (0)
 #endif
 
 /** Sleep for an integer number of seconds */

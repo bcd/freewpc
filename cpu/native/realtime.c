@@ -76,8 +76,10 @@ void realtime_loop (void)
 		int usecs_asked = 1000 - usecs_elapsed - 100;
 		if (usecs_asked > 0)
 		{
-#ifdef CONFIG_PTH
+#if defined(CONFIG_PTH)
 			pth_nap (pth_time (0, usecs_asked));
+#elif defined(CONFIG_PTHREADS)
+			usleep (usecs_asked);
 #else
 #error "No thread library supported for realtime yet"
 #endif

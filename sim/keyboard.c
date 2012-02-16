@@ -114,7 +114,11 @@ void sim_key_install_shooter (char key)
 static char sim_getchar (void)
 {
 	char inbuf;
+#ifdef CONFIG_PTH
 	ssize_t res = pth_read (sim_input_fd, &inbuf, 1);
+#else
+	ssize_t res = read (sim_input_fd, &inbuf, 1);
+#endif
 	if (res <= 0)
 	{
 		task_sleep_sec (2);

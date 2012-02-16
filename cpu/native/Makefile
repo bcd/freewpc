@@ -20,6 +20,11 @@ CFLAGS += $(PTH_CFLAGS)
 NATIVE_OBJS += $(C)/task_pth.o
 endif
 
+ifeq ($(CONFIG_PTHREADS),y)
+HOST_LIBS += -lpthread
+NATIVE_OBJS += $(C)/task_pthread.o
+endif
+
 ifeq ($(CONFIG_NATIVE_PROFILE),y)
 CFLAGS += -pg
 HOST_LFLAGS += -pg
