@@ -141,7 +141,7 @@ __noreturn__ void freewpc_init (void)
 	   made. */
 	log_init ();
 
-#ifdef CONFIG_NATIVE
+#ifdef CONFIG_SIM
 	/* Notify the simulator when the core OS is up and running. */
 	sim_init ();
 #endif

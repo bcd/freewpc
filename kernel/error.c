@@ -114,7 +114,7 @@ void fatal (errcode_t error_code)
 #endif
 
 	/* In simulation, exit whenever a fatal occurs. */
-#ifdef CONFIG_NATIVE
+#ifdef CONFIG_SIM
 	sim_exit (error_code);
 #endif
 
