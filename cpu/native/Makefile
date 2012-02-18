@@ -3,6 +3,13 @@
 CPU := native
 C := cpu/$(CPU)
 
+GCC_ROOT ?= /usr/bin
+GCC_CROSS ?=
+CC := $(GCC_ROOT)/$(GCC_CROSS)gcc
+AS := $(CC) -xassembler-with-cpp
+LD := $(GCC_ROOT)/$(GCC_CROSS)gcc
+REQUIRED += $(CC) $(LD)
+
 GCC_VERSION = NATIVE
 CFLAGS =
 

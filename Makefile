@@ -112,7 +112,8 @@ BUILD_YEAR := $(shell date +%Y)
 
 .PHONY : platform_target
 ifeq ($(CPU), native)
-platform_target : native
+NATIVE_PROG := $(BLDDIR)/freewpc_$(MACHINE)
+platform_target : $(NATIVE_PROG)
 else
 ifdef TARGET_ROMPATH
 platform_target : install
@@ -274,7 +275,6 @@ else
 GAME_ROM = freewpc.rom
 endif
 MAP_FILE = $(GAME_ROM:.rom=.map)
-NATIVE_PROG = $(BLDDIR)/freewpc_$(MACHINE)
 
 ifndef MACHINE_FILE
 MACHINE_FILE = $(MACHINE).md
@@ -587,12 +587,9 @@ $(BLDDIR)/$(MAP_FILE) : build/freewpc.s19
 ifeq ($(CPU),m6809)
 $(BINFILES:.bin=.s19) : %.s19 : %.lnk $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
 	$(Q)echo "Linking $@..." && $(CC) -Wl,-T -Wl,$< >> $(ERR) 2>&1
-endif
-
-ifeq ($(CPU),native)
-native : $(NATIVE_PROG)
+else
 $(NATIVE_PROG) : $(IMAGE_ROM) $(OBJS) $(NATIVE_OBJS)
-	$(Q)echo "Linking $@ ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o $(NATIVE_PROG) $(OBJS) $(NATIVE_OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
+	$(Q)echo "Linking $@ ..." && $(LD) $(HOST_LFLAGS) `pth-config --ldflags` -o $(NATIVE_PROG) $(OBJS) $(NATIVE_OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
 endif
 
 #
@@ -742,7 +739,7 @@ $(filter-out $(HOST_OBJS),$(NATIVE_OBJS)) $(C_OBJS) $(FON_OBJS):
 ifeq ($(CPU),m6809)
 	$(Q)echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
 else
-	$(Q)echo "Compiling $< ..." && $(HOSTCC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) $< >> $(ERR) 2>&1
+	$(Q)echo "Compiling $< ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) $< >> $(ERR) 2>&1
 endif
 ifeq ($(CONFIG_PROFILING),y)
 	$(Q)mkdir -p gprof.data
