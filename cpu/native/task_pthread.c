@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <unistd.h>
 #include <freewpc.h>
 
 /**
@@ -95,6 +96,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	pthread_attr_t attr;
 	struct sched_param param;
 	int i;
+	int rc;
 
 	simdebug ("task_create_gid: gid=%d, fn=%p\n", gid, fn);
 
@@ -104,21 +106,24 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	 * - priority : make certain tasks that the simulator itself
 	 *   uses higher priority, and all others equal in priority.
 	 */
-	pthread_attr_init (&attr);
-	pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
-	pthread_attr_setschedpolicy (&attr, SCHED_FIFO);
+	rc = pthread_attr_init (&attr);
+	rc = pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+	rc = pthread_attr_setschedpolicy (&attr, SCHED_FIFO);
 	if (gid == GID_LINUX_REALTIME) /* time tracking */
 		param.sched_priority = 3;
 	else if (gid == GID_LINUX_INTERFACE) /* user input */
 		param.sched_priority = 2;
 	else
 		param.sched_priority = 1;
-	pthread_attr_setschedparam (&attr, &param);
+	rc = pthread_attr_setschedparam (&attr, &param);
+	rc = pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
 
 	/* TODO - inside of calling the function directly, call a global
 	 * function and pass it a pointer to the task_data_table entry
 	 * as an argument. */
-	pthread_create (&pid, &attr, fn, 0);
+	rc = pthread_create (&pid, &attr, fn, 0);
+	if (rc != 0)
+		fatal (ERR_NO_FREE_TASKS);
 
 	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == 0)
@@ -131,7 +136,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 #ifdef CONFIG_SIM
 			ui_write_task (i, gid);
 #endif
-			simdebug ("pthread_create: index=%d, pid=%p\n", i, pid);
+			simdebug ("pthread_create: index=%d, pid=%u\n", i, (unsigned)pid);
 			return (pid);
 		}
 
@@ -176,7 +181,6 @@ void task_sleep (task_ticks_t ticks)
 }
 
 
-/* TODO - this function is identical to the 6809 version */
 void task_sleep_sec1 (U8 secs)
 {
 	usleep (TIME_1S * secs * USECS_PER_TICK);
@@ -188,7 +192,7 @@ void task_exit (void)
 {
 	int i;
 
-	simdebug ("task_exit: pid=%p\n", task_getpid ());
+	simdebug ("task_exit: pid=%u\n", (unsigned)task_getpid ());
 	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == task_getpid ())
 		{
@@ -212,7 +216,7 @@ task_pid_t task_find_gid (task_gid_t gid)
 			&& (task_data_table[i].pid != 0))
 			return task_data_table[i].pid;
 	}
-	return NULL;
+	return 0;
 }
 
 
@@ -230,7 +234,7 @@ task_pid_t task_find_gid_next (task_pid_t last, task_gid_t gid)
 				ok_to_return = 1;
 		}
 	}
-	return NULL;
+	return 0;
 }
 
 
@@ -238,7 +242,7 @@ void task_kill_pid (task_pid_t tp)
 {
 	int i;
 
-	simdebug ("task_kill_pid: pid=%p\n", tp);
+	simdebug ("task_kill_pid: pid=%u\n", (unsigned)tp);
 
 	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == tp)
@@ -406,7 +410,7 @@ void *task_get_class_data (task_pid_t pid)
 	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == pid)
 			return task_data_table[i].class_data;
-	printf ("task_get_class_data for pid %p failed\n", pid);
+	printf ("task_get_class_data for pid %u failed\n", (unsigned)pid);
 	fatal (0xFD);
 }
 
