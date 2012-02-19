@@ -79,6 +79,14 @@ endif
 
 NATIVE_OBJS += $(C)/bits.o
 NATIVE_OBJS += $(C)/bcd_string.o
+NATIVE_OBJS += $(C)/log.o
+NATIVE_OBJS += $(C)/section.o
+
+# For Ubuntu 8.10 and higher: The default compiler flags will try to
+# detect buffer overflows, but we are doing ugly things to read/write
+# persistent memory.  We need to disable this 'feature' for this file
+# only.
+$(C)/section.o : CFLAGS += -U_FORTIFY_SOURCE
 
 .PHONY : run
 run: $(NATIVE_PROG)
