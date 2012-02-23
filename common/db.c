@@ -265,6 +265,9 @@ void db_init (void)
 	}
 #elif defined(CONFIG_SIM)
 	puts_handler = puts_sim;
+#else
+	extern void puts_default (const char *);
+	puts_handler = puts_default;
 #endif
 
 #ifdef DEBUGGER
