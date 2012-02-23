@@ -20,6 +20,7 @@
 
 #include <unistd.h>
 #include <freewpc.h>
+#include <native/log.h>
 
 /**
  * \file
@@ -30,7 +31,14 @@
 
 
 /** Enable this to turn on verbose debugging of the task subsystem. */
-//#define PTHDEBUG
+//#define PTHREAD_DEBUG
+
+#ifdef PTHREAD_DEBUG
+#include <sys/errno.h>
+#define pthread_debug(args...) print_log(args)
+#else
+#define pthread_debug(args...)
+#endif
 
 bool task_dispatching_ok = TRUE;
 
@@ -75,17 +83,6 @@ void idle_profile_rtt (void)
 {
 }
 
-#ifdef PTHDEBUG
-#ifdef CONFIG_SIM
-#define SLC_DEBUG 0
-#define simdebug(args...) simlog(SLC_DEBUG, args)
-#else
-#define simdebug(args...) printf(args)
-#endif
-#else
-#define simdebug(args...)
-#endif
-
 
 /**
  * The main function for creating a new task.
@@ -98,7 +95,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	int i;
 	int rc;
 
-	simdebug ("task_create_gid: gid=%d, fn=%p\n", gid, fn);
+	pthread_debug ("task_create_gid: gid=%d, fn=%p\n", gid, fn);
 
 	/* Set the task attributes:
 	 * - Not joinable : all tasks are independent
@@ -108,6 +105,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	 */
 	rc = pthread_attr_init (&attr);
 	rc = pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+	rc = pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
 	rc = pthread_attr_setschedpolicy (&attr, SCHED_FIFO);
 	if (gid == GID_LINUX_REALTIME) /* time tracking */
 		param.sched_priority = 3;
@@ -116,14 +114,16 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	else
 		param.sched_priority = 1;
 	rc = pthread_attr_setschedparam (&attr, &param);
-	rc = pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
 
 	/* TODO - inside of calling the function directly, call a global
 	 * function and pass it a pointer to the task_data_table entry
 	 * as an argument. */
 	rc = pthread_create (&pid, &attr, fn, 0);
 	if (rc != 0)
+	{
+		pthread_debug ("pthread_create failed, errno=%u\n", errno);
 		fatal (ERR_NO_FREE_TASKS);
+	}
 
 	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == 0)
@@ -136,7 +136,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 #ifdef CONFIG_SIM
 			ui_write_task (i, gid);
 #endif
-			simdebug ("pthread_create: index=%d, pid=%u\n", i, (unsigned)pid);
+			pthread_debug ("pthread_create: index=%d, pid=%u\n", i, (unsigned)pid);
 			return (pid);
 		}
 
@@ -192,7 +192,7 @@ void task_exit (void)
 {
 	int i;
 
-	simdebug ("task_exit: pid=%u\n", (unsigned)task_getpid ());
+	pthread_debug ("task_exit: pid=%u\n", (unsigned)task_getpid ());
 	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == task_getpid ())
 		{
@@ -200,7 +200,7 @@ void task_exit (void)
 #ifdef CONFIG_SIM
 			ui_write_task (i, 0);
 #endif
-			simdebug ("pthread_exit: index=%d\n", i);
+			pthread_debug ("pthread_exit: index=%d\n", i);
 			for (;;)
 				pthread_exit (0);
 		}
@@ -242,7 +242,7 @@ void task_kill_pid (task_pid_t tp)
 {
 	int i;
 
-	simdebug ("task_kill_pid: pid=%u\n", (unsigned)tp);
+	pthread_debug ("task_kill_pid: pid=%u\n", (unsigned)tp);
 
 	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == tp)
