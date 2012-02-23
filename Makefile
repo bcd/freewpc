@@ -218,6 +218,9 @@ include test/Makefile
 
 
 EVENT_OBJS = $(BLDDIR)/callset.o
+ifdef CONFIG_GEN_RTT
+EVENT_OBJS += $(BLDDIR)/rtt.o
+endif
 
 BASIC_OBJS = $(KERNEL_BASIC_OBJS) $(COMMON_BASIC_OBJS) $(FONT_OBJS) $(TRANS_OBJS)
 
@@ -824,6 +827,15 @@ $(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS) tools/gencal
 .PHONY : callset_again
 callset_again:
 	rm -rf $(BLDDIR)/callset.c && $(MAKE) callset
+
+.PHONY : rtt
+rtt : $(BLDDIR)/rtt.c
+
+$(BLDDIR)/rtt.c : $(MACH_LINKS) tools/genrtt $(OBJS:.o=.c)
+	$(Q)echo "Generating RTTs ... " && rm -f $@ \
+		&& tools/genrtt \
+			$(foreach section,$(CALLSET_SECTIONS),$($(section)_OBJS:.o=.c:$(section)_PAGE)) \
+			$(NATIVE_OBJS:.o=.c)
 
 .PHONY : fonts clean-fonts
 fonts clean-fonts:
