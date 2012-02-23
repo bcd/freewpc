@@ -74,6 +74,10 @@ HOST_LIBS += $(shell sdl-config --libs) -lSDL_ttf
 NATIVE_OBJS += $(D)/ui_sdl.o
 endif
 
+ifeq ($(CONFIG_LINUX_GPIO),y)
+NATIVE_OBJS += $(C)/gpio.o
+endif
+
 ifeq ($(CONFIG_SOFT_REALTIME), y)
 NATIVE_OBJS += $(C)/realtime.o
 endif

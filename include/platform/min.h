@@ -24,15 +24,20 @@
 /* This is an example of a 'minimal platform' which only provides the
    basic necessities for a pinball game. */
 
-#define PINIO_NUM_LAMPS 16
+/* Mandatory PINIO defines */
+#define PINIO_NUM_LAMPS 24
 #define PINIO_NUM_SWITCHES 8
 #define PINIO_NUM_SOLS 4
 #define PINIO_GI_STRINGS 0x3
 
+/* Internal names for I/O addresses.  These addresses are "virtual".
+   Each represents an 8-bit input/output register. */
 #define IO_SWITCH 0
-#define IO_LAMP 1
+#define IO_LAMP 1 /* 8 direct lamps (0-7) */
 #define IO_SOL 2
 #define IO_DIAG 3
+#define IO_LAMP_MX_ROW 4 /* 4x4 lamp matrix (8-23) */
+#define IO_LAMP_MX_COL 5
 
 /* TODO : we shouldn't need to declare anything if there is no banking... */
 
@@ -45,6 +50,8 @@ extern inline U8 pinio_get_bank (U8 bankno) { return 0; }
 #define LOCAL_SIZE 64
 #define AREA_SIZE(name) 0
 
+/* The following two are very similar, and could be merged... */
+
 extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 {
 	if (set == 0)
@@ -55,6 +62,8 @@ extern inline IOPTR sol_get_write_reg (U8 sol)
 {
 	return IO_SOL;
 }
+
+/* Other stuff */
 
 extern inline void pinio_reset_sound (void)
 {

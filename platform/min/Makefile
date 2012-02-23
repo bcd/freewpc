@@ -2,10 +2,13 @@
 P := platform/min
 $(eval $(call have,CONFIG_PLATFORM_MIN))
 
-ifndef CPU
+ifndef CONFIG_SIM
 CPU := native
-include cpu/$(CPU)/Makefile
 $(eval $(call have,CONFIG_CALLIO))
+$(eval $(call have,CONFIG_PTHREADS))
+$(eval $(call have,CONFIG_SOFT_REALTIME))
+$(eval $(call have,CONFIG_LINUX_GPIO))
+include cpu/$(CPU)/Makefile
 endif
 
 KERNEL_HW_OBJS += $(P)/main.o

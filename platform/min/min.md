@@ -17,6 +17,7 @@ D5: Target, ingame
 11: Start Button, start-button
 12: Shoot Again, shoot-again, ball-save
 13: Target
+14: GI
 
 [drives]
 H1: Ball Release
