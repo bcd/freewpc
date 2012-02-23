@@ -141,6 +141,16 @@ __noreturn__ void freewpc_init (void)
 	   made. */
 	log_init ();
 
+#ifdef CONFIG_NATIVE
+	{
+		void realtime_loop (void);
+
+		/* This is done here, because the task subsystem isn't ready
+		inside main () */
+		task_create_gid_while (GID_LINUX_REALTIME, realtime_loop,
+			TASK_DURATION_INF);
+	}
+#endif
 #ifdef CONFIG_SIM
 	/* Notify the simulator when the core OS is up and running. */
 	sim_init ();

@@ -1,3 +1,4 @@
+ifndef NATIVE_OBJS
 
 # Root directory for native mode compiler.
 CPU := native
@@ -16,7 +17,7 @@ CFLAGS =
 # TODO : don't define CONFIG_LITTLE_ENDIAN on sparc, etc.
 
 # Additional CFLAGS required for a native build
-CFLAGS += -O -g -DCONFIG_NATIVE -DCONFIG_LITTLE_ENDIAN
+CFLAGS += -O -g -DCONFIG_NATIVE -DCONFIG_LITTLE_ENDIAN -DMACHINE_SHORTNAME=\"$(MACHINE)\"
 
 HOST_LIBS += -lm
 
@@ -97,3 +98,5 @@ run: $(NATIVE_PROG)
 .PHONY : attach
 attach:
 	gdb -p `ps -ef | grep $(NATIVE_PROG) | head -n 1 | grep -o "[0-9].*" | awk '{print $$1}'` -x gdbmacros
+
+endif

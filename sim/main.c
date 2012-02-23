@@ -37,8 +37,6 @@
 #include <simulation.h>
 #include <hwsim/io.h>
 
-extern void do_firq (void);
-extern void do_irq (void);
 extern void exit (int);
 
 
@@ -47,12 +45,6 @@ static time_t sim_boot_time;
 
 /** The rate at which the simulated clock should run */
 int linux_irq_multiplier = 1;
-
-/** True if the IRQ is enabled */
-bool linux_irq_enable;
-
-/** True if the FIRQ is enabled */
-bool linux_firq_enable;
 
 /** When nonzero, the system is held in reset afer power on.  This lets
 you fire up gdb and debug the early initialization.  From the debugger,
@@ -134,48 +126,6 @@ __noreturn__ void sim_exit (U8 error_code)
 
 
 
-/** Realtime callback function.
- *
- * This event simulates an elapsed 1ms.
- */
-CALLSET_ENTRY (sim, realtime_tick)
-{
-#define FIRQ_FREQ 8
-#define PERIODIC_FREQ 16
-
-	static unsigned long next_firq_time = FIRQ_FREQ;
-	static unsigned long next_periodic_time = PERIODIC_FREQ;
-
-	/* Update all of the simulator modules that need periodic processing */
-	sim_time_step ();
-
-	/* Simulate an IRQ every 1ms */
-	if (linux_irq_enable)
-		tick_driver ();
-
-#ifdef CONFIG_FIRQ
-	/* Simulate an FIRQ every 8ms */
-	if (linux_firq_enable)
-	{
-		while (realtime_read () >= next_firq_time)
-		{
-			do_firq ();
-			next_firq_time += FIRQ_FREQ;
-		}
-	}
-#endif
-
-	/* Call periodic processes every 16ms */
-	if (realtime_read () >= next_periodic_time)
-	{
-		db_periodic ();
-		if (likely (periodic_ok))
-			do_periodic ();
-		next_periodic_time += PERIODIC_FREQ;
-	}
-}
-
-
 /**
  * Return the current wall clock time in minutes.
  */
@@ -195,12 +145,6 @@ sim_get_wall_clock (void)
  */
 void sim_init (void)
 {
-	void realtime_loop (void);
-
-	/* This is done here, because the task subsystem isn't ready
-	inside main () */
-	task_create_gid_while (GID_LINUX_REALTIME, realtime_loop, TASK_DURATION_INF);
-
 	/* Initialize the keyboard handler */
 	keyboard_init ();
 

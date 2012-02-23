@@ -117,6 +117,10 @@ void fatal (errcode_t error_code)
 #ifdef CONFIG_SIM
 	sim_exit (error_code);
 #endif
+#ifdef CONFIG_NATIVE
+	native_exit ();
+	exit (error_code);
+#endif
 
 	/* Defining STOP_ON_ERROR is helpful during debugging a problem.
 	Having the machine reset makes it hard to debug after the fact. */

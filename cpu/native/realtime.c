@@ -21,7 +21,13 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <freewpc.h>
+#include <native/log.h>
 #include <simulation.h>
+
+bool linux_irq_enable;
+bool linux_firq_enable;
+extern void do_firq (void);
+extern void do_irq (void);
 
 
 /**
@@ -36,6 +42,49 @@ unsigned long realtime_counter;
 unsigned long realtime_read (void)
 {
 	return realtime_counter;
+}
+
+/** Realtime callback function.
+ *
+ * This event simulates an elapsed 1ms.
+ */
+void realtime_tick (void)
+{
+#define FIRQ_FREQ 8
+#define PERIODIC_FREQ 16
+
+	static unsigned long next_firq_time = FIRQ_FREQ;
+	static unsigned long next_periodic_time = PERIODIC_FREQ;
+
+#ifdef CONFIG_SIM
+	/* Update all of the simulator modules that need periodic processing */
+	sim_time_step ();
+#endif
+
+	/* Simulate an IRQ every 1ms */
+	if (linux_irq_enable)
+		tick_driver ();
+
+#ifdef CONFIG_FIRQ
+	/* Simulate an FIRQ every 8ms */
+	if (linux_firq_enable)
+	{
+		while (realtime_read () >= next_firq_time)
+		{
+			do_firq ();
+			next_firq_time += FIRQ_FREQ;
+		}
+	}
+#endif
+
+	/* Call periodic processes every 16ms */
+	if (realtime_read () >= next_periodic_time)
+	{
+		db_periodic ();
+		if (likely (periodic_ok))
+			do_periodic ();
+		next_periodic_time += PERIODIC_FREQ;
+	}
 }
 
 
@@ -99,7 +148,7 @@ void realtime_loop (void)
 		Print a message when the latency is more than 0.5ms than we requested . */
 		latency = usecs_elapsed - usecs_asked;
 		if (latency > 500)
-			simlog (SLC_DEBUG, "latency %d usec", latency);
+			print_log ("latency %d usec", latency);
 #endif
 		prev_time = curr_time;
 
@@ -107,14 +156,14 @@ void realtime_loop (void)
 		So if we slept < 1ms (either the OS lied to us, or we didn't sleep at all),
 		we'll make forward progress. */
 		realtime_counter++;
-		callset_invoke (realtime_tick);
+		realtime_tick ();
 		usecs_elapsed -= usecs_asked;
 
 		/* If any remaining millseconds occurred during the wait, handle them */
 		while (usecs_elapsed >= 1000)
 		{
 			realtime_counter++;
-			callset_invoke (realtime_tick);
+			realtime_tick ();
 			usecs_elapsed -= 1000;
 		}
 

@@ -7,8 +7,8 @@ D := sim
 NATIVE_OBJS :=
 
 # Common simulation CPU configuration
-CPU := native
-$(eval $(call have,CONFIG_PTH))
+CPU ?= native
+$(eval $(call have,CONFIG_SIM))
 $(eval $(call have,CONFIG_CALLIO))
 CONFIG_UI ?= curses
 $(eval $(call have,CONFIG_SOFT_REALTIME))
@@ -19,7 +19,7 @@ include $(PMAKEFILE)
 CFLAGS += -I$(D) -DPAGE=0
 
 # Additional object files to be linked into the kernel region
-NATIVE_OBJS += $(D)/main.o $(D)/switch.o $(D)/section.o \
+NATIVE_OBJS += $(D)/main.o $(D)/switch.o \
 	$(D)/timing.o $(D)/watchdog.o \
 	$(D)/signal.o $(D)/hwtimer.o $(D)/sound.o
 
@@ -45,18 +45,10 @@ NATIVE_OBJS += $(if $(CONFIG_DMD), tools/imglib/imglib.o)
 NATIVE_OBJS += $(if $(CONFIG_DMD), cpu/native/dot.o)
 $(D)/asciidmd.o : CFLAGS += -Itools/imglib
 
-# For Ubuntu 8.10 and higher: The default compiler flags will try to
-# detect buffer overflows, but we are doing ugly things to read/write
-# persistent memory.  We need to disable this 'feature' for this file
-# only.
-$(D)/section.o : CFLAGS += -U_FORTIFY_SOURCE
-
 $(NATIVE_OBJS) : CFLAGS += -DNATIVE_SYSTEM $(UI_CFLAGS)
 
 # Add machine type flags
 CFLAGS += $(if $(CONFIG_DMD), -DMACHINE_DMD=1)
-
-CFLAGS += -DMACHINE_SHORTNAME=\"$(MACHINE)\"
 
 # CALLSET_ENTRYs in the simulator directory work too!
 CALLSET_FLAGS += -D $(D)
