@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -19,20 +19,25 @@
  */
 
 #include <freewpc.h>
+#include "native/log.h"
 
-U8 in_test;
 U8 p2k_write_cache[0x20];
 
+/**
+ * readb/writeb talk to the parallel port driver.
+ */
+#ifndef CONFIG_SIM
 void writeb (IOPTR addr, U8 val)
 {
-	//dbprintf ("IO write(%X,%02X)\n", addr, val);
+	print_log ("writeb(%X,%02X)\n", addr, val);
 }
 
 U8 readb (IOPTR addr)
 {
-	//dbprintf ("IO read(%X)\n", addr);
+	print_log ("readb(%X)\n", addr);
 	return 0;
 }
+#endif
 
 
 /**
@@ -40,7 +45,7 @@ U8 readb (IOPTR addr)
  */
 void p2k_write (U8 reg, U8 val)
 {
-	dbprintf ("p2k_write: [%d] <- %02X\n", reg, val);
+	print_log ("p2k_write: [%d] <- %02X\n", reg, val);
 	p2k_write_cache[reg] = val;
 	writeb (LPT_DATA, reg);
 	writeb (LPT_CONTROL, LPT_REG_LATCH);
@@ -60,31 +65,35 @@ U8 p2k_read (U8 reg)
 	writeb (LPT_DATA, reg);
 	writeb (LPT_CONTROL, LPT_REG_LATCH);
 	writeb (LPT_CONTROL, 0);
-	writeb (LPT_CONTROL, 0x29);
+	writeb (LPT_CONTROL, 0x29); /* what are these bits? */
 	val = readb (LPT_DATA);
 	writeb (LPT_CONTROL, 0);
-	dbprintf ("p2k_read: [%d] -> %02X\n", reg, val);
+	print_log ("p2k_read: [%d] -> %02X\n", reg, val);
 	return val;
 }
 
-
-void linux_shutdown (U8 error_code)
+/* RTT(name=switch_rtt freq=2) */
+void switch_rtt (void)
 {
-	exit (error_code);
 }
+
+/* RTT(name=lamp_rtt freq=20) */
+void lamp_rtt (void)
+{
+}
+
+/* RTT(name=sol_update_rtt_0 freq=1) */
+void sol_update_rtt_0 (void)
+{
+}
+
+void sol_update_rtt_1 (void)
+{
+}
+
 
 void platform_init (void)
 {
 }
 
-void linux_init (void)
-{
-}
-
-int main (int argc, char *argv[])
-{
-	in_test = FALSE;
-	freewpc_init ();
-	return 0;
-}
 

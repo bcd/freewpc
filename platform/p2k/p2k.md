@@ -16,21 +16,23 @@ D1: Left Coin, cabinet
 D2: Center Coin, cabinet
 D3: Right Coin, cabinet
 D4: Fourth Coin, cabinet
-D5: Escape, service, intest, cabinet, button
-D6: Down, service, intest, cabinet, button
-D7: Up, service, intest, cabinet, button
-D8: Enter, service, intest, cabinet, button
-22: Coin Door Closed, cabinet, edge, intest
-24: Always Closed, virtual, c_decl(sw_unused)
 
-F1: L. R. Flipper EOS, opto, cabinet
-F2: L. R. Flipper Button, button, opto, intest, c_decl(sw_right_button)
-F3: L. L. Flipper EOS, opto, cabinet
-F4: L. L. Flipper Button, button, opto, intest, c_decl(sw_left_button)
-F5: U. R. Flipper EOS, opto, cabinet
-F6: U. R. Flipper Button, button, opto
-F7: U. L. Flipper EOS, opto, cabinet
-F8: U. L. Flipper Button, button, opto
+F1: Slam Tilt
+F2: Coin Door Closed
+F3: Tilt
+F5: Right Button, button, intest, c_decl(sw_right_button)
+F6: Left Button, button, intest, c_decl(sw_left_button)
+F7: Right Action, button
+F8: Left Action, button
+
+#D73: Escape, service, intest, cabinet, button
+#D74: Down, service, intest, cabinet, button
+#D75: Up, service, intest, cabinet, button
+#D76: Enter, service, intest, cabinet, button
+#D77: L.R. EOS
+#D78: L.L. EOS
+#D79: U.R. EOS
+#D80: U.L. EOS
 
 [drives]
 H1: High Power Sol. 1, notinstalled
@@ -74,28 +76,8 @@ F6: U.R. Flip Hold, time(TIME_100MS)
 F7: U.L. Flip Power, time(TIME_33MS)
 F8: U.L. Flip Hold, time(TIME_100MS)
 
-[gi]
-0: G.I. String 1
-1: G.I. String 2
-2: G.I. String 3
-3: G.I. String 4
-4: G.I. String 5
-
 [lamplists]
 ALL: 11..88
 Ball Save: MACHINE_BALL_SAVE_LAMP
-
-[fonts]
-mono5:
-num5x7:
-lucida9:
-tinynum:
-var5:
-fixed6:
-cu17:
-fixed10:
-term6:
-times8:
-bitmap8:
 
 

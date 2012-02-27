@@ -1,6 +1,6 @@
 PLATFORM := p2k
 MACHINE_FILE = p2ktest.md
-CONFIG_PLAYABLE := n
+$(eval $(call have,CONFIG_NO_DEFFS))
 GAME_ROM_PREFIX := p2kt
 MACHINE_MAJOR := 0
 MACHINE_MINOR := 01

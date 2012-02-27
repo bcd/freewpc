@@ -223,5 +223,8 @@ void io_init (void)
 #ifdef CONFIG_PLATFORM_MIN
 	io_min_init ();
 #endif
+#ifdef CONFIG_PLATFORM_P2K
+	io_p2k_init ();
+#endif
 }
 

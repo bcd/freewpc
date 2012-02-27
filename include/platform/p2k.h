@@ -22,8 +22,6 @@
 #define P2K_H
 
 #undef DEBUGGER
-#undef MACHINE_DMD
-#define MACHINE_DMD 1
 /* TODO */
 #define WPC_DMD_LOW_PAGE 0xF0
 #define WPC_DMD_HIGH_PAGE 0xF1
@@ -31,11 +29,18 @@
 #define WPC_DMD_ACTIVE_PAGE 0xF3
 extern U8 *pinio_dmd_low_page, *pinio_dmd_high_page;
 
-/*
- * Miscellaneous
- */
-#define LOCAL_SIZE 0x40U
-#define AREA_SIZE(name) 1
+/* TODO : we shouldn't need to declare anything if there is no banking... */
+
+#define timestamp_update(x)
+#define PINIO_BANK_ROM 0
+#define PINIO_BANK_RAM 1
+extern inline void pinio_set_bank (U8 bankno, U8 val) { }
+extern inline U8 pinio_get_bank (U8 bankno) { return 0; }
+
+/* TODO : why do I have to say this? */
+#define LOCAL_SIZE 64
+#define AREA_SIZE(name) 0
+
 
 /*
  * Parallel port registers
@@ -198,6 +203,10 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 			p2k_write (P2K_LOGIC_OUTPUT, val);
 			break;
 	}
+}
+
+extern inline IOPTR sol_get_write_reg (U8 sol)
+{
 }
 
 #define PINIO_NUM_SWITCHES 88
