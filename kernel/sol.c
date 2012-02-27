@@ -313,6 +313,7 @@ extern inline void sol_req_off (void)
  * It works identically to the code for the flashers, except there can only be
  * one at a time.
  */
+/* RTT(name=sol_req_rtt   freq=4) */
 void sol_req_rtt (void)
 {
 	if (sol_pulse_timer != 0)

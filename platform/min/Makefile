@@ -1,12 +1,12 @@
 
 P := platform/min
 $(eval $(call have,CONFIG_PLATFORM_MIN))
+# $(eval $(call have,CONFIG_GEN_RTT))
 
 ifndef CONFIG_SIM
 CPU := native
 $(eval $(call have,CONFIG_CALLIO))
 $(eval $(call have,CONFIG_PTHREADS))
-$(eval $(call have,CONFIG_SOFT_REALTIME))
 $(eval $(call have,CONFIG_LINUX_GPIO))
 include cpu/$(CPU)/Makefile
 endif

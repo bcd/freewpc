@@ -162,7 +162,7 @@ foreach $rtt (@rtlist) {
 		$freq = $rtt->{"freq"};
 		print FH "\n";
 		print FH " " x $indent;
-		print FH "if ($timervar & ($freq-1) == 0) {\n";
+		print FH "if (($timervar & ($freq-1)) == 0) {\n";
 		$indent += $indentsize;
 	}
 	print FH " " x $indent;
@@ -174,5 +174,7 @@ while ($indent > 0) {
 	print FH "}\n";
 }
 print FH "\n";
+
+print FH "void rtt_init (void) {}\n\n";
 close FH;
 

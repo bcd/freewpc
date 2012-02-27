@@ -1,7 +1,9 @@
 
+ifndef CONFIG_GEN_RTT
 SYSTEM_SCHEDULE := kernel/system.sched
 SCHED_SRC := build/sched_irq.c
 SCHED_OBJ := $(SCHED_SRC:.c=.o)
+endif
 
 # Basic kernel modules are generic and do not depend on
 # the machine type at all.

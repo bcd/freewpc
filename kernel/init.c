@@ -39,6 +39,7 @@ U8 periodic_ok;
 running.  The splash screen is kept until this reverts to zero. */
 U8 sys_init_pending_tasks;
 
+/* RTT(name=advance_time_rtt freq=16) */
 
 /**
  * Handle a warm reboot.
@@ -85,7 +86,11 @@ __noreturn__ void freewpc_init (void)
 
 	/* Initialize the real-time scheduler.  The periodic functions
 	are scheduled at compile-time  using the 'gensched' utility. */
+#ifdef CONFIG_GEN_RTT
+	VOIDCALL (rtt_init);
+#else
 	VOIDCALL (tick_init);
+#endif
 
 	/* Initialize the hardware.
 	 * After each init call, tickle the watchdog (IRQ isn't enabled yet)

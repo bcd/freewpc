@@ -176,9 +176,12 @@ D := tools/$1
 include tools/$1/$1.make
 endef
 
+ifndef CONFIG_GEN_RTT
 $(eval $(call include-tool,sched))       # Realtime scheduler
+endif
+ifeq ($(CONFIG_DMD),y)
 $(eval $(call include-tool,imgld))       # Image linker
-
+endif
 ifeq ($(CPU),m6809)
 $(eval $(call include-tool,srec2bin))    # SREC to binary converter
 $(eval $(call include-tool,csum))        # Checksum update utility
@@ -828,15 +831,6 @@ $(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS) tools/gencal
 callset_again:
 	rm -rf $(BLDDIR)/callset.c && $(MAKE) callset
 
-.PHONY : rtt
-rtt : $(BLDDIR)/rtt.c
-
-$(BLDDIR)/rtt.c : $(MACH_LINKS) tools/genrtt $(OBJS:.o=.c)
-	$(Q)echo "Generating RTTs ... " && rm -f $@ \
-		&& tools/genrtt \
-			$(foreach section,$(CALLSET_SECTIONS),$($(section)_OBJS:.o=.c:$(section)_PAGE)) \
-			$(NATIVE_OBJS:.o=.c)
-
 .PHONY : fonts clean-fonts
 fonts clean-fonts:
 	$(Q)echo "Making $@... " && $(MAKE) -f Makefile.fonts $@
@@ -846,10 +840,21 @@ fonts clean-fonts:
 #######################################################################
 
 .PHONY : sched
+ifdef CONFIG_GEN_RTT
+sched : $(BLDDIR)/rtt.c
+
+$(BLDDIR)/rtt.c : $(MACH_LINKS) tools/genrtt $(OBJS:.o=.c)
+	$(Q)echo "Generating RTTs ... " && rm -f $@ \
+		&& tools/genrtt \
+			$(foreach section,$(CALLSET_SECTIONS),$($(section)_OBJS:.o=.c:$(section)_PAGE)) \
+			$(NATIVE_OBJS:.o=.c)
+
+else
 sched: $(SCHED_SRC) tools/sched/sched.make
 
 $(SCHED_SRC): $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(SCHED) $(SCHED_HEADERS) $(MAKE_DEPS)
 	shopt -s nullglob && $(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(MACHINE_SCHED_FLAGS)
+endif
 
 #######################################################################
 ###	Tracing

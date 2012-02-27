@@ -63,7 +63,13 @@ void realtime_tick (void)
 
 	/* Simulate an IRQ every 1ms */
 	if (linux_irq_enable)
+	{
+#ifdef CONFIG_GEN_RTT
+		exec_rtt ();
+#else
 		tick_driver ();
+#endif
+	}
 
 #ifdef CONFIG_FIRQ
 	/* Simulate an FIRQ every 8ms */
@@ -147,8 +153,8 @@ void realtime_loop (void)
 		/* This is for debugging only to see how good your native OS is.
 		Print a message when the latency is more than 0.5ms than we requested . */
 		latency = usecs_elapsed - usecs_asked;
-		if (latency > 500)
-			print_log ("latency %d usec", latency);
+		if (latency > 200)
+			print_log ("latency %d usec\n", latency);
 #endif
 		prev_time = curr_time;
 
@@ -158,6 +164,10 @@ void realtime_loop (void)
 		realtime_counter++;
 		realtime_tick ();
 		usecs_elapsed -= usecs_asked;
+
+		if (usecs_elapsed > 20000)
+		{
+		}
 
 		/* If any remaining millseconds occurred during the wait, handle them */
 		while (usecs_elapsed >= 1000)
