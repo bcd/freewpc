@@ -2,17 +2,19 @@
 # Root directory for the platform files
 P=platform/whitestar
 
+ifndef CPU
 CPU := m6809
 $(eval $(call have,CONFIG_PERIODIC_FIRQ))
 CONFIG_TASK := y
 include cpu/$(CPU)/Makefile
+$(eval $(call have,CONFIG_MMIO))
+endif
 
 # Subplatform support
 $(eval $(call have,CONFIG_PLATFORM_WHITESTAR))
-$(eval $(call have,CONFIG_MMIO))
+$(eval $(call nohave,CONFIG_AC))
 $(eval $(call have,CONFIG_GI))
 $(eval $(call have,CONFIG_NO_DEFFS))
-$(eval $(call nohave,CONFIG_AC))
 
 # ROM bank switching
 CONFIG_ROM_BANK_SIZE := 16
@@ -30,7 +32,7 @@ CFLAGS += -Wno-format
 # Optional CFLAGS
 CFLAGS += -mint8
 
-### NOTE:  -mwpc is totally not acceptable, as Whitestar doesn't have
+### TODO:  -mwpc is totally not acceptable, as Whitestar doesn't have
 # the shifter hardware.  But gcc6809 is crashing on some bit shift
 # statements, so for _now_, keep this here until the compiler can be
 # fixed, so we can fix up other problems.

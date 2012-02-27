@@ -88,6 +88,7 @@ AREA_DECL(nvram)
 #define WS_LAMP_ROW_OUTPUT      0x200A
 #define WS_AUX_CTRL             0x200B
    #define WS_AUX_GI         0x1   /* 0=GI on, 1=GI off */
+	#define WS_AUX_LEFT_POST_SAVE 0x2
 	#define WS_AUX_BSTB       0x8
 	#define WS_AUX_CSTB       0x10
 	#define WS_AUX_DSTB       0x20
@@ -116,6 +117,8 @@ AREA_DECL(nvram)
 #define WS_SOUND_OUT            0x3800
    #define WS_SOUND_BUSY       0x1
 
+extern U8 ws_page_led_io;
+extern U8 ws_aux_ctrl_io;
 
 /********************************************/
 /* LED                                      */
@@ -124,7 +127,8 @@ AREA_DECL(nvram)
 /** Toggle the diagnostic LED. */
 extern inline void pinio_active_led_toggle (void)
 {
-	io_toggle_bits (WS_PAGE_LED, WS_LED_MASK);
+	ws_page_led_io ^= WS_LED_MASK;
+	writeb (WS_PAGE_LED, ws_page_led_io);
 }
 
 
@@ -152,7 +156,9 @@ extern inline void pinio_set_bank (U8 bankno, U8 val)
 	switch (bankno)
 	{
 		case PINIO_BANK_ROM:
-			writeb (WS_PAGE_LED, val & WS_PAGE_MASK);
+			ws_page_led_io &= ~WS_PAGE_MASK;
+			ws_page_led_io |= val;
+			writeb (WS_PAGE_LED, ws_page_led_io);
 			break;
 		default:
 			break;
@@ -164,7 +170,7 @@ extern inline U8 pinio_get_bank (U8 bankno)
 	switch (bankno)
 	{
 		case PINIO_BANK_ROM:
-			return readb (WS_PAGE_LED) & WS_PAGE_MASK;
+			return ws_page_led_io & WS_PAGE_MASK;
 		default:
 			return 0;
 	}
@@ -216,9 +222,10 @@ extern inline U8 pinio_read_locale (void)
 
 #define PINIO_NUM_LAMPS 80
 
-extern inline void pinio_write_lamp_strobe (U8 val)
+extern inline void pinio_write_lamp_strobe (U16 val)
 {
-	writeb (WS_LAMP_COLUMN_STROBE, val);
+	writeb (WS_LAMP_COLUMN_STROBE, val & 0xFF);
+	writeb (WS_LAMP_COLUMN_STROBE+1, val >> 8);
 }
 
 extern inline void pinio_write_lamp_data (U8 val)
@@ -297,9 +304,14 @@ extern inline U8 pinio_read_sound (void)
 /* Switches                                 */
 /********************************************/
 
+#define PINIO_NUM_SWITCHES 72
+
+#define SW_LEFT_BUTTON SW_LEFT_FLIPPER
+#define SW_RIGHT_BUTTON SW_RIGHT_FLIPPER
 #define SW_ENTER SW_BLACK_BUTTON
 #define SW_UP SW_GREEN_BUTTON
 #define SW_DOWN SW_RED_BUTTON
+#define SW_ESCAPE SW_RED_BUTTON
 
 extern inline void pinio_write_switch_column (U8 val)
 {
@@ -323,6 +335,9 @@ extern inline U8 pinio_read_dedicated_switches (void)
 #define PINIO_GI_STRINGS 0x1
 extern inline void pinio_write_gi (U8 val)
 {
+	val = ~val;
+	ws_aux_ctrl_io = 0xFE | (val & 0x1);
+	writeb (WS_AUX_CTRL, ws_aux_ctrl_io);
 }
 
 /********************************************/
