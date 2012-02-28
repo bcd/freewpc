@@ -802,6 +802,15 @@ extern inline IOPTR sol_get_write_reg (U8 sol)
 }
 
 
+/** Return nonzero if a solenoid's enable line is inverted; i.e.
+ * writing a 0 turns it on and writing a 1 turns it off.
+ */
+#if (MACHINE_WPC95 == 0)
+#define PINIO_SOL_INVERTED(sol) \
+	(((sol) >= SOL_BASE_FLIPTRONIC) && ((sol) < (SOL_BASE_FLIPTRONIC+8)))
+#endif
+
+
 /********************************************/
 /* Sound                                    */
 /********************************************/

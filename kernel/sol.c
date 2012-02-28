@@ -135,7 +135,11 @@ sol_req_start_specific (U8 sol, U8 mask, U8 time)
 	req_reg_read = sol_get_read_reg (sol);
 	req_bit = sol_get_bit (sol);
 	sol_pulse_duty = mask;
-	req_inverted = sol_inverted (sol) ? 0xFF : 0x00;
+#ifdef PINIO_SOL_INVERTED
+	req_inverted = PINIO_SOL_INVERTED (sol) ? 0xFF : 0x00;
+#else
+	req_inverted = 0;
+#endif
 
 	/* This must be last, as it triggers the IRQ code */
 	sol_pulse_timer = time / 4;
@@ -295,13 +299,13 @@ void sol_request (U8 sol)
 }
 
 
-extern inline void sol_req_on (void)
+static inline void sol_req_on (void)
 {
 	writeb (req_reg_write, (*req_reg_read |= req_bit) ^ req_inverted);
 }
 
 
-extern inline void sol_req_off (void)
+static inline void sol_req_off (void)
 {
 	writeb (req_reg_write, (*req_reg_read &= ~req_bit) ^ req_inverted);
 }
