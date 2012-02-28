@@ -39,7 +39,7 @@ U8 periodic_ok;
 running.  The splash screen is kept until this reverts to zero. */
 U8 sys_init_pending_tasks;
 
-/* RTT(name=advance_time_rtt freq=16) */
+/* RTT(name=advance_time_rtt freq=16 inline=1) */
 
 /**
  * Handle a warm reboot.

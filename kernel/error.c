@@ -44,6 +44,7 @@ __permanent__ bool new_fatal_error;
  * used.  (Even better, it should "task_yield" and let other tasks
  * run for a while.)
  */
+/* RTT(name=lockup_check_rtt freq=128) */
 void lockup_check_rtt (void)
 {
 #ifndef CONFIG_NATIVE

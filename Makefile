@@ -845,7 +845,7 @@ sched : $(BLDDIR)/rtt.c
 
 $(BLDDIR)/rtt.c : $(MACH_LINKS) tools/genrtt $(OBJS:.o=.c)
 	$(Q)echo "Generating RTTs ... " && rm -f $@ \
-		&& tools/genrtt \
+		&& tools/genrtt $(SCHED_FLAGS) \
 			$(foreach section,$(CALLSET_SECTIONS),$($(section)_OBJS:.o=.c:$(section)_PAGE)) \
 			$(NATIVE_OBJS:.o=.c)
 
