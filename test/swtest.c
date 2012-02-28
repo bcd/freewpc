@@ -25,6 +25,8 @@
 extern U8 sw_last_scheduled;
 extern U8 switch_display_timer;
 
+/* TODO - this is very WPC specific at the moment */
+#define MAKE_SWITCH(col,row)	(((col) * 8) + (row) - 1)
 
 void switch_matrix_draw (void)
 {

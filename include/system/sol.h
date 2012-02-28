@@ -128,7 +128,7 @@ or memory variable that corresponds to a particular
 coil driver. */
 extern inline U8 sol_get_bit (const solnum_t sol)
 {
-	return 1 << (sol % 8);
+	return single_bit_set (sol % 8);
 }
 
 

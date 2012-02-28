@@ -24,9 +24,17 @@
 typedef U8 *bitset;
 typedef const U8 *const_bitset;
 
+#if defined(__m6809__) && !defined(CONFIG_PLATFORM_WPC)
+#define CONFIG_SINGLE_BIT_SET_ARRAY
+extern U8 single_bit_set_array[];
+#define single_bit_set(n) single_bit_set_array[n]
+#else
+#define single_bit_set(n) (1 << (n))
+#endif
+
 #define bitarray_const_offset(bits, bitno) (bits[(bitno) / 8])
 
-#define bitarray_const_mask(bits, bitno) (1 << ((bitno) % 8))
+#define bitarray_const_mask(bits, bitno) single_bit_set ((bitno) % 8)
 
 /* Non-optimized macros for twiddling bits.
  *
@@ -84,14 +92,6 @@ typedef const U8 *const_bitset;
 
 #define wpc_testbit(bs, index) \
 	WPC_BITOP (bs, index, "\tand%1\t,%0")
-
-#elif defined (CONFIG_PLATFORM_WHITESTAR) && defined (SHIFTER_FAILS)
-
-#define __bitarray_constant_p(bitno) 0
-#define wpc_setbit(bits,bitno) 0
-#define wpc_clearbit(bits,bitno) 0
-#define wpc_togglebit(bits,bitno) 0
-#define wpc_testbit(bits,bitno) 0
 
 #else /* !CONFIG_PLATFORM_WPC */
 

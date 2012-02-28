@@ -107,9 +107,7 @@ depending on the system type. */
 
 #define SW_COL(x)			((x) >> 3)
 #define SW_ROW(x)			((x) & 0x07)
-#define SW_ROWMASK(x)	(1 << SW_ROW(x))
-
-#define MAKE_SWITCH(col,row)	(((col) * 8) + (row) - 1)
+#define SW_ROWMASK(x)	single_bit_set (SW_ROW(x))
 
 
 /** The form for a matrix of bits, one per switch */

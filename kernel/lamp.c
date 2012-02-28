@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -159,6 +159,10 @@ void lamp_power_set (U8 level)
 /* Basic bit manipulation routines.  These will
 always use the WPC shift hardware and may not be
 optimal.  The bitarray macros are preferred. */
+
+#ifdef CONFIG_SINGLE_BIT_SET_ARRAY
+U8 single_bit_set_array[8] = { 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80 };
+#endif
 
 void bit_on (bitset matrix, U8 bit)
 {

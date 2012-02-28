@@ -151,7 +151,7 @@ void device_register (devicenum_t devno, device_properties_t *props)
 		return;
 
 	dev->devno = devno;
-	dev->devno_mask = (1 << devno);
+	dev->devno_mask = single_bit_set (devno);
 	dev->props = props;
 	dev->size = props->sw_count;
 	dev->max_count = props->init_max_count;
