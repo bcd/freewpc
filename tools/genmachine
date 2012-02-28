@@ -310,7 +310,7 @@ sub check_define_global {
 
 sub close_switch_or_lamp {
 	my ($def) = @_;
-	$def->{'ID'} =~ m/(.)(.)/;
+	$def->{'ID'} =~ m/(.)(.*)/;
 	my ($first, $second) = ($1, $2);
 	if ($first eq "D") {
 		$def->{'number'} = $second - 1;
@@ -621,7 +621,7 @@ LINE:
 
 		else {
 			# Handle lines that aren't data definitions.
-			error "unrecognized element at line " . $lineno . "\n";
+			error "unrecognized element $_ at line " . $lineno . "\n";
 		}
 	}
 	close FH;
