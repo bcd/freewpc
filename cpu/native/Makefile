@@ -78,13 +78,15 @@ ifeq ($(CONFIG_LINUX_GPIO),y)
 NATIVE_OBJS += $(C)/gpio.o
 endif
 
-ifeq ($(CONFIG_SOFT_REALTIME), y)
-NATIVE_OBJS += $(C)/realtime.o
+ifeq ($(CONFIG_LINUX_INPUT),y)
+NATIVE_OBJS += $(C)/input.o
 endif
 
 NATIVE_OBJS += $(C)/bits.o
 NATIVE_OBJS += $(C)/bcd_string.o
 NATIVE_OBJS += $(C)/log.o
+NATIVE_OBJS += $(C)/main.o
+NATIVE_OBJS += $(C)/realtime.o
 NATIVE_OBJS += $(C)/section.o
 
 # For Ubuntu 8.10 and higher: The default compiler flags will try to
