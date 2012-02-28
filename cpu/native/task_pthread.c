@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -29,6 +29,9 @@
  * It exposes the same task_ API functions, with similar semantics.
  */
 
+/* TODO:
+   - Create tasks in advance to minimize repeated overhead of spawning.
+*/
 
 /** Enable this to turn on verbose debugging of the task subsystem. */
 //#define PTHREAD_DEBUG
@@ -54,8 +57,6 @@ extern int linux_irq_multiplier;
 #define linux_irq_multiplier 1
 #endif
 
-#define USECS_PER_TICK (16000 / linux_irq_multiplier)
-
 #ifdef CONFIG_SIM
 extern void ui_write_task (int, task_gid_t);
 #endif
@@ -72,6 +73,11 @@ typedef struct
 } aux_task_data_t;
 
 aux_task_data_t task_data_table[NUM_TASKS];
+
+pthread_attr_t attr_default;
+pthread_attr_t attr_task;
+pthread_attr_t attr_input;
+pthread_attr_t attr_interrupt;
 
 
 void task_dump (void)
@@ -90,35 +96,24 @@ void idle_profile_rtt (void)
 task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 {
 	pthread_t pid;
-	pthread_attr_t attr;
+	pthread_attr_t *attr;
 	struct sched_param param;
 	int i;
 	int rc;
 
 	pthread_debug ("task_create_gid: gid=%d, fn=%p\n", gid, fn);
 
-	/* Set the task attributes:
-	 * - Not joinable : all tasks are independent
-	 * - cancellable : task kill is permitted
-	 * - priority : make certain tasks that the simulator itself
-	 *   uses higher priority, and all others equal in priority.
-	 */
-	rc = pthread_attr_init (&attr);
-	rc = pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
-	rc = pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
-	rc = pthread_attr_setschedpolicy (&attr, SCHED_FIFO);
 	if (gid == GID_LINUX_REALTIME) /* time tracking */
-		param.sched_priority = 3;
+		attr = &attr_interrupt;
 	else if (gid == GID_LINUX_INTERFACE) /* user input */
-		param.sched_priority = 2;
+		attr = &attr_input;
 	else
-		param.sched_priority = 1;
-	rc = pthread_attr_setschedparam (&attr, &param);
+		attr = &attr_task;
 
 	/* TODO - inside of calling the function directly, call a global
 	 * function and pass it a pointer to the task_data_table entry
 	 * as an argument. */
-	rc = pthread_create (&pid, &attr, fn, 0);
+	rc = pthread_create (&pid, attr, fn, 0);
 	if (rc != 0)
 	{
 		pthread_debug ("pthread_create failed, errno=%u\n", errno);
@@ -143,26 +138,6 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	fatal (ERR_NO_FREE_TASKS);
 }
 
-/* TODO - this function is identical to the 6809 version */
-task_pid_t task_create_gid1 (task_gid_t gid, task_function_t fn)
-{
-	task_pid_t tp = task_find_gid (gid);
-	if (tp) 
-		return (tp);
-	return task_create_gid (gid, fn);
-}
-
-
-/* TODO - this function is identical to the 6809 version */
-task_pid_t task_recreate_gid (task_gid_t gid, task_function_t fn)
-{
-	task_kill_gid (gid);
-#ifdef PARANOID
-	if (task_find_gid (gid))
-		fatal (ERR_TASK_KILL_FAILED);
-#endif
-	return task_create_gid (gid, fn);
-}
 
 void task_setgid (task_gid_t gid)
 {
@@ -186,8 +161,7 @@ void task_sleep_sec1 (U8 secs)
 	usleep (TIME_1S * secs * USECS_PER_TICK);
 }
 
-
-__noreturn__ 
+__noreturn__
 void task_exit (void)
 {
 	int i;
@@ -430,5 +404,21 @@ void task_init (void)
 	task_data_table[0].pid = task_getpid ();
 	task_data_table[0].gid = GID_FIRST_TASK;
 	task_data_table[0].duration = TASK_DURATION_INF;
-}
 
+	pthread_attr_init (&attr_default);
+
+	attr_task = attr_default;
+	pthread_attr_setdetachstate (&attr_task, PTHREAD_CREATE_DETACHED);
+	pthread_attr_setinheritsched (&attr_task, PTHREAD_EXPLICIT_SCHED);
+	pthread_attr_setschedpolicy (&attr_task, SCHED_FIFO);
+	sched_param.sched_priority = 1;
+	pthread_attr_setschedparam (&attr_task, &sched_param);
+
+	attr_input = attr_task;
+	sched_param.sched_priority = 2;
+	pthread_attr_setschedparam (&attr_input, &sched_param);
+
+	attr_interrupt = attr_task;
+	sched_param.sched_priority = 8;
+	pthread_attr_setschedparam (&attr_interrupt, &sched_param);
+}

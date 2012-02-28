@@ -133,27 +133,6 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	fatal (ERR_NO_FREE_TASKS);
 }
 
-/* TODO - this function is identical to the 6809 version */
-task_pid_t task_create_gid1 (task_gid_t gid, task_function_t fn)
-{
-	task_pid_t tp = task_find_gid (gid);
-	if (tp) 
-		return (tp);
-	return task_create_gid (gid, fn);
-}
-
-
-/* TODO - this function is identical to the 6809 version */
-task_pid_t task_recreate_gid (task_gid_t gid, task_function_t fn)
-{
-	task_kill_gid (gid);
-#ifdef PARANOID
-	if (task_find_gid (gid))
-		fatal (ERR_TASK_KILL_FAILED);
-#endif
-	return task_create_gid (gid, fn);
-}
-
 void task_setgid (task_gid_t gid)
 {
 	int i;
@@ -174,14 +153,9 @@ void task_sleep (task_ticks_t ticks)
 }
 
 
-/* TODO - this function is identical to the 6809 version */
 void task_sleep_sec1 (U8 secs)
 {
-	while (secs > 0)
-	{
-		task_sleep (TIME_1S);
-		secs--;
-	}
+	pth_nap (pth_time (0, secs * TIME_1S * PTH_USECS_PER_TICK));
 }
 
 

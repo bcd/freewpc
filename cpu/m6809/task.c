@@ -443,31 +443,6 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 }
 
 
-/** Create a task, but not if a task with the same GID already exists.
- * The previous task will continue to run. */
-task_t *task_create_gid1 (task_gid_t gid, task_function_t fn)
-{
-	task_t *tp = task_find_gid (gid);
-	if (tp) 
-		return (tp);
-	return task_create_gid (gid, fn);
-}
-
-
-/** Create a task with a given GID, ensuring that only one task
- * with that GID exists.  Any tasks with the same GID are killed
- * prior to starting the new task.  */
-task_t *task_recreate_gid (task_gid_t gid, task_function_t fn)
-{
-	task_kill_gid (gid);
-#ifdef PARANOID
-	if (task_find_gid (gid))
-		fatal (ERR_TASK_KILL_FAILED);
-#endif
-	return task_create_gid (gid, fn);
-}
-
-
 /** Change the GID of the currently running task */
 void task_setgid (task_gid_t gid)
 {

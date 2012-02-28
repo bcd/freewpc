@@ -35,6 +35,7 @@ extern bool task_dispatching_ok;
 
 #ifdef CONFIG_NATIVE
 #include <sys/time.h>
+#define USECS_PER_TICK (16000 / linux_irq_multiplier)
 #if defined(CONFIG_PTH)
 #include <pth.h>
 typedef pth_t task_pid_t;
