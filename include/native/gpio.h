@@ -3,6 +3,8 @@
 
 typedef int gpio_id_t;
 
+#define GPID(i,p) (((i)*32)+p)
+
 int gpio_request (gpio_id_t gpio);
 int gpio_config (gpio_id_t gpio);
 int gpio_set_direction (gpio_id_t gpio, const char *direction);

@@ -10,8 +10,6 @@
 #define MAX_GPIOS 128
 #define MAX_LEDS 4
 
-#define GPID(i,p) (((i)*32)+p)
-
 char gpio_file_name[128];
 
 struct gpio
@@ -124,6 +122,8 @@ int gpio_set_direction (gpio_id_t gpio, const char *direction)
 {
 	sprintf (gpio_file_name, "/sys/class/gpio/gpio%d/direction", gpio);
 	FILE *fp = fopen (gpio_file_name, "w");
+	if (!fp)
+		return -1;
 	fprintf (fp, "%s", direction);
 	fclose (fp);
 	return 0;
@@ -169,18 +169,22 @@ int gpio_release (gpio_id_t gpio)
 
 int gpio_request_input (gpio_id_t gpio)
 {
-	gpio_request (gpio);
-	gpio_config (gpio);
-	gpio_set_direction (gpio, "in");
-	return 0;
+	int rc;
+	if ((rc = gpio_request (gpio)) < 0)
+		return rc;
+	if ((rc = gpio_config (gpio)) < 0)
+		return rc;
+	return gpio_set_direction (gpio, "in");
 }
 
 int gpio_request_output (gpio_id_t gpio)
 {
-	gpio_request (gpio);
-	gpio_config (gpio);
-	gpio_set_direction (gpio, "out");
-	return 0;
+	int rc;
+	if ((rc = gpio_request (gpio)) < 0)
+		return rc;
+	if ((rc = gpio_config (gpio)) < 0)
+		return rc;
+	return gpio_set_direction (gpio, "out");
 }
 
 #ifdef TESTME
