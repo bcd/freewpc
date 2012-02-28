@@ -46,7 +46,7 @@ COMMON_SW_OBJS += common/highscore.o
 COMMON_SW_OBJS += common/knocker.o
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/replay.o)
 COMMON_SW_OBJS += common/search.o
-COMMON_SW_OBJS += $(if $(CONFIG_PLATFORM_WPC), common/status.o)
+COMMON_SW_OBJS += common/status.o
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/special.o)
 
 COMMON_OBJS = $(COMMON_BASIC_OBJS) $(COMMON_SW_OBJS)
