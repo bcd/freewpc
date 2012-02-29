@@ -112,6 +112,7 @@ U8 button_check (U8 sw)
 
 void bpt_display (void)
 {
+#if (MACHINE_DMD == 1)
 	dmd_alloc_low_clean ();
 
 	sprintf ("%p", bpt_mem_addr);
@@ -143,6 +144,7 @@ void bpt_display (void)
 	sprintf ("C%04lX", prev_log_callset);
 	font_render_string_left (&font_bitmap8, 0, 24, sprintf_buffer);
 	dmd_show_low ();
+#endif
 }
 
 
@@ -200,8 +202,10 @@ void bpt_hit (void)
 			task_runs_long ();
 		}
 	}
+#ifdef CONFIG_DMD_OR_ALPHA
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
+#endif
 }
 #endif /* CONFIG_BPT */
 
