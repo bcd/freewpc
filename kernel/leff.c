@@ -41,6 +41,10 @@
  * matrices, and can run concurrently.
  */
 
+#ifndef PINIO_GI_STRINGS
+#define PINIO_GI_STRINGS 0
+#endif
+
 /** Indicates in a leff definition that it does not allocate any lamps */
 #define L_NOLAMPS		0x0
 
@@ -56,7 +60,6 @@
 /* Declare externs for all of the deff functions */
 #define DECL_LEFF(num, flags, pri, b1, b2, fn, fnpage) \
 	extern void fn (void);
-
 #ifdef MACHINE_LAMP_EFFECTS
 MACHINE_LAMP_EFFECTS
 #endif
@@ -76,10 +79,10 @@ static const leff_t leff_table[] = {
 
 
 /* Declare externs for lamp bit matrices used by leffs */
-extern __fastram__ U8 lamp_leff1_allocated[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_leff1_matrix[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
+extern __fastram__ lamp_set lamp_leff1_allocated;
+extern __fastram__ lamp_set lamp_leff1_matrix;
+extern __fastram__ lamp_set lamp_leff2_allocated;
+extern __fastram__ lamp_set lamp_leff2_matrix;
 
 
 /** Indicates the priority of the exclusive leff currently running */

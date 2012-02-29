@@ -65,25 +65,24 @@
 
 #include <freewpc.h>
 
-__fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
-
-U8 lamp_flash_matrix[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_leff1_matrix[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_leff1_allocated[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
+__fastram__ lamp_set lamp_matrix;
+lamp_set lamp_flash_matrix;
+__fastram__ lamp_set lamp_flash_matrix_now;
+__fastram__ lamp_set lamp_leff1_matrix;
+__fastram__ lamp_set lamp_leff1_allocated;
+__fastram__ lamp_set lamp_leff2_matrix;
+__fastram__ lamp_set lamp_leff2_allocated;
 
 U8 bit_matrix[BITS_TO_BYTES (MAX_FLAGS)];
 
 U8 global_bits[BITS_TO_BYTES (MAX_GLOBAL_FLAGS)];
 
-__fastram__ U8 lamp_strobe_mask;
+#ifdef CONFIG_LAMP_STROBE16
+typedef U16 lamp_strobe_t;
+#else
+typedef U8 lamp_strobe_t;
+#endif
+__fastram__ lamp_strobe_t lamp_strobe_mask;
 
 __fastram__ U8 lamp_strobe_column;
 
@@ -98,13 +97,13 @@ U16 lamp_power_idle_timer;
 void lamp_init (void)
 {
 	/* Clear all lamps/flags */
-	matrix_all_off (lamp_matrix);
-	matrix_all_off (lamp_flash_matrix);
-	matrix_all_off (lamp_flash_matrix_now);
-	matrix_all_off (lamp_leff1_matrix);
-	matrix_all_off (lamp_leff2_matrix);
-	matrix_all_off (bit_matrix);
-	matrix_all_off (global_bits);
+	lamp_set_off (lamp_matrix);
+	lamp_set_off (lamp_flash_matrix);
+	lamp_set_off (lamp_flash_matrix_now);
+	lamp_set_off (lamp_leff1_matrix);
+	lamp_set_off (lamp_leff2_matrix);
+	lamp_set_off (bit_matrix);
+	lamp_set_off (global_bits);
 
 	/* Lamp effect allocation matrices are "backwards",
 	 * in the sense that a '1' means free, and '0' means
@@ -123,6 +122,7 @@ void lamp_init (void)
 /** Runs periodically to invert any lamps in the flashing state.
  * (This is hard realtime now; it could probably be dropped in
  * priority, though.) */
+/* RTT(name=lamp_flash_rtt freq=128) */
 void lamp_flash_rtt (void)
 {
 	U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
@@ -227,14 +227,14 @@ __attribute__((pure)) U8 *matrix_lookup (lamp_matrix_id_t id)
 	fatal (ERR_INVALID_MATRIX);
 }
 
-void matrix_all_on (bitset matrix)
+void lamp_set_on (lamp_set lset)
 {
-	memset (matrix, 0xFF, NUM_LAMP_COLS);
+	memset (lset, 0xFF, NUM_LAMP_COLS);
 }
 
-void matrix_all_off (bitset matrix)
+void lamp_set_off (lamp_set lset)
 {
-	memset (matrix, 0, NUM_LAMP_COLS);
+	memset (lset, 0, NUM_LAMP_COLS);
 }
 
 
@@ -323,21 +323,21 @@ bool lamp_flash_test (lampnum_t lamp)
 void lamp_all_on (void)
 {
 	disable_interrupts ();
-	matrix_all_off (lamp_flash_matrix);
+	lamp_set_off (lamp_flash_matrix);
 	enable_interrupts ();
-	matrix_all_on (lamp_matrix);
+	lamp_set_on (lamp_matrix);
 }
 
 
 void lamp_all_off (void)
 {
 	disable_interrupts ();
-	matrix_all_off (lamp_flash_matrix_now);
-	matrix_all_off (lamp_flash_matrix);
-	matrix_all_off (lamp_leff1_matrix);
-	matrix_all_off (lamp_leff2_matrix);
+	lamp_set_off (lamp_flash_matrix_now);
+	lamp_set_off (lamp_flash_matrix);
+	lamp_set_off (lamp_leff1_matrix);
+	lamp_set_off (lamp_leff2_matrix);
 	enable_interrupts ();
-	matrix_all_off (lamp_matrix);
+	lamp_set_off (lamp_matrix);
 }
 
 /*
@@ -352,27 +352,27 @@ void lamp_all_off (void)
 
 void lamp_leff1_allocate_all (void)
 {
-	matrix_all_off (lamp_leff1_allocated);
+	lamp_set_off (lamp_leff1_allocated);
 }
 
 void lamp_leff1_erase (void)
 {
-	matrix_all_off (lamp_leff1_matrix);
+	lamp_set_off (lamp_leff1_matrix);
 }
 
 void lamp_leff1_free_all (void)
 {	
-	matrix_all_on (lamp_leff1_allocated);
+	lamp_set_on (lamp_leff1_allocated);
 }
 
 void lamp_leff2_erase (void)
 {
-	matrix_all_off (lamp_leff2_matrix);
+	lamp_set_off (lamp_leff2_matrix);
 }
 
 void lamp_leff2_free_all (void)
 {
-	matrix_all_on (lamp_leff2_allocated);
+	lamp_set_on (lamp_leff2_allocated);
 }
 
 

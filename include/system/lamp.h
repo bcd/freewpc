@@ -50,10 +50,13 @@ typedef const lampnum_t lamplist_t[];
 /** Lampsets are identified by small integers */
 typedef U8 lamplist_id_t;
 
+/** The set of all lamps, with one bit for each */
+typedef U8 lamp_set[NUM_LAMP_COLS];
 
-extern __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
-extern U8 lamp_flash_matrix[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
+
+extern __fastram__ lamp_set lamp_matrix;
+extern lamp_set lamp_flash_matrix;
+extern __fastram__ lamp_set lamp_flash_matrix_now;
 
 extern U8 bit_matrix[BITS_TO_BYTES (MAX_FLAGS)];
 extern U8 global_bits[BITS_TO_BYTES (MAX_GLOBAL_FLAGS)];
@@ -169,7 +172,7 @@ void lamplist_rotate_previous (lamplist_id_t id, bitset matrix);
 void lamplist_set_count (lamplist_id_t set, U8 count);
 bool lamplist_test_all (lamplist_id_t id, lamp_boolean_operator_t op);
 
-__attribute__((noinline)) void matrix_all_on (bitset matrix);
-__attribute__((noinline)) void matrix_all_off (bitset matrix);
+__attribute__((noinline)) void lamp_set_on (lamp_set matrix);
+__attribute__((noinline)) void lamp_set_off (lamp_set matrix);
 
 #endif /* _SYS_LAMP_H */

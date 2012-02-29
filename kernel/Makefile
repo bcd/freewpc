@@ -26,6 +26,7 @@ KERNEL_SW_OBJS += $(if $(CONFIG_FONT), kernel/font.o)
 KERNEL_SW_OBJS += kernel/game.o
 KERNEL_SW_OBJS += kernel/ladder.o
 KERNEL_SW_OBJS += kernel/lamplist.o
+KERNEL_SW_OBJS += kernel/lampset.o
 KERNEL_SW_OBJS += kernel/player.o
 KERNEL_SW_OBJS += kernel/printf.o
 KERNEL_SW_OBJS += kernel/score.o
