@@ -9,9 +9,9 @@ NATIVE_OBJS :=
 # Common simulation CPU configuration
 CPU ?= native
 $(eval $(call have,CONFIG_SIM))
+$(eval $(call have,CONFIG_PTH))
 $(eval $(call have,CONFIG_CALLIO))
 CONFIG_UI ?= curses
-$(eval $(call have,CONFIG_SOFT_REALTIME))
 include cpu/$(CPU)/Makefile
 include $(PMAKEFILE)
 
