@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -19,8 +19,7 @@
  */
 
 #include <freewpc.h>
-
-U8 in_test;
+#include "native/log.h"
 
 void proc_debug_write (U8 c)
 {
@@ -37,28 +36,7 @@ void proc_post_switch_transition (switchnum_t swno)
 }
 
 
-void platform_main_loop (void)
-{
-	int n;
-	extern __fastram__ U16 sys_time;
-	for (;;)
-	{
-		task_sleep (TIME_16MS);
-		for (n = 0; n < 16; n++)
-		{
-			sys_time++;
-			if (n & 1)
-				VOIDCALL (lamp_rtt);
-			tick_driver ();
-		}
-		db_periodic ();
-		if (likely (periodic_ok))
-		{
-			do_periodic ();
-		}
-	}
-}
-
+#ifndef CONFIG_SIM
 void writeb (IOPTR addr, U8 val)
 {
 }
@@ -67,45 +45,33 @@ U8 readb (IOPTR addr)
 {
 	return 0;
 }
+#endif
 
+
+/* RTT(name=switch_rtt freq=2) */
+void switch_rtt (void)
+{
+}
+
+/* RTT(name=lamp_rtt freq=16) */
+void lamp_rtt (void)
+{
+	writeb (IO_LAMP, platform_lamp_compute (0));
+}
+
+/* RTT(name=sol_update_rtt_0 freq=1) */
+void sol_update_rtt_0 (void)
+{
+	pinio_write_solenoid_set (0, *sol_get_read_reg (0));
+}
+
+void sol_update_rtt_1 (void)
+{
+}
 
 void platform_init (void)
 {
-	in_test = 0;
-	remote_dmd_init ();
+	//remote_dmd_init ();
 }
 
-
-void linux_init (void)
-{
-	printf ("P-ROC: Initializing\n");
-}
-
-
-void linux_shutdown (U8 error_code)
-{
-	printf ("P-ROC: Shutdown\n");
-	exit (error_code);
-}
-
-
-CALLSET_ENTRY (proc, diagnostic_check)
-{
-}
-
-CALLSET_ENTRY (proc, init_complete)
-{
-}
-
-CALLSET_ENTRY (proc, idle)
-{
-	/* Check for input events from the hardware */
-}
-
-
-int main (int argc, char *argv[])
-{
-	freewpc_init ();
-	return 0;
-}
 

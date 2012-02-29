@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2009-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,22 +20,12 @@
 
 /**
  * \file
- * \brief Definitions/macros specific to the WPC hardware
+ * \brief Definitions/macros specific to the P-ROC hardware
  */
 
-#ifndef _PROC_H
-#define _PROC_H
+#ifndef __PLATFORM_PROC_H
+#define __PLATFORM_PROC_H
 
-#undef DEBUGGER
-#undef MACHINE_DMD
-#define MACHINE_DMD 1
-/* TODO */
-#define WPC_DMD_LOW_PAGE 0
-#define WPC_DMD_HIGH_PAGE 1
-#define WPC_DMD_FIRQ_ROW_VALUE 2
-#define WPC_DMD_ACTIVE_PAGE 3
-#define DMD_LOW_BASE (U8 *)0
-#define DMD_HIGH_BASE (U8 *)0
 /* A hack -- code should not be calling this unless CONFIG_WPC */
 #define WPC_HAS_CAP(cap) 0
 
@@ -137,15 +127,6 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 {
 }
 
-extern inline void pinio_write_solenoid (U8 solno, U8 val)
-{
-}
-
-extern inline U8 pinio_read_solenoid (U8 solno)
-{
-	return 0;
-}
-
 /********************************************/
 /* Switches                                 */
 /********************************************/
@@ -204,15 +185,6 @@ extern inline void pinio_watchdog_reset (void)
 {
 }
 
-
-
-/********************************************/
-/* Printer / Parallel Port                  */
-/********************************************/
-
-extern inline void wpc_parport_write (U8 data)
-{
-}
 
 /********************************************/
 /* Bank Switching                           */
@@ -279,7 +251,5 @@ extern inline void pinio_write_triac (U8 val)
 #define pinio_nvram_unlock()
 #define pinio_nvram_lock()
 
-#undef HAVE_PARALLEL_PORT /* pinio_parport_write() will not be called */
-
-#endif /* _PROC_H */
+#endif /* __PLATFORM_PROC_H */
 
