@@ -19,6 +19,7 @@ export SHELL
 
 define have
 $1 := y
+HAVE_LIST += $1
 AUTO_CFLAGS += -D$1
 EXTRA_ASFLAGS += -D$1
 SCHED_FLAGS += -D $1
@@ -975,6 +976,9 @@ areainfo:
 	@true $(foreach area,$(AREA_LIST),&& echo $(area) $(AREASIZE_$(area)))
 	@true $(foreach page,$(PAGED_SECTIONS),&& echo $(page) 0x4000 $($(page)_SECTIONS))
 
+.PHONY : have
+have:
+	@true $(foreach item,$(HAVE_LIST),&& echo "$(item)")
 
 #
 # 'make clean' does what you think.
