@@ -27,7 +27,7 @@ typedef U8 solnum_t;
 #error "PINIO_NUM_SOLS undefined"
 #endif
 
-#define SOL_REG_COUNT ((PINIO_NUM_SOLS + 7) / 8)
+#define SOL_REG_COUNT MULTIPLEOF8(PINIO_NUM_SOLS)
 
 #ifndef SOL_MIN_FLASHER
 #define SOL_MIN_FLASHER 0
@@ -69,7 +69,8 @@ void sol_init (void);
 /* sol_start is a wrapper function, because the 'time' value must be scaled
 to the correct resolution.  Ticks are normally 1 per 16ms, but
 we need 1 per 4ms for solenoids, so scale accordingly. */
-__attribute__((deprecated)) extern inline void sol_start (U8 sol, U8 mask, U8 time)
+__attribute__((deprecated))
+extern inline void sol_start (U8 sol, U8 mask, U8 time)
 {
 	sol_start_real (sol, mask, (4 * time));
 }
@@ -132,21 +133,12 @@ extern inline U8 sol_get_bit (const solnum_t sol)
 }
 
 
-/** Return nonzero if a solenoid's enable line is
- * inverted; i.e. writing a 0 turns it on and
- * writing a 1 turns it off.
+/*
+ * Turn on a solenoid driver immediately.
+ * It will remain on indefinitely.
+ * The hardware may not be updated instantly, however, depending
+ * on the platform driver.
  */
-extern inline U8 sol_inverted (const solnum_t sol)
-{
-#if (MACHINE_WPC95 == 1)
-	return 0;
-#else
-	return (sol >= 32) && (sol < 40);
-#endif
-}
-
-
-/** Turn on a solenoid driver immediately. */
 extern inline void sol_enable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);
@@ -154,7 +146,11 @@ extern inline void sol_enable (const solnum_t sol)
 }
 
 
-/** Turn off a solenoid driver immediately. */
+/*
+ * Turn off a solenoid driver immediately.
+ * The hardware may not be updated instantly, however, depending
+ * on the platform driver.
+ */
 extern inline void sol_disable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);

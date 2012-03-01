@@ -111,6 +111,11 @@ extern U8 periodic_ok;
 #define C_STRING(x)	C_STR(x)
 #define C_STR(x)		#x
 
+/*
+ * Round a value to the next highest multiple of 8.
+ */
+#define MULTIPLEOF8(x) (((x) + 7) / 8)
+
 #ifdef CONFIG_NATIVE
 #include <platform/native.h>
 #endif
