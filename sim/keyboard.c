@@ -361,6 +361,11 @@ void keyboard_init (void)
 	sim_key_install ('9', SW_UP);
 	sim_key_install ('0', SW_ENTER);
 #endif
+#ifdef CONFIG_PLATFORM_WHITESTAR
+	sim_key_install ('8', SW_RED_BUTTON);
+	sim_key_install ('9', SW_GREEN_BUTTON);
+	sim_key_install ('0', SW_BLACK_BUTTON);
+#endif
 	sim_key_install (',', SW_LEFT_BUTTON);
 	sim_key_install ('.', SW_RIGHT_BUTTON);
 #ifdef SW_COIN_DOOR_CLOSED
