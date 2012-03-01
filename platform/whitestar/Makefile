@@ -32,12 +32,6 @@ CFLAGS += -Wno-format
 # Optional CFLAGS
 CFLAGS += -mint8
 
-### TODO:  -mwpc is totally not acceptable, as Whitestar doesn't have
-# the shifter hardware.  But gcc6809 is crashing on some bit shift
-# statements, so for _now_, keep this here until the compiler can be
-# fixed, so we can fix up other problems.
-CFLAGS += -mwpc
-
 # Optimization flags
 CFLAGS += -O2 -fomit-frame-pointer -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
 
