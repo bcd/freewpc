@@ -57,12 +57,14 @@ void switch_rtt (void)
 {
 	platform_switch_input (0, readb (IO_SWITCH));
 	platform_switch_debounce (0);
+#ifndef CONFIG_SIM
 	int c = posix_input_poll (0);
 	if (c > 0)
 	{
 		if (c == ' ')
 			print_log ("space found\n");
 	}
+#endif
 }
 
 /* RTT(name=lamp_rtt freq=16) */
@@ -84,13 +86,13 @@ void sol_update_rtt_1 (void)
 void platform_init (void)
 {
 	/* Request GPIOs */
+#ifndef CONFIG_SIM
 	gpio_request_output (GPIO_SOL_0);
 	gpio_request_output (GPIO_SOL_1);
 	gpio_request_output (GPIO_SOL_2);
 	gpio_request_output (GPIO_SOL_3);
-
 	posix_input_config (0);
-
+#endif
 	last_lamps = last_sols = 0;
 }
 

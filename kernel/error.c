@@ -87,6 +87,7 @@ void fatal (errcode_t error_code)
 #endif
 
 	/* TODO - this whole function needs porting to Whitestar */
+	/* Maybe just call platform_init again? */
 #ifdef CONFIG_PLATFORM_WPC
 	if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
 		wpc_write_flippers (0);
@@ -94,6 +95,7 @@ void fatal (errcode_t error_code)
 #ifdef CONFIG_TICKET
 	pinio_write_ticket (0);
 #endif
+	pinio_disable_flippers ();
 	pinio_write_solenoid_set (0, 0);
 	pinio_write_solenoid_set (1, 0);
 	pinio_write_solenoid_set (2, 0);
@@ -108,19 +110,21 @@ void fatal (errcode_t error_code)
 	audit_assign (&system_audits.lockup1_pid_lef, task_getgid ());
 	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_FATAL, error_code);
 
-	/* Dump all of the task information to the debugger port. */
+	/* Dump all debugging information */
 #ifdef DEBUGGER
 	dbprintf ("Fatal error %d\n", error_code);
 	db_dump_all ();
 #endif
 
-	/* In simulation, exit whenever a fatal occurs. */
+	/* In native mode, exit whenever a fatal occurs.  If the
+	   simulator is compiled in, let it clean up first. */
 #ifdef CONFIG_SIM
 	sim_exit (error_code);
-#endif
+#else
 #ifdef CONFIG_NATIVE
 	native_exit ();
 	exit (error_code);
+#endif
 #endif
 
 	/* Defining STOP_ON_ERROR is helpful during debugging a problem.
