@@ -226,6 +226,7 @@ void replay_award (void)
 #endif
 
 	audit_increment (&system_audits.replays);
+	timestamp_update (&system_timestamps.last_replay);
 	replay_total_this_player++;
 	knocker_fire ();
 }

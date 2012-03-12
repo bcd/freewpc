@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -128,7 +128,7 @@ typedef struct
 	struct date coins_cleared; /* done */
 	struct date factory_reset; /* done */
 	struct date last_game_start; /* done */
-	struct date last_replay;
+	struct date last_replay; /* done */
 	struct date last_hstd_reset;
 	struct date champion_reset;
 	struct date last_printout; /* done */
