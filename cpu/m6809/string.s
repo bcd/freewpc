@@ -119,16 +119,27 @@ _memcpy:
 	ldu   4,s    ; source pointer
 	ldd   6,s    ; number of bytes
 
-	; Calculate the number of 16 byte blocks that can be copied fast.
+	; If less than 16 bytes, then skip the large block copy completely.
+	cmpd	#16
+	blt	__memcpy_small
+
+	; Save Y register for block loop
+	sty	*m2
+
+	; Calculate the number of 16 byte blocks to copy.
+	lsrb
+	lsrb
+	lsrb
+	lsrb
+	stb   *m0
+	tsta
+	beq	__memcpy_large
 	lsra
-	rorb
 	lsra
-	rorb
 	lsra
-	rorb
 	lsra
-	rorb
-	beq   __memcpy_small
+	adda	*m0
+	sta	*m0
 
 	; Copy the 16 byte blocks first.
 	; Put this into m0 so decrement sets the condition codes.
@@ -137,8 +148,6 @@ _memcpy:
 	; we never copy more than that.
 	; Also save/restore Y register which is needed in this loop.
 
-	stb   *m0
-	sty	*m2
 __memcpy_large:
 	pulu	d,y
 	std	,x
