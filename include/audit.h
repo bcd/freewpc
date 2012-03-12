@@ -27,12 +27,6 @@
  */
 typedef U16 audit_t;
 
-/**
- * Some audits need more than 16-bits.  These are called
- * long audits and are stored as 3-byte binary-coded decimal.
- */
-typedef U8 long_audit_t[3];
-
 
 /*
  * A timestamp audit.  The 16-bit variable is not large enough to

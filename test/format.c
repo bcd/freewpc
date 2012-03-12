@@ -291,9 +291,6 @@ void integer_audit (audit_t val)
 	sprintf ("%ld", val);
 }
 
-void long_integer_audit (long_audit_t *val)
-{
-}
 
 void secs_audit (audit_t val)
 {
