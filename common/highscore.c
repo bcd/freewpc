@@ -195,7 +195,7 @@ void high_score_reset (void)
 	memcpy (high_score_table[0].initials, default_gc_initials, HIGH_SCORE_NAMESZ);
 
 	/* Reset the other high scores */
-	for (place=0; place < 4; place++)
+	for (place=0; place < NUM_HIGH_SCORES; place++)
 	{
 		memcpy (high_score_table[place+1].score, default_highest_scores[place],
 			HIGH_SCORE_WIDTH);
