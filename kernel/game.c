@@ -254,24 +254,7 @@ void end_ball (void)
 	music_disable ();
 	if (!in_tilt)
 		callset_invoke (bonus);
-
-	/* Clear the tilt flag.  Note, this is not combined
-	with the above to handle tilt while bonus is running. */
-	if (in_tilt)
-	{
-		/* Wait for tilt bob to settle */
-		while (free_timer_test (TIM_IGNORE_TILT))
-			task_sleep (TIME_100MS);
-
-		/* Cancel the tilt effects */
-#ifdef DEFF_TILT
-		deff_stop (DEFF_TILT);
-#endif
-#ifdef LEFF_TILT
-		leff_stop (LEFF_TILT);
-#endif
-		in_tilt = FALSE;
-	}
+	callset_invoke (bonus_complete);
 
 	/* Stop tasks that should run only until end-of-ball. */
 	task_remove_duration (TASK_DURATION_BALL);

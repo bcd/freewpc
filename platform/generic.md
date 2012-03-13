@@ -45,9 +45,6 @@ Tilt Warning: PRI_TILT_WARNING, GI(ALL), c_decl(tilt_warning_leff), page(COMMON_
 Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
 Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE), page(COMMON_PAGE)
 
-[timers]
-Ignore Tilt:
-
 [globalflags]
 Ball At Plunger:
 Coin Door Opened:

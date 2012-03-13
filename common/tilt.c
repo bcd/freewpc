@@ -35,6 +35,10 @@
 /** The number of tilt warnings that have been issued on this ball. */
 U8 tilt_warnings;
 
+/* A timer that allows tilt to settle during endball before
+   proceeding to the next ball. */
+free_timer_id_t tilt_ignore_timer;
+
 
 /** Lamp effect function for a leff that turns all lights off.
  * Used by the system-defined tilt function. */
@@ -61,7 +65,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 	 * moving, so we can delay endball. */
 	if (in_tilt)
 	{
-		free_timer_restart (TIM_IGNORE_TILT, TIME_2S);
+		free_timer_restart (tilt_ignore_timer, TIME_2S);
 		return;
 	}
 
@@ -76,7 +80,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 #endif
 		deff_start (DEFF_TILT);
 		leff_start (LEFF_TILT);
-		free_timer_restart (TIM_IGNORE_TILT, TIME_2S);
+		free_timer_restart (tilt_ignore_timer, TIME_2S);
 		in_tilt = TRUE;
 		set_valid_playfield ();
 		flipper_disable ();
@@ -134,6 +138,28 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	/* TODO: wait for slam switch to become stable, to avoid
 	 * endless restarts */
 	 warm_reboot ();
+}
+
+
+CALLSET_ENTRY (tilt, bonus_complete)
+{
+	/* Clear the tilt flag.  Note, this is not combined
+	with the above to handle tilt while bonus is running. */
+	if (in_tilt)
+	{
+		/* Wait for tilt bob to settle */
+		while (free_timer_test (tilt_ignore_timer))
+			task_sleep (TIME_100MS);
+
+		/* Cancel the tilt effects */
+#ifdef DEFF_TILT
+		deff_stop (DEFF_TILT);
+#endif
+#ifdef LEFF_TILT
+		leff_stop (LEFF_TILT);
+#endif
+		in_tilt = FALSE;
+	}
 }
 
 
