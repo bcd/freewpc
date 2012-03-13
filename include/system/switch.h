@@ -82,26 +82,22 @@ extern const U8 mach_edge_switches[];
 /** Returns the container ID that a switch belongs to */
 #define SW_GET_DEVICE(sw)	(sw->devno - 1)
 
-#define NUM_PF_SWITCHES 64
-
-#define NUM_DEDICATED_SWITCHES 8
-
 /** On a pre-Fliptronic game, the flipper button switches are in
 the ordinary 8x8 switch matrix.  On Fliptronic games, these are
 accessed separately and tracked in a "9th" switch column internally.
 Define SW_LEFT_BUTTON and SW_RIGHT_BUTTON to the correct values
 depending on the system type. */
+#ifdef CONFIG_PLATFORM_WPC
 #if (MACHINE_FLIPTRONIC == 1)
-#define NUM_FLIPTRONIC_SWITCHES 8
 #define SW_LEFT_BUTTON SW_L_L_FLIPPER_BUTTON
 #define SW_RIGHT_BUTTON SW_L_R_FLIPPER_BUTTON
 #else
-#define NUM_FLIPTRONIC_SWITCHES 0
 #define SW_LEFT_BUTTON SW_LEFT_FLIPPER
 #define SW_RIGHT_BUTTON SW_RIGHT_FLIPPER
 #endif
+#endif
 
-#define NUM_SWITCHES (NUM_DEDICATED_SWITCHES + NUM_PF_SWITCHES + NUM_FLIPTRONIC_SWITCHES)
+#define NUM_SWITCHES PINIO_NUM_SWITCHES
 
 #define SWITCH_BITS_SIZE	(NUM_SWITCHES / 8)
 

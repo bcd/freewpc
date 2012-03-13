@@ -866,6 +866,10 @@ extern inline U8 pinio_read_sound (void)
 /* Switches                                 */
 /********************************************/
 
+#define WPC_SW_DIRECT 0
+#define WPC_SW_PLAYFIELD 8
+#define WPC_SW_FLIPTRONIC 72
+
 #if (MACHINE_FLIPTRONIC == 1)
 #define PINIO_NUM_SWITCHES 80
 #else

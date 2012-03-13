@@ -2226,7 +2226,7 @@ struct menu clear_audits_item = {
 
 void clear_coins_confirm (void)
 {
-	/* TODO */
+	/* TODO - clear coin related audits */
 	timestamp_update (&system_timestamps.coins_cleared);
 	confirm_start ();
 }
@@ -2827,15 +2827,19 @@ struct menu switch_levels_item = {
 
 void switch_item_number (U8 val)
 {
-	if (val < NUM_DEDICATED_SWITCHES)
+#ifdef CONFIG_PLATFORM_WPC
+	if (val >= WPC_SW_DIRECT && val < WPC_SW_PLAYFIELD)
 		sprintf ("D%d", val+1);
-	else if (val >= NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES)
-		sprintf ("F%d", val - (NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES) + 1);
+	else if (val >= WPC_SW_FLIPTRONIC)
+		sprintf ("F%d", val - WPC_SW_FLIPTRONIC + 1);
 	else
 	{
-		val -= NUM_DEDICATED_SWITCHES;
+		val -= WPC_SW_PLAYFIELD;
 		sprintf ("%d%d", (val / 8)+1, (val % 8)+1);
 	}
+#else
+	sprintf ("SW%d", val);
+#endif
 }
 
 void single_switch_init (void)
