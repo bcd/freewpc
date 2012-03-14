@@ -1,0 +1,325 @@
+<html lang="en">
+<head>
+<title>The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="#Top">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<h1 class="settitle">The FreeWPC Manual</h1>
+<div class="contents">
+<h2>Table of Contents</h2>
+<ul>
+<li><a name="toc_Top" href="index.html#Top">Introduction</a>
+<li><a name="toc_Overview" href="Overview.html#Overview">1 Overview</a>
+<li><a name="toc_Installation" href="Installation.html#Installation">2 Installation</a>
+<ul>
+<li><a href="Installation.html#Installation">2.1 Binary Packages</a>
+<li><a href="Installation.html#Installation">2.2 Source Code Packages</a>
+<li><a href="Installation.html#Installation">2.3 Directory Layout</a>
+</li></ul>
+<li><a name="toc_Compiling" href="Compiling.html#Compiling">3 Compiling</a>
+<ul>
+<li><a href="Compiling.html#Compiling">3.1 Configuration</a>
+<li><a href="Compiling.html#Compiling">3.2 Building</a>
+<li><a href="Compiling.html#Compiling">3.3 Build Results</a>
+</li></ul>
+<li><a name="toc_Software-Environment" href="Software-Environment.html#Software-Environment">4 Software Environment</a>
+<ul>
+<li><a href="Multitasking.html#Multitasking">4.1 Multitasking</a>
+<ul>
+<li><a href="Multitasking.html#Multitasking">4.1.1 Periodic Functions</a>
+<li><a href="Multitasking.html#Multitasking">4.1.2 Task APIs</a>
+</li></ul>
+<li><a href="Real_002dTime-Processing.html#Real_002dTime-Processing">4.2 Real-Time Processing</a>
+<ul>
+<li><a href="Real_002dTime-Processing.html#Real_002dTime-Processing">4.2.1 Overview</a>
+<li><a href="Real_002dTime-Processing.html#Real_002dTime-Processing">4.2.2 Schedule File Syntax</a>
+<li><a href="Real_002dTime-Processing.html#Real_002dTime-Processing">4.2.3 Function Unrolling</a>
+</li></ul>
+<li><a href="Memory-Allocation.html#Memory-Allocation">4.3 Memory Allocation</a>
+<li><a href="Bit-Variables.html#Bit-Variables">4.4 Bit Variables</a>
+<li><a href="Event-Handling.html#Event-Handling">4.5 Event Handling</a>
+<ul>
+<li><a href="Event-Handling.html#Event-Handling">4.5.1 Boolean Events</a>
+<li><a href="Event-Handling.html#Event-Handling">4.5.2 Debugging Event Handlers</a>
+<li><a href="Event-Handling.html#Event-Handling">4.5.3 How Event Handlers Are Implemented</a>
+</li></ul>
+<li><a href="Template-Drivers.html#Template-Drivers">4.6 Template Drivers</a>
+<ul>
+<li><a href="Template-Drivers.html#Template-Drivers">4.6.1 Template Syntax</a>
+<li><a href="Template-Drivers.html#Template-Drivers">4.6.2 Template Usage</a>
+</li></ul>
+<li><a href="Fault-Detection.html#Fault-Detection">4.7 Fault Detection</a>
+<li><a href="Timers.html#Timers">4.8 Timers</a>
+<ul>
+<li><a href="Timers.html#Timers">4.8.1 Task Timers</a>
+<li><a href="Timers.html#Timers">4.8.2 Free Timers</a>
+<li><a href="Timers.html#Timers">4.8.3 Periodic Functions</a>
+<li><a href="Timers.html#Timers">4.8.4 Realtime Functions</a>
+</li></ul>
+<li><a href="Bank-Switching.html#Bank-Switching">4.9 Bank Switching</a>
+<ul>
+<ul>
+<li><a href="Bank-Switching.html#Bank-Switching">4.9.0.1 Explicit Bank Switching</a>
+<li><a href="Bank-Switching.html#Bank-Switching">4.9.0.2 Far Calls</a>
+<li><a href="Bank-Switching.html#Bank-Switching">4.9.0.3 Performance</a>
+</li></ul>
+</li></ul>
+</li></ul>
+<li><a name="toc_Core-APIs" href="Core-APIs.html#Core-APIs">5 Core APIs</a>
+<ul>
+<li><a href="Switches.html#Switches">5.1 Switches</a>
+<li><a href="Lamps.html#Lamps">5.2 Lamps</a>
+<li><a href="Solenoids.html#Solenoids">5.3 Solenoids</a>
+<ul>
+<li><a href="Solenoids.html#Solenoids">5.3.1 Pulsing</a>
+<li><a href="Solenoids.html#Solenoids">5.3.2 Flashers</a>
+<li><a href="Solenoids.html#Solenoids">5.3.3 Custom Drivers</a>
+</li></ul>
+<li><a href="Dot_002dMatrix-Display-_0028DMD_0029.html#Dot_002dMatrix-Display-_0028DMD_0029">5.4 Dot-Matrix Display (DMD)</a>
+<li><a href="Sound-Board.html#Sound-Board">5.5 Sound Board</a>
+<li><a href="General-Illumination.html#General-Illumination">5.6 General Illumination</a>
+<li><a href="Real_002dTime-Clock.html#Real_002dTime-Clock">5.7 Real-Time Clock</a>
+</li></ul>
+<li><a name="toc_Effects" href="Effects.html#Effects">6 Effects</a>
+<ul>
+<li><a href="Basic-Effect-Principles.html#Basic-Effect-Principles">6.1 Basic Effect Principles</a>
+<li><a href="Background-Effects.html#Background-Effects">6.2 Background Effects</a>
+<li><a href="Display-Effects.html#Display-Effects">6.3 Display Effects</a>
+<li><a href="Lamp-Effects.html#Lamp-Effects">6.4 Lamp Effects</a>
+<li><a href="Sound-and-Music-Effects.html#Sound-and-Music-Effects">6.5 Sound and Music Effects</a>
+<li><a href="Lamplists.html#Lamplists">6.6 Lamplists</a>
+<li><a href="DMD-Transitions.html#DMD-Transitions">6.7 DMD Transitions</a>
+<li><a href="Background-Refresh.html#Background-Refresh">6.8 Background Refresh</a>
+</li></ul>
+<li><a name="toc_Ball-Tracking" href="Ball-Tracking.html#Ball-Tracking">7 Ball Tracking</a>
+<ul>
+<li><a href="Device-Status.html#Device-Status">7.1 Device Status</a>
+<li><a href="Global-Status.html#Global-Status">7.2 Global Status</a>
+<li><a href="Events.html#Events">7.3 Events</a>
+<li><a href="The-Trough-Device.html#The-Trough-Device">7.4 The Trough Device</a>
+<li><a href="Virtual-Balls.html#Virtual-Balls">7.5 Virtual Balls</a>
+</li></ul>
+<li><a name="toc_Test-Mode" href="Test-Mode.html#Test-Mode">8 Test Mode</a>
+<ul>
+<li><a href="Test-Mode.html#Test-Mode">8.1 Adjustments</a>
+<li><a href="Test-Mode.html#Test-Mode">8.2 Audits</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3 Tests</a>
+<ul>
+<li><a href="Test-Mode.html#Test-Mode">8.3.1 Font Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.2 Display Effect Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.3 Lamp Effect Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.4 Lamplist Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.5 Ball Device Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.6 Random Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.7 Transition Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.8 Frame Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.9 Force Error Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.10 Display Stress Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.11 Symbol Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.12 Score Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.13 PIC Test</a>
+<li><a href="Test-Mode.html#Test-Mode">8.3.14 Memory Editor</a>
+</li></ul>
+</li></ul>
+<li><a name="toc_Common-Pinball-Library" href="Common-Pinball-Library.html#Common-Pinball-Library">9 Common Pinball Library</a>
+<ul>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.1 Coins and Pricing</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.2 Extra Balls</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.3 Tournament Mode</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.4 Ball Search</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.5 Knocker Driver</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.6 Adjustments</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.7 Audits</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.8 Scoring</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.9 Lamp Timers</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.10 Diagnostics</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.11 Score Rank</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.12 Timed Modes</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.13 Ball Savers</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.14 Ball Serve</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.15 Multiball Modes</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.16 Mute and Pause Mode</a>
+<li><a href="Common-Pinball-Library.html#Common-Pinball-Library">9.17 Status Report</a>
+</li></ul>
+<li><a name="toc_Fonts-and-Graphics" href="Fonts-and-Graphics.html#Fonts-and-Graphics">10 Fonts and Graphics</a>
+<ul>
+<li><a href="Fonts-and-Graphics.html#Fonts-and-Graphics">10.1 Compression</a>
+<li><a href="Fonts-and-Graphics.html#Fonts-and-Graphics">10.2 Using TrueType Fonts</a>
+<li><a href="Fonts-and-Graphics.html#Fonts-and-Graphics">10.3 Printing Text</a>
+<li><a href="Fonts-and-Graphics.html#Fonts-and-Graphics">10.4 Formatting Text</a>
+<li><a href="Fonts-and-Graphics.html#Fonts-and-Graphics">10.5 Frame List</a>
+</li></ul>
+<li><a name="toc_System-Initialization" href="System-Initialization.html#System-Initialization">11 System Initialization</a>
+<li><a name="toc_Platform-APIs" href="Platform-APIs.html#Platform-APIs">12 Platform APIs</a>
+<li><a name="toc_Native-Mode" href="Native-Mode.html#Native-Mode">13 Native Mode</a>
+<ul>
+<li><a href="Thread-Model.html#Thread-Model">13.1 Thread Model</a>
+<li><a href="Persistent-Memory.html#Persistent-Memory">13.2 Persistent Memory</a>
+<li><a href="Input-and-Output.html#Input-and-Output">13.3 Input and Output</a>
+<li><a href="GDB-Debugging.html#GDB-Debugging">13.4 GDB Debugging</a>
+<li><a href="Interrupt-Tracing.html#Interrupt-Tracing">13.5 Interrupt Tracing</a>
+<li><a href="Platform-Emulation.html#Platform-Emulation">13.6 Platform Emulation</a>
+<li><a href="Timing.html#Timing">13.7 Timing</a>
+<li><a href="Command-Language.html#Command-Language">13.8 Command Language</a>
+<li><a href="Variables.html#Variables">13.9 Variables</a>
+<li><a href="User-Interface.html#User-Interface">13.10 User Interface</a>
+<li><a href="Hardware-Emulation.html#Hardware-Emulation">13.11 Hardware Emulation</a>
+<li><a href="Signal-Tracking.html#Signal-Tracking">13.12 Signal Tracking</a>
+</li></ul>
+<li><a name="toc_Debugging" href="Debugging.html#Debugging">14 Debugging</a>
+<ul>
+<li><a href="Debugging.html#Debugging">14.1 <code>dbprintf</code></a>
+<li><a href="Debugging.html#Debugging">14.2 <samp><span class="command">gdb</span></samp></a>
+<li><a href="Debugging.html#Debugging">14.3 <samp><span class="command">exec09</span></samp></a>
+<li><a href="Debugging.html#Debugging">14.4 Breakpoints</a>
+<li><a href="Debugging.html#Debugging">14.5 Switch Stress Test</a>
+</li></ul>
+<li><a name="toc_The-WPC-Hardware" href="The-WPC-Hardware.html#The-WPC-Hardware">Appendix A The WPC Hardware</a>
+<ul>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.1 Overview</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2 CPU Board</a>
+<ul>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.1 Blanking</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.2 Diagnostics LED</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.3 Watchdog</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.4 Bit Shifter</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.5 Memory Protection</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.6 Time of Day Clock</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.7 High Resolution Timer</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.8 Bank Switching</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.9 The Switch Matrix</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.10 External I/O</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.11 Interrupts</a>
+<ul>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.11.1 Reset</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.11.2 IRQ</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.11.3 FIRQ</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.2.11.4 NMI</a>
+</li></ul>
+</li></ul>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.3 Power Driver Board</a>
+<ul>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.3.1 Lamp Circuits</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.3.2 Solenoid Circuits</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.3.3 General Illumination Circuits</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.3.4 Zero Cross Circuit</a>
+</li></ul>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.4 Sound Board</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.5 Fliptronic Board</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.6 Auxiliary Driver Board</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.7 Dot Matrix Controller Board</a>
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">A.8 Memory Map</a>
+</li></ul>
+<li><a name="toc_The-Machine-Definition" href="The-Machine-Definition.html#The-Machine-Definition">Appendix B The Machine Definition</a>
+<ul>
+<li><a href="The-Machine-Definition.html#The-Machine-Definition">B.1 Syntax</a>
+<li><a href="The-Machine-Definition.html#The-Machine-Definition">B.2 Fixed Objects</a>
+<li><a href="The-Machine-Definition.html#The-Machine-Definition">B.3 Variable Objects</a>
+<li><a href="The-Machine-Definition.html#The-Machine-Definition">B.4 Directives</a>
+<ul>
+<li><a href="The-Machine-Definition.html#The-Machine-Definition">B.4.1 include</a>
+<li><a href="The-Machine-Definition.html#The-Machine-Definition">B.4.2 define</a>
+</li></ul>
+<li><a href="The-Machine-Definition.html#The-Machine-Definition">B.5 Global Configuration</a>
+<li><a href="The-Machine-Definition.html#The-Machine-Definition">B.6 Section Summary</a>
+<li><a href="The-Machine-Definition.html#The-Machine-Definition">B.7 How genmachine works</a>
+</li></ul>
+<li><a name="toc_System-Events" href="System-Events.html#System-Events">Appendix C System Events</a>
+<li><a name="toc_Build-Tools" href="Build-Tools.html#Build-Tools">Appendix D Build Tools</a>
+<ul>
+<li><a href="Build-Tools.html#Build-Tools">D.1 csum : ROM Checksum Tool</a>
+<li><a href="Build-Tools.html#Build-Tools">D.2 srec2bin : S-Record Converter</a>
+<li><a href="Build-Tools.html#Build-Tools">D.3 sched : Static Scheduler</a>
+<li><a href="Build-Tools.html#Build-Tools">D.4 fontgen2 : TrueType Font Generator</a>
+</li></ul>
+<li><a name="toc_Dot_002dMatrix-Performance" href="Dot_002dMatrix-Performance.html#Dot_002dMatrix-Performance">Appendix E Dot-Matrix Performance</a>
+<ul>
+<li><a href="Dot_002dMatrix-Performance.html#Dot_002dMatrix-Performance">E.1 Frame Rate</a>
+<li><a href="Dot_002dMatrix-Performance.html#Dot_002dMatrix-Performance">E.2 Simulating Color</a>
+<li><a href="Dot_002dMatrix-Performance.html#Dot_002dMatrix-Performance">E.3 6809 Instruction Set</a>
+<li><a href="Dot_002dMatrix-Performance.html#Dot_002dMatrix-Performance">E.4 The Fastest Copy in Town</a>
+<li><a href="Dot_002dMatrix-Performance.html#Dot_002dMatrix-Performance">E.5 Bit Alignment</a>
+<li><a href="Dot_002dMatrix-Performance.html#Dot_002dMatrix-Performance">E.6 Compression Techniques</a>
+</li></ul>
+<li><a name="toc_Historical-Notes" href="Historical-Notes.html#Historical-Notes">Appendix F Historical Notes</a>
+<li><a name="toc_Design-Principles" href="Design-Principles.html#Design-Principles">Appendix G Design Principles</a>
+<ul>
+<li><a href="Design-Principles.html#Design-Principles">G.1 Overview</a>
+<li><a href="Design-Principles.html#Design-Principles">G.2 Classes of Modules</a>
+<li><a href="Design-Principles.html#Design-Principles">G.3 Device Drivers</a>
+<li><a href="Design-Principles.html#Design-Principles">G.4 Shot Detection</a>
+<li><a href="Design-Principles.html#Design-Principles">G.5 Game Rules</a>
+<li><a href="Design-Principles.html#Design-Principles">G.6 Other Modules</a>
+</li></ul>
+<li><a name="toc_Concept-Index" href="Concept-Index.html#Concept-Index">Concept Index</a>
+</li></ul>
+</div>
+
+
+
+<div class="node">
+<a name="Top"></a>
+<p>
+Up:&nbsp;<a rel="up" accesskey="u" href="../index.html#dir">(dir)</a>
+<hr>
+</div>
+
+<h2 class="unnumbered">Introduction</h2>
+
+<p>This is the manual for <dfn>FreeWPC</dfn>, a free platform for developing replacement
+game ROMs for Bally/Williams pinball machines based on the WPC
+(Williams Pinball Controller) chip.  FreeWPC provides the foundation for building
+new ROMs with custom game rules.  This document describes version
+1.10-dev of the software.
+
+   <p>FreeWPC is developed by Brian Dominy (<a href="mailto:brian@oddchange.com">brian@oddchange.com</a>) and is licensed
+under the GNU General Public License version 2 or later.  The latest version of
+the software can be obtained at <a href="http://www.oddchange.com/freewpc">http://www.oddchange.com/freewpc</a>. 
+Developers should be familiar
+with basic embedded systems programming concepts and the C programming
+language.  Familiarity with 6809 assembler is recommended but not necessary. 
+Also, knowledge of WPC pinball machines is very helpful.
+
+<ul class="menu">
+<li><a accesskey="1" href="Overview.html#Overview">Overview</a>:                 A basic description of what FreeWPC is. 
+<li><a accesskey="2" href="Installation.html#Installation">Installation</a>:             How to obtain and install the software. 
+<li><a accesskey="3" href="Compiling.html#Compiling">Compiling</a>:                How to recompile the code yourself. 
+<li><a accesskey="4" href="Software-Environment.html#Software-Environment">Software Environment</a>:     The basic software model. 
+<li><a accesskey="5" href="Core-APIs.html#Core-APIs">Core APIs</a>:                How to control the hardware from user code. 
+<li><a accesskey="6" href="Effects.html#Effects">Effects</a>:                  How to choreograph lights, sounds, and graphics. 
+<li><a accesskey="7" href="Ball-Tracking.html#Ball-Tracking">Ball Tracking</a>:            How the locations of the pinballs are monitored. 
+<li><a accesskey="8" href="Test-Mode.html#Test-Mode">Test Mode</a>:                Differences in the service menu. 
+<li><a accesskey="9" href="Common-Pinball-Library.html#Common-Pinball-Library">Common Pinball Library</a>:   Other common functions that are implemented. 
+<li><a href="Fonts-and-Graphics.html#Fonts-and-Graphics">Fonts and Graphics</a>:       More info on the display APIs. 
+<li><a href="System-Initialization.html#System-Initialization">System Initialization</a>:    The sequence of events that happen at startup. 
+<li><a href="Platform-APIs.html#Platform-APIs">Platform APIs</a>:            How to define a new hardware platform. 
+<li><a href="Native-Mode.html#Native-Mode">Native Mode</a>:              Running the software directly on your PC. 
+<li><a href="Debugging.html#Debugging">Debugging</a>:                How to debug problems. 
+<li><a href="The-WPC-Hardware.html#The-WPC-Hardware">The WPC Hardware</a>:         A primer on the WPC platform. 
+<li><a href="The-Machine-Definition.html#The-Machine-Definition">The Machine Definition</a>:   How to define a new machine. 
+<li><a href="System-Events.html#System-Events">System Events</a>:            A list of the predefined callback functions. 
+<li><a href="Build-Tools.html#Build-Tools">Build Tools</a>:              Other programs used during the build process. 
+<li><a href="Dot_002dMatrix-Performance.html#Dot_002dMatrix-Performance">Dot-Matrix Performance</a>:   Thoughts on optimization of the display. 
+<li><a href="Historical-Notes.html#Historical-Notes">Historical Notes</a>:         Random observations from past experience. 
+<li><a href="Design-Principles.html#Design-Principles">Design Principles</a>:        Common practices for creating new game modules. 
+<li><a href="Concept-Index.html#Concept-Index">Concept Index</a>
+</ul>
+
+   </body></html>
+

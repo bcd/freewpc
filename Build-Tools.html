@@ -1,0 +1,90 @@
+<html lang="en">
+<head>
+<title>Build Tools - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="System-Events.html#System-Events" title="System Events">
+<link rel="next" href="Dot_002dMatrix-Performance.html#Dot_002dMatrix-Performance" title="Dot-Matrix Performance">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Build-Tools"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Dot_002dMatrix-Performance.html#Dot_002dMatrix-Performance">Dot-Matrix Performance</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="System-Events.html#System-Events">System Events</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="appendix">Appendix D Build Tools</h2>
+
+<h3 class="section">D.1 csum : ROM Checksum Tool</h3>
+
+<p><a name="index-Checksumming-78"></a><a name="index-ROM-checksum-79"></a>
+The checksum tool works on FreeWPC ROMs as well as the original
+Williams factory ROMs.  It can verify and update the checksum
+field located just above the interrupt vector table.
+
+   <p>The checksum is a 16-bit value that resides at logical address
+0xFFEE (18 bytes from the top of ROM).  This value should equal the
+sum of all the 8-bit byte values in the ROM, modulo 65536.  The
+checksum word is itself included when calculating and verifying it.
+
+   <p><samp><span class="command">csum</span></samp> also uses the word at address 0xFFEC as a
+<dfn>fixup word</dfn>, which can be set to any value to help make the
+checksum match.
+
+<h3 class="section">D.2 srec2bin : S-Record Converter</h3>
+
+<p><a name="index-S_002drecords-80"></a>
+The gcc6809 linker produces S-record files by default.  This
+tool converts S-records to raw binary format.
+
+   <p>Each bank of the ROM is linked individually; each produces an S-record
+file.  These files contain nearly everything to generate a binary file,
+except for the size and the value to place at holes.  We use 0xFF
+for all holes as this is more friendly to EPROMs.
+
+<h3 class="section">D.3 sched : Static Scheduler</h3>
+
+<p>The scheduler reads in a list of schedule files, which by
+convention end with the extension <samp><span class="file">.sched</span></samp>.  Each entry gives
+a function and a frequency at which it should be called. 
+It generates a C source file that contains a top-level function
+which then calls all of those functions at the right rate.  It does
+this by keeping a counter of the number of times that the top
+function was called.
+
+   <p>The scheduler supports <dfn>loop unrolling</dfn>, where the top
+function is actually decomposed into a small number of functions. 
+This reduces the number of if-statements needed overall; it does
+require an extra indirection via function pointer.  This can
+cause code duplication for the sake of speed.  The unroller tries
+to balance all of the functions to be scheduled using performance
+data in the schedule file.
+
+<h3 class="section">D.4 fontgen2 : TrueType Font Generator</h3>
+
+<p><a name="index-Font-conversion-81"></a>
+This is a short Perl script which can transform a TrueType
+font file (<samp><span class="file">.ttf</span></samp>) into FreeWPC source code.  It requires
+the <samp><span class="command">convert</span></samp> program from the ImageMagick tool suite.
+
+<!-- ====================================================== -->
+   </body></html>
+

@@ -1,0 +1,60 @@
+<html lang="en">
+<head>
+<title>Ball Tracking - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Effects.html#Effects" title="Effects">
+<link rel="next" href="Test-Mode.html#Test-Mode" title="Test Mode">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Ball-Tracking"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Test-Mode.html#Test-Mode">Test Mode</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Effects.html#Effects">Effects</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">7 Ball Tracking</h2>
+
+<p><a name="index-Containers-51"></a><a name="index-Ball-devices-52"></a><a name="index-Ball-tracking-53"></a>
+The ball tracking module manages the locations of all of the pinballs in
+the machine.  It is implemented in <samp><span class="file">common/device.c</span></samp> and uses
+container declarations in the machine description.
+
+   <p>A <dfn>device</dfn> is defined to be something which can hold and release pinballs. 
+(Earlier versions of the software used the term <em>container</em>.) 
+A device is comprised of one or more switches which count the number of balls
+in the device, plus a release solenoid that can be pulsed to force one
+ball to be removed.
+
+   <p>Ball troughs, kickouts, poppers, saucers, and locks are all just different
+shapes that a device can take.  Some containers only hold one ball, while
+others can hold many.
+
+<ul class="menu">
+<li><a accesskey="1" href="Device-Status.html#Device-Status">Device Status</a>:               What state is maintained per device
+<li><a accesskey="2" href="Global-Status.html#Global-Status">Global Status</a>:               What state is maintained for the whole machine
+<li><a accesskey="3" href="Events.html#Events">Events</a>:                      Which events are generated
+<li><a accesskey="4" href="The-Trough-Device.html#The-Trough-Device">The Trough Device</a>:           How the trough device is special
+<li><a accesskey="5" href="Virtual-Balls.html#Virtual-Balls">Virtual Balls</a>:               How to manipulate ball counts manually
+</ul>
+
+   </body></html>
+

@@ -1,0 +1,66 @@
+<html lang="en">
+<head>
+<title>General Illumination - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Core-APIs.html#Core-APIs" title="Core APIs">
+<link rel="prev" href="Sound-Board.html#Sound-Board" title="Sound Board">
+<link rel="next" href="Real_002dTime-Clock.html#Real_002dTime-Clock" title="Real-Time Clock">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="General-Illumination"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Real_002dTime-Clock.html#Real_002dTime-Clock">Real-Time Clock</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Sound-Board.html#Sound-Board">Sound Board</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Core-APIs.html#Core-APIs">Core APIs</a>
+<hr>
+</div>
+
+<h3 class="section">5.6 General Illumination</h3>
+
+<p><a name="index-General-illumination-_0028G_002eI_002e_0029-37"></a><a name="index-Triacs-38"></a><a name="index-Lamp-dimming-39"></a>
+General illumination allows for additional lighting that is managed in
+groups of lamps, which are all enabled and disabled at the same time. 
+These are often referred to as GI "strings". 
+FreeWPC supports a maximum of 8 strings.
+
+   <p>On the WPC platform, GI can be dimmed, because the controls for these
+strings are governed through triacs.  (On WPC-95, some of the GI are
+dimmable and some are not.)
+
+     <dl>
+<dt><code>gi_enable</code><dd>
+Turns on one or more GI strings.  The argument given is a bitmask where
+each bit corresponds to an entire set of lamps (thus, we support at most
+8 strings).
+
+     <br><dt><code>gi_disable</code><dd>
+Turns off one or more GI strings.
+
+     <br><dt><code>gi_dim</code><dd>
+Dims one or more GI strings.  This is like <code>gi_enable</code>, but it takes
+an extra parameter, which specifies the <em>intensity</em> of the lamps. 
+Not all hardware supports dimming. 
+If dimming is not supported, then this API is unavailable and
+will cause a compiler error.
+
+   </dl>
+
+   </body></html>
+

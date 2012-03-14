@@ -1,0 +1,141 @@
+<html lang="en">
+<head>
+<title>Switches - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Core-APIs.html#Core-APIs" title="Core APIs">
+<link rel="next" href="Lamps.html#Lamps" title="Lamps">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Switches"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Lamps.html#Lamps">Lamps</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Core-APIs.html#Core-APIs">Core APIs</a>
+<hr>
+</div>
+
+<h3 class="section">5.1 Switches</h3>
+
+<p><a name="index-Switches-32"></a>
+Switches are present in all pinball games to receive input from the ball
+and the player.
+
+   <p>Switches are numbered from 0 to <code>NUM_SWITCHES</code>-1. 
+How the switch numbers are mapped to actual inputs is platform and
+machine dependent.  The machine description names the switches and defines
+their physical characteristics.
+
+   <p>Each switch entry can declare the following
+flags, which alter the way that the switching code will manage
+it.  The capitalized name is used in the C code; the lowercase
+name is the spelling used in the machine config file.
+
+     <ul>
+<li>SW_OPTICAL (opto)
+
+     <p>Says that this is an optical switch, which is active low rather than
+active high.
+
+     <li>SW_EDGE (edge)
+
+     <p>Says that the event handler (CALLSET_ENTRY) should be thrown in both directions:
+when it becomes inactive or active. 
+Handlers for edge switches generally
+need to check which type of transition just happened, by calling
+<code>switch_poll_logical</code>, and then act accordingly.
+
+     <p>All counting switches in a ball container must be edge switches, so that the
+device count can be updated correctly.  The shooter switch is also usually
+declared edge.
+
+     <li>SW_IN_GAME (ingame)
+
+     <p>Says that this switch should only be serviced during a game.
+
+     <li>SW_PLAYFIELD
+
+     <p>Says that this switch is on the playfield, and can be activated by a ball,
+as opposed to cabinet buttons, motor optos, etc.  A playfield switch
+event will normally set the valid playfield flag.  It will also cause the
+<code>any_pf_switch</code> event to be thrown, which is normally used to score
+during "frenzy" modes.  These switches also reset the ball search timer
+to prevent a search from starting.
+
+     <p>This is the default; use the <code>noplay</code> tag to indicate that a switch
+is not playfield scoring.
+
+     <li>SW_NOVALID (novalid)
+
+     <p>Set for a SW_PLAYFIELD switch for which the valid playfield flag should
+not automatically be set.  This is used for switches that might
+unreasonably activate not due to a ball, such as a misaligned jet bumper
+that continually fires.
+
+     <p>These are the switches that you can trigger at ball start and drain, and
+still get the ball back.
+
+     <li>SW_IN_TEST (intest)
+
+     <p>Says that this switch handler should also be called in test mode. 
+Normally in test mode handlers are not called, but important switches
+like cabinet buttons require this.  If this flag is set, handlers will
+need to test the <code>in_test</code> variable to see if we are in test mode,
+and act accordingly.
+
+   </ul>
+
+   <p>In addition to polling their levels, the switch driver will detect
+when switches have <em>changed state</em>, and invoke their event handlers. 
+The switch entry in the config file names a function to be called when
+these changes occur.  These functions are always called from within
+their own task context.
+
+   <p>The driver performs debouncing, so that rapid open and close
+are not considered.  By default, a switch is processed if it remains
+active for only 4ms.  You can declare a larger debounce time using the
+<code>debounce</code> tag.  A transition that lasts for less time is ignored.
+
+   <p>Switch entries can also declare an associated playfield lamp; when
+this is done, valid activations of the switch will cause a brief
+flicker of the lamp.
+
+     <dl>
+<dt><code>switch_poll</code><dd>
+Read the stable, physical state of a switch.  Returns nonzero if it has
+a high level, or zero for a low level.
+
+     <p>Switch readings are polled by the switch driver continuously; this
+API just returns the results of the last time the switch was
+examined.  How often switches are polled is platform-dependent;
+on WPC, it is every 2ms.
+
+     <br><dt><code>switch_poll_logical</code><dd>
+Read the stable, logical state of a switch.  Returns nonzero if it is
+active, or zero for inactive.  This is the same as <code>switch_poll</code>
+but it inverts its result for optos.
+
+     <br><dt><code>rt_switch_poll</code><dd>
+Like <code>switch_poll</code>, but only for use inside realtime tasks. 
+It is slightly more efficient.  It always returns a physical level;
+drivers must invert for optos.
+
+   </dl>
+
+   </body></html>
+

@@ -1,0 +1,162 @@
+<html lang="en">
+<head>
+<title>Platform APIs - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="System-Initialization.html#System-Initialization" title="System Initialization">
+<link rel="next" href="Native-Mode.html#Native-Mode" title="Native Mode">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Platform-APIs"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Native-Mode.html#Native-Mode">Native Mode</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="System-Initialization.html#System-Initialization">System Initialization</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">12 Platform APIs</h2>
+
+<p><a name="index-Platforms-74"></a><a name="index-Hardware-platforms-75"></a>
+The platform APIs define how the hardware is accessed on a particular
+platform.  They only need to be written once, and then all games on that
+hardware architecture can be supported.
+
+   <p>If you are developing code for a WPC machine, you do not need to understand
+the platform APIs in detail, because they are already written for you. 
+If you plan to port FreeWPC to a different hardware architecture, then
+you will need to write these functions first before you can create any
+game code.
+
+   <p>Every platform must define a header file in
+<code>include/</code><samp><span class="file">platform</span></samp><code>/</code><samp><span class="file">platform</span></samp><code>.h</code>. 
+This file defines a number of inline functions, all of which begin with
+<code>pinio</code>.  It also defines a handful of constants, which begin
+with <code>PINIO</code>.
+
+   <p>Platform APIs are the functions that perform the physical I/O.  On WPC,
+these functions read and write the WPC ASIC registers.  All reads and writes
+to I/O registers should use the <code>readb</code> and <code>writeb</code> macros. 
+How these work depends on the platform.  For most platforms, these turn into
+memory-mapped operations.  However, they could also use a parallel port or
+USB.
+
+   <p>Platform APIs are not
+suitable for game code to call directly, as they are too low-level.  Instead,
+game code uses the core APIs to access a device driver; the device driver then
+uses the platform APIs.
+
+     <dl>
+<dt><code>pinio_write_switch_column</code><dd>
+Set the current switch matrix column.
+
+     <br><dt><code>pinio_read_switch_rows</code><dd>
+Read all of the switches on the currently selected column.
+
+     <br><dt><code>pinio_read_dedicated_switches</code><dd>
+Read all of the dedicated switches.
+
+     <br><dt><code>pinio_read_flippers</code><dd>
+Read all of the Fliptronic switches.
+
+     <br><dt><code>pinio_read_flipper_buttons</code><dd>
+Read all of the Fliptronic button switches.
+
+     <br><dt><code>pinio_read_flipper_eos</code><dd>
+Read all or some of the flipper switches.
+
+     <br><dt><code>pinio_read_locale</code><dd>
+Read the locale indicator (jumpers or DIP switches).
+
+     <br><dt><code>pinio_write_lamp_strobe</code><dd>
+Set the current lamp matrix strobe.
+
+     <br><dt><code>pinio_write_lamp_data</code><dd>
+Write lamp row data for the currently selected column.
+
+     <br><dt><code>pinio_write_solenoid_set (</code><var>bank</var><code>, </code><var>value</var><code>)</code><dd>
+Refresh a set of 8 solenoids.
+
+     <br><dt><code>pinio_read_ac_zerocross (CONFIG_AC)</code><dd>
+Return nonzero if currently at a zerocross point.
+
+     <br><dt><code>pinio_reset_sound</code><dd>
+Reset the sound board.
+
+     <br><dt><code>pinio_write_sound</code><dd>
+Write an 8-bit code to the sound board.
+
+     <br><dt><code>pinio_sound_ready_p</code><dd>
+Return true if the sound board has an 8-bit waiting to be read.
+
+     <br><dt><code>pinio_read_sound</code><dd>
+Read an 8-bit code from the sound board.
+
+     <br><dt><code>pinio_write_gi (CONFIG_GI)</code><dd>
+Write to the set of all general illumination strings.  This API
+is only used when the platform does not support dimming.
+
+     <br><dt><code>pinio_read_triac (CONFIG_TRIAC)</code><dd>
+If the platform supports dimming through triacs, this call returns the
+input-side latch values.
+
+     <br><dt><code>pinio_write_triac (CONFIG_TRIAC)</code><dd>
+Write to the triacs.  This API is only used when the platform supports dimming.
+
+     <br><dt><code>pinio_watchdog_reset (CONFIG_WATCHDOG)</code><dd>
+Reset the hardware watchdog timer.
+
+     <br><dt><code>pinio_active_led_toggle (CONFIG_DIAG_LED)</code><dd>
+Toggle the diagnostic LED.
+
+     <br><dt><code>pinio_dmd_window_set (CONFIG_DMD)</code><dd>
+Sets the display page that is mapped into a given portion of the CPU address space.
+
+     <br><dt><code>pinio_dmd_window_get (CONFIG_DMD)</code><dd>
+Returns the display page that is mapped into a given portion of the CPU address space.
+
+     <br><dt><code>pinio_dmd_window_ptr (CONFIG_DMD)</code><dd>
+Returns a pointer to the beginning of the buffer that is mapped into a given portion
+of the CPU address space.
+
+     <br><dt><code>pinio_dmd_set_visible (CONFIG_DMD)</code><dd>
+Sets the display page that is currently visible on the display.
+
+     <br><dt><code>pinio_dmd_request_interrupt (CONFIG_DMD)</code><dd>
+Request that an interrupt be generated when the DMD controller finishes
+refreshing the display.
+
+     <br><dt><code>pinio_parport_write (CONFIG_PARALLEL_PORT)</code><dd>
+Write a byte to the parallel port.
+
+     <br><dt><code>pinio_set_bank (CONFIG_BANK_SWITCH)</code><dd>
+Writes to a bank switching register.  There may be multiple such registers;
+you specify which register, and the value to be written.  The values
+are also platform specific.
+
+     <br><dt><code>pinio_get_bank (CONFIG_BANK_SWITCH)</code><dd>
+Reads the value of a bank switching register.
+
+     <br><dt><code>pinio_read_timer (CONFIG_HIGHRES_TIMER)</code>
+<br><dt><code>pinio_write_timer (CONFIG_HIGHRES_TIMER)</code><dd>
+</dl>
+
+<!-- ====================================================== -->
+   </body></html>
+

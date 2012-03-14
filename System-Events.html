@@ -1,0 +1,265 @@
+<html lang="en">
+<head>
+<title>System Events - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="The-Machine-Definition.html#The-Machine-Definition" title="The Machine Definition">
+<link rel="next" href="Build-Tools.html#Build-Tools" title="Build Tools">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="System-Events"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Build-Tools.html#Build-Tools">Build Tools</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="The-Machine-Definition.html#The-Machine-Definition">The Machine Definition</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="appendix">Appendix C System Events</h2>
+
+<p>Here is a list of all of the standard events that the system generates.
+
+     <dl>
+<dt><code>add_credits</code><dd>One or more full credits have just been added, via coins or the service
+switch.
+
+     <br><dt><code>add_partial_credits</code><dd>One or more partial credits have just been added.
+
+     <br><dt><code>add_player</code><dd>A new player has been added to the game in progress.  This event is
+thrown for all players, including the first one.  For the first player,
+it is thrown after the start_game event.  When called, all player-local
+variables are in scope.
+
+     <br><dt><code>amode_page</code><dd>Thrown by the attract mode pager to allow machines to add their own
+pages into the attract mode display sequence.
+
+     <br><dt><code>amode_start</code><dd>Attract mode has just started.
+
+     <br><dt><code>amode_stop</code><dd>Attract mode has just stopped.
+
+     <br><dt><code>any_device_enter</code><dd>A ball has entered any of the ball devices.
+
+     <br><dt><code>any_kick_attempt</code><dd>An attempt is about to be made to kick from one of the ball devices.
+
+     <br><dt><code>any_pf_switch</code><dd>A playfield switch closure occurred.
+
+     <br><dt><code>ball_count_change</code><dd>The number of balls in play has changed.
+
+     <br><dt><code>boolean ball_drain</code><dd>A ball has entered the trough; should it be treated as a drain? 
+This event should be received by ballsaver logic.  It should return
+FALSE if this is not to be considered a drain, in which case the
+handler should also put a ball back into play somehow.  Otherwise, it
+should return TRUE.
+
+     <p>The standard ballsaver module takes care of this, but you can hook this if
+you write an "unlimited ball" mode, like Lost in the Zone.
+
+     <br><dt><code>ball_search</code><dd>A ball search attempt is in progress.  This event is thrown each time
+all of the solenoids are pulsed to try to find the ball.  It should be
+received by modules which need to do some special processing, such as
+raising/lowering a motor bank &ndash; anything more complicated than just
+firing a solenoid.
+
+     <br><dt><code>bonus</code><dd>End of ball bonus has started.
+
+     <br><dt><code>dev_</code><var>foo</var><code>_enter</code><dd>The device "foo" was just entered (its count went up by 1).
+
+     <br><dt><code>dev_</code><var>foo</var><code>_kick_attempt</code><dd>The system is about to try to kick a ball from device "foo". 
+It cannot be stopped at this point; see the kick_request
+event if you want to delay for some reason.
+
+     <br><dt><code>dev_</code><var>foo</var><code>_kick_failure</code><dd>A kick from device "foo" failed (its count did not change).
+
+     <br><dt><code>dev_</code><var>foo</var><code>_kick_request</code><dd>The system wants to try to kick a ball from device "foo". 
+If you return FALSE from this event, the attempt will be delayed
+for a while.
+
+     <br><dt><code>dev_</code><var>foo</var><code>_kick_success</code><dd>A kick from device "foo" succeeded (its count went down by 1). 
+If more than 1 ball is released at the same time, then more than one
+of these will be thrown.
+
+     <br><dt><code>dev_</code><var>foo</var><code>_surprise_release</code><dd>The count of a device went down by 1 when a release was not initiated
+by software; the ball fell out of the device by other means.
+
+     <br><dt><code>device_update</code><dd>Called periodically to update any mechanical devices whose state
+changes frequently depending on a variety of factors.  Unlike other
+periodic update functions, this will not be called during a ball search.
+
+     <br><dt><code>diagnostic_check</code><dd>Called after init_complete to perform further diagnostic checks.  Note
+that unlike init_ok, a diagnostic_check failure does not cause factory
+reset and reboot, but only flags a problem.  These errors are reported
+in test report.  The diagnostic check can wait if necessary for powerup
+tests to complete, but take care that it does not wait forever.
+
+     <br><dt><code>display_update</code><dd>The running display effect needs to be updated.  This is called whenever
+a display effect exits; it may also be called periodically.  Modules which
+want to display a long-running effect (e.g. for a running mode) should
+receive this event, see if the condition to start the effect is valid
+(i.e. the mode is running), and call deff_start_bg() to request a
+particular background effect be started.  That call itself doesn't guarantee
+that the effect will run; if multiple requests are made, only the one with the
+highest priority will run.
+
+     <br><dt><code>empty_balls_test</code><dd>The empty balls test has been initiated.  The system will take care of
+emptying ordinary ball devices; this event is for modules which store
+balls in some other way (e.g. virtual devices like TZ's gumball machine).
+
+     <br><dt><code>boolean empty_trough_kick</code><dd>This is thrown prior to serving a new ball from the trough after a ball
+lock.  It allows machines to override this behavior and serve the ball
+from somewhere else if desired.  When this is wanted, the handler should
+return FALSE.  The system automatically handles the case where the trough
+is empty and the ball must be served from somewhere else anyway.
+
+     <br><dt><code>end_ball</code><dd>End-of-ball has been asserted.  This is thrown just before end of ball
+bonus starts.
+
+     <br><dt><code>end_game</code><dd>End-of-game has been asserted (for all players).  This is thrown after
+all of the end game effects, like high score entry and match.
+
+     <br><dt><code>end_player</code><dd>End-player has been asserted.  This is called after end_ball, and
+before end_game.
+
+     <br><dt><code>extra_ball_award</code><dd>An extra ball has just been awarded.
+
+     <br><dt><code>factory_reset</code><dd>A factory reset has been initiated.  This event should be received by
+any module with a __permanent__ variable, so that it can be reinitialized. 
+Audits and adjustments are handled automatically.
+
+     <br><dt><code>flipper_abort</code><dd>Both flipper buttons were pressed simultaneously.
+
+     <br><dt><code>flipper_code_entered</code><dd>TBD.
+
+     <br><dt><code>idle</code><dd>This event will be thrown exactly once every 16ms, after all running
+tasks have been scanned and given a chance to run.  If tasks take
+a long while, it is possible that this event will run less frequently. 
+However, this event cannot be starved out indefinitely.  The idle event
+is not thrown during early system initialization.  As this event happens
+frequently, it is usually not the right event for non-system modules to receive.
+
+     <br><dt><code>idle_every_100ms</code><dd>Like idle, but only called once per 100 milliseconds.  This is the
+preferred event for modules to use for periodic processing.
+
+     <br><dt><code>idle_every_second</code><dd>Like idle, but only called once per second.  This can be used instead
+of the 100ms event for less frequent processing.
+
+     <br><dt><code>idle_every_ten_seconds</code><dd>Like idle, but only called once per 10 seconds.  This can be used
+for extremely infrequent processing.
+
+     <br><dt><code>init</code><dd>Called during phase 1 of system initialization.  An init receiver
+cannot assume anything about any other modules than itself.  This is
+normally used to initialize variables, but not to begin device I/O.
+
+     <br><dt><code>init_complete</code><dd>Called during phase 2 of system initialization.  This is intended for
+modules which require interaction with each other.  This is usually the
+right event for a complex device driver to perform I/O-based initialization,
+(e.g. calibration of a motor).
+
+     <br><dt><code>init_ok (boolean)</code><dd>Called after init to determine if initialization failed for any module. 
+Handlers should return FALSE on failure, TRUE on success.  If any
+handler returns FALSE, an automatic factory reset will occur, and the
+init_complete event will not be generated.
+
+     <br><dt><code>lamp_update</code><dd>Called periodically to update the lamp matrix.  This should be received
+to update a lamp whose state depends on a variety of conditions which
+may be constantly changing (e.g. a generic "mode arrow" which could
+be off, flash, or solid and is used by multiple modes.)  In these cases,
+the state of the lamp is dependent on several variables, and the
+lamp_update routine recalculates the state of the lamp.
+
+     <br><dt><code>match_awarded</code><dd>A match was just awarded to one or more players.
+
+     <br><dt><code>minute_elapsed</code><dd>One minute of real time has elapsed, as detected by the real-time clock.
+
+     <br><dt><code>missing_ball_found</code><dd>Don't use this... it will probably be deleted.
+
+     <br><dt><code>music_refresh</code><dd>Called periodically to update the running background music.
+
+     <br><dt><code>replay</code><dd>A replay was just awarded.
+
+     <br><dt><code>score_deff_start</code><dd>The default score screen display effect just started.
+
+     <br><dt><code>score_overlay</code><dd>Thrown just after the default score screen is drawn, but before it is
+displayed.  It allows machines to add an auxiliary effect into the score
+screen, e.g. the starfield on Twilight Zone or the swimming fish on
+Fish Tales.
+
+     <br><dt><code>serve_ball</code><dd>A new ball was just served to the shooter lane.  This event is thrown
+during start_ball, and after locking a ball, but it is not thrown during
+a ball save.  It is intended to be used for relighting a skill shot, or
+for enabling a ball saver.  This event also signals that valid_playfield
+has been reset; i.e. draining this ball without scoring will cause it
+to be re-served.
+
+     <br><dt><code>shoot_again</code><dd>Called during start_ball if an extra ball is being played.
+
+     <br><dt><code>single_ball_play</code><dd>The game was in multiball, but is now back into 1-ball play.  This should
+be handled by multiball modes to shutdown.
+
+     <br><dt><code>slam_tilt</code><dd>The machine has been slam-tilted.
+
+     <br><dt><code>special_award</code><dd>A special was just awarded.
+
+     <br><dt><code>start_ball</code><dd>Start-of-ball has been asserted.
+
+     <br><dt><code>start_game</code><dd>A new game has been started.
+
+     <br><dt><code>start_player</code><dd>Called during the first ball of each player.  For player 1, it is called
+after start_game.  This should be received by any module with a __local__
+variable declaration, which is per-player, to initialize it correctly.
+
+     <br><dt><code>start_without_credits</code><dd>The start button has been pressed in attract mode without credits.
+
+     <br><dt><code>status_report</code><dd>Thrown after all of the default status report pages have been displayed,
+to allow machines to define their own pages.
+
+     <br><dt><code>stop_game</code><dd>The game in progress has been cancelled, due to game restart or exiting
+to test mode.
+
+     <br><dt><code>sw_</code><var>foo</var><dd>The switch <var>foo</var> has transitioned.  Normally switch events are only
+generated on a transition from inactive to active.  Switches marked
+"edge" in the machine configuration will also generate events when
+going back to inactive: for those switches, handlers must use
+switch_poll_logical() to determine the current state of the switch to
+do the right thing.
+
+     <br><dt><code>test_start</code><dd>Test mode has been started.
+
+     <br><dt><code>tilt</code><dd>The player has just tilted his ball.
+
+     <br><dt><code>tilt_warning</code><dd>The player has just received a tilt warning.
+
+     <br><dt><code>timed_drain_penalty</code><dd>In a timed game, the player has drained the ball.  This should be
+received by any modes that want to penalize the player for draining,
+by changing game features or further decreasing the game timer.
+
+     <br><dt><code>timed_game_tick</code><dd>In a timed game, the game timer has decreased by 1 second.
+
+     <br><dt><code>valid_playfield</code><dd>Called after start_ball when the ball has been put into play; a
+ball drain at this point will now signal end_ball.  This is normally
+asserted on any scoring switch, and is what enables a zero-point ball
+to be re-served.  Certain switches like jets and slingshots, which can
+fire if misaligned, can be marked "noplay" to disable this.  The machine
+may use other methods to assure that it is eventually asserted, based on
+number of switch closures or timing.
+
+   </dl>
+
+<!-- ====================================================== -->
+   </body></html>
+

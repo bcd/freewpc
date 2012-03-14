@@ -1,0 +1,99 @@
+<html lang="en">
+<head>
+<title>Display Effects - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Effects.html#Effects" title="Effects">
+<link rel="prev" href="Background-Effects.html#Background-Effects" title="Background Effects">
+<link rel="next" href="Lamp-Effects.html#Lamp-Effects" title="Lamp Effects">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Display-Effects"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Lamp-Effects.html#Lamp-Effects">Lamp Effects</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Background-Effects.html#Background-Effects">Background Effects</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Effects.html#Effects">Effects</a>
+<hr>
+</div>
+
+<h3 class="section">6.3 Display Effects</h3>
+
+<p><a name="index-Display-effects-44"></a><a name="index-Aborting-display-effects-45"></a><a name="index-Kickout-locks-46"></a>
+Display effects are defined in the <code>[deffs]</code> section of the machine
+configuration file.  Both foreground and background deffs are defined here. 
+Each deff has an implementation function, a priority, and one or more of
+the following properties:
+
+     <ul>
+<li>D_QUEUED
+
+     <p>Says that if the effect cannot be started now, to queue it and keep
+retrying.  This flag should be set on higher priority messages that
+really ought to be seen by the player.
+
+     <li>D_TIMEOUT
+
+     <p>Only applies to D_QUEUED deffs.  Says that they should timeout
+eventually if they cannot be started.
+
+     <li>D_ABORTABLE
+
+     <p>Says that pressing both flipper buttons will abort this effect.
+
+     <li>D_PAUSE
+
+     <p>Says that while this effect is running, ball kickouts are paused. 
+This flag is typically set on important instructions or on big
+scoring effects to allow the player to pause and celebrate.
+
+     <li>D_SCORE
+
+     <p>Says that this is a score award effect; the value of the last switch
+score is made available to the effect via the <code>score_deff_get()</code> API.
+
+     <li>D_RESTARTABLE
+
+     <p>Says that if the effect is started when it is already running, that
+it will be restarted (normally, the second call would do nothing). 
+This should generally be set on D_SCORE effects at least.
+
+   </ul>
+
+     <dl>
+<dt><code>deff_start</code><dd>
+Starts a foreground display effect.
+
+     <br><dt><code>deff_stop</code><dd>
+Stops a foreground display effect.
+
+     <br><dt><code>deff_exit</code><dd>
+Exits from the currently running display effect.
+
+     <br><dt><code>deff_nice</code><dd>
+Change the priority of the currently running display effect. 
+If it drops below the priority of something else waiting, this will
+cause it to be preempted.
+
+     <br><dt><code>deff_update</code><dd>
+Update the background display effect.
+
+   </dl>
+
+   </body></html>
+

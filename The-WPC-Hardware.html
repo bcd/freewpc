@@ -1,0 +1,657 @@
+<html lang="en">
+<head>
+<title>The WPC Hardware - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Debugging.html#Debugging" title="Debugging">
+<link rel="next" href="The-Machine-Definition.html#The-Machine-Definition" title="The Machine Definition">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="The-WPC-Hardware"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="The-Machine-Definition.html#The-Machine-Definition">The Machine Definition</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Debugging.html#Debugging">Debugging</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="appendix">Appendix A The WPC Hardware</h2>
+
+<p>This appendix provides an overview of the WPC hardware, in terms of its
+capabilities and how software is able to control everything in the machine.
+
+<h3 class="section">A.1 Overview</h3>
+
+<p>WPC pinball machines contain a number of circuit boards, some that are
+intelligent with microprocessors, and others that are passive.  One of these,
+the CPU board, is the master and houses the main microprocessor, a Motorola
+6809 running at 2MHz.  All
+other boards are connected to this one via ribbon cables.  The functionality
+is spread across multiple boards to make maintenance easier and to isolate
+faults.  These data cables carry 5V, generally active low signals.  Inputs
+read as high (inactive) when the cables are disconnected.
+
+   <p>From 1990-1999, six different generations of machines were produced, which
+differed only slightly.  In order of appearance:
+
+     <ul>
+<li>WPC Alphanumeric
+
+     <p>The initial generation, which used 2 16-character alphanumeric displays,
+Each character is comprised of 14 line segments, a comma, and a period.
+
+     <p>In addition to the CPU board, there is a power driver board which handles
+all of the high voltage I/O, and an alphanumeric controller board, which
+translates CPU commands into the proper signals that the displays need. 
+There is also a separate sound board.
+
+     <li>WPC DMD
+
+     <p>In the second generation, the alphanumerics are replaced by a
+dot matrix controller/display (DMD), which has 128x32 pixels. 
+The display expects a serial bitstream and must be continously refreshed. 
+The controller board stores up to 16 frames in its own RAM and handles
+the refresh.  It connects to the main CPU board which writes the data. 
+The display refreshes at 122Mhz.
+
+     <li>WPC Fliptronic
+
+     <p>Here, the flipper switches and drive transistors are moved from the regular
+switch matrix and power driver board onto a separate board, called the
+Fliptronic Board.  There are Fliptronic I and Fliptronic II boards but
+they appear the same to software.
+
+     <p>This frees up several of the switch matrix entries previously used for
+flipper buttons for other purposes.  The flipper-related circuitry on
+the power driver board goes unused.
+
+     <li>WPC DCS
+
+     <p>With the DCS generation, the sound board is radically improved,
+replacing the synthesizer chip and low-quality analog circuits with a DSP
+supporting high fidelity, stereo, multi-channel sound.
+
+     <li>WPC Security
+
+     <p>A security PIC chip is added between the ASIC and the switch matrix
+inputs.  The CPU no longer reads the switch data directly; it sends
+commands to the PIC which then reads the data.  The PIC requires some
+special cryptic codes to be sent otherwise it will not return valid
+switch data, making the game unplayable.
+
+     <li>WPC-95
+
+     <p>The functions of the circuit boards are combined into fewer boards,
+using FPGAs to replace many of the discrete TTL components.  Functionally
+it is not much different, although the CPU addresses for many of the
+functions changed.  The WPC ASIC remained the same, but its outputs are
+connected to the other circuit boards in slightly different ways.
+
+   </ul>
+
+<h3 class="section">A.2 CPU Board</h3>
+
+<p>The CPU board contains the main processor: a Motorola 68B09E, running at 2Mhz. 
+It is an 8-bit/16-bit CPU with a 64KB address space.  Bank switching is
+required to address more than 64KB.  On reset, location 0xFFFE is
+read to determine the address of the first instruction.
+
+   <p>8KB of RAM is located at physical address 0x0000.  When power is turned off,
+three AA batteries on the CPU board maintain the state of the RAM.
+
+   <p>The game ROM size varies from 128KB to 1MB, depending on the game. 
+The hardware supports a maximum of 1MB; this upper limit was used in all of
+the later models to accommodate more and more graphics.  The uppermost 32KB is
+permanently mapped into the 64KB address space at address 0x8000 and contains
+the core operating system functions.  The remaining parts of the ROM
+must be bank switched in, 16KB at a time; only one 16KB bank at a time
+is visible at address 0x4000.
+
+   <p>The WPC ASIC is the heart of the system and is essentially a
+giant address decoder.  It combines a lot of the functionality that
+was performed by PIAs and TTL logic in earlier solid state games. 
+All read/write requests from the CPU are first seen by the ASIC, which can
+then either respond to it directly if it is an
+internal function, or forward the request to another device.  RAM and ROM
+requests cause those devices enables to be asserted.  For I/O, it may be
+more complicated and cause I/O to other circuit boards.
+
+<h4 class="subsection">A.2.1 Blanking</h4>
+
+<p>The system blanking circuit protects the circuit boards during
+system initialization.  The ASIC generates the BLANKING signal which is
+carried to all of the other boards.  When asserted, BLANKING means
+to disable all output circuits.
+
+   <p>Blanking is initially asserted by the ASIC at powerup, so that no
+lamps or solenoids can be turned on, regardless of the states of the
+outputs from the CPU board.  Once the CPU has initialized, it writes to
+the ASIC to disable blanking; then the other register outputs take effect.
+
+<h4 class="subsection">A.2.2 Diagnostics LED</h4>
+
+<p>LED 3 is controlled by writing to bit 7 of the WPC_LEDS
+register; this register can also be read to get the current LED state. 
+The OS toggles this bit periodically to indicate that the system is alive. 
+It is also used during early fatal errors as a primitive way of
+providing an error message.
+
+<h4 class="subsection">A.2.3 Watchdog</h4>
+
+<p>The ASIC has a builtin watchdog timer which will reset the CPU board if
+software does not restart it periodically.  The expiration seems to be
+on the order of 1 or 2ms.
+
+   <p>FreeWPC restarts the watchdog on every periodic interrupt, every 1ms. 
+During initialization, when interrupts are disabled, it also restarts it
+occasionally.
+
+<h4 class="subsection">A.2.4 Bit Shifter</h4>
+
+<p>The ASIC has a bit shifter which offloads the CPU from having to
+calculate shifts using multiple CPU instructions.  The 6809 does not
+have a native shift instruction for more than 1 bit at a time.
+
+   <p>The bit shifter is used to optimize bit-level operations (set,
+clear, test, and toggle).  This is particularly useful on WPC because
+RAM is scarce; many variables are stored as bits to save space.
+
+<h4 class="subsection">A.2.5 Memory Protection</h4>
+
+<p>As an address decoder, the WPC ASIC is capable of restricting access
+to any part of the address space.  The memory protection circuit
+lets you lock a portion of the system RAM as read-only, so that writes
+to those addresses are effectively no-ops.
+
+   <p>The feature can be enabled/disabled, and the size of the protected
+region can also be specified.  The region must reside in the uppermost
+part of RAM and must be a power of 2 in size.
+
+   <p>FreeWPC uses memory protection to guard adjustments, audits, and some
+other vital data.
+
+<h4 class="subsection">A.2.6 Time of Day Clock</h4>
+
+<p>The time-of-day device maintains the current calendar time.  It has
+two read/write registers, which stores hours and minutes.  The clock
+continues to count even when power is turned off.
+
+   <p>Software maintains the calendar time in nonvolatile memory.
+
+<h4 class="subsection">A.2.7 High Resolution Timer</h4>
+
+<p>The high resolution timer is not currently used by FreeWPC. 
+It allows for sub-millisecond accuracy, and was only used in
+alphanumeric games to do display dimming.
+
+<h4 class="subsection">A.2.8 Bank Switching</h4>
+
+<p>The bank switch register allows you to select which portion of the
+ROM is mapped to the banked region of the physical address space,
+at 0x4000.  Only the lower 6-bits of the register are used, allowing
+for up to 64 pages.  These bits become the uppermost address lines
+sent to the ROM device.
+
+<h4 class="subsection">A.2.9 The Switch Matrix</h4>
+
+<p>All of the switch inputs terminate directly on the CPU board. 
+This includes up to 64 playfield switches, arranged in an 8x8 matrix;
+8 direct inputs used for service buttons and coin switches; and
+several jumpers/DIP switches used for configuring some factory defaults.
+
+<h4 class="subsection">A.2.10 External I/O</h4>
+
+<p>All of the other I/O is located on other boards, which are connected
+to the CPU board via ribbon cables.  Generally on these cables, one side
+of the pins are connected to ground, while the others contain actual
+inputs/outputs.  All logic values measure 0V for a '0', and +5V for a '1'. 
+Inputs have pullup resistors so that reading the signal while the cable
+is not connected will return '1'. 
+All generations of WPC use the same 17x2 pin connector to
+the power driver board, which controls lamps and general solenoids. 
+Display, sound, and flipper interfaces differ somewhat between generations.
+
+   <p>Special I/O boards exist to drive other miscellaneous devices like
+ticket dispensers or a printer.  These were addons that are not typically
+installed in all machines.
+
+<h4 class="subsection">A.2.11 Interrupts</h4>
+
+<p>The ASIC generates the reset, IRQ, and FIRQ signals which are sent to the CPU.
+
+   <p>The 6809 instructions to generate <em>soft interrupts</em> &mdash; swi, swi2,
+and swi3, are not used.  The handlers for those vectors all throw fatal
+errors.
+
+<h5 class="subsubsection">A.2.11.1 Reset</h5>
+
+<p>The ASIC drives the CPU reset signal.  This signal is active low; normally
+the reset line is high.  The ASIC will pull reset low when the watchdog
+timer expires.
+
+<h5 class="subsubsection">A.2.11.2 IRQ</h5>
+
+<p>IRQ is generated 976 times per second, about once every 1.02ms.  An
+oscillator on the CPU board generates the frequency. 
+The periodic interrupt
+can be disabled/enabled by writing to the ASIC's WPC_ZEROCROSS_IRQ_CLEAR
+register.  Separately, IRQ can be masked/unmasked by writing to the
+6809's condition-code (CC) register.
+
+<h5 class="subsubsection">A.2.11.3 FIRQ</h5>
+
+<p>FIRQ can be generated in two ways: from the dot matrix controller after a
+certain scanline is redrawn, or from the high-performance timer.  When
+an FIRQ is received, the CPU has to determine which of these occurred
+to determine how to process it.
+
+   <p>The DMD controller can interrupt via FIRQ when a particular scanline of
+the display has just been sent to the display.  This can be used to
+tell the CPU when to display a new frame.
+
+   <p>The high precision timer can interrupt when its value reaches zero.
+
+   <p>Either of these can be enabled/disabled individually, in addition to
+masking the interrupt at the processor.
+
+<h5 class="subsubsection">A.2.11.4 NMI</h5>
+
+<p>The CPU's NMI input is not used and is connected to Vcc.
+
+<h3 class="section">A.3 Power Driver Board</h3>
+
+<p>The power driver board contains all of the high power circuitry. 
+It has no intelligent parts and is controlled completely by the CPU board
+over a short ribbon cable.  It houses the drive transistors which switch
+current to the high power devices, along with fuses and other power-related
+circuitry.
+
+<h4 class="subsection">A.3.1 Lamp Circuits</h4>
+
+<p>WPC supports up to 64 individually controllable lamps.  The lamps are
+arranged in an 8x8 matrix.  At any given instant, only 8 of the lamps
+can receive power.  A column strobe is written to determine which set
+of 8 lamps is being addressed.  A row output is written to specify
+the on/off states of that set of lamps.  Software must repeatedly
+strobe each of the lamp columns in order to update all 64 lamps.
+
+   <p>The filaments in incandescent lamps operate at around 6V.  The lamp
+circuitry switches a much higher 18V, but strobing only enables that
+voltage for 1/8 of the time, and filaments do not instantly turn off
+when power is removed, so no flicker is perceived.  LEDs do not have
+this property and this explains the flicker that is often seen when
+people replace normal bulbs with LEDs.
+
+<h4 class="subsection">A.3.2 Solenoid Circuits</h4>
+
+<p>All versions of the power driver board support 28 controlled outputs for
+solenoids, motors, etc.  These are divided into four groups:
+8 high power drivers, 8 low power drivers, 8 flashlamp drivers, and
+4 general purpose drivers.  Each bank operates at a different voltage,
+somewhere between 20V and 50V.
+
+   <p>The CPU board enables/disable a driver by writing a command to the
+power driver board.  All values are latched on the driver board and thus
+retain their states until the CPU changes them.  The latches are not
+readable, so software must maintain the last value written in RAM. 
+A CPU board reset will assert a blanking signal to reset the latches;
+this helps in the event of a software crash.
+
+   <p>On WPC-95, 4 additional low voltage outputs running at 5V are added
+to the general purpose group, which can be used for miscellaneous I/O
+like small DC motors.
+
+<h4 class="subsection">A.3.3 General Illumination Circuits</h4>
+
+<p>The GI circuitry allows for 5 strings of up to 18 lamps each. 
+These are separate from the <dfn>controlled lamps</dfn> described previously;
+individual lamps are not controllable, only entire strings of lamps. 
+Each string can independently be turned on and off by a triac. 
+The lamps all run off 6.3V AC.
+
+   <p>Starting with WPC-95, two of the GI strings are always on and not
+under software control, saving the cost of the triacs, but
+eliminating the ability to dim them.
+
+   <p>When enabled, the triacs illuminate the lamps until the AC voltage
+crosses zero.  They must be constantly re-enabled to keep the lamps on.
+
+<h4 class="subsection">A.3.4 Zero Cross Circuit</h4>
+
+<p>The zero-cross circuit tells the CPU when the AC voltage is near zero.
+
+   <p>Alternating current (AC) rapidly changes between a positive and
+negative voltage many times per second.  In the US, the frequency is
+60Hz, which means that the voltage is near zero about once every 8.33ms. 
+Outside the US, line voltage is 50Hz and so zero crossing occurs every
+10ms.
+
+   <p>The zero cross data is used to dim the general illumination.
+
+<h3 class="section">A.4 Sound Board</h3>
+
+<p>Both the WPC and DCS sound boards are connected via a ribbon cable
+to the CPU board, which sends it both read and write commands.  The
+actual values vary greatly depending on the board type.  These
+boards are intelligent and have processors running their own operating
+system dedicated to sound tasks.
+
+   <p>1-byte or 2-byte commands are written to request particular sounds
+to be played.  The sound board stores all of the sound data on
+additional EPROMs, and has its own CPU that decodes the data and
+writes it to various audio devices.
+
+   <p>The sound board can also send data back to the CPU, notably to tell
+it when a sound has finished playing, allowing the CPU to synchronize
+its actions to the sounds and music.
+
+<h3 class="section">A.5 Fliptronic Board</h3>
+
+<p>On all but the earliest games, flipper control is located on a
+separate board, called the Fliptronic Board.  It has 8 drivers
+for up to 4 flippers.  Half of the drivers switch high power 50V,
+used when initially turning on a flipper; the other half switch a
+lower 'holding' power that is adequate for keeping the flipper
+in the raised position for a long period of time.  The board
+also supports 8 switches that can be read by the CPU board: 4
+for the flipper buttons and 4 end-of-stroke (EOS) switches. 
+The button switches are wired to the cabinet buttons.  The
+EOS switches are mounted on the flipper and used to determine
+when the flippers are in the 'up' position, indicating that the
+lower power voltage can be used.
+
+   <p>On pre-Fliptronic games, the flippers are hardwired to the cabinet
+buttons, so flipping occurs without any CPU involvement.  The CPU
+can control a relay on the power driver board to cut flipper power,
+though.
+
+   <p>On WPC-95, the Fliptronic Board was eliminated and its components
+moved elsewhere: switch inputs moved to the CPU board, and flipper
+outputs moved to the driver board.
+
+<h3 class="section">A.6 Auxiliary Driver Board</h3>
+
+<p>Some games use an auxiliary driver board which allows up to 8
+additional flashlamps/low power devices to be controlled.  These
+machines must have the following line in the machine config:
+
+<pre class="example">     define MACHINE_SOL_EXTBOARD1
+</pre>
+   <p>The auxiliary board plugs into the slot formerly used by
+the alphanumeric display board; thus, alphanumeric games cannot use
+this.  This port was later removed on WPC-95.
+
+<h3 class="section">A.7 Dot Matrix Controller Board</h3>
+
+<p>The dot matrix display is 128 columns x 32 rows.  The display itself is
+very dumb and expects a serial bitstream of pixels to be clocked in. 
+The controller board has the display RAM and the serialization logic.
+
+   <p>The controller fetches 1 byte (8 pixels) every 32 CPU cycles (16 microseconds). 
+At this rate, it takes 256 microseconds per row and a little more than 8
+milliseconds per complete frame.  Thus, the refresh rate is about 122MHz.
+
+   <p>The display RAM holds 8KB.  A full DMD bit plane requires 128x32 pixels,
+that is, 4096 bits, or 512 bytes.  Thus, there is enough RAM to hold
+a total of 16 planes.  At any time, at most two planes can be addressed by the
+CPU (changed to six in WPC-95).
+
+   <p>The SRAM is designed to allow both the 6809 and the serial decoder
+to access it simultaneously, at nonoverlapping phases of the system
+clocks.
+
+   <p>Bits are encoded within a byte such that the leftmost pixel is in the
+least significant bit.  This is backwards from how binary numbers are
+normally visualized.
+
+   <p>The DMD controller exposes the following registers:
+
+     <ul>
+<li>Low Mapped Page Register
+
+     <p>Says which of the 16 pages is currently accessible at CPU address 0x3800.
+
+     <li>High Mapped Page Register
+
+     <p>Says which of the 16 pages is currently accessible at CPU address 0x3A00.
+
+     <li>Visible Page Register
+
+     <p>The visible page register, WPC_DMD_ACTIVE_PAGE, holds the page number
+of the frame that should be clocked to the display.  Writing to this
+register does not take effect immediately but instead at the beginning
+of the next vertical retrace.
+
+     <li>Scanline Register
+
+     <p>The controller keeps track of which row is currently being refreshed,
+and makes this accessible to the CPU by reading the WPC_DMD_SCANLINE register. 
+Values range from 0 to 31.
+
+     <p>The CPU can also write to WPC_DMD_SCANLINE to request an FIRQ interrupt
+to be generated when the current scanline reaches a certain value.  This is
+used to implement shading: the active page buffer is rapidly changed between
+different bit planes at different frequencies to simulate color.  Because
+there is latency between the time that FIRQ is generated and the CPU can
+respond to it, this writable register can compensate for that delay and
+help to ensure that flipping occurs as fast as possible.
+
+   </ul>
+
+<h3 class="section">A.8 Memory Map</h3>
+
+<p>This section describes the WPC memory map in detail.  In particular,
+it gives the function of each of the WPC ASIC registers, along with the
+names given to them by FreeWPC.
+
+     <dl>
+<dt>WPC_RAM_BASE (0x0000)<dd>
+System RAM (2K)
+
+     <br><dt>WPC_DMD_RAM_BASE (0x3800)<dd>
+Display RAM (1K).  Which 1K portion of the 16K SRAM
+appears here is controlled by writing to two display
+paging registers, WPC_DMD_HIGH_PAGE and WPC_DMD_LOW_PAGE. 
+On WPC-95 only, up to 3K can be mapped, starting at 0x3000.
+
+     <br><dt>WPC_DEBUG_DATA_PORT (0x3D60)
+<br><dt>WPC_DEBUG_CONTROL_PORT (0x3D61)
+<br><dt>WPC_SERIAL_CONTROL_PORT (0x3E66)
+<br><dt>WPC_SERIAL_DATA_PORT (0x3E67)
+<br><dt>WPC_DMD_3200_PAGE (0x3FB8) [WPC-95 only]<dd>
+3-0: W: The page of display RAM mapped into the 2nd region,
+from 0x3200-0x33FF.
+
+     <br><dt>WPC_DMD_3000_PAGE (0x3FB9) [WPC-95 only]<dd>
+3-0: W: The page of display RAM mapped into the 1st region,
+from 0x3000-0x31FF.
+
+     <br><dt>WPC_DMD_3600_PAGE (0x3FBA) [WPC-95 only]
+<br><dt>WPC_DMD_3400_PAGE (0x3FBB) [WPC-95 only]
+<br><dt>WPC_DMD_HIGH_PAGE (0x3FBC)<dd>
+3-0: W: The page of display RAM mapped into the 2nd (6th on WPC95) region,
+from 0x3A00-0x3BFF.
+
+     <br><dt>WPC_DMD_SCANLINE (0x3FBD)<dd>
+7-0: W: Request an FIRQ after a particular scanline is drawn
+5-0: R: The last scanline that was drawn
+
+     <br><dt>WPC_DMD_LOW_PAGE 				0x3FBE<dd>
+3-0: W: The page of display RAM mapped into the 1st (5th on WPC95) region,
+from 0x3800-0x39FF.
+
+     <br><dt>WPC_DMD_ACTIVE_PAGE 			0x3FBF<dd>3-0: W: The page of display RAM to be used for refreshing the display. 
+Writes to this register take effect just prior to drawing scanline 0.
+
+     <br><dt>WPC_PARALLEL_STATUS_PORT 	(0x3FC0)
+<br><dt>WPC_PARALLEL_DATA_PORT 	(0x3FC1)
+<br><dt>WPC_PARALLEL_STROBE_PORT 	(0x3FC2)
+<br><dt>WPC_SERIAL_DATA_OUTPUT 	(0x3FC3)
+<br><dt>WPC_SERIAL_CONTROL_OUTPUT	(0x3FC4)
+<br><dt>WPC_SERIAL_BAUD_SELECT 	(0x3FC5)
+<br><dt>WPC_TICKET_DISPENSE 		(0x3FC6)
+<br><dt>WPC_FLIPTRONIC_PORT_A 		(0x3FD4)<dd>
+7: W: Enable upper-left flipper hold
+6: W: Enable upper-left flipper power
+5: W: Enable upper-right flipper hold
+4: W: Enable upper-right flipper power
+3: W: Enable lower-left flipper hold
+2: W: Enable lower-left flipper power
+1: W: Enable lower-right flipper hold
+0: W: Enable lower-right flipper power
+7: R: Upper-left flipper EOS input
+6: R: Upper-left flipper cabinet input
+5: R: Upper-right flipper EOS input
+4: R: Upper-right flipper cabinet input
+3: R: Lower-left flipper EOS input
+2: R: Lower-left flipper cabinet input
+1: R: Lower-right flipper EOS input
+0: R: Lower-right flipper cabinet input
+
+     <br><dt>WPC_FLIPTRONIC_PORT_B 		0x3FD5<dd>
+Not used.
+
+     <br><dt>WPCS_DATA 						0x3FDC<dd>
+7-0: R/W: Send/receive a byte of data to/from the sound board.
+
+     <br><dt>WPCS_CONTROL_STATUS 			0x3FDD<dd>
+7: R: WPC sound board read ready
+0: R: DCS sound board read ready
+
+     <br><dt>WPC_SOL_GEN_OUTPUT 		   0x3FE0<dd>
+7-0: W: Enables for solenoids 25-29
+
+     <br><dt>WPC_SOL_HIGHPOWER_OUTPUT 	0x3FE1<dd>
+7-0: W: Enables for solenoids 1-8
+
+     <br><dt>WPC_SOL_FLASH1_OUTPUT 		0x3FE2<dd>
+7-0: W: Enables for solenoids 17-24
+
+     <br><dt>WPC_SOL_LOWPOWER_OUTPUT 		0x3FE3<dd>
+7-0: W: Enables for solenoids 9-16
+
+     <br><dt>WPC_LAMP_ROW_OUTPUT 			0x3FE4<dd>
+7-0: W: Lamp matrix row output
+
+     <br><dt>WPC_LAMP_COL_STROBE 			0x3FE5<dd>
+7-0: W: Lamp matrix column strobe
+At most one bit in this register should be set. 
+If all are clear, then no controlled lamps are
+enabled.
+
+     <br><dt>WPC_GI_TRIAC 					0x3FE6<dd>
+7: W: Flipper enable relay
+5: W: Coin door enable relay
+4-0: W: General illumination enables
+
+     <br><dt>WPC_SW_JUMPER_INPUT 			0x3FE7<dd>7-0: R: Jumper/DIP switch inputs
+
+     <br><dt>WPC_SW_CABINET_INPUT 			0x3FE8<dd>
+7: R: Fourth coin switch
+6: R: Right coin switch
+5: R: Center coin switch
+4: R: Left coin switch
+3: R: Enter (Begin Test) button
+2: R: Up button
+1: R: Down button
+0: R: Escape (Service Credit) button
+
+     <br><dt>WPC_SW_ROW_INPUT 				0x3FE9 *Pre-security<dd>
+7-0: R: Readings for the currently selected switch column. 
+Bit 0 corresponds to row 1, bit 1 to row 2, and so on. 
+A '1' indicates active voltage level.  For a mechanical switch,
+this means the switch is closed.  For an optical switch, this
+means the switch is open.
+
+     <br><dt>WPCS_PIC_READ 					0x3FE9 *WPC-S
+<br><dt>WPC_SW_COL_STROBE 				0x3FEA *Pre-security
+<br><dt>WPCS_PIC_WRITE 					0x3FEA *WPC-S<dd>
+7-0: W: Switch column strobe. 
+For pre-Security games, exactly one bit must be set. 
+For Security games, writing to this register sends a command
+to the PIC chip and does not directly control the strobe line.
+
+     <br><dt>WPC_ALPHA_POS 					0x3FEB *Alphanumeric
+<br><dt>WPC_EXTBOARD1 					0x3FEB *DMD<dd>
+On DMD games, this is a general I/O that is used for machine-specific
+purposes.
+
+     <br><dt>WPC_ALPHA_ROW1 					0x3FEC *Alphanumeric
+<br><dt>WPC_EXTBOARD2 					0x3FEC *DMD<dd>
+On DMD games, this is a general I/O that is used for machine-specific
+purposes.
+
+     <br><dt>WPC_EXTBOARD3 					0x3FED *DMD<dd>
+On DMD games, this is a general I/O that is used for machine-specific
+purposes.
+
+     <br><dt>WPC_ALPHA_ROW2 					0x3FEE *Alphanumeric
+<br><dt>WPC95_FLIPPER_COIL_OUTPUT 	0x3FEE *WPC-95
+<br><dt>WPC95_FLIPPER_SWITCH_INPUT 	0x3FEF *WPC-95
+<br><dt>WPC_LEDS 							0x3FF2<dd>
+7: R/W : The state of the diagnostic LED. 
+&gt;0=Off
+&gt;1=On
+
+     <br><dt>WPC_RAM_BANK 					0x3FF3 *WPC-95<dd>
+3-0: W: The page of RAM currently mapped into the banked region.
+
+     <br><dt>WPC_SHIFTADDR 					0x3FF4<dd>15-0: R/W: The base address for the bit shifter. 
+Writing to this address initializes the shifter. 
+Reading from this address after a shift command returns the
+shifted address.
+
+     <br><dt>WPC_SHIFTBIT 					0x3FF6<dd>7-0: W: Sets the bit position for a shift command. 
+7-0: R: Returns the output of the last shift command as a bitmask.
+
+     <br><dt>WPC_SHIFTBIT2 					0x3FF7<dd>7-0: R/W:
+
+     <br><dt>WPC_PERIPHERAL_TIMER_FIRQ_CLEAR 0x3FF8
+<br><dt>WPC_ROM_LOCK 					0x3FF9<dd>
+Not used
+
+     <br><dt>WPC_CLK_HOURS_DAYS 			0x3FFA<dd>
+7-0: R/W : The time-of-day hour counter.
+
+     <br><dt>WPC_CLK_MINS 					0x3FFB<dd>
+7-0: R/W : The time-of-day minute counter.
+
+     <br><dt>WPC_ROM_BANK 					0x3FFC<dd>
+5-0: R/W: The page of ROM currently mapped into the banked region (0x4000-0x7FFF). 
+Pages 62 and 63 correspond to the uppermost 32KB, and are not normally mapped
+because those pages are accessible in the fixed region (0x8000-0xFFFF). 
+Page numbers are consecutive.  Page 0 corresponds to the lowest address in a
+1MB device.  If a smaller ROM is installed, the uppermost bits of this register
+are effectively ignored.
+
+     <br><dt>WPC_RAM_LOCK 					0x3FFD
+<br><dt>WPC_RAM_LOCKSIZE 				0x3FFE
+<br><dt>WPC_ZEROCROSS_IRQ_CLEAR 		0x3FFF<dd>
+7: R: Set to 1 when AC is currently at a zero crossing, or 0 otherwise. 
+7: W: Writing a 1 here clears the source of the periodic timer interrupt. 
+4: R/W: Periodic timer interrupt enable
+&gt;0=Periodic IRQ disabled
+&gt;1=Periodic IRQ enabled
+2: W: Writing a 1 here resets the watchdog.
+
+   </dl>
+
+<!-- ====================================================== -->
+   </body></html>
+

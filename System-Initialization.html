@@ -1,0 +1,77 @@
+<html lang="en">
+<head>
+<title>System Initialization - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Fonts-and-Graphics.html#Fonts-and-Graphics" title="Fonts and Graphics">
+<link rel="next" href="Platform-APIs.html#Platform-APIs" title="Platform APIs">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="System-Initialization"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Platform-APIs.html#Platform-APIs">Platform APIs</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Fonts-and-Graphics.html#Fonts-and-Graphics">Fonts and Graphics</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">11 System Initialization</h2>
+
+<p><a name="index-Initialization-sequence-72"></a>
+Game developers do not generally need to understand all the details of
+initialization.  However, this may be of interest to system developers.
+
+   <p>Here is a rough outline of the steps taken to initialize the FreeWPC
+environment:
+
+     <ul>
+<li>On real hardware, the processor's RESET handler is called. 
+On WPC, the reset handler is written in assembly language.  It performs
+a ROM checksum test and a RAM test. 
+<li>The program's <code>main</code> function is called (on real hardware,
+this is called from the RESET handler; in simulation, this is called
+by the OS like any other executable).  <code>main</code> is a platform-dependent
+function.  It can be thought of as the continuation of low-level
+initialization, except written in C. 
+<li><code>main</code> calls into <code>freewpc_init</code>, where the common
+initialization begins.  This is defined in <samp><span class="file">kernel/init.c</span></samp>. 
+<li>All of the hardware-related subsystems are initialized. 
+<li>The task scheduler is initialized.  This transforms the single thread
+of execution into a legitimate task. 
+<li>Interrupts are enabled.  Hardware systems that depend on interrupts
+are now fully functional.  Also, the system clock begins to tick, which
+allows tasks to sleep and therefore multitasking is fully supported. 
+<li>Software subsystems are initialized.  The <code>init</code> event is thrown
+here, so any new subsystems added just need to catch this event to initialize
+themselves.  It is important that modules do not interact with each other during
+this phase, because the order of init calls is not guaranteed. 
+<li>Periodic functions are enabled. 
+<a name="index-Power_002dup-message-73"></a><li>The system powerup display effect is started. 
+<li>The <code>init_ok</code> event is thrown to allow modules to perform a final
+initialization, which may require interaction with each other.  Modules can
+return FALSE if a factory reset is required.  In that case, the system will
+reboot after performing the factory reset. 
+<li>The <code>init_complete</code> event is thrown, to signal that all modules are
+ready. 
+<li>The main task exits, and initialization is complete. 
+</ul>
+
+<!-- ====================================================== -->
+   </body></html>
+

@@ -1,0 +1,78 @@
+<html lang="en">
+<head>
+<title>Native Mode - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Platform-APIs.html#Platform-APIs" title="Platform APIs">
+<link rel="next" href="Debugging.html#Debugging" title="Debugging">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Native-Mode"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Debugging.html#Debugging">Debugging</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Platform-APIs.html#Platform-APIs">Platform APIs</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">13 Native Mode</h2>
+
+<p><a name="index-Native-mode-76"></a><a name="index-Simulation-77"></a>
+Native mode lets you run FreeWPC directly on your host build machine. 
+It is a form of emulation, like PinMAME, except the emulator is
+"built-in" to the game program itself.  It works on both Linux and
+Cygwin systems.
+
+   <p>There are two major differences in a simulation build.  First, certain
+low-level OS and CPU specific features must be replaced by new components that
+work under your native operating system environment.  In particular, 6809
+assembly language functions are not used at all in this mode.  We use either
+portable C versions of these functions, or comparable functions that are
+provided by the host OS.
+
+   <p>Second, I/O reads and writes do not directly control real hardware, but
+are instead emulated internally by the program itself.  All I/O is
+initiated by the platform APIs and uses the <code>readb</code> and <code>writeb</code>
+functions to address the hardware.  In native mode, these functions define
+a separation between the "program" and the "simulation".
+
+   <p>Native mode is most useful for debugging and testing the higher layers
+of FreeWPC, which aren't as hardware or timing dependent.  This is only
+possible because the majority of the code is written in C.
+
+   <p>To compile in native mode, just add <code>NATIVE=y</code> to your <samp><span class="file">.config</span></samp>. 
+Instead of a ROM, you'll get an executable that can be run directly.
+
+<ul class="menu">
+<li><a accesskey="1" href="Thread-Model.html#Thread-Model">Thread Model</a>:            How tasks and interrupts work in simulation
+<li><a accesskey="2" href="Persistent-Memory.html#Persistent-Memory">Persistent Memory</a>:       How to simulate persistent variables
+<li><a accesskey="3" href="Input-and-Output.html#Input-and-Output">Input and Output</a>:        How the hardware I/O is emulated
+<li><a accesskey="4" href="GDB-Debugging.html#GDB-Debugging">GDB Debugging</a>:           Debugging the program using GDB
+<li><a accesskey="5" href="Interrupt-Tracing.html#Interrupt-Tracing">Interrupt Tracing</a>
+<li><a accesskey="6" href="Platform-Emulation.html#Platform-Emulation">Platform Emulation</a>
+<li><a accesskey="7" href="Timing.html#Timing">Timing</a>
+<li><a accesskey="8" href="Command-Language.html#Command-Language">Command Language</a>
+<li><a accesskey="9" href="Variables.html#Variables">Variables</a>
+<li><a href="User-Interface.html#User-Interface">User Interface</a>
+<li><a href="Hardware-Emulation.html#Hardware-Emulation">Hardware Emulation</a>
+<li><a href="Signal-Tracking.html#Signal-Tracking">Signal Tracking</a>
+</ul>
+
+   </body></html>
+

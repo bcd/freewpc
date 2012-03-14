@@ -1,0 +1,44 @@
+<html lang="en">
+<head>
+<title>Interrupt Tracing - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Native-Mode.html#Native-Mode" title="Native Mode">
+<link rel="prev" href="GDB-Debugging.html#GDB-Debugging" title="GDB Debugging">
+<link rel="next" href="Platform-Emulation.html#Platform-Emulation" title="Platform Emulation">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Interrupt-Tracing"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Platform-Emulation.html#Platform-Emulation">Platform Emulation</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="GDB-Debugging.html#GDB-Debugging">GDB Debugging</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Native-Mode.html#Native-Mode">Native Mode</a>
+<hr>
+</div>
+
+<h3 class="section">13.5 Interrupt Tracing</h3>
+
+<p>Since interrupt handlers are really just ordinary functions in native mode,
+they are much easier to debug.  You can use printf and other functions that
+would normally be off-limits.  The <code>interrupt_dbprintf</code> function can
+be used; in 6809 mode, this is a macro which does nothing, while in native
+mode it equates to a regular <code>dbprintf</code>.
+
+   </body></html>
+

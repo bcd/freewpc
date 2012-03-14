@@ -1,0 +1,64 @@
+<html lang="en">
+<head>
+<title>Device Status - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Ball-Tracking.html#Ball-Tracking" title="Ball Tracking">
+<link rel="next" href="Global-Status.html#Global-Status" title="Global Status">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Device-Status"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Global-Status.html#Global-Status">Global Status</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Ball-Tracking.html#Ball-Tracking">Ball Tracking</a>
+<hr>
+</div>
+
+<h3 class="section">7.1 Device Status</h3>
+
+<p>For each device, the ball tracker maintains the following state information:
+
+     <ul>
+<li>The maximum number of balls it can hold.  This is a constant that
+depends on the number of counting switches in the device. 
+<li>The current number of balls it contains
+<li>The previous number of balls it contained earlier
+<li>The desired number of balls that game logic wants it to have
+<li>Whether or not it is in the process of trying to release a ball
+</ul>
+
+   <p>The <dfn>desired count</dfn> is crucial to understanding the module's behavior. 
+Whenever the device has more balls than desired, the ball tracker will initiate
+one or more releases
+to try to bring the count down to the desired number.  Otherwise, any balls
+that enter the device are kept there; this is used to implement ball locks.
+
+   <p>Software requests to kick a ball are <em>always</em> done by manipulating the
+desired count.  The device module has complete control over the actual
+release solenoid.
+
+   <p>The trough device is the only device which normally desires to keep any balls. 
+Playfield devices generally desire zero balls unless a lock has been enabled.
+
+   <p>Device switches must be declared as <em>edge</em> switches, which invoke the
+event handler on both open and close transitions.  The tracker simply updates
+the current count on either type of transition.
+
+   </body></html>
+

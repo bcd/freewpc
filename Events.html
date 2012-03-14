@@ -1,0 +1,64 @@
+<html lang="en">
+<head>
+<title>Events - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Ball-Tracking.html#Ball-Tracking" title="Ball Tracking">
+<link rel="prev" href="Global-Status.html#Global-Status" title="Global Status">
+<link rel="next" href="The-Trough-Device.html#The-Trough-Device" title="The Trough Device">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Events"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="The-Trough-Device.html#The-Trough-Device">The Trough Device</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Global-Status.html#Global-Status">Global Status</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Ball-Tracking.html#Ball-Tracking">Ball Tracking</a>
+<hr>
+</div>
+
+<h3 class="section">7.3 Events</h3>
+
+<p>The ball tracker also generates new per-device events.  The name of
+the event includes the name of the device: for example,
+<code>dev_trough_enter</code>.
+
+   <p>The <dfn>enter</dfn> event is generated when the current count goes up by 1. 
+Game code should normally always register handlers for the enter events
+rather than individual switches.  Note that a switch closure does not
+always indicate enter: consider an eject that is trying to kick out
+but the kicker is weak, so that the ball falls back in immediately. 
+Also, when a ball trough releases a ball, a whole series of switch
+closures occur rapidly, but eventually it stabilizes.  The ball
+tracker waits a little while after switch change before it begins
+to take action.
+
+   <p>When a release is necessary, the module first generates a <dfn>kick_request</dfn>
+event.  This is a boolean event; handlers can return FALSE if the request
+should be postponed for some reason.  In that case, the module will retry again
+later.  Once the request is allowed, a <dfn>kick_attempt</dfn> event is generated
+just before the solenoid is pulsed.  This is typically caught in order to play
+a sound effect.  If the pulse fails, the attempt event may be thrown multiple
+times.
+
+   <p>The <dfn>kick_success</dfn> event is generated when the release is deemed successful:
+when the device count goes down by 1.  The <dfn>kick_failure</dfn> event is instead
+thrown when an attempts fails repeatedly and the device is abandoned.
+
+   </body></html>
+

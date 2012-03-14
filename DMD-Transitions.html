@@ -1,0 +1,52 @@
+<html lang="en">
+<head>
+<title>DMD Transitions - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Effects.html#Effects" title="Effects">
+<link rel="prev" href="Lamplists.html#Lamplists" title="Lamplists">
+<link rel="next" href="Background-Refresh.html#Background-Refresh" title="Background Refresh">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="DMD-Transitions"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Background-Refresh.html#Background-Refresh">Background Refresh</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Lamplists.html#Lamplists">Lamplists</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Effects.html#Effects">Effects</a>
+<hr>
+</div>
+
+<h3 class="section">6.7 DMD Transitions</h3>
+
+<p><a name="index-Transitions-50"></a>
+A <dfn>transition</dfn> is an interim effect that runs between the end of one display
+effect and the beginning of another.  By default, a new effect will simply
+kill the old one and overwrite it with a new image.
+
+   <p>Transitions are scheduled &ndash; a handler is installed that runs the next
+time that a new image is shown.  Instead of showing the image right away,
+the transition handler kicks in and displays some combination of
+the present view and the new one.  When the transition finishes, the
+display should consist entirely of the new image.
+
+   <p>Currently, all DMD transitions are contained in <samp><span class="file">common/dmdtrans.c</span></samp>
+and segment transitions are in <samp><span class="file">kernel/segment.c</span></samp>.
+
+   </body></html>
+

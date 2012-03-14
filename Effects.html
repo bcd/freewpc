@@ -1,0 +1,63 @@
+<html lang="en">
+<head>
+<title>Effects - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Core-APIs.html#Core-APIs" title="Core APIs">
+<link rel="next" href="Ball-Tracking.html#Ball-Tracking" title="Ball Tracking">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Effects"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Ball-Tracking.html#Ball-Tracking">Ball Tracking</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Core-APIs.html#Core-APIs">Core APIs</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">6 Effects</h2>
+
+<p><a name="index-Effects-42"></a><a name="index-Choreography-43"></a>
+Effect processing is a layer above the hardware which provides
+controlled access to the lamps, display, flashers, and general
+illumination.  It resolves contention when multiple tasks try to
+access the same object at the same time through the use of
+priorities.
+
+   <p>The system manages three distinct types of effects: display, lamps, and
+music.  They are fully independent of each other.  It is not possible
+to request that all three types do something in sync with one another. 
+There are similarities between the way each type is handled, but all
+three have fundamental differences.
+
+   <p>Lamp effects manage the controlled lamps, plus the GI and flashers.
+
+<ul class="menu">
+<li><a accesskey="1" href="Basic-Effect-Principles.html#Basic-Effect-Principles">Basic Effect Principles</a>:     What all types of effects have in common
+<li><a accesskey="2" href="Background-Effects.html#Background-Effects">Background Effects</a>:          When an effect should always be running
+<li><a accesskey="3" href="Display-Effects.html#Display-Effects">Display Effects</a>:             Extra properties of display effects
+<li><a accesskey="4" href="Lamp-Effects.html#Lamp-Effects">Lamp Effects</a>:                Extra properties of lamps effects
+<li><a accesskey="5" href="Sound-and-Music-Effects.html#Sound-and-Music-Effects">Sound and Music Effects</a>:     Extra properties of sounds and music
+<li><a accesskey="6" href="Lamplists.html#Lamplists">Lamplists</a>:                   How to work with more than one lamp at a time
+<li><a accesskey="7" href="DMD-Transitions.html#DMD-Transitions">DMD Transitions</a>:             Wipes, fades, etc. on the display
+<li><a accesskey="8" href="Background-Refresh.html#Background-Refresh">Background Refresh</a>:          Periodic updates other than display/music. 
+</ul>
+
+   </body></html>
+

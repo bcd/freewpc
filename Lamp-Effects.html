@@ -1,0 +1,88 @@
+<html lang="en">
+<head>
+<title>Lamp Effects - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Effects.html#Effects" title="Effects">
+<link rel="prev" href="Display-Effects.html#Display-Effects" title="Display Effects">
+<link rel="next" href="Sound-and-Music-Effects.html#Sound-and-Music-Effects" title="Sound and Music Effects">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Lamp-Effects"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Sound-and-Music-Effects.html#Sound-and-Music-Effects">Sound and Music Effects</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Display-Effects.html#Display-Effects">Display Effects</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Effects.html#Effects">Effects</a>
+<hr>
+</div>
+
+<h3 class="section">6.4 Lamp Effects</h3>
+
+<p><a name="index-Lamp-effects-47"></a><a name="index-Light-shows-48"></a>
+Lamp effects are defined in the <code>[leffs]</code> section of the machine
+configuration file.  Each lamp effect defines a function that executes
+when the effect is running, plus it says which of the lamps, flashers,
+and G.I. strings it is able to modify.  Attempts to modify unallocated
+objects have no effect.
+
+   <p>The objects allocated to a lamp effect are guaranteed to be turned off
+when the function starts, and are restored to their previous states
+when the function ends.
+
+   <p>A lamp effect can also be declared as <dfn>shared</dfn>.  A shared leff can
+run in parallel with the current running leff, and with other shared
+leffs.  Shared leffs have a lower priority than normal leffs; the
+effect can be masked.  Also, shared leffs run to completion and are
+never preempted.
+
+   <p>Shared leffs are usually for indicating low-priority game state
+that requires constant updating, and where it is not appropriate to use
+the default lamp state. 
+Normal leffs are intended for light shows.
+
+   <p>Lamp effects cannot be aborted by the flippers like display effects.
+
+   <p>If a normal leff cannot be started, it is forgotten and never queued, like
+display effects can be.
+
+     <dl>
+<dt><code>leff_start</code><dd>
+Starts a lamp effect.
+
+     <br><dt><code>leff_stop</code><dd>
+Stops a lamp effect.
+
+     <br><dt><code>leff_restart</code><dd>
+Stops and then starts a lamp effect again.
+
+     <br><dt><code>leff_on, leff_off, leff_toggle, leff_test</code><dd>
+Called from within a lamp effect, sets/gets the state of a single lamp
+that has been allocated to it.
+
+     <br><dt><code>gi_leff_alloc, gi_leff_enable, gi_leff_disable, gi_leff_free</code><dd>
+Called only from within lamps effects.  These modify GI strings
+overriding their default settings.
+
+     <br><dt><code>leff_exit</code><dd>
+Exits from the currently running lamp effect.
+
+   </dl>
+
+   </body></html>
+

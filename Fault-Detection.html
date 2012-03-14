@@ -1,0 +1,81 @@
+<html lang="en">
+<head>
+<title>Fault Detection - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link rel="prev" href="Template-Drivers.html#Template-Drivers" title="Template Drivers">
+<link rel="next" href="Timers.html#Timers" title="Timers">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Fault-Detection"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Timers.html#Timers">Timers</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Template-Drivers.html#Template-Drivers">Template Drivers</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Software-Environment.html#Software-Environment">Software Environment</a>
+<hr>
+</div>
+
+<h3 class="section">4.7 Fault Detection</h3>
+
+<p><a name="index-Fault-detection-26"></a>
+Fatal errors when detected will cause the system to reboot.  The system
+API <code>fatal()</code> can be used to cause a fatal error at any time. 
+A list of the error codes is kept in <samp><span class="file">include/sys/errno.h</span></samp>.
+
+   <p>There is also the <code>nonfatal()</code> API
+for logging errors which will not cause a reset.  These are audited
+and when <code>DEBUGGER</code> is defined, it will display a brief message on the DMD.
+
+   <p>The core operating system code throws fatal errors in several key
+circumstances:
+
+     <ul>
+<li>When task scheduling locks up
+
+     <p>Because tasks continue to run until they give up control, a "hung" task
+will hang the entire system.  At realtime level, this can be detected
+by seeing that the current task has not changed for a certain period of
+time.  This works because realtime uses interrupts.
+
+     <li>When we cannot create a new task
+
+     <p>The number of tasks is bounded, to prevent runaway task creation/
+memory allocation.  Many other subsystems do the same whenever a limit
+is reached.
+
+     <p>As a result, you never need to check the return value of a <code>task_create</code>
+call, because if it fails, then control is never returned to you.
+
+     <li>When an NMI or other unexpected interrupt occurs
+
+     <li>When the non-volatile memory is found unlocked.
+
+     <p>This is almost
+always because someone called <code>pinio_nvram_unlock()</code> and forgot
+to call <code>pinio_nvram_lock()</code> afterwards, or executed a <code>task_sleep</code>
+in between.
+
+     <li>Certain illegal function calls are made, such as trying to sleep
+from outside task context.
+
+   </ul>
+
+   </body></html>
+

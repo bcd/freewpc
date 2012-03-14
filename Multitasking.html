@@ -1,0 +1,146 @@
+<html lang="en">
+<head>
+<title>Multitasking - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link rel="next" href="Real_002dTime-Processing.html#Real_002dTime-Processing" title="Real-Time Processing">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Multitasking"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Real_002dTime-Processing.html#Real_002dTime-Processing">Real-Time Processing</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Software-Environment.html#Software-Environment">Software Environment</a>
+<hr>
+</div>
+
+<h3 class="section">4.1 Multitasking</h3>
+
+<p><a name="index-Task-scheduler-7"></a>FreeWPC implements a runtime, round-robin, non-preemptive task scheduler. 
+The system manages multiple tasks, each of which has its own call stack.  You
+can create a new task when you want to run some code in parallel with the current
+thread of execution.  The current task has complete control of the CPU and will
+continue to run until it explicitly exits or sleeps (waiting for a certain amount
+of time).  The minimum sleep time is defined by IRQS_PER_TICK and is currently 16ms.
+
+   <p>Contrast this with desktop operating systems, which use timeslicing and preemption to
+allow multiple threads to run in parallel.  There, the OS switches between the tasks. 
+In FreeWPC task switches only happen explicitly; this provides for more deterministic
+behavior, it requires less overhead, and it eliminates the need for mutexes (locks)
+between two tasks because task switches cannot happen at arbitrary times.
+
+   <p>If a task does not give up control, either by sleeping, exiting, or yielding
+after a certain amount of time, the fatal error <code>ERR_FCFS_LOCKUP</code> will be asserted.
+
+   <p>When a new task is created, it does not begin running immediately; control always
+continues with the task that started it.  This allows you to configure the new task
+before it can run.
+
+   <p><a name="index-Process-IDs-8"></a><a name="index-Group-IDs-9"></a>Each task is identified by a <dfn>process ID</dfn>, or <dfn>pid</dfn>.  The PID for a task
+is assigned by the system when it is created.  A task also has a <dfn>group ID</dfn>,
+or <dfn>gid</dfn>.  The GID is assigned by the programmer, and multiple tasks can share
+the same GID.  GIDs allow you to control a group of related tasks, or to
+refer to a task using a compile-time ID as opposed to a run-time ID.
+
+   <p>In native mode, the multitasking APIs are implemented using the GNU
+Pth library.  A good description of this library can be found at
+<a href="http://www.gnu.org/software/pth/">http://www.gnu.org/software/pth/</a>.  Note this is not the same
+as <samp><span class="command">pthreads</span></samp>, which is the predominant <em>preemptive</em>
+threading library.
+
+   <p>For Windows programmers, this threading model is very similar to what Win32 calls
+<em>fibers</em>.
+
+<h4 class="subsection">4.1.1 Periodic Functions</h4>
+
+<p><a name="index-Periodic-functions-10"></a>
+After all tasks have been given a chance to run in a 16ms timeslice,
+the system runs the <dfn>periodic functions</dfn>.  These have equal priority
+to tasks, but they do not have a stack and they cannot sleep.  In the
+code, these are also referred to as <dfn>idle functions</dfn>, although that
+term is slightly incorrect (they are guaranteed to be called even on a
+fully busy system).
+
+   <p>You can register a periodic function at various
+rates: either every 16ms, 100ms, 1 second, or 10 seconds.  Handlers may not
+be called at the exact rate, but it will be as close as possible.  Slippage
+occurs when it takes longer than 16ms for all tasks to be given a chance to run. 
+If you need exact timing, use a realtime function.
+
+   <p>For example, assume that a 1 second handler does not get called until
+after 1.5 seconds from the previous call, because the system is busy running
+other tasks.  Then the next time it will be called just 500ms
+later; the scheduler will realize that it is behind and try to catch up.
+
+   <p>You cannot dynamically register or deregister periodic handlers at runtime.
+
+<h4 class="subsection">4.1.2 Task APIs</h4>
+
+     <dl>
+<dt><code>task_create_gid</code><dd>
+The basic API to create a new task.  You specify a code function and a GID.  The function
+must reside in the same bank of ROM.  If the function is in a different ROM page, you
+need to call <code>task_set_rom_page</code> <em>immediately</em> after this call to say where
+it was placed.
+
+     <br><dt><code>task_create_gid1</code><dd>
+Similar, but checks to see if a task with the same GID already exists; if it does, no new
+task is created.
+
+     <br><dt><code>task_recreate_gid</code><dd>
+Similar, but checks to see if a task with the same GID already exists; if it does, the old
+task is stopped before the new task is created.
+
+     <br><dt><code>task_sleep</code><dd>
+Suspends the current running task for <em>at least</em> the given period of time.  The parameter is one of the
+<code>TIME</code> defines which is given in units of approximately 16ms.  Because it is 8-bit, this limits it
+to about 4 seconds.
+
+     <p>If you want to sleep for the absolute minimum, instead of <code>task_sleep (0)</code> it is recommended
+to use <code>task_yield()</code>.
+
+     <br><dt><code>task_sleep_sec</code><dd>
+Suspends the current running task for the given number of seconds.  This handles larger
+timeouts, but does not allow the same granularity.
+
+     <br><dt><code>task_exit</code><dd>
+Exit from the current task.  This must be called; task functions cannot just return when they
+are done (that is guaranteed to cause a crash).
+
+     <br><dt><code>task_find_gid</code><dd>
+Returns the first PID found for a task that has a given GID.
+
+     <br><dt><code>task_kill_pid</code><dd>
+Stops another task based on PID.  This stops exactly one task.
+
+     <br><dt><code>task_kill_gid</code><dd>
+Stops another task based on GID.  This can stop one or more tasks.  If called from a task with
+the same GID, it stops all other tasks, but keeps the running task alive.
+
+     <br><dt><code>task_set_arg</code><dd>
+The creator of a task can pass a single 16-bit value or pointer to it using this call. 
+It should be called before a task switch might occur.
+
+     <br><dt><code>task_get_arg</code><dd>
+Called by the newly created task to obtain its argument.
+
+</dl>
+
+   </body></html>
+

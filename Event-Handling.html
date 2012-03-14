@@ -1,0 +1,138 @@
+<html lang="en">
+<head>
+<title>Event Handling - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link rel="prev" href="Bit-Variables.html#Bit-Variables" title="Bit Variables">
+<link rel="next" href="Template-Drivers.html#Template-Drivers" title="Template Drivers">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Event-Handling"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Template-Drivers.html#Template-Drivers">Template Drivers</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Bit-Variables.html#Bit-Variables">Bit Variables</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Software-Environment.html#Software-Environment">Software Environment</a>
+<hr>
+</div>
+
+<h3 class="section">4.5 Event Handling</h3>
+
+<p><a name="index-Callsets-16"></a><a name="index-Events-17"></a>
+FreeWPC is mostly an <dfn>event-driven</dfn> system, which only acts when there are new
+inputs to the system.  This section describes the basic interface to the
+application layer software, and then explains how that is implemented internally.
+
+   <p>When any module wants to be notified when a particular event occurs, it declares
+an event catcher function, using the CALLSET_ENTRY macro.  Here is an example:
+
+<pre class="example">     CALLSET_ENTRY (strobe_multiball, sw_forcefield_target)
+     {
+     	...
+     }
+</pre>
+   <p>This declares a new catcher for the module named <code>strobe_multiball</code>,
+which is to be called whenever the event <code>sw_forcefield_target</code> occurs.
+
+   <p>The name of the module is arbitrary, but the convention is to use the name
+of the source code file or something similar.  If you need to write two different
+handlers in the same source file for the same event, they need to have different
+module names.
+
+   <p>The event name must exactly match the name used by the generator of that event. 
+There is a list of predefined system events which are often caught (see <a href="System-Events.html#System-Events">System Events</a>). 
+Switch names can also be used as events (e.g. sw_free_kick_target).  Normally a switch
+event is generated on an <em>inactive-to-active transition</em>; you can cause an event
+on any transition by declaring the switch as &lsquo;<samp><span class="samp">edge</span></samp>&rsquo; in the machine configuration file. 
+Ball devices also generate events for several reasons (see <a href="Ball-Tracking.html#Ball-Tracking">Ball Tracking</a>), for example,
+<code>dev_lock_enter</code>.
+
+   <p>If there are multiple catchers for the same event, then all of them
+will be invoked, in some random order.  For example, another mode might
+also make use of the same target shown above:
+
+<pre class="example">     CALLSET_ENTRY (mode_start, sw_forcefield_target)
+     {
+     	...
+     }
+</pre>
+   <p>Then both of these handlers would be called when the switch is closed.
+
+   <p>To generate an event, use the <code>callset_invoke()</code> API, passing
+it the name of the event.  You can create your own events for any
+purpose; event names do not need to be declared.  Such events are
+as full-featured as system-defined events.  When defining custom events
+in a game, it is customary to prefix the event name with the short
+name of the game (e.g. &lsquo;<samp><span class="samp">tz</span></samp>&rsquo;).
+
+   <p>Event catchers are allowed to throw new events.  This will result
+in nested function calls.
+
+<h4 class="subsection">4.5.1 Boolean Events</h4>
+
+<p>Most event handlers do not return a value.  However, in some cases
+it is desirable to stop calling event handlers once the event has
+been <em>claimed</em>.  You can do this with boolean events.
+
+   <p>To throw a boolean event, use <code>callset_invoke_boolean()</code>.  This
+returns TRUE if all of the event handlers return TRUE; else it
+returns FALSE.
+
+   <p>The event handlers are declared using <code>CALLSET_BOOL_ENTRY</code> instead
+of <code>CALLSET_ENTRY</code>, and they must return either TRUE or FALSE.
+
+   <p>The invocation of boolean handlers will immediately stop if one of them
+returns FALSE (so-called <dfn>short-circuit evaluation</dfn>).
+
+<h4 class="subsection">4.5.2 Debugging Event Handlers</h4>
+
+<p>The runtime code generated by <samp><span class="command">gencallset</span></samp> will call the macro <code>callset_debug</code>
+before invoking each of the handlers.  This macro is passed one argument, which is a 16-bit
+integer that is unique to every handler.  The default implementation is to save this in
+persistent memory; if a crash occurs, after rebooting the value can be examined to help
+determine the last function that caused the problem.
+
+   <p>Previously, debugging required a compile-time flag set in <samp><span class="command">CALLSET_FLAGS</span></samp>, but this
+is no longer needed.
+
+   <p>For more thorough debugging, you can rewrite the implementation of <code>callset_debug</code>
+to do something else with those IDs, such as print them or set a breakpoint.
+
+<h4 class="subsection">4.5.3 How Event Handlers Are Implemented</h4>
+
+<p>When you write a <code>CALLSET_ENTRY</code>, the module name and event name are
+concatenated to form the name of a function, separated by an underscore.
+
+   <p>When you write a <code>callset_invoke</code>, it calls a function named <code>callset_</code><var>event</var>. 
+<samp><span class="command">gencallset</span></samp> scans all of the source code and creates these functions; you can
+see the output in <samp><span class="file">build/callset.c</span></samp>.  So there is no queueing, memory allocation, or
+anything complicated &mdash; these are just ordinary function calls.  The trick is to do all
+of the work at compile-time.
+
+   <p>Because event handlers are just function calls, they can sometimes become deeply
+nested.  For example, a start button press can cause many other events to be
+thrown.  On the 6809 hardware, the stack size is limited and a stack overflow can
+occur if functions nest too deeply, AND a call to <code>task_sleep</code> is made.  As long
+as you don't sleep, there is no problem; the limitation is in the size of the per-task
+stack area.  <code>start_game</code> and <code>test_start</code> are particularly problematic
+sometimes.  Avoid sleeping in such handlers to be safe; if necessary, use a periodic
+function instead.
+
+   </body></html>
+

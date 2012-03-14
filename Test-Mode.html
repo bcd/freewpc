@@ -1,0 +1,168 @@
+<html lang="en">
+<head>
+<title>Test Mode - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Ball-Tracking.html#Ball-Tracking" title="Ball Tracking">
+<link rel="next" href="Common-Pinball-Library.html#Common-Pinball-Library" title="Common Pinball Library">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Test-Mode"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Common-Pinball-Library.html#Common-Pinball-Library">Common Pinball Library</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Ball-Tracking.html#Ball-Tracking">Ball Tracking</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">8 Test Mode</h2>
+
+<p>The FreeWPC test mode works similarly to the original WPC menu system. 
+However, there are extra options and a few important differences. 
+For testing core changes to FreeWPC, it is often more convenient to use
+test mode than to play a game.
+
+   <p>You can navigate the menus with the flipper buttons in addition to the
+coin door buttons.  Use Start to enter, and double flip to exit.
+
+   <p>When compiling with the <code>MACHINE_TEST_ONLY</code> option, the game
+will boot directly into test mode, and there is no provision to start a game.
+
+<h3 class="section">8.1 Adjustments</h3>
+
+<p>All of the <em>standard adjustments</em> are supported.  There are also a few
+new adjustments.
+
+   <p><dfn>Timed Game</dfn> allows you to switch between normal game play and a timed
+game.  Machines can implement different rules for timed play or not. 
+They can also disable it entirely.
+
+   <p><dfn>Payment Type</dfn> configures whether the display asks you to insert
+coins, bills, or swipe a card.
+
+<h3 class="section">8.2 Audits</h3>
+
+<p>All of the <em>standard audits</em> are supported.
+
+   <p>Presently, audits are kept as 16-bit integers, so they max out at 65535. 
+This will probably change at some point.
+
+<h3 class="section">8.3 Tests</h3>
+
+<p>The test menu contains roughly the same tests as in the actual WPC
+games, with some differences.
+
+   <p>The solenoid test lets you control the duration and duty cycle of
+each coil pulse by using the flipper buttons.
+
+   <p>The development menu contains a series of additional tests that are
+probably only relevant to developers and not to end users.  Current
+tests include:
+
+     <ul>
+<li>Trigger specific display/lamp effects
+<li>Browse lamplists
+<li>Examine the states of all multiball devices
+<li>Test the random number generator
+<li>Test display transition effects
+<li>Run a display effect stress test
+<li>Analyze task scheduler performance
+<li>Analyze interrupt handler performance
+<li>Test the presentation of scores in multi-player games
+<li>A memory editor that allows inspection/modification of any
+memory address. 
+</ul>
+
+<h4 class="subsection">8.3.1 Font Test</h4>
+
+<p>Cycles through all of the available fonts.  Use the flipper buttons
+to scroll through the alphabet.  The machine will try to display
+as much as possible at once, depending on the font size.
+
+<h4 class="subsection">8.3.2 Display Effect Test</h4>
+
+<p>Cycles through all display effects.  Press ENTER to activate a deff,
+as if <code>deff_start</code> were called.  For long-running effects, press
+ENTER again to stop it via <code>deff_stop</code>.
+
+<h4 class="subsection">8.3.3 Lamp Effect Test</h4>
+
+<p>Cycles through all lamp effects.  Press ENTER to activate a leff,
+as if <code>leff_start</code> were called.  Press ENTER again to stop it.
+
+   <p>Remember that multiple lamp effects can be active simultaneously if
+they are declared as shared and they do not overlap in the lamps that
+they use.
+
+<h4 class="subsection">8.3.4 Lamplist Test</h4>
+
+<p>Cycles through the lamplists.  The flipper buttons cycle through the
+different ways that the lamplist can be controlled.  The default is
+to turn on all of the lamps.  You can also strobe them, flash them, etc.
+
+<h4 class="subsection">8.3.5 Ball Device Test</h4>
+
+<p>Cycles through each of the ball devices, telling you its current status
+(how many balls it sees, kickouts pending, errors).  The flipper buttons
+will scroll through a set of actions (empty, kick 1, etc.); press ENTER
+to perform the action displayed.
+
+   <p>This test also continuously shows the global device status, such as
+how many total balls are detected and whether any balls are missing.
+
+<h4 class="subsection">8.3.6 Random Test</h4>
+
+<p>Tests the random number generator.
+
+<h4 class="subsection">8.3.7 Transition Test</h4>
+
+<p>Cycles through all of the dot-matrix or alphanumeric transition effects.
+
+<h4 class="subsection">8.3.8 Frame Test</h4>
+
+<p>Cycles through all of the display frames.
+
+<h4 class="subsection">8.3.9 Force Error Test</h4>
+
+<p>Entering this test forces a fatal error, which should restart the system.
+
+<h4 class="subsection">8.3.10 Display Stress Test</h4>
+
+<p>Starts randomly starting and stopping display effects until exiting the test.
+
+<h4 class="subsection">8.3.11 Symbol Test</h4>
+
+<p>Cycles through the symbol bitmap, a collection of arrows, boxes, etc.
+
+<h4 class="subsection">8.3.12 Score Test</h4>
+
+<p>Advance through the various combinations of players per game and
+player-up, to show how the score screen would look.
+
+<h4 class="subsection">8.3.13 PIC Test</h4>
+
+<p>Displays vital data about the PIC.
+
+<h4 class="subsection">8.3.14 Memory Editor</h4>
+
+<p>Lets you interactively scroll through the CPU's memory and alter values.
+
+<!-- ====================================================== -->
+   </body></html>
+

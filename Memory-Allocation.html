@@ -1,0 +1,100 @@
+<html lang="en">
+<head>
+<title>Memory Allocation - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link rel="prev" href="Real_002dTime-Processing.html#Real_002dTime-Processing" title="Real-Time Processing">
+<link rel="next" href="Bit-Variables.html#Bit-Variables" title="Bit Variables">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Memory-Allocation"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Bit-Variables.html#Bit-Variables">Bit Variables</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Real_002dTime-Processing.html#Real_002dTime-Processing">Real-Time Processing</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Software-Environment.html#Software-Environment">Software Environment</a>
+<hr>
+</div>
+
+<h3 class="section">4.3 Memory Allocation</h3>
+
+<p>FreeWPC does not use dynamic (heap) memory allocation, except in some very
+rare circumstances.  All variables should be declared global, or put on the stack.
+
+   <p>Global variables cannot be statically initialized.  Variables should be initialized
+explicitly inside a C function.
+
+   <p>Global variables can be divided into a number of categories, depending on their
+usage.  Normal globals are always in scope and behave as you would expect.  Additionally,
+you can tag a global with one of the following attributes:
+
+     <dl>
+<dt><code>__fastram__</code><dd>
+Used for variables that are used frequently.  GCC6809 will generate faster
+code when accessing these.  However, you are limited to about 250 bytes of
+fastram variables total.  These are mostly used by RTTs for performance.
+
+     <p>Do not use fastram unless you are working in the core system, or writing
+a device driver that runs more than once every 4ms or so.
+
+     <p>The performance gain is just 1 CPU cycle faster and 1 fewer byte of code
+per read or write access.
+
+     <br><dt><code>__permanent__</code><dd><a name="index-Permanent-variables-13"></a>
+Used for variables that should be persistent across reboots.  These variables
+should be initialized inside of a <code>factory_reset</code> event, because factory
+reset should restore everything to a sane state.  GCC6809 places these variables
+at an address that is not automatically cleaned by the startup code during the
+memory test.
+
+     <p>The <code>init</code> or <code>init_complete</code> handlers should test these values for
+sanity, since they may become corrupted due to software bugs.  If this is
+detected, they should be restored to sane values for non-fatal cases if possible,
+otherwise a factory reset should be forced.
+
+     <br><dt><code>__nvram__</code><dd><a name="index-Non_002dvolatile-variables-14"></a>
+Like __permanent__, but for variables that are also write-protected by default. 
+To modify such a variable, you must first call <code>pinio_nvram_unlock()</code>, change
+it, and then call <code>pinio_nvram_lock()</code>.  This helps to ensure that
+certain critical variables are not accidentally corrupted.
+
+     <p>Do not sleep while inside the critical section.  Do not nest calls to these
+functions either.
+
+     <p>This feature makes use of special hardware in the WPC ASIC.
+
+     <p>Adjustments and audits kept in NVRAM are managed via special APIs which
+do the locking/unlocking for you.
+
+     <p>This feature works even in native mode; the __nvram__ variables are saved
+to a file when you exit the program.
+
+     <br><dt><code>__local__</code><dd><a name="index-Per_002dplayer-variables-15"></a>
+Used for variables that are maintained separately for different players
+in a multiplayer game.  The system software will transparently reload
+these variables with the correct values whenever the player up changes. 
+These variables should be initialized inside of a <code>start_player</code> event.
+
+     <p>There is a limit to how many locals can be declared; if you exceed this, you
+will get a linker error.
+
+   </dl>
+
+   </body></html>
+

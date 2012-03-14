@@ -1,0 +1,140 @@
+<html lang="en">
+<head>
+<title>Bank Switching - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link rel="prev" href="Timers.html#Timers" title="Timers">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Bank-Switching"></a>
+<p>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Timers.html#Timers">Timers</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Software-Environment.html#Software-Environment">Software Environment</a>
+<hr>
+</div>
+
+<h3 class="section">4.9 Bank Switching</h3>
+
+<p><a name="index-Bank-switching-28"></a><a name="index-ROM-banks-29"></a><a name="index-Paging-30"></a><a name="index-ROM-paging-31"></a>
+The WPC platform uses ROMs that are larger than the processor can address. 
+6809 is limited to 64KB of address space, but the ROM may be as large as 1MB. 
+Some address space is also needed for RAM and I/O registers.
+
+   <p>The WPC ASIC uses bank switching to work around this limitation. 
+The uppermost 32KB of the ROM is fixed and can be accessed at all times. 
+The remaining ROM is divided into "banks" or "pages" of 16KB each.  Access to
+these areas requires software support.
+
+   <p>When compiling in simulation mode, or on other platforms, bank switching
+is not an issue.  The bank switching APIs become effectively no-ops should
+you use them.
+
+<h5 class="subsubsection">4.9.0.1 Explicit Bank Switching</h5>
+
+<p>Use the <code>pinio_set_bank</code> API to write to the bank switching register. 
+Use one of the page identifiers like <code>COMMON_PAGE</code> or <code>MACHINE_PAGE</code>
+as the argument.  Note that this should only be called while the code is
+running out of the fixed area, otherwise, the current function becomes
+inaccesible!
+
+   <p>You can also use the <code>page_push</code> and <code>page_pop</code> functions to change the
+register temporarily.  The old value is saved onto the stack so that it can
+be restored after you have accessed the code/data in the desired bank.
+
+<h5 class="subsubsection">4.9.0.2 Far Calls</h5>
+
+<p>The GCC6809 compiler supports function calls across all of the banks without
+explicit page changing, but only if you declare your functions correctly. 
+Each C file that is compiled must have all
+of its code and constant data placed into the same bank.  You specify which
+bank via the Makefiles.  For example, suppose you add a new file to the
+common directory, named newfile.c.  In common/Makefile, the line:
+
+   <p><code>COMMON_BASIC_OBJS += common/newfile.o</code>
+
+   <p>adds this module into the COMMON_OBJS list; all of these objects are part of
+the COMMON_PAGE bank.  In the top-level Makefile, you can see that
+COMMON_PAGE is mapped to bank 56.
+
+   <p>There are a number of predefined sections, like COMMON, EFFECT, TEST, and TEST2. 
+More can be added by modifying the topmost Makefile.  Each of these is then
+mapped to a physical bank of ROM. It is possible for multiple sections to map
+to the same physical page.
+
+   <p>The Makefiles only control the <em>placement</em> of code and data.  To make function
+calls between sections work correctly, you also need to modify the C prototypes.
+
+   <p>When the compiler encounters an ordinary prototype, such as:
+
+   <p>void foo (void);
+
+   <p>then a call to <code>foo()</code> is an ordinary call with no consideration for banking. 
+However,
+
+   <p>__attribute__((page ("56")) void foo (void);
+
+   <p>says that <code>foo()</code> will be physically placed in page 56, and a far call might be
+needed.  If the calling function is not in page 56, then the compiler will emit some
+special code to switch the bank, make the call, and restore the bank.  This even
+works when the caller is in a different bank and not in the fixed region.  When
+each file is compiled, it is told which page it is in using the -mfar-code-page option.
+
+   <p>If the caller is in the same bank as the callee, GCC knows that a bank switch is
+not necessary and will emit an ordinary function call.
+
+   <p>Because this mechanism is used so often, there are macros to make it easier. 
+The above prototype could be rewritten as:
+
+   <p>__common__ void foo (void);
+
+   <p>See <samp><span class="file">include/env.h</span></samp> for a list of the macros that can be used.  In general,
+every section has an attribute that can be used like this.
+
+   <p>Failure to put the correct tag on the prototype cannot be caught by the
+compiler, and will likely result in a system crash.  If a function should not
+be called outside of its own file, putting <code>static</code> on it will prevent
+you from making such a bad call.
+
+   <p>Because placement is a somewhat manual procedure, it is possible for a bank to
+become full.  When that happens, code often must be moved or new sections added. 
+This is rare but does happen from time to time.
+
+<h5 class="subsubsection">4.9.0.3 Performance</h5>
+
+<p>A far call takes about 80 additional CPU cycles on the 6809.  This is less than
+0.1 ms, but when the number of far calls is high, this can add up.
+
+   <p>The most commonly used functions should go into the kernel page (SYS_PAGE),
+where they can always be called directly.  Uncommon things should always be
+placed into one of the banked areas since performance is not an issue.  This
+also leaves more room in the fixed area for the important stuff.
+
+   <p>It is slightly more efficient to use <code>page_push</code> and <code>page_pop</code> than
+using a compiled-generated far call.
+
+   <p>Any event generated by a <code>callset_invoke</code> turns into a function call
+in EVENT_PAGE.  In the current code, this is the same as MACHINE_PAGE, so
+an event thrown by code in MACHINE_OBJS is slightly more efficient than if
+thrown elsewhere (MACHINE2_OBJS for example).  It is recommended that shot
+handlers go into MACHINE_PAGE since they are invoked frequently.
+
+<!-- ====================================================== -->
+   </body></html>
+

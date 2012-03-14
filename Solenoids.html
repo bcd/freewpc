@@ -1,0 +1,129 @@
+<html lang="en">
+<head>
+<title>Solenoids - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Core-APIs.html#Core-APIs" title="Core APIs">
+<link rel="prev" href="Lamps.html#Lamps" title="Lamps">
+<link rel="next" href="Dot_002dMatrix-Display-_0028DMD_0029.html#Dot_002dMatrix-Display-_0028DMD_0029" title="Dot-Matrix Display (DMD)">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Solenoids"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Dot_002dMatrix-Display-_0028DMD_0029.html#Dot_002dMatrix-Display-_0028DMD_0029">Dot-Matrix Display (DMD)</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Lamps.html#Lamps">Lamps</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Core-APIs.html#Core-APIs">Core APIs</a>
+<hr>
+</div>
+
+<h3 class="section">5.3 Solenoids</h3>
+
+<p><a name="index-Solenoids-34"></a>
+Solenoid outputs are used for many purposes.  We use the term 'solenoid'
+or 'coil' generically to refer to any writable, high power output. 
+They could be connected to coils, flashers, or motors. 
+Like the lamps, they are individually controllable.
+
+   <p>Unlike the controlled lamps, the core API does not permit you to turn on
+a solenoid permanently.  Instead, you either use a pulsing API, which
+turns it on for a short period of time (and the system turns it back off
+for you), or you use a custom driver to control it.
+
+<h4 class="subsection">5.3.1 Pulsing</h4>
+
+<p><a name="index-Pulsing-solenoids-35"></a>
+<dfn>Pulsing</dfn> is used for solenoids that are operated infrequently,
+and only for short durations at a time. 
+These are normally used for kickers, poppers, etc. 
+The system queues the requests and executes them one at a time, never
+in parallel.
+
+   <p>The default pulse settings are controlled by the entry
+in the machine description, in the "drives" section.  The <code>time</code>
+parameter sets the total length of time for the pulse.  It can be an integer
+value in milliseconds, or one of the <code>TIME_xxx</code> values which are in
+multiples of 16ms.  The <code>duty</code>
+parameter controls the duty cycle; use one of the <code>SOL_DUTY_xxx</code> defines. 
+SOL_DUTY_100 keeps the driver on for the entire interval; SOL_DUTY_50 keeps
+it on half the time, delivering half the power; and so on.  The minimum duty
+cycle is 1/8th full power.
+
+   <p>If you do not specify either of these values, you will get a reasonable, but
+conservative default.  Solenoids and flashers may have different default values. 
+A large portion of getting a new game to work correctly is determining the
+correct values to use here.
+
+     <dl>
+<dt><code>sol_request</code><dd>
+Pulse a solenoid, and wait for it to be fired.  A request may
+be delayed for a number of reasons.  This should only be used inside
+of a task context where it is acceptable that the call may block for
+a while.
+
+     <br><dt><code>sol_request_async</code><dd>
+Pulse a solenoid, but don't wait for it to be fired.  This is the preferred
+method to use.  This function returns immediately, before the pulse
+occurs.
+
+     <br><dt><code>sol_req_start_specific</code><dd>
+This is the most flexible API, which allows you to specify the exact duty
+and time parameters that you want, overriding the defaults from the machine
+config.  It is not recommended for ordinary use.  It is exposed by test mode
+to allow you to try different settings to see how they behave.
+
+   </dl>
+
+<h4 class="subsection">5.3.2 Flashers</h4>
+
+<p><a name="index-Flashers-36"></a>
+The flashlamp APIs are similar to the solenoid pulse APIs. 
+A flashlamp pulse is always with a 100% duty cycle, but for a much shorter
+period of time.
+
+   <p>Note: it is currently possible to use the solenoid pulse APIs on flashers,
+but this should not be done.  This will likely be enforced in the future.
+
+     <dl>
+<dt><code>flasher_pulse</code><dd>
+Pulse a flashlamp for a nominal period of time.
+
+     <br><dt><code>flasher_pulse_short</code><dd>
+Pulse a flashlamp very quickly.
+
+     <br><dt><code>flasher_start</code><dd>
+This is a lower-layer API that allows you to specify the exact duration
+and duty cycle for a flasher.  Times longer than FLASHER_TIME_DEFAULT are
+not recommended.  The duty cycle can be specified using one of the SOL_DUTY_xxx
+defines to pulse it more dimly than usual.
+
+   </dl>
+
+<h4 class="subsection">5.3.3 Custom Drivers</h4>
+
+<p><dfn>Custom drivers</dfn> can run for longer periods of time. 
+They are allowed to run in parallel with anything else.  They
+will frequently use <dfn>duty cycling</dfn> to avoid keeping the
+coil 100% active for too long, and thus they often require
+realtime processing to switch reliably.
+
+   <p>These types of drivers are all implemented using templates.
+
+<!-- include coil-drivers.txt -->
+   </body></html>
+

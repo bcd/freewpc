@@ -1,0 +1,49 @@
+<html lang="en">
+<head>
+<title>Variables - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Native-Mode.html#Native-Mode" title="Native Mode">
+<link rel="prev" href="Command-Language.html#Command-Language" title="Command Language">
+<link rel="next" href="User-Interface.html#User-Interface" title="User Interface">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Variables"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="User-Interface.html#User-Interface">User Interface</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Command-Language.html#Command-Language">Command Language</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Native-Mode.html#Native-Mode">Native Mode</a>
+<hr>
+</div>
+
+<h3 class="section">13.9 Variables</h3>
+
+<p>The simulator uses variables in certain places to allow you to change its
+behavior at runtime.  The <code>set</code> and <code>print</code> commands work on these
+variables.
+
+   <p>All variables are fundamentally of type <code>int</code>.  There is no support for strings.
+
+   <p>Simulator modules declare variables in the usual way, then export these to the
+variable tracker using <code>conf_add</code>.  This associates a public name for the variable
+that the command language sees.  When variables are modified in this way, the module's
+int variables are then modified directly.
+
+   </body></html>
+

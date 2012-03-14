@@ -1,0 +1,78 @@
+<html lang="en">
+<head>
+<title>Overview - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="index.html#Top" title="Top">
+<link rel="next" href="Installation.html#Installation" title="Installation">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Overview"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Installation.html#Installation">Installation</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="index.html#Top">Top</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">1 Overview</h2>
+
+<p>FreeWPC is a toolkit for building brand new software for pinball machines. 
+It primarily targets the Williams WPC
+family of games, which was used in all of that company's games from 1990-1999,
+starting with &lsquo;<samp><span class="samp">Funhouse</span></samp>&rsquo; and ending with &lsquo;<samp><span class="samp">Cactus Canyon</span></samp>&rsquo;.
+
+   <p>This document provides an overview of the FreeWPC architecture for
+developers who wish to understand how the system works. 
+FreeWPC is constantly evolving and the information here is
+subject to change.
+
+   <p>FreeWPC only replaces your game ROM (the U6 chip on the CPU board), which contains all
+of the game code and dot matrix text/graphics.  In particular, sounds and
+music are NOT included in this device, so FreeWPC games use the
+same sounds as the real machines.
+
+   <p><a name="index-Legalese-1"></a>FreeWPC is 100% Williams-free code, written from scratch.  It is not a hack on existing
+ROMs and does not contain any software extracted from real games. 
+Most of the code is written mostly in the C programming language.  (Actual WPC games
+were programmed in assembly language).  FreeWPC uses the freely available GCC6809 C
+compiler.  There are some assembly language routines for really low-level, or high
+performance parts of the program.
+
+   <p><a name="index-WPC-generations-2"></a>All generations of WPC are supported.  FreeWPC is also architected into a number of
+distinct layers which makes it highly portable to other
+types of pinball machines than just WPC games, including new custom hardware.  The
+<em>platform</em> files describe the circuit boards.  The <em>CPU</em> files are specific to
+the microprocessor, and can be shared between platforms (WPC and WhiteStar both use
+a 6809).  The <em>machine</em> files are unique to a particular game.
+
+   <p><a name="index-Cygwin-3"></a>Development requires a UNIX-like environment, such as Linux or Cygwin for Microsoft Windows
+users.  Many common UNIX tools like <samp><span class="command">bc</span></samp> and <samp><span class="command">perl</span></samp> are required.
+
+   <p>FreeWPC has become more portable over the years, so that it can be used to develop
+pinball software for platforms other than WPC.  This support is still evolving rapidly. 
+In addition to building ROMs, the toolkit supports <dfn>native mode compilation</dfn>, which
+builds an executable that can be run directly on your development machine.  This lets you
+test and debug the software without requiring a real machine or even an emulator.  Basically,
+native mode replaces the lowest level of hardware access with builtin emulation.  In place
+of actual I/O being controlled, it displays the results of the simulation on your screen,
+using either the console, <samp><span class="command">ncurses</span></samp>, or <samp><span class="command">gtk</span></samp>.
+
+   </body></html>
+

@@ -1,0 +1,59 @@
+<html lang="en">
+<head>
+<title>Command Language - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Native-Mode.html#Native-Mode" title="Native Mode">
+<link rel="prev" href="Timing.html#Timing" title="Timing">
+<link rel="next" href="Variables.html#Variables" title="Variables">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Command-Language"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Variables.html#Variables">Variables</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Timing.html#Timing">Timing</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Native-Mode.html#Native-Mode">Native Mode</a>
+<hr>
+</div>
+
+<h3 class="section">13.8 Command Language</h3>
+
+<p>The simulator allows you to control it via a command language.  While
+the program is running, you can enter commands via the user-interface. 
+You can also load scripts of commands from files.
+
+   <p>Some files are checked automatically at startup and these commands are
+always run.  These are kept in the <samp><span class="file">conf</span></samp> subdirectory of the source
+tree.  First, it will load <samp><span class="file">conf/freewpc.conf</span></samp>.  Then it will load
+a machine-specific file, <samp><span class="file">conf/</span><var>machine</var><span class="file">.conf</span></samp>.
+
+   <p>In the curses-based simulator, press the colon key (like in vi) to
+open a command prompt.  Other UIs may be different.
+
+   <p>The basic commands are listed below.  See other sections for more commands
+that are more specific.
+
+   <p>Because commands can be placed in script files, shell-style comments and
+blank lines are accepted and ignored.
+
+     <dl>
+<dt>&bull;set <var>var</var> <var>value</var><br><dt>&bull;print <var>var</var><br><dt>&bull;include <var>file</var><br><dt>&bull;sw <var>switch</var><br><dt>&bull;swtoggle <var>switch</var><br><dt>&bull;key <var>keyname</var> <var>switch</var><br><dt>&bull;push <var>value</var><br><dt>&bull;pop <var>argcount</var><br><dt>&bull;sleep <var>time</var><br><dt>&bull;exit<dd></dl>
+
+   </body></html>
+

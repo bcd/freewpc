@@ -1,0 +1,81 @@
+<html lang="en">
+<head>
+<title>Basic Effect Principles - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Effects.html#Effects" title="Effects">
+<link rel="next" href="Background-Effects.html#Background-Effects" title="Background Effects">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Basic-Effect-Principles"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Background-Effects.html#Background-Effects">Background Effects</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Effects.html#Effects">Effects</a>
+<hr>
+</div>
+
+<h3 class="section">6.1 Basic Effect Principles</h3>
+
+<p>These principles apply to all types of effects.
+
+   <p>At any time, there is at most 1 effect that is <em>running</em> of each
+type.  The
+running effect is the one which has been <em>started</em> with the
+highest priority.  Priorities are simple integer values:
+the higher the number, the more important the effect is.  A list
+of predefined priority values is defined in <samp><span class="file">priority.h</span></samp>;
+these files begin with <code>PRI</code> and have been carefully defined relative
+to one another.  Use one of these values when possible.
+
+   <p>It is possible for no effect to be running if none has been started. 
+In that case, the current priority is considered to be zero.  Actual
+effects always have a priority that is non-zero.
+
+   <p>The running effect is executed in a separate task context, except for
+music, which is executed on a separate CPU.  The
+currently running display effect always has the group ID
+<code>GID_DEFF</code>; likewise <code>GID_LEFF</code> for the lamps.  Effects
+that are started but not running do not have a task assigned to them,
+and are simply marked as started in memory somehow.  Because they do
+not have enough priority to run, there is nothing for them to do.
+
+   <p>Effect tasks can be preempted, if a higher priority effect is started later. 
+In that case, the old task is killed, and a new task is started.  When
+the task is killed, there is no guarantee as to what was doing
+previously, and there is no opportunity for it to do cleanup on its
+own.
+
+   <p>Effect functions must be declared in the machine configuration file.  Each
+entry names the function to be called to run the effect, along with its priority
+and other optional properties.
+
+   <p>The APIs and implementation for display/lamp effects are mostly the
+same, but there are differences due to the following:
+
+     <ul>
+<li>The lamp matrix can be suballocated; the display can only be
+allocated as a whole. 
+<li>Some display effects are long-lived, while others are only
+temporary. 
+<li>Some display effects do not have high priority, but we should
+retry to start it later if possible. 
+</ul>
+
+   </body></html>
+

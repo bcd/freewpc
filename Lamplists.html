@@ -1,0 +1,103 @@
+<html lang="en">
+<head>
+<title>Lamplists - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Effects.html#Effects" title="Effects">
+<link rel="prev" href="Sound-and-Music-Effects.html#Sound-and-Music-Effects" title="Sound and Music Effects">
+<link rel="next" href="DMD-Transitions.html#DMD-Transitions" title="DMD Transitions">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Lamplists"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="DMD-Transitions.html#DMD-Transitions">DMD Transitions</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Sound-and-Music-Effects.html#Sound-and-Music-Effects">Sound and Music Effects</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Effects.html#Effects">Effects</a>
+<hr>
+</div>
+
+<h3 class="section">6.6 Lamplists</h3>
+
+<p><a name="index-Lamp-lists-49"></a>
+Typically, groups of lamps are often used for a similar purpose. 
+A lamplist is an ordered array of lamps that are often controlled together. 
+Each lamplist has a unique ID, and is internally represented by an array of
+the lamp values, terminated by a special lamp code named <code>LAMP_END</code>.
+
+   <p>The lamplist APIs provide convenience whenever many lamps need to be updated
+at once.
+
+     <dl>
+<dt><code>lamplist_index</code><dd>
+Return the nth member of a lamplist.
+
+     <br><dt><code>lamplist_first_entry</code><dd>
+Return the first lamp in a lamplist.
+
+     <br><dt><code>lamplist_last_entry</code><dd>
+Return the last lamp in a lamplist.
+
+     <br><dt><code>lamplist_previous_entry</code><dd>
+Return the entry before a given one.
+
+     <br><dt><code>lamplist_next_entry</code><dd>
+Return the entry after a given one.
+
+     <br><dt><code>lamplist_apply</code><dd>
+Apply a lamp operator to all members of a lamplist.  If a break is
+encountered, a pause will occur.
+
+     <br><dt><code>lamplist_apply_nomacro</code><dd>
+Apply a lamp operator to all members of a lamplist, ignoring breaks.
+
+     <br><dt><code>lamplist_test_all</code><dd>
+Return true if all members pass a given boolean test.  The test operator
+lets you apply different test conditions, for example, testing the
+lamp's default state versus its flashing state.
+
+     <br><dt><code>lamplist_test_any</code><dd>
+Return true if any member passes a given boolean test.
+
+     <br><dt><code>lamplist_apply_leff_alternating</code><dd>
+Alternatively set and clear every member of a lamplist.  You can specify
+whether the first lamp will be set or cleared.  This can only be used inside
+lamp effects.
+
+     <br><dt><code>lamplist_step_increment</code><dd>
+Turn off the lamp that is currently on, and turn on the next one.
+
+     <br><dt><code>lamplist_step_decrement</code><dd>
+Turn off the lamp that is currently on, and turn on the previous one.
+
+     <br><dt><code>lamplist_build_increment</code><dd>
+Turn on the first lamp in the list that is not on.
+
+     <br><dt><code>lamplist_build_decrement</code><dd>
+Turn off the last lamp in the list that is on.
+
+     <br><dt><code>lamplist_rotate_next</code><dd>
+Rotate the lamp states forward.
+
+     <br><dt><code>lamplist_rotate_previous</code><dd>
+Rotate the lamp states backward.
+
+   </dl>
+
+   </body></html>
+

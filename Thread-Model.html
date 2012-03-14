@@ -1,0 +1,61 @@
+<html lang="en">
+<head>
+<title>Thread Model - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Native-Mode.html#Native-Mode" title="Native Mode">
+<link rel="next" href="Persistent-Memory.html#Persistent-Memory" title="Persistent Memory">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Thread-Model"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Persistent-Memory.html#Persistent-Memory">Persistent Memory</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Native-Mode.html#Native-Mode">Native Mode</a>
+<hr>
+</div>
+
+<h3 class="section">13.1 Thread Model</h3>
+
+<p>Native mode programs are no longer realtime.  There are two main concerns related
+to scheduling.
+
+   <p>First, normal multitasking (the task_xxx APIs) is accomplished using
+the <em>pth</em> library, an
+open source, nonpreemptive thread library.  A thin wrapper maps the core
+task APIs to their pth equivalents.
+
+   <p>Periodic functions are called occasionally from a special thread instead of
+the FreeWPC scheduler.
+
+   <p>Interrupts are also simulated from an ordinary thread.  The native operating
+system probably does not allow threads to sleep for as little as 1ms; on
+Linux the minimum sleep time is on the order of 10-20ms instead, and under
+Cygwin, it may be even longer. 
+When the interrupt thread is woken up, it checks the system clock to see
+how much time has actually elapsed, and invokes the interrupt handler
+<em>multiple times</em>.  The net effect is that interrupt handlers are invoked
+the same number of times as they would be on real hardware, but not the same
+way: they are called in batches, rather than being equally spread out.
+
+   <p>By default, the simulation runs at the same speed as the native system clock. 
+It is possible to speed up the simulation by a constant multiplier, which
+is sometimes helpful for rapid testing.
+
+   </body></html>
+

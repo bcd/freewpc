@@ -1,0 +1,66 @@
+<html lang="en">
+<head>
+<title>Core APIs - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link rel="next" href="Effects.html#Effects" title="Effects">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Core-APIs"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Effects.html#Effects">Effects</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Software-Environment.html#Software-Environment">Software Environment</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">5 Core APIs</h2>
+
+<p>The core APIs provide a common set of hardware access functions
+that can be used by game designers.  The interfaces are designed to be
+portable to all pinball hardware platforms and all machines. 
+However, the underlying implementation may vary.
+
+   <p>These functions do not access the hardware directly, but instead, they
+call into a device driver which may be platform-specific (see <a href="Platform-APIs.html#Platform-APIs">Platform APIs</a>).
+
+   <p>These APIs are intended to be called from the application layer (what other
+operating systems might refer to as "user space"). 
+For example, there are core APIs to poll the state of switches (active, or
+inactive?).  Under the hood, the switch driver must deal with the fact that
+switches are arranged in rows and columns, and that some switches are optos:
+this is all transparent to the user.
+
+   <p>Core APIs are all defined in the <samp><span class="file">kernel</span></samp> directory.  Any functions
+which are not <code>static</code> may be called from game developers from within
+normal task context at any time.
+
+<ul class="menu">
+<li><a accesskey="1" href="Switches.html#Switches">Switches</a>:               How to read switches
+<li><a accesskey="2" href="Lamps.html#Lamps">Lamps</a>:                  How to control the lamps
+<li><a accesskey="3" href="Solenoids.html#Solenoids">Solenoids</a>:              How to pulse solenoids and flashers
+<li><a accesskey="4" href="Dot_002dMatrix-Display-_0028DMD_0029.html#Dot_002dMatrix-Display-_0028DMD_0029">Dot-Matrix Display (DMD)</a>:  How to draw to the dot matrix display
+<li><a accesskey="5" href="Sound-Board.html#Sound-Board">Sound Board</a>:            How to talk to the sound board
+<li><a accesskey="6" href="General-Illumination.html#General-Illumination">General Illumination</a>:   How to control the general illumination strings
+<li><a accesskey="7" href="Real_002dTime-Clock.html#Real_002dTime-Clock">Real-Time Clock</a>:        How to control the realtime clock
+</ul>
+
+   </body></html>
+

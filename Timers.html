@@ -1,0 +1,99 @@
+<html lang="en">
+<head>
+<title>Timers - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link rel="prev" href="Fault-Detection.html#Fault-Detection" title="Fault Detection">
+<link rel="next" href="Bank-Switching.html#Bank-Switching" title="Bank Switching">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Timers"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Bank-Switching.html#Bank-Switching">Bank Switching</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Fault-Detection.html#Fault-Detection">Fault Detection</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Software-Environment.html#Software-Environment">Software Environment</a>
+<hr>
+</div>
+
+<h3 class="section">4.8 Timers</h3>
+
+<p><a name="index-Timers-27"></a>
+There are a number of ways to implement timers.  There are slight
+differences between them all.
+
+<h4 class="subsection">4.8.1 Task Timers</h4>
+
+<p>The first way is just to use <code>task_sleep</code> from within task context. 
+A task can sleep in between actions to enforce a particular delay. 
+Note that this gives a <em>minimum</em> delay; the actual delay may be longer.
+
+   <p>If you are not in a task context that can sleep, you can create a new
+task which is allowed to sleep.  Starting and stopping such tasks is
+equivalent to starting and stopping a timer.  Querying the task by its
+GID is equivalent to checking if the timer is still running.
+
+   <p>If you want to use this model, consider using the <code>timer_</code><var>xxx</var> APIs,
+which do this underneath a standard API that clearly shows what you are trying
+to accomplish.
+
+   <p>Because these timers are based on tasks, they do not need to be statically
+declared in advance.  They are limited in number only by the maximum number of
+tasks.
+
+<h4 class="subsection">4.8.2 Free Timers</h4>
+
+<p>Sometimes you may want a timer, but without the overhead of a separate task. 
+Then use the <code>free_timer_</code><var>xxx</var> functions.  <dfn>Free timers</dfn>
+are small counters that are updated in realtime context.  They do not
+support pausing (hence, the name) but can be started/stopped.  The set
+of all free timers must be declared in advance in the machine
+configuration file.
+
+   <p>Free timers are useful for the case when you need to run a timer, and
+no code needs to be executed when the timer expires.  You can always
+write code to query the timer value, but if it expires to zero, then
+nothing special happens.  One common use is for detecting certain
+playfield shots when a series of switches needs to activate within
+a certain amount of time, say 1 second apart.
+
+   <p>Free timers can only be started in multiples of 1/3 second, up to 8
+seconds.
+
+<h4 class="subsection">4.8.3 Periodic Functions</h4>
+
+<p>Periodic functions can be declared to do timing.  Your choices for
+frequency are limited to 16ms, 100ms, 1 second, or 10 seconds; if you
+need other timing, you'll have to implement it yourself.  For example,
+display effects get updated every 500ms by scheduling a 100ms periodic
+function, but only acting every 5 calls.
+
+   <p>These functions are statically scheduled and so run continuously; you
+cannot directly start or stop them.  However, you can use variables
+to control whether they do anything or not; but note that there is
+overhead in calling them all the time.
+
+<h4 class="subsection">4.8.4 Realtime Functions</h4>
+
+<p>Precision timing should use realtime functions.  They give you the most
+accurate timing and allow measuring down to 1ms, but they can be high
+overhead.  They should be used carefully when no alternative works.
+
+   </body></html>
+

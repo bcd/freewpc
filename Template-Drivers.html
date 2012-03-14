@@ -1,0 +1,173 @@
+<html lang="en">
+<head>
+<title>Template Drivers - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link rel="prev" href="Event-Handling.html#Event-Handling" title="Event Handling">
+<link rel="next" href="Fault-Detection.html#Fault-Detection" title="Fault Detection">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Template-Drivers"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Fault-Detection.html#Fault-Detection">Fault Detection</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Event-Handling.html#Event-Handling">Event Handling</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Software-Environment.html#Software-Environment">Software Environment</a>
+<hr>
+</div>
+
+<h3 class="section">4.6 Template Drivers</h3>
+
+<p><a name="index-Templates-18"></a>
+A <dfn>template</dfn> is a crude implementation of a reusable code block, similar in
+purpose to C++ templates but much more limited.  Were FreeWPC written in C++,
+regular templates would have been used here.
+
+   <p>Templates end in <samp><span class="file">.ct</span></samp> (for C template) and are always kept in the
+<samp><span class="file">drivers/</span></samp> directory.  A template file is <dfn>instantiated</dfn> via
+commands in the machine description.  The script <samp><span class="command">ctemp</span></samp> converts
+a template to one or more .c or .h files, which are then compiled normally. 
+Thus, templates can contain RTTs or event handlers just like any other file.
+
+<h4 class="subsection">4.6.1 Template Syntax</h4>
+
+<p>A template contains ordinary C code, plus special <dfn>template directives</dfn>. 
+These always begin with two at-signs (@@).  The list of valid directives,
+in the order that they are normally used, is listed below:
+
+     <dl>
+<dt><code>@@class</code><dd>
+Gives the name of the template; usually this is related to the filename.
+
+     <br><dt><code>@@parameter </code><var>name</var><dd>
+Declares a template parameter.  The value is substituted during instantiation.
+
+     <br><dt><code>@@file</code><dd>
+Sets the current output filename. 
+A template can generate any number of output files. 
+You can switch between the different output files with this directive.
+
+     <br><dt><code>@@</code><dd>
+A template comment.  Used to insert a comment line that is not placed
+into the current output file.  Ordinary C-like (or shell) comments will be
+emitted into the output files like any other non-directive line.
+
+   </dl>
+
+   <p>Within the C code, you use single-at (@) references to substitute the
+values of template variables into the text.  For example,
+
+<pre class="example">     @@class xyz
+     int @class_variable
+</pre>
+   <p>would be translated into the following plain C code:
+
+<pre class="example">     int xyz_variable
+</pre>
+   <p>Notice that template variable names cannot contain underscores.
+
+   <p>You define your own template variables with the @@parameter directive. 
+Some variables are predefined by the code generator:
+
+     <dl>
+<dt><code>@class</code><dd>
+The name of the template, as given in a @@class directive.
+
+     <br><dt><code>@self</code><dd>
+The name of the instance.  If a template is instantiated multiple times,
+each should have a different name.  For example, the &lsquo;<samp><span class="samp">sling</span></samp>&rsquo; class
+might have instances named &lsquo;<samp><span class="samp">left_sling</span></samp>&rsquo; and &lsquo;<samp><span class="samp">right_sling</span></samp>&rsquo;.
+
+     <br><dt><code>@instance</code><dd>
+Like @self, but a zero-based ID.  These are assigned by the code
+generator during instantiation.
+
+   </dl>
+
+   <p>Variable substitutions can occur just about anywhere.  For example, you
+can use a variable as the argument to the @@file directive.  In fact,
+this is generally how you would use it.  Consider the following:
+
+<pre class="example">     @@class widget
+     @@file @class.h
+     @@file @self.h
+     @@file @class.c
+     @@file @self.c
+</pre>
+   <p>Here, the template named <code>widget</code> is defined.  It generates four
+different source files: two based on the name of the class (<samp><span class="file">widget.c</span></samp>
+and <samp><span class="file">widget.h</span></samp>), and two based on the name of each instance. 
+If there were 2 widgets instantiated by the machine, say a left widget and
+a right widget, then we would have <samp><span class="file">left_widget.c</span></samp>, <samp><span class="file">left_widget.h</span></samp>,
+<samp><span class="file">right_widget.c</span></samp>, and <samp><span class="file">right_widget.h</span></samp>.
+
+<h4 class="subsection">4.6.2 Template Usage</h4>
+
+<p>The use case for templates is to define reusable device drivers.  From game
+to game, there is commonality on how certain devices should be treated,
+although the parameters are different.
+
+   <p>Typically, a device requires a number of different functions to control it. 
+Most devices need a realtime function if hardware accesses must be
+frequent.  A periodic function can handle less critical actions. 
+APIs are defined for the rest of the logic to access it.  All of this
+can be put into a single template, then instantiated by each machine with
+values for the machine-specific parameters.
+
+   <p>Currently there are device drivers for all of the following:
+
+     <ul>
+<li>Special Solenoids (<code>spsol.ct</code>)
+<a name="index-Special-solenoids-19"></a><a name="index-Slingshots-20"></a><a name="index-Jet-bumpers-21"></a><a name="index-Pop-bumpers-22"></a><a name="index-Kickbacks-23"></a>
+These are switch-activated coils, like slingshots, jet bumpers, or
+kickbacks.  When the switch activates, the associated coil is fired. 
+The driver allows you to enable/disable the automatic action, as well
+as defining the length of the coil pulse.  The switch is also briefly
+ignored afterwards to prevent rapid-fire action.
+
+     <li>Spinners (<code>spinner.ct</code>)
+<a name="index-Spinners-24"></a>
+The driver is useful because it handles the fact that spinner switches
+activate very fast.  It polls the spinner switch at a fast rate and
+keeps a count of the number of activations, which are then processing
+by a slower callback at normal task time.
+
+     <li>Duty-Cycled Coils (<code>duty.ct</code>)
+
+     <p>This is typically for a diverter that needs to be held on for a long
+period of time, like TZ's left ramp.  Enabling the coil begins by
+applying a high power pulse, then dropping to a lower power duty cycle
+(typically 25% but it is configurable.)  It is emulating what the
+Fliptronic flippers do with a power and hold coil, except that there is
+only one physical coil.
+
+     <li>Bidirectional Motors (<code>bivar.ct</code>)
+
+     <p>Used by the Twilight Zone clock and the World Cup Soccer ball. 
+For when there are two inputs to the motor to control direction.
+
+     <li>Drop Targets (<code>drop.ct</code>)
+<a name="index-Drop-targets-25"></a>
+A generic, single drop target driver.  Handles software knockdown when
+capable, and retry functions.
+
+   </ul>
+
+   </body></html>
+

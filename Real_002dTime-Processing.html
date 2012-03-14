@@ -1,0 +1,123 @@
+<html lang="en">
+<head>
+<title>Real-Time Processing - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link rel="prev" href="Multitasking.html#Multitasking" title="Multitasking">
+<link rel="next" href="Memory-Allocation.html#Memory-Allocation" title="Memory Allocation">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Real-Time-Processing"></a>
+<a name="Real_002dTime-Processing"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Memory-Allocation.html#Memory-Allocation">Memory Allocation</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Multitasking.html#Multitasking">Multitasking</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Software-Environment.html#Software-Environment">Software Environment</a>
+<hr>
+</div>
+
+<h3 class="section">4.2 Real-Time Processing</h3>
+
+<p>The multitasking APIs are flexible but do not guarantee realtime response, since
+any task may run for a long time.  Processing that needs to occur at a strict interval
+is done by <dfn>real time tasks</dfn>, sometimes abbreviated in the code as <dfn>RTTs</dfn>.
+
+   <p>Optimizing the realtime tasks is key to an efficient system.  To date,
+about 35-40% of the 6809 is spent in realtime tasks; the actual value
+depends on the machine and the number of device drivers needed.
+
+<h4 class="subsection">4.2.1 Overview</h4>
+
+<p><a name="index-Real-time-tasks-11"></a>
+Real-time tasks are scheduled at <em>compile-time</em>.  When you write an RTT, you
+must also add an entry to the <dfn>schedule file</dfn>, either <samp><span class="file">kernel/system.sched</span></samp>
+for the core parts of the system, or <samp><span class="file">machine/</span><var>machine</var><span class="file">/</span><var>machine</var><span class="file">.sched</span></samp>
+for the game-specific RTTs.  Each entry in the schedule file gives the rate at which
+you want your function to be run, for example, once every 8ms.  You can schedule
+to run as frequently as once every 1ms, but you should only schedule as often as
+you really need it, otherwise the CPU will have little time to do anything else!
+
+   <p>Real-time functions run in interrupt context.  The periodic interrupt will preempt anything
+else that is running at non-real-time priority.  Realtime functions cannot sleep.
+
+   <p>A scheduler, <samp><span class="command">gensched</span></samp>, processes the schedule files at compile-time and generates
+the interrupt handler code which calls all of the RTTs at the correct frequency.  The output
+can be seen in <samp><span class="file">build/sched_irq.c</span></samp>.
+
+<h4 class="subsection">4.2.2 Schedule File Syntax</h4>
+
+<p><a name="index-Schedule-files-12"></a>
+Each line in the schedule file is formatted as follows:
+
+   <p><var>function</var> <var>frequency</var> <var>duration</var>
+
+   <p><var>function</var> identifies the name of the function that you want called in realtime
+context.  If you prefix the name with an exclamation point '!', the function is assumed
+to be an inline function; otherwise, it is an ordinary function.  You can append a
+conditional as a suffix, e.g. <samp><span class="command">my_rtt?CONFIG_FOO</span></samp> will call <samp><span class="command">my_rtt</span></samp>,
+but only if the conditional <samp><span class="command">CONFIG_FOO</span></samp> is set.
+
+   <p><var>frequency</var> says how often the function should be called, in multiples of the
+system IRQ tick, which is 1ms on WPC.  Presently, this value can range from 1 to 2048 ms. 
+It must also be a power of 2.
+
+   <p><var>duration</var> says how long this function takes to run, in the worst case.  The
+scheduler tries to reserve enough CPU cycles for all RTTs and to arrange the order in
+which they are called so that tasks are balanced.  The duration is also given in milliseconds
+and should be less than 1ms.  It can also be specified in CPU cycles by appending the 'c'
+suffix.  It is not critical if the value is not exact, but a reasonable approximation
+should be listed.
+
+   <p>Blank lines and lines beginning with the '#' sign are treated as comments.
+
+<h4 class="subsection">4.2.3 Function Unrolling</h4>
+
+<p>By default, the scheduler will unroll the interrupt handler into 8 smaller handlers. 
+That is, over a period of 8ms, the system will cycle through 8 different interrupt
+handlers.  The reason is that this cuts down on the number of checks which have to
+be performed on every IRQ, since infrequent (greater than 8ms) actions do not need
+to be tested every time.
+
+   <p>If a function is scheduled every 4ms, then it will be called from half of those
+interrupt handlers (every other one, either the even-numbered ones or the odd-
+numbered ones).  Likewise for functions scheduled every 2ms.  Functions scheduled
+every 1ms are called every time.  For functions scheduled 8ms or more, those are
+all executed from the last of the 8 handlers, and 'if' statements wrap the blocks
+of code that need to run less often.
+
+   <p>Sometimes you may want to unroll a function manually.  An example of where this is
+used is with the switch detection logic.  All switches must be polled every 2ms. 
+However, it takes a long time to poll every switch.  Instead, we poll half of
+the switches during 1ms, and the other half on the next 1ms.  This spreads out the
+processing and keeps the length of any one IRQ call from being too long.
+
+   <p>To tell the scheduler to do this, first write two separate rtt functions.  By
+convention these are numbered with a suffix, e.g. switch_rtt_0 and switch_rtt_1. 
+Then in the schedule file:
+
+   <p>switch_rtt/2   1   280c
+
+   <p>The "/2" says that the function was manually unrolled into two separate RTTs. 
+The frequency is now 1ms, because one or the other will be scheduled twice as often
+now.  The duration is the length of time it takes for one of them to run, and is
+currently assumed to be the same for both.
+
+   </body></html>
+

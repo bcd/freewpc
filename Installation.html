@@ -1,0 +1,127 @@
+<html lang="en">
+<head>
+<title>Installation - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Overview.html#Overview" title="Overview">
+<link rel="next" href="Compiling.html#Compiling" title="Compiling">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Installation"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Compiling.html#Compiling">Compiling</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Overview.html#Overview">Overview</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">2 Installation</h2>
+
+<p>This chapter explains how to install the software.
+
+   <p>FreeWPC is mainly a toolkit, and thus is provided in source code format. 
+However, periodically binary ROMs are compiled and published as well. 
+If you are not a developer, but would like to experiment with FreeWPC,
+you can just download the binary packages and install them in your
+machine or in your emulator.
+
+   <p>If you are a developer and want to write your own game code, for one
+of the existing games that FreeWPC has been ported to or for a brand
+new game, you need a source code package.
+
+   <p>If you just want to browse the source code, you can view it online
+at the GitHub repository.
+
+<h3 class="section">2.1 Binary Packages</h3>
+
+<p>Binary packages are available as <samp><span class="file">.zip</span></samp> files, which contain
+<samp><span class="file">.rom</span></samp> files.  These ROMs replace the game ROM only (the U6 chip
+on the CPU board).  If you want to test in a real machine, you need
+to burn a real EPROM from this file.
+
+   <p><a name="index-PinMAME-4"></a>If you want to test under PinMAME, you need to copy the ROM file into
+your PinMAME <samp><span class="file">roms</span></samp> directory; where this is
+depends on how you installed PinMAME.  These directories typically contain
+<samp><span class="file">.zip</span></samp> files of both the game ROM and sound ROMs together. 
+You'll need to unzip the original file, replace the game ROM, then zip it back. 
+Make sure to save your original
+game ROM file for when you want to revert back to the Williams code.
+
+<h3 class="section">2.2 Source Code Packages</h3>
+
+<p>The following is a partial list of other programs which are used during the
+build process: gcc6809, dd, bc, zip, unzip, bash, Perl.
+
+<h3 class="section">2.3 Directory Layout</h3>
+
+<p><a name="index-Directory-structure-5"></a>
+The FreeWPC source code tree is organized into the following directories:
+
+     <dl>
+<dt><samp><span class="file">kernel/</span></samp><dd>
+The core pinball APIs, which are the user-level APIs used to read inputs and
+control outputs.  As a game developer you mostly use the core APIs to interface
+to the hardware of the machine.
+
+     <p>On hardware which requires bank switching (like WPC), these functions are kept
+in the fixed region of ROM that can be called at any time.
+
+     <br><dt><samp><span class="file">common/</span></samp><dd>
+Secondary pinball APIs, also called the <dfn>Common Pinball Library</dfn>. 
+These functions are not in fixed ROM and may require bank switching to call.
+
+     <p>They are mostly software-related APIs for common features that pinball machines have,
+like replay, match, and dot-matrix effects.
+
+     <br><dt><samp><span class="file">machine/</span><var>machine</var><span class="file">/</span></samp><dd>
+The machine-specific files.  Every machine has its own directory of files that are
+specific to it.  Each file may or may not be placed into a bank switched region. 
+Generally, you should put game code outside the fixed page as rules are not important
+enough to keep in system ROM.  Custom device drivers must go into system ROM though.
+
+     <br><dt><samp><span class="file">platform/</span><var>platform</var><span class="file">/</span></samp><dd>
+The platform-specific files.  These are mostly used during initialization. 
+Every new pinball hardware platform must define some files here.
+
+     <br><dt><samp><span class="file">cpu/</span><var>cpu</var><span class="file">/</span></samp><dd>
+The CPU-specific files.  For the 6809, these are mostly assembly language files
+which are optimized for high performance.  There are also native versions here
+when compiling in simulation mode.
+
+     <br><dt><samp><span class="file">fonts/</span></samp><dd>
+All font files are kept here.  Fonts are stored as normal C code that is compiled
+as usual, just with a .fon extension to denote that they are actually fonts. 
+These files are autogenerated from more standard font files (like TrueType fonts)
+and then cleaned up.
+
+     <br><dt><samp><span class="file">drivers/</span></samp><dd>
+Driver templates for things like jets, slings, kickbacks, etc.  These can be
+shared across all machines.
+
+     <br><dt><samp><span class="file">include/</span></samp><dd>
+All of the include files are kept in here or one of its subdirectories.
+
+     <br><dt><samp><span class="file">build/</span></samp><dd>
+Most output files which are not under source control, but generated during the
+build process, appear here.
+
+   </dl>
+
+   </body></html>
+

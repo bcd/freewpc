@@ -1,0 +1,53 @@
+<html lang="en">
+<head>
+<title>Input and Output - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Native-Mode.html#Native-Mode" title="Native Mode">
+<link rel="prev" href="Persistent-Memory.html#Persistent-Memory" title="Persistent Memory">
+<link rel="next" href="GDB-Debugging.html#GDB-Debugging" title="GDB Debugging">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Input-and-Output"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="GDB-Debugging.html#GDB-Debugging">GDB Debugging</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Persistent-Memory.html#Persistent-Memory">Persistent Memory</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Native-Mode.html#Native-Mode">Native Mode</a>
+<hr>
+</div>
+
+<h3 class="section">13.3 Input and Output</h3>
+
+<p>The native program includes a simple, curses-based user interface to show
+what it is doing.  Switches, lamps, solenoids, and GI states are redrawn in
+the window as necessary.  Also, the DMD or alphanumeric display is emulated.
+
+   <p>The UI support is separated into a separate module from the core emulation,
+and could be replaced by something more sophiscated in the future, for
+example, using a window library like Qt or GTK.
+
+   <p>Switches can be simulated by pressing keys.  The ESC key terminates the
+simulation.  Many of the key mappings are the same as what is offered in
+PinMAME.
+
+   <p>Advanced simulation techniques, such as ball movements, are only partially
+implemented at the moment.
+
+   </body></html>
+

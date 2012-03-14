@@ -1,0 +1,61 @@
+<html lang="en">
+<head>
+<title>Real-Time Clock - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Core-APIs.html#Core-APIs" title="Core APIs">
+<link rel="prev" href="General-Illumination.html#General-Illumination" title="General Illumination">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Real-Time-Clock"></a>
+<a name="Real_002dTime-Clock"></a>
+<p>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="General-Illumination.html#General-Illumination">General Illumination</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Core-APIs.html#Core-APIs">Core APIs</a>
+<hr>
+</div>
+
+<h3 class="section">5.7 Real-Time Clock</h3>
+
+<p><a name="index-Clock-time-40"></a><a name="index-Real-time-clock-41"></a>
+On machines with a realtime clock, these APIs let you set and get
+the current time of day.  At present, only WPC is supported.
+
+   <p>The WPC ASIC provides three registers for counting minutes, hours, and days. 
+FreeWPC keeps the calendar time in persistent memory. 
+About once per minute, it polls the RTC and updates the calendar time to reflect
+any changes.  The battery provides power to the ASIC even when the game is off
+so the real-time clock remains updated.
+
+   <p>Game code does not need to call the following APIs.  The current date and time
+can simply be read from memory, in the variable <var>current_date</var>.
+
+     <dl>
+<dt><code>rtc_hw_read</code><dd>
+Update the hour/minute in memory from the value in the hardware registers.
+
+     <br><dt><code>rtc_hw_write</code><dd>
+Update the hour/memory in the hardware from the value in memory.  This is
+only used when setting the time.
+
+   </dl>
+
+<!-- ====================================================== -->
+   </body></html>
+

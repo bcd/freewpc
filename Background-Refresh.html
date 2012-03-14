@@ -1,0 +1,65 @@
+<html lang="en">
+<head>
+<title>Background Refresh - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Effects.html#Effects" title="Effects">
+<link rel="prev" href="DMD-Transitions.html#DMD-Transitions" title="DMD Transitions">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Background-Refresh"></a>
+<p>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="DMD-Transitions.html#DMD-Transitions">DMD Transitions</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Effects.html#Effects">Effects</a>
+<hr>
+</div>
+
+<h3 class="section">6.8 Background Refresh</h3>
+
+<p>In addition to the display and music effect updates, there are a couple
+of other things that need to be refreshed periodically.  The default
+states of the lamps, outside of any running effect, sometimes need to
+change depending on a complex combination of factors.
+
+   <p>For example, consider a feature that needs to be disabled temporarily
+during any multiball.  Instead of using the lamp bit to track whether
+the feature is enabled, we should use a separate bit flag, and then
+draw the lamp if the flag is set <em>and</em> the feature is not masked
+by a multiball.
+
+   <p>The <code>lamp_update</code> event is generated periodically by the system
+to give modules a chance to recalculate the states of the lamps. 
+Currently, it is generated about once per 500ms.  Code can request
+a faster update by calling <code>effect_update_request</code> as before.
+
+   <p>Likewise, sometimes solenoid-driven devices require a periodic update
+as well.  Ball scoops that raise from the playfield, like the trap door
+on Funhouse, can either be up or down, and the desired state depends on
+a number of things.  A separate <code>device_update</code> event is thrown for
+the purpose of updating these.  It works identically to the <code>lamp_update</code>
+function; however, these events are generated more frequently, as they are
+more important to be right in a timely manner.
+
+   <p>Note that device update is disabled during ball search, so that search
+handlers can complete control of the devices to try to find the missing
+pinball.
+
+<!-- ====================================================== -->
+   </body></html>
+

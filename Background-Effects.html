@@ -1,0 +1,80 @@
+<html lang="en">
+<head>
+<title>Background Effects - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Effects.html#Effects" title="Effects">
+<link rel="prev" href="Basic-Effect-Principles.html#Basic-Effect-Principles" title="Basic Effect Principles">
+<link rel="next" href="Display-Effects.html#Display-Effects" title="Display Effects">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Background-Effects"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Display-Effects.html#Display-Effects">Display Effects</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Basic-Effect-Principles.html#Basic-Effect-Principles">Basic Effect Principles</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Effects.html#Effects">Effects</a>
+<hr>
+</div>
+
+<h3 class="section">6.2 Background Effects</h3>
+
+<p>The display and music should always be doing something, even when
+nothing really important is happening.  Thus, these effect modules
+implement <dfn>background effects</dfn>, a way to determine what to do
+in these circumstances.  Lamp effects do not support a background mode;
+it is OK for no effect to be running, as the lamps have a default state
+that shows through.
+
+   <p>The strategy for handling background effects is as follows:  When
+there is no explicitly started effect, an event is generated:
+either <code>display_update</code> or <code>music_refresh</code>.  Any module that can
+provide a background effect should implement these handlers.
+
+   <p>The handler can decide which effect, if any, it wants to provide by
+calling either <code>deff_start_bg</code> or <code>music_request</code>.  (If the
+conditions are not correct, it can simply return without doing anything,
+as with a mode that is not running.)  The handler request includes
+the ID for the deff or music to be started, plus a priority value.  After all of the
+event handlers have been invoked, the one with the highest priority
+wins and will be started.
+
+   <p>The common code provides many of the implementations to deal with the
+usual cases.  For example, while a game is running, the default effect
+is to show the game scores.  Default music codes can be defined for
+different circumstances: normal game play, ball at plunger, during bonus.
+
+   <p>Because handlers can use the values of other variables in the
+determination (are we in game, for example?), the calculations need to
+be redone periodically, in case the conditions change.  To force a refresh
+of both the display and music,
+call <code>effect_update_request</code>.  The update will take place within the next
+100ms; the delay is intended to smooth out multiple such requests within
+a short time, and the delay is not really noticeable.
+
+   <p>When a foreground display or music effect exits, an update will take place
+immediately.  In this case, if display update is needed, then music is not
+updated, and vice-versa.
+
+   <p>If an update is not requested, the display and music will still be refreshed
+periodically by the system, about twice per second, as the conditions checked
+within the handlers may have changed.  Because of this, <code>effect_update_request</code>
+is really an optional call, and only forces the update to happen faster.
+
+   </body></html>
+

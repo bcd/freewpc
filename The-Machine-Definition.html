@@ -1,0 +1,329 @@
+<html lang="en">
+<head>
+<title>The Machine Definition - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="The-WPC-Hardware.html#The-WPC-Hardware" title="The WPC Hardware">
+<link rel="next" href="System-Events.html#System-Events" title="System Events">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="The-Machine-Definition"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="System-Events.html#System-Events">System Events</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="The-WPC-Hardware.html#The-WPC-Hardware">The WPC Hardware</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="appendix">Appendix B The Machine Definition</h2>
+
+<p>Machines define most of their hardware configuration in the form of
+an "md" file. 
+Long ago, this was done by directly writing a .h file with the required
+information.  The .h file approach was more cumbersome and somewhat error-
+prone.
+
+   <p>The md file is "compiled" by the script <samp><span class="command">genmachine</span></samp>,
+which writes out a .h file and also some .c files that get linked in
+to the final program.  <samp><span class="command">genmachine</span></samp> will do some consistency
+checking on the input to make sure it is sane.
+
+   <p>It will enforce naming consistency between identifiers, declarations,
+and strings.  For example, the start button gets a define for its switch
+number (SW_START_BUTTON), an identifier for callback events
+(sw_start_button), and a string in the menus ("START BUTTON"). 
+gendefine can produce all of these automatically from
+a single "Start Button:" declaration in the .md file.
+
+   <p>Though the syntax is fairly strict, there is a bit of magic in how different
+categories need to be written.  The easiest way to write a config for a new
+game is to copy from another one.  The Twilight Zone and World Cup Soccer
+configs are the most complete.  There is more documentation in those files
+on how things should be set up.
+
+<h3 class="section">B.1 Syntax</h3>
+
+<p>The "md" file is just a text file.  Blank lines and lines beginning
+with a '#' are ignored, like in a shell script.
+
+   <p>Long lines can be broken up like in C, with a backslash at the end of each line. 
+A comma also acts as a line continuation character, which is useful when
+defining long lists.
+
+   <p>The file is divided into sections, which begin with a section header in
+square brackets.  For example:
+
+<pre class="example">     <var>global-statements</var>
+     
+     [section1]
+     <var>section1-statements</var>
+     
+     [section2]
+     <var>section2-statements</var>
+</pre>
+   <p>Only section names that are known to genmachine are permitted.  The list of
+permitted sections is listed near the top of the <code>genmachine</code> script, and
+includes: switches, lamp, drives, gi, lamplists, containers, etc.
+
+   <p>Notice that there is a global section that is in effect at the top of a file,
+before you declare any sections.
+
+   <p>Within a section, you declare items that fit that category.  All
+declarations take this form:
+
+<pre class="example">     <var>key</var>: <var>property1</var> [, <var>property2</var>...]
+</pre>
+   <p>A declaration begins with a key, followed by a colon, followed by a comma-
+separated list of properties.  The key and/or properties can contain any
+characters, including spaces, but not commas or colons.
+
+   <p>There are two types of declarations: fixed objects and dynamic objects. 
+They are written similarly but not exactly the same.
+
+<h3 class="section">B.2 Fixed Objects</h3>
+
+<p>In one style, used mostly for
+hardware layout, the key refers to the object's physical identification,
+such as the switch, lamp, or solenoid
+number.  Here the key is generally numeric, although for solenoids the
+syntax is slightly different to specify the solenoid bank.  The first
+property of these declarations should always be the human readable name
+of the object.  Depending on the type of declaration, genmachine can
+validate that the key name is valid.
+
+   <p>An example:
+
+<pre class="example">     [switches]
+     14: Tilt, tilt, ingame, noplay
+</pre>
+   <p>The key, 14, identifies which switch is being described.  For switches and
+lamps, the key is given as a pair of column/row digits, as it would be listed
+in the game manual.  The first property, Tilt, gives it a name. 
+This is used to generate the defines and strings related to the switch.
+
+   <p>Everything else identifies the properties of the switch. 
+Different types of objects will have different properties.  Here, we say three
+things: (1) it is an instance of a well-known switch class, called 'tilt';
+this ties it directly to system code for processing tilts automatically. 
+(2) The tilt switch should only be serviced during a game.  (3) A closure does
+not mark valid playfield.
+
+<h3 class="section">B.3 Variable Objects</h3>
+
+<p>In the second type of object definition, there is no physical identifier,
+and so the name before the colon is the human readable name.  These are generally used for
+software constructs.  For these, genmachine automatically
+assigns a number based on the order of the declarations.  There can be an
+unlimited number of objects of these types, unlike those tied to hardware
+where there is a physical limit.
+
+   <p>For example:
+
+<pre class="example">     [deffs]
+     Multiball Start: page(MACHINE_PAGE), PRI_GAME_QUICK6
+</pre>
+   <p>This defines a display effect for multiball start.  A #define is generated,
+DEFF_MULTIBALL_START, which is a numeric ID used to refer to the effect. 
+The IDs for all deffs are assigned sequentially, and do not need to be
+specified as with the switches above.  Everything following the colon is
+treat as a property just as above.
+
+   <p>This example also shows a variation in the property syntax.  Above,
+we saw properties 'ingame' and 'noplay', which are <dfn>binary properties</dfn>:
+just stating them causes them to be turned on.  Binary properties can
+be listed in any order; genmachine knows what all of the allowable binary
+properties are and will handle them correctly.  In the deff declaration
+above, there is a 'page' property, which is not binary &ndash; it has a value,
+MACHINE_PAGE.  For these <dfn>valued properties</dfn>, the syntax is always
+&lsquo;<samp><var>variable</var><span class="samp">(</span><var>value</var><span class="samp">)</span></samp>&rsquo;.
+
+<h3 class="section">B.4 Directives</h3>
+
+<h4 class="subsection">B.4.1 include</h4>
+
+<p>The 'include' directive can be used to include config syntax from another file,
+much like a C '#include'.  This is used to bring in common definitions for the
+platform, that can be shared across games.
+
+   <p>For example, no game defines a switch entry for the "ALWAYS CLOSED" switch,
+which is the same in every WPC game.  This can be put into a file shared by
+all machines.
+
+   <p>By convention, the <em>machine-specific</em> file includes the
+<em>platform-specific</em> file, which may itself include other files. 
+The WPC platform provides different files for the different hardware
+generations, one per variation and one that is common for all.
+
+   <p>All include files are read and parsed before any of the output is generated. 
+It is thus possible to override definitions that were seen in an earlier
+include.  The default WPC md file provides names
+for all of the switches and lamps, so if you omit one from the machine file,
+you get a default definition.  The tester ROM uses this facility.
+
+<h4 class="subsection">B.4.2 define</h4>
+
+<p>The 'define' directive is used for miscellaneous settings.  It gets translated
+to a C '#define' in the output file <samp><span class="file">mach-config.h</span></samp>.  For example,
+
+   <p>define MACHINE_NUMBER 531
+
+   <p>is converted to:
+
+   <p>#define MACHINE_NUMBER 531
+
+   <p>Note that the pound sign is not included in the mdfile,
+as it would be treated as a comment.
+
+<h3 class="section">B.5 Global Configuration</h3>
+
+<p>Certain things need to be defined in the global sections, using Key: Value syntax. 
+The human readable name of the machine, the system type, and a few other things can be
+given here.  These do not appear directly in the mach-config.h, but are used by
+genmachine to guide the compilation.  Again, see any existing config file for an example.
+
+<h3 class="section">B.6 Section Summary</h3>
+
+<p>Here is a list of the sections that can appear.
+
+     <dl>
+<dt><code>switches</code><dd>
+Defines the physical switches.
+
+     <p>The possible attributes for switches are:
+          <dl>
+<dt><code>opto</code><br><dt><code>edge</code><br><dt><code>noplay</code><br><dt><code>ingame</code><br><dt><code>intest</code><br><dt><code>button</code><br><dt><code>noscore</code><dd></dl>
+
+     <p>Additionally, these attributes are used to tag special switches. 
+There should only be one switch of each type.
+
+          <dl>
+<dt><code>outhole</code><br><dt><code>shooter</code><br><dt><code>tilt</code><br><dt><code>slam-tilt</code><br><dt><code>buyin-button</code><br><dt><code>launch-button</code><br><dt><code>start-button</code><br><dt><code>trough-stack</code><dd></dl>
+
+     <br><dt><code>lamps</code><dd>
+Defines the controlled lamps.  You can also give each lamp a color
+and a playfield position; there are ways of using this data to
+auto-generate lamp effects.
+
+     <p>These attributes are used to tag special lamps:
+
+          <dl>
+<dt><code>start</code><br><dt><code>buyin</code><br><dt><code>extra-ball</code><br><dt><code>shoot-again</code><dd></dl>
+
+     <br><dt><code>drives</code><dd>
+Defines the solenoids and flashers.  Use the <code>flash</code> attribute to say
+which ones are flashers.  Use <code>motor</code> to say which ones are motors.
+
+     <p>These attributes are used to tag special drives:
+
+          <dl>
+<dt><code>ballserve</code><br><dt><code>knocker</code><br><dt><code>launch</code><dd></dl>
+
+     <br><dt><code>gi</code><dd>
+Defines the G.I. string names, for display in test mode.
+
+     <br><dt><code>lamplists</code><dd>
+Defines the lamplists.  The attribute list defines an ordered list of lamps. 
+Each attribute can be a physical lamp name, as defined in the <code>[lamps]</code> section;
+a range of lamps in the form <var>lamp_start</var><code>..</code><var>lamp_end</var>; or another
+lamplist name, allowing for nested declarations.
+
+     <br><dt><code>containers</code><dd>
+Defines the containers/ball devices. 
+The attribute list begins with the name of the release solenoid,
+followed by the names of the counting switches (in order from entry
+to exit).
+
+     <p>The trough container should be marked with the attribute <code>trough</code>.
+
+     <br><dt><code>templates</code><dd>
+Lists the template instantiations.  The key gives a name to the instance. 
+The first property should be the name of the common <code>driver</code> that
+implements it.  The remaining properties give values to all of the driver's
+parameters.
+
+     <br><dt><code>tests</code><dd>
+Defines additional hardware tests that are put into the Tests menu. 
+The name of the item corresponds to the name of the test item.  These should
+be defined in a separate C file from the rest of the machine code, and linked
+into the TEST_OBJS section with the rest of the test module.
+
+     <br><dt><code>deffs</code><dd>
+Define the display effects.
+
+     <br><dt><code>leffs</code><dd>
+Define the lamp effects.
+
+     <br><dt><code>adjustments</code><dd>
+Define the machine's feature adjustments.  For each adjustment,
+you give a <em>type</em>, which is an object that defines its
+allowable values, and a <em>default</em>.
+
+     <br><dt><code>audits</code><dd>
+Defines feature audit variables.
+
+     <br><dt><code>system_sounds</code><dd>
+Gives the machine-specific sound codes that are to be used for certain
+system events, like coin insertion and tilt.
+
+     <br><dt><code>system_music</code><dd>
+Likewise but for the default background music to be used in well-known
+situations.
+
+     <br><dt><code>highscores</code><dd>
+Defines the default high scores.
+
+     <br><dt><code>flags</code><dd>
+Declares bit flags.  These are handled similarly to lamps; they are
+per-player.  All flags are zero at the start of each player's game.
+
+     <br><dt><code>globalflags</code><dd>
+Like &lsquo;<samp><span class="samp">flags</span></samp>&rsquo;, except these are global and not per-player.  These
+must be initialized explicitly.
+
+     <br><dt><code>scores</code><dd>
+Declares the score table, which associates a short 8-bit ID to a binary-coded
+decimal score value.  Some of the scoring APIs use IDs instead of the
+expanded values for space efficiency.
+
+     <br><dt><code>fonts</code><dd>
+Declares which fonts should be included in this game.
+
+     <br><dt><code>timers</code><dd>
+Declares the freerunning timers that are needed.
+
+   </dl>
+
+<h3 class="section">B.7 How genmachine works</h3>
+
+<p>genmachine is a Perl script.  It parses all of the md commands and builds a giant
+hash with all of the data.  genmachine is invoked multiple times with different options,
+requesting that different output files be generated.  All of the output files are C or H
+files put into the 'build' subdirectory, which are then compiled normally.
+
+   <p>For the Perl programmer, each object declaration is itself a Perl anonymous hash, where
+each property of the object is one of the hash entries.  Using the variable(value) syntax,
+it is possible to put anything into the object definition.  However, only certain keys are
+recognized by the output functions.  Adding new properties generally doesn't require
+a parser change, but only a change to the output routines.  Binary properties and well-known
+object classes do need to be stated &ndash; there are constant tables at the top of the script
+that declare these.
+
+<!-- ====================================================== -->
+   </body></html>
+

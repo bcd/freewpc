@@ -1,0 +1,317 @@
+<html lang="en">
+<head>
+<title>Dot-Matrix Performance - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Build-Tools.html#Build-Tools" title="Build Tools">
+<link rel="next" href="Historical-Notes.html#Historical-Notes" title="Historical Notes">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Dot-Matrix-Performance"></a>
+<a name="Dot_002dMatrix-Performance"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Historical-Notes.html#Historical-Notes">Historical Notes</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Build-Tools.html#Build-Tools">Build Tools</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="appendix">Appendix E Dot-Matrix Performance</h2>
+
+<p>On older machines without a dot matrix, driving
+segmented score displays was a relatively low horsepower task.  Up until
+the late 1980's, 7-segment displays were used that could only display numbers
+(and a few letters).  Including a comma, there are only 8 bits per segment. 
+Assuming 4 players per game and 8-digit scoring, that's still only 256 bits &ndash;
+or 32 bytes of data &ndash; that has to be managed by the CPU.
+
+   <p>Later, 16-bit segments were used that could display full text, which doubles
+the data size, but still the quantity of data to be manipulated was low.
+
+   <p>The dot matrix display changed that.  The DMD is 128 pixels wide by 32 pixels
+high, for a total of 4096 pixels, or 512 bytes, per frame.  Let's look at some
+of the challenges that are created.
+
+<h3 class="section">E.1 Frame Rate</h3>
+
+<p>Achieving a realistic looking animation means redrawing the display
+frequently enough so that movements appear smooth.  See this article
+about flicker fusion threshold for more information.
+
+   <p>A 20Hz frame rate is decent looking.  That requires updating the display 20
+times per second, or once every 50ms.  For better quality, 25Hz or 30Hz
+is desirable.  However, the 2MHz processor, saturated with other things
+besides DMD updating, is not well-suited to a high frame rate.
+
+   <p>We'll assume a 20Hz frame rate throughout this article, and see how
+difficult even that is to achieve.  We'll find that in some
+cases, we have to settle for even less than that.
+
+   <p>Another way of looking at it is that every 50ms, or every 97600 CPU cycles,
+we need to draw and commit another display frame.  Later, we'll talk about
+the CPU instruction set and how efficiently it can do some common operations.
+
+<h3 class="section">E.2 Simulating Color</h3>
+
+<p>The display itself has no notion of color.  Each pixel is either off, or glows
+orange.  WPC games simulated different shades of orange by using a page flipping
+technique.  By rapidly switching between two pages, up to 4 different colors
+(3 oranges plus black) are perceived.
+
+   <p>The key is that the two pages are not shown equally.  One of them is displayed 1/3 of the time;
+the other 2/3 of the time.  If a pixel is off in both pages, it appears black. 
+If a pixel is on in both pages, it appears to be on all the time, at 100%
+intensity.  If a pixel is on in one page but not the other, then it appears
+either 1/3 or 2/3 of the time, producing either a dark brown or medium orange
+color.
+
+   <p>The controller itself does not implement the page flipping; the software does. 
+The controller can interrupt the CPU (on the FIRQ line) whenever the display
+has just been refreshed.  Software can reprogram the controller to display a
+different page of data at this time.  Doing it at any other time will produce
+tearing, where parts of two different pages are temporarily displayed at once.
+
+   <p>The display refreshes at 122MHz (ref); therefore, the FIRQ occurs about once
+every 8ms (or 16000 CPU cycles).  The FIRQ handler needs to be fast since it
+is so frequent.  All it needs to do though, is to set the active page register
+in the controller to a new value.  (FreeWPC does this in less than 40 cycles.)
+
+   <p>The same technique, with more pages, could be used to simulate more colors. 
+For example, 3 pages could produce 8 colors, and 4 pages could produce 16
+colors.  However, note that as more pages are flipped, the effective refresh
+rate drops.  This means that the page flipping begins to be perceived as movement
+and not as color change.  Showing more colors requires other techniques that
+are not discussed further.
+
+   <p>2 pages = effective frame every 3 redraws = 40Hz frame rate
+3 pages = effective frame every 7 redraws = 17Hz frame rate
+4 pages = effective frame every 15 redraws = 8Hz frame rate
+
+<h3 class="section">E.3 6809 Instruction Set</h3>
+
+<p>The 6809 does not provide much support for bulk movement of data, which is
+what is mainly needed to update the display.  Assume for now that a single
+512-byte, monochrome frame of data is in the game EPROM, which needs to be
+copied into display memory, i.e.
+
+   <p>	memcpy (display_memory, image_src, 512);
+
+   <p>How long does this simplest of operations take?  It all depends on the implementation
+of the copy.  Let's look at some approaches.
+
+   <p>A simple way is to copy byte-by-byte.  Assume that the source and destination
+addresses are already in registers, then we can do something like this:
+
+<pre class="example">     loop:
+     	ldb	,x+
+     	stb	,u+
+     	dec	count
+     	bne	loop
+</pre>
+   <p>We use the X and U registers, because instructions using Y are one byte longer,
+and also take one cycle longer.
+
+   <p>This actually doesn't work, because count is a byte variable, and we need to
+copy 512 bytes.  Also, it is inefficient because many cycles are spent in the
+'dec' and 'bne'.  Loop unrolling can help us eliminate overhead:
+
+<pre class="example">     	lda	#64
+     	sta	count
+     loop:
+     	ldb	,x+
+     	stb	,u+
+     	ldb	,x+
+     	stb	,u+
+     	ldb	,x+
+     	stb	,u+
+     	ldb	,x+
+     	stb	,u+
+     	dec	count
+     	bne	loop
+</pre>
+   <p>As each iteration now copies 4 bytes at a time, we can do this in 64 loop iterations.
+
+   <p>Obviously, we could unroll some more and it would run even faster, but with
+diminishing returns and at the expense of a larger program.  Code space is not
+the primary concern here, but it does play a role.
+
+   <p>The above example can be improved further by realizing that the 6809 can operate
+on 16-bit words.  Loading/storing a word at a time helps a lot.  The number of
+iterations can be cut in half, too, which reduces loop overhead more.
+
+<pre class="example">     	lda	#32
+     	sta	count
+     loop:
+     	ldd	,x++
+     	std	,u++
+     	ldd	,x++
+     	std	,u++
+     	ldd	,x++
+     	std	,u++
+     	ldd	,x++
+     	std	,u++
+     	dec	count
+     	bne	loop
+</pre>
+   <p>The 'ldd' and 'std' instructions, in the indexed modes used above, take 7 cycles
+each.  dec takes 5 cycles &ndash; or 4 if we ensure that it is in the direct page. 
+(footnote here)  bne only takes 2 cycles.  So one iteration of this loop, which
+copies 8 bytes, takes 63 cycles.  Multiply by 32 and we get 2016 cycles, or
+a little more than 1ms, just to do a straightforward page copy.
+
+   <p>Now consider the following:
+
+     <dl>
+<dt>&bull;<dd>Keeping all images uncompressed is not practical on the WPC platform, because
+of the ROM space limitation.  In the earliest dot matrix games, 256KB ROMs were
+used.  With no room for anything but graphics, these could only hold 512 pages
+of data.  If 4-color images are desired, then cut that number in half.
+
+     <br><dt>&bull;<dd>Compression is necessary, and takes CPU power to decode.  So the 1ms copy is
+mostly unrealistic.
+
+     <br><dt>&bull;<dd>In many cases, copying a single page of graphics is not what is needed. 
+We may need to composite several layers of images together, including text. 
+It may take 4 or 5 page-level operations (meaning, where an entire page is modified)
+to compose the final image.  Some of these operations are a little more costly
+than a single copy, too.
+
+     <br><dt>&bull;<dd>Remember that we wanted a display frame every 50ms.  As we add all of this
+extra complexity, this is starting to take a significant percentage of the
+total CPU available. 
+</dl>
+
+<h3 class="section">E.4 The Fastest Copy in Town</h3>
+
+<p>It turns out that our copying loop is NOT the most efficient that it can be. 
+Remember, the goal is to do bulk copying of data.  There actually are
+instructions that can copy more than 16-bits of data at a time: the stack
+push/pull instructions!
+
+   <p>The PSHS (push) instruction can copy the contents of the A, B, X, Y, U, S,
+PC, DP, and CC registers onto the stack.  Likewise PULS does the opposite,
+loading from memory into registers.  These instructions don't quite work
+though, because we need a working stack.  However, there is another
+variant: PSHU and PULU.  These were intended to be used for a "user stack",
+but for our purposes, U is just another pointer register.  If we point U
+at our display page, we can do bulk copies using PSHU, and get more
+than 16-bits done at a time.  [Note that this only works for either
+the source or the destination, but not both.]
+
+   <p>These instructions are not without some cost, though.  What they improve
+is the overhead of instruction fetching.  Each of them takes 5 cycles plus
+1 cycle for each byte transferred.  Recall that ldd/std took 7 cycles.  So
+if we use the stack instructions for only 16-bits at a time, the cost is the
+same.  But any additional bytes copied come for only 1 cycle per byte.
+
+   <p>We want to push as many values in registers as possible, but we can't
+use them all.  U is already being used as our pointer, so we can't use it
+for the display data, too.  PC is obviously not a good candidate.  DP and
+CC affect other things, so we don't want to trash them.  That leaves
+A, B, X, Y, and S.
+
+   <p>FreeWPC chooses not to use S as a data register, although it could if the
+copy code was protected against interrupts and no stack variables were
+needed during the copy.  In some applications, this might be possible. 
+Because of the large amount of time that a copy takes, I felt that keeping
+interrupts disabled for a long time was a bad idea.  So I only use A, B,
+and X, and Y: 6 bytes copied at a time. [ Note: I'm not using Y. ]
+
+   <p>And that, as far as I can tell, is THE fastest way to copy bytes on the 6809.
+
+<h3 class="section">E.5 Bit Alignment</h3>
+
+<p>For full 128x32 frames, a bytewise or wordwise copy doesn't need to concern itself
+with the individual bits in the image.  However, when copying smaller bitmaps
+to an arbitrary DMD location &ndash; for example, when drawing font glyphs &ndash;
+bit aligment becomes a problem.
+
+   <p>First, some background.  A single byte of data in the controller's memory
+addresses 8 consecutive pixels within a single row.  The least-significant
+bit of the data corresponds to the leftmost pixel.  That is, the value 0x01
+draws one pixel aligned to the left; 0x80 is aligned to the right.  If you're
+used to picturing a byte of data in its binary form, this is completely backwards from
+that, which can cause some confusion when working with these algorithms.
+
+   <p>Now say we have an 8x1 bitmap (8 pixels wide, 1 pixel high) stored in one of these bytes,
+and we want to
+place it anywhere on the display.  If the leftmost pixel location is byte-aligned,
+this is easy; we just write the byte to that location.
+
+   <p>If the leftmost pixel location is not byte-aligned, you can see that this will
+take at least two instructions, because two different bytes of the display data
+are modified.  Suppose we want to put this bitmap at a row where x=4 (four pixels
+in from the left edge of the display).  How would we do it?
+
+   <p>First, we're going to have to modify two different bytes of data.
+
+   <p>Second, note that to be correct, we cannot just overwrite these areas, because
+that would trash some of the bits that we are not concerned with.  The pixels
+from x=0 to x=3 and from x=12 to x=15 should not be altered.  This requires
+reading those locations, modifying only the appropriate pixels, then writing
+back the results.
+
+   <p>So already this is not trivial.  This is an important problem to solve
+because this is how all fonts get drawn.
+
+   <p>The 6809 does not support shifting more than 1 bit in a single instruction.
+
+   <p>All this said, there are a number of efficient solutions to the problem, but
+they all take a lot of CPU cycles.  FreeWPC's approach is to examine the size of
+the source bitmap and the target bit alignment, to determine the most
+efficient method to use.  Three different situations are handled:
+
+   <p>1. the source width plus the bit alignment are less than 8 bits.  This means
+no more than 1 byte per row need to be emitted.  This is very efficient for
+small fonts in some cases. [ This is not right. ]
+
+   <p>2. the source width is 8 bits or less, and the width plus alignment is less
+than 16 bits.  This is almost as good; we can read 1 byte per row and write
+2 bytes per row.
+
+   <p>3. Everything else.  The generic method always works, but is inefficient for
+all but the largest of bitmaps.
+
+<h3 class="section">E.6 Compression Techniques</h3>
+
+<p>FreeWPC has not experimented much with various compression algorithms for
+full-screen images.  Compression has not been implemented at all for font
+data and other small bitmaps, simply because the space savings would not be
+worth all of the extra computation.
+
+   <p>The goal is not perfect compression, but rather to be good enough.  The
+best compressor takes time &ndash; and thereby requires time to decompress.  We
+need a fast decompression algorithm that the 6809 can do well.  That limits
+the scope to the simplest of algorithms.  Really good compressors work at
+the bit-level, but because of the 6809's inability to do bit-level manipulation
+fast, FreeWPC has only considered techniques that work a byte or a word at a time.
+
+   <p>There are a number of basic approaches to compression.  The first is to use
+a form of run length encoding (RLE), where a long string of consecutive
+byte or word values is compressed into a value+count pair.  Not all images will have
+long strings like this, but many do, especially runs of 0x00 and 0xFF.
+
+   <p>The second is to use a form of delta encoding, where an image is encoded as the
+set of differences from a previous image.  This is useful when doing animations,
+in which consecutive images don't differ too much.
+
+   <p>More complicated techniques than these are likely to be a burden for the 6809.
+
+   </body></html>
+

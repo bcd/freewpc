@@ -1,0 +1,142 @@
+<html lang="en">
+<head>
+<title>Debugging - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Native-Mode.html#Native-Mode" title="Native Mode">
+<link rel="next" href="The-WPC-Hardware.html#The-WPC-Hardware" title="The WPC Hardware">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Debugging"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="The-WPC-Hardware.html#The-WPC-Hardware">The WPC Hardware</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Native-Mode.html#Native-Mode">Native Mode</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">14 Debugging</h2>
+
+<h3 class="section">14.1 <code>dbprintf</code></h3>
+
+<p>You can use the <code>dbprintf()</code> function to print debug
+messages. 
+<code>dbprintf</code> uses the builtin <code>sprintf</code> function to format
+the message, and then calls <code>db_puts</code> to print it. 
+How these messages are printed depends on which version of
+<samp><span class="command">pinmame</span></samp> you are using.  At present, there is no way
+to see these messages when you are running on real hardware.
+
+   <p>If you are running Linux, and you obtain the patches to <samp><span class="command">xpinmame</span></samp>,
+each character is written to a new hardware register, the
+<dfn>debugger port</dfn>.  It acts like a serial port and can
+be used to communicate between the game program and a
+separate debug console.  The program <samp><span class="command">wpcdebug</span></samp> is
+the console.  Run this at the same time as pinmame and you
+will see the debug messages printed out.  The two programs
+use a local socket to send data back and forth.
+
+   <p>The console also accepts keyboard input and passes it back
+to the running program.  See <samp><span class="file">common/db.c</span></samp> for more information.
+
+   <p>Under an unpatched emulator, such as on Windows, debug messages are
+sent to the WPC parallel port.  <code>pinmame</code>
+writes the printer output to a file in the <samp><span class="file">memcard</span></samp> directory. 
+Under Windows, these files cannot be read while the program is
+still running.
+
+   <p>In either case, the code to drive the serial/parallel port is only
+enough to keep the emulator happy; none of it would work on real hardware.
+
+<h3 class="section">14.2 <samp><span class="command">gdb</span></samp></h3>
+
+<p>In native mode only, you can use <samp><span class="command">gdb</span></samp> as you would on
+any other program.  Because native mode uses <samp><span class="command">ncurses</span></samp>, however,
+it is best to run the debugger in a separate window from the program
+itself.
+
+   <p>Start FreeWPC as usual, then from another window, run <samp><span class="command">make attach</span></samp>. 
+(See the Makefile to see what this does; you really don't need to be
+in the source tree to do it.)  gdb starts, searches for the PID of the program,
+and attaches to it.  The program will stop, and you can then control it from
+the gdb prompt.
+
+   <p>There are some special gdb macros provided in <samp><span class="file">gdbmacros</span></samp>. 
+All of the usual breakpoints, stepping, and variable evaluation
+commands work as you would expect.
+
+<h3 class="section">14.3 <samp><span class="command">exec09</span></samp></h3>
+
+<p>exec09 is the 6809 emulator that is provided with GCC6809. 
+exec09 supports a subset of the WPC architecture and can be used
+as a replacement for PinMAME.  It is mostly good for debugging
+straight CPU code that does not access hardware.  It provides
+a command-line monitor with breakpoints, single-step, and symbolic
+debugging which is sometimes more useful than PinMAME or gdb.
+
+   <p>exec09 can measure the length of time a function takes, including
+interrupt handlers, which is good for determining performance.
+
+<h3 class="section">14.4 Breakpoints</h3>
+
+<p>FreeWPC now supports breaking into the game program when the compile-time
+flag <code>CONFIG_BPT</code> is turned on.  This works both in emulators and on
+real hardware.  When enabled, this feature overrides the normal use of the
+Escape coin door button.  Pressing Escape now halts the system; press Escape
+again to resume.
+
+   <p>While halted, you can use the Up and Down buttons to view memory.
+
+   <p>If a fatal error occurs when the debugger is compiled in, the machine will
+fall into the debugger instead of rebooting.  This will show you what
+error occurred and which task was last running.
+
+   <p>When halted, only normal task scheduling and periodic functions cease to run. 
+Interrupt handlers/realtime functions cannot be halted, and thus, if they
+fail, the system will behave erratically.  (Smoke alert.)
+
+   <p>You can also dynamically enable and disable breakpoints at various places
+within the code, so that the debugger will start when the program hits that
+location, without having to press Escape.
+
+<h3 class="section">14.5 Switch Stress Test</h3>
+
+<p>The switch stress test is used to test switch handling over a long
+period of time.  When enabled, this adjustment causes the game to
+pretend that switch closures are occurring randomly.  No balls are
+actually put into play, but the machine is fooled into thinking so.
+
+   <p>Stress test also exercises ball devices correctly, and simulates 'enter'
+events instead of individual device switches.  Ball locks, trough
+serves, and multiballs can all be tested.
+
+   <p>You can force end-of-ball by pressing the Start Button several seconds
+after the start of the ball (the delay allows you to still add players
+to test multiplayer games).  If in multiball play, pressing Start
+simulates the drain of exactly one ball at a time.
+
+   <p>Closures are simulated randomly at a rate of about 10 per second. 
+This test has been used to uncover some hard to find bugs in the game
+logic after extended play.
+
+   <p>Naturally, this feature is disabled by default.
+
+<!-- ====================================================== -->
+   </body></html>
+

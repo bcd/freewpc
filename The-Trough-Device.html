@@ -1,0 +1,59 @@
+<html lang="en">
+<head>
+<title>The Trough Device - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Ball-Tracking.html#Ball-Tracking" title="Ball Tracking">
+<link rel="prev" href="Events.html#Events" title="Events">
+<link rel="next" href="Virtual-Balls.html#Virtual-Balls" title="Virtual Balls">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="The-Trough-Device"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Virtual-Balls.html#Virtual-Balls">Virtual Balls</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Events.html#Events">Events</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Ball-Tracking.html#Ball-Tracking">Ball Tracking</a>
+<hr>
+</div>
+
+<h3 class="section">7.4 The Trough Device</h3>
+
+<p><a name="index-Trough-device-56"></a>
+The trough device is special; every game must have one.  The system
+completely handles the device events generated for the ball trough.
+
+   <p><a name="index-Live-count-57"></a><a name="index-Balls-in-play-58"></a>The function <code>device_add_live</code> is called whenever a new ball
+is successfully served.  The <dfn>live count</dfn> of the machine is the
+number of balls in play for the purposes of game code (i.e. not counting
+missing pinballs or balls locked on the playfield from previous games). 
+The <code>single_ball_play</code> event is generated when the live count
+is reduced to 1.  Multiball modes use
+this to stop properly.  There is also a <code>ball_count_change</code> event
+invoked on every change of the number of balls in play; some games use
+this to update playfield multipliers.
+
+   <p>Likewise, <code>device_remove_live</code> is called whenever a ball drains. 
+It ultimately is the one that generates the <code>end_ball</code> event
+when all balls have drained.
+
+   <p>Live count is not necessarily the actual number of balls in play. 
+If a missing pinball suddenly reappears, the live count is not increased.
+
+   </body></html>
+

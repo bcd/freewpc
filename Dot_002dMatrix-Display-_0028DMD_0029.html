@@ -1,0 +1,166 @@
+<html lang="en">
+<head>
+<title>Dot-Matrix Display (DMD) - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Core-APIs.html#Core-APIs" title="Core APIs">
+<link rel="prev" href="Solenoids.html#Solenoids" title="Solenoids">
+<link rel="next" href="Sound-Board.html#Sound-Board" title="Sound Board">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Dot-Matrix-Display-(DMD)"></a>
+<a name="Dot_002dMatrix-Display-_0028DMD_0029"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Sound-Board.html#Sound-Board">Sound Board</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Solenoids.html#Solenoids">Solenoids</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Core-APIs.html#Core-APIs">Core APIs</a>
+<hr>
+</div>
+
+<h3 class="section">5.4 Dot-Matrix Display (DMD)</h3>
+
+<p>Dot matrix APIs should only be called from display effects.
+
+   <p>There are two key objects you should understand: pages and windows.
+
+   <p>A <dfn>display page</dfn> is special RAM which holds the frame buffer that determines
+which pixels are turned on and off.  Display memory cannot be accessed like
+ordinary memory, though; it does not have a fixed address.
+
+   <p>A <dfn>display window</dfn> is an address that the CPU can use to read/write display
+memory &ndash; that is, it sees one of the display pages.
+
+   <p>There can be more display pages than windows, so not all pages are accessible
+at all times.  Through <dfn>mapping calls</dfn>, you decide which pages are mapped
+to which windows.
+
+   <p>You must go through several steps for each frame you want to write.  For
+each step, there are several APIs to choose from.
+
+     <ul>
+<li>Allocate a new display page. 
+The new page may contain old, stale data in it; it is not necessarily initialized. 
+Allocation alone does not make it accessible, only reserved.
+
+          <dl>
+<dt><code>dmd_alloc_</code><var>map</var><dd>Allocate and map a single page into either the low or high area.
+
+          <br><dt><code>dmd_alloc_low_high</code><dd>Allocate and map two pages at once.  The pages will always have consecutive
+page numbers (N and N+1).
+
+          <p>Do not assume that the low and high windows are contiguous in memory.
+
+          <br><dt><code>dmd_dup_mapped</code><dd>Allocate and map a page pair that is copy of what is currently mapped.
+
+     </dl>
+
+     <li>Map the page into one of the display windows. 
+FreeWPC requires at least two windows; some platforms support more.  These two
+windows are called the <dfn>low window</dfn> and <dfn>high window</dfn>; the pages
+that are mapped there are the <dfn>low page</dfn> and the <dfn>high page</dfn>. 
+The simplest effects can be be done using only the low page.  If you need color,
+or flashing effects, you will probably need both the low and high page. 
+In the API names below, the term <var>map</var> refers to either <em>low</em> or <em>high</em>.
+
+          <dl>
+</dl>
+
+     <li>Initialize the page if necessary. 
+If you are writing text only, you would want to clear the page first.  If you
+are filling the page with a full-size image, that is not necessary.
+
+          <dl>
+<dt><code>dmd_clean_page_</code><var>map</var><dd>Zero a display page.
+
+          <br><dt><code>dmd_copy_page</code><dd>Copy an entire page from one buffer to another. 
+</dl>
+
+     <li>Render text and graphics on the page.  Text APIs implicitly write to the
+low page only.  Graphics APIs generally write to the low page if dealing with
+only 1 color, or to both low and high pages if multiple colors are used. 
+If you need to write to the high page, use <code>dmd_flip_low_high</code> to swap
+them temporarily.
+
+          <dl>
+<dt><code>font_render_string</code><dd>Write text in the given font, starting at a specific coordinate. 
+<br><dt><code>font_render_string_center</code><dd>Write text in the given font, centered about the given coordinate. 
+<br><dt><code>font_render_string_right</code><dd>Write text in the given font, right-justified against the specified coordinate. 
+<br><dt><code>bmp_draw</code><dd>Draw an arbitrary sized bitmap onto the low page. 
+<br><dt><code>frame_draw</code><dd>Draw a full-size, 4-color frame onto the low and high pages. 
+<br><dt><code>dmd_text_outline</code><dd>Generate a text outline page.  On input, the low page should contain nothing but text. 
+The high page should be allocated, but need not be clean.  On output,
+the high page will contain an outline mask.
+
+          <p>This API should be used when rendering text onto a color image.  Each '1' bit
+in the mask corresponds to a pixel that should be made black in the final image,
+so that the text stands out from the background image.  See <code>dmd_overlay_outline</code>
+below for a method to do this. 
+</dl>
+
+     <li>Optionally, create a composite of several pages together
+For example, overlaying text onto background art.  You can use <dfn>overlay pages</dfn>,
+which are additional fixed buffers that do not need to be allocated.  You can
+use compositing APIs to join multiple pages together in different ways.
+
+          <dl>
+<dt><code>dmd_overlay</code><dd>Overlay ("or") the low overlay page onto the allocated low page.  Use when both
+the allocation and the overlay are mono. 
+<br><dt><code>dmd_overlay_color</code><dd>Overlay both low/high overlay pages onto the allocated low/high pages.  Use when
+both the allocation and the overlay are 4-color. 
+<br><dt><code>dmd_overlay_onto_color</code><dd>A hybrid of the above two APIs, used when the allocation is in color, but the
+overlay is mono. 
+<br><dt><code>dmd_overlay_outline</code><dd>Overlays text onto a color image.  The allocated low/high pages contain the image. 
+The low overlay page contains the text.  The high overlay page contains the outline mask,
+created with <code>dmd_text_outline</code>.
+
+          <p>This is a fairly slow call, as it is requires several AND and OR operations. 
+<br><dt><code>dmd_and_page</code><dd>A low-level function to AND the contents of the low page, using the high page as a mask. 
+<br><dt><code>dmd_or_page</code><dd>A low-level function to OR into the contents of the low page, using data from the high page. 
+<br><dt><code>dmd_xor_page</code><dd>A low-level function to XOR the contents of the low page with the data in the high page. 
+</dl>
+
+     <li>Show the page. 
+Until the page is shown, it is not visible.  This prevents each step of the
+rendering process from being seen, which is not visually appealing.  Once
+the page is shown, it is implicitly freed back to the system, meaning that any
+new changes to the display require allocating a new page again.  The page does
+not need to remain mapped into a window for it to be visible.
+
+          <dl>
+<dt><code>dmd_show_</code><var>map</var><dd>Show a single display page as a 1-color image.  It can be in either window. 
+<br><dt><code>dmd_show_other</code><dd>If the low page is currently visible, then show the high page; and vice versa. 
+<br><dt><code>dmd_show2</code><dd>Show both display pages together as a 4-color (3 plus black) image. 
+</dl>
+
+     <p>Prior to showing the image, you can schedule a <dfn>transition</dfn>.  You call
+<code>dmd_sched_transition</code> just before showing to say which transition should
+be used.
+
+   </ul>
+
+   <p>Other APIs are listed below.
+
+     <dl>
+<dt><code>dmd_flip_low_high</code><dd>Flip the mappings, so that the low page appears in the high region, and vice
+versa. 
+<br><dt><code>dmd_rough_copy</code><br><dt><code>dmd_rough_erase</code><dd>Erase a rough region of the low page.  The x coordinates must be 8-bit aligned. 
+</dl>
+
+   </body></html>
+

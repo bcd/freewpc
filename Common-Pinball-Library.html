@@ -1,0 +1,342 @@
+<html lang="en">
+<head>
+<title>Common Pinball Library - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Test-Mode.html#Test-Mode" title="Test Mode">
+<link rel="next" href="Fonts-and-Graphics.html#Fonts-and-Graphics" title="Fonts and Graphics">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Common-Pinball-Library"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Fonts-and-Graphics.html#Fonts-and-Graphics">Fonts and Graphics</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Test-Mode.html#Test-Mode">Test Mode</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">9 Common Pinball Library</h2>
+
+<p>The files in the <samp><span class="file">common</span></samp> directory provide a library of generic
+pinball functions that can be reused from game to game.  Some of the more
+important ones are described in detail in this chapter.
+
+<h3 class="section">9.1 Coins and Pricing</h3>
+
+<p>FreeWPC implements a weak form of coin switch handling.  It is not
+very robust and does not time the coins as it should.
+
+   <p>If <code>FREE_ONLY</code> is defined, it will build a ROM that doesn't require
+coins.
+
+<h3 class="section">9.2 Extra Balls</h3>
+
+<p>This module tracks lit and collected extra balls.  Lit extra balls can
+be easy (lit until end of game) or hard (lit only until end of ball).
+
+   <p>In the machine config file, you should tag the lamp that indicates
+an extra ball is lit as <code>extra-ball</code>, and the shoot again lamp
+as <code>shoot-again</code>.  Then the lamps will automatically update for you
+when these APIs are called.
+
+     <dl>
+<dt><code>light_easy_extra_ball</code><dd>Lights an easy extra ball. 
+<br><dt><code>light_hard_extra_ball</code><dd>Lights a hard extra ball. 
+<br><dt><code>eb_light_adjustable</code><dd>Lights an easy or hard extra ball, depending on the value of an adjustment. 
+<br><dt><code>collect_extra_ball</code><dd>Call this from the switch handler of the shot that scores the extra ball. 
+<br><dt><code>can_award_extra_ball</code><dd>Returns true if an extra ball is allowed to be lit/awarded.  This
+consider limits of extra balls per game. 
+</dl>
+
+   <p>There is also an API <code>special_award</code> to award a special, but
+it does not manage any lamps automatically.  It just obeys the adjustment
+to award whatever has been configured for special, and fires the knocker.
+
+<h3 class="section">9.3 Tournament Mode</h3>
+
+<p>FreeWPC implements a tournament mode module.  Note this is what newer
+Stern games refer to as <em>competition mode</em>.
+
+   <p>Tournament mode can be enabled globally in the adjustments menu, or
+it can be enabled by holding down the left flipper button briefly
+before starting the game.  A message will indicate that tournament mode
+has been enabled.  It affects all players in the game.
+
+   <p>Software should check the <code>tournament_mode_enabled</code> boolean variable
+to determine if tournament is in effect.
+
+<h3 class="section">9.4 Ball Search</h3>
+
+<p><a name="index-Ball-searching-59"></a>
+Machines don't need to do much to produce a working ball search function. 
+The common code knows how to pulse all of the regular solenoids. 
+It also knows <em>not</em> to fire anything marked as a <code>motor</code>
+or <code>flasher</code>. 
+You can mark a solenoid in the machine description with <code>nosearch</code>
+to ignore other solenoids as well.
+
+   <p>Machines that need to handle a particular power driver in a non-standard
+way (by using a template driver) should implement a <code>ball_search</code>
+event handler, and mark the
+associated solenoid as <code>nosearch</code>. 
+The <code>ball_search</code> handlers will be called along with the automatic
+pulsing.
+
+   <p>For example, on Funhouse, the Rudy saucer eject needs to make sure that
+the mouth is open before kicking.
+
+   <p>Solenoids associated with ball devices will be skipped unless they are empty,
+except after several ball searches have failed.  The chase ball/lost ball
+recovery feature is also implemented and can be enabled by menu adjustment.
+
+   <p>Game code can call <code>ball_search_timeout_set</code> to set the amount of
+idle time that must expire before a ball search will occur.  The default
+is 15 seconds.  The timer resets anytime a playfield switch (one marked
+with the <code>SW_PLAYFIELD</code> flag) triggers.  You can also manually reset it
+manually using <code>ball_search_timer_reset</code>.
+
+<h3 class="section">9.5 Knocker Driver</h3>
+
+<p>Call <code>knocker_fire</code> to fire the knocker.  If a coin meter is attached
+to the knocker coil, it will not be pulsed.  If the machine defines a sound
+effect for knock, that will be played instead of pulsing a solenoid.
+
+<h3 class="section">9.6 Adjustments</h3>
+
+<p>Adjustments are 8-bit variables kept in persistent storage.  Each group
+of related adjustments is checksummed to verify integrity.  Adjustments
+can be checked by just reading the variable; there is no special API to do so.
+
+   <p>Machines can define their own <em>feature adjustments</em> in the machine config.
+
+<h3 class="section">9.7 Audits</h3>
+
+<p>Audits are 16-bit variables kept in the non-volatile area of memory.  They
+are generally incremented via the <code>audit_increment</code> API, which adds 1. 
+They can also be incremented by an arbitrary value, via <code>audit_add</code>; or
+they can be assigned via <code>audit_assign</code>.  They will not overflow if the
+maximum value is reached, but instead will just stop counting up.
+
+   <p>Machines can define their own <em>feature audits</em> in the machine config.
+
+<h3 class="section">9.8 Scoring</h3>
+
+<p>A global playfield multiplier is supported; use <code>score_multiplier_set</code> to
+change it.  It is automatically set to 1 at the beginning of each ball.
+
+   <p>Scores can be stated in two ways: as a 5-byte, binary-coded decimal value, or
+as an 8-bit "score code".  The long values allow for arbitrary values up to
+10 billion points.  The short values are more compact and index a table of
+common score values, which are listed in the machine config.
+
+   <p>The first set of APIs operate on arbitary BCD score buffers:
+
+     <dl>
+<dt><code>score_zero</code><dd>Zeroes a score. 
+<br><dt><code>score_copy</code><dd>Copies one score to another. 
+<br><dt><code>score_add</code><dd>Adds one score to another. 
+<br><dt><code>score_sub</code><dd>Subtracts one score from another. 
+<br><dt><code>score_mul</code><dd>Multiples a score by an integer. 
+<br><dt><code>score_compare</code><dd>Compares two scores, as memcmp would do. 
+</dl>
+
+   <p>The second group of APIs increment the current player's score by
+a fixed value.
+
+     <dl>
+<dt><code>score</code><dd>Award score.  The input is an 8-bit score code. 
+<br><dt><code>score_long</code><dd>Also awards score.  The input is another BCD score buffer. 
+<br><dt><code>score_multiple</code><dd>Like <code>score()</code>, but also takes a multiplier argument.  This multiplier
+<em>and</em> the global score multiplier are taken into account. 
+<br><dt><code>score_long_multiple</code><dd>Like <code>score_long</code> and <code>score_multiple</code>.  This is the most
+low-level API; all others ultimately call it. 
+<br><dt><code>score_long_unmultiplied</code><dd>Awards score without any multipliers. 
+</dl>
+
+   <p>The third group of APIs, called the <dfn>ladder APIs</dfn>, add score according
+to some rule.
+
+   <p>A <dfn>fixed ladder rule</dfn> tracks the current value of a shot, and defines a
+base value, an increment, and a maximum value.
+
+     <dl>
+<dt><code>fixed_ladder_reset</code><dd>Reset the value of the rule to its base. 
+<br><dt><code>fixed_ladder_advance</code><dd>Advance the value of the rule by the increment.  The new value is checked to
+make sure that it does not exceed the defined maximum. 
+<br><dt><code>fixed_ladder_score</code><dd>Add the current value of the rule to the player's score. 
+<br><dt><code>fixed_ladder_scorex</code><dd>Add the current value of the rule, multiplied by some constant, to the player's score. 
+<br><dt><code>fixed_ladder_score_and_advance</code><dd>Add the rule value to the player and advance it by one step. 
+<br><dt><code>fixed_ladder_scorex_and_advance</code><dd>Add the rule value multiplied to the player and advance it by one step. 
+</dl>
+
+<h3 class="section">9.9 Lamp Timers</h3>
+
+<p>A lamp timer is a countdown timer which is tied to a playfield lamp. 
+The amount of time remaining controls how fast the lamp flashes.  When
+the timer reaches zero, the effect stops.
+
+   <p>You declare a structure of type <code>struct lamptimer_args</code>, which
+names the lamp and the initial timer value, in seconds.
+
+   <p>The lamp is modified as part of an internally generated lamp effect (meaning
+that it behaves just like a leff, but it does not have a lamp effect ID); thus,
+the basic state of the lamp is retained.  While the lamp timer runs, the
+basic state is overriden by the effect.
+
+     <dl>
+<dt><code>lamp_timer_start</code><br><dt><code>lamp_timer_find</code><br><dt><code>lamp_timer_stop</code><dd></dl>
+
+<h3 class="section">9.10 Diagnostics</h3>
+
+<h3 class="section">9.11 Score Rank</h3>
+
+<p>The score rank module is optional, based on the value of <code>CONFIG_SCORE_RANK</code>. 
+When enabled, the system will
+monitor the relative changes in players' scores over the course of a multi-
+player game, and throw a <code>rank_change</code> event whenever the current player
+moves into a new place.  It is up to each game to decide how to handle it.
+
+<h3 class="section">9.12 Timed Modes</h3>
+
+<p><a name="index-Timed-modes-60"></a>
+To write a timed mode, you need to do two things:
+
+   <p>First, create a structure of type <code>struct timed_mode_ops</code> and fill out
+all of the required information.  Use the DEFAULT_MODE macro in the initializer
+to set suitable values before declaring your own values.  The fields are:
+
+     <ul>
+<li><var>init</var>, an initialization function.  This is called when the mode is started. 
+<li><var>exit</var>, an exit function.  This is called when the mode is stopped or times out. 
+<li><var>gid</var>, a task group ID.  Choose any name you want begin with <code>GID</code>. 
+This field is mandatory and has no default.  When the mode is started, a task will be created with this group ID. 
+<li><var>music</var>, the background music code.  Use MUS_NONE if the mode should not update the background music. 
+<li><var>deff_running</var>, the running display effect ID.  Use DEFF_NULL if none is needed. 
+<li><var>deff_ending</var>, the ending display effect ID.  Use DEFF_NULL if none is needed. 
+<li><var>prio</var>, a priority value.  Use one of the PRI values. 
+<li><var>init_timer</var>, tThe initial mode timer, in seconds. 
+<li><var>timer</var>, a pointer to a timer variable.  You must declare the variable yourself. 
+<li><var>grace_timer</var>, the length of the grace period, in seconds.  It may be zero. 
+<li><var>pause</var>, the pause function.  This function is called occasionally while the mode is running.  If it returns TRUE, the timer is not advanced. 
+Use <code>system_timer_pause</code> when the mode should pause for the "usual cases" only. 
+Use <code>null_false_function</code> if the mode should not pause at all.  You can also
+supply your own function if you need custom behavior. 
+</ul>
+
+   <p>You must make sure that the structure and all of the functions that it references
+are in the same .c file, otherwise ROM paging will not work.
+
+   <p>Second, handle several system events which affect the mode's operation:
+
+     <dl>
+<dt><code>timed_mode_music_refresh.</code><dd>Call this from a <code>music_refresh</code> handler, passing it a pointer to the mode ops struct. 
+<br><dt><code>timed_mode_display_update.</code><dd>Call this from a <code>display_update</code> handler, passing it a pointer to the mode ops struct. 
+</dl>
+
+   <p>From outside the mode itself, other modules call these APIs to interact with
+your mode.  The mode ops struct is part of the public interface.
+
+     <dl>
+<dt><code>timed_mode_begin</code><dd>Starts a timed mode. 
+<br><dt><code>timed_mode_end</code><dd>Ends a timed mode immediately. 
+<br><dt><code>timed_mode_reset.</code><dd>Resets the timer to its initial value. 
+<br><dt><code>timed_mode_add.</code><dd>Adds to the timer. 
+<br><dt><code>timed_mode_get_timer.</code><dd>Gets the current timer value.  This should only be used by display effects. 
+Note that timer can be zero and the mode is still running! 
+<br><dt><code>timed_mode_running_p</code><dd>Returns true if the mode is running, for the purposes of scoring.  This returns
+TRUE while the mode is in its grace period. 
+<br><dt><code>timed_mode_effect_running_p</code><dd>Returns true if the mode is running, for the purposes of display and lamp effects. 
+This return FALSE while in grace period. 
+<br><dt><code>timed_mode_device_running_p</code><dd>Similarly, but should be used when updating devices from a <code>device_update</code>
+function. 
+</dl>
+
+<h3 class="section">9.13 Ball Savers</h3>
+
+<p><a name="index-Ball-save-61"></a>
+
+<h3 class="section">9.14 Ball Serve</h3>
+
+<p><a name="index-Ball-serve-62"></a>
+The ball serve module is the preferred API for adding balls to play. 
+It uses the ball tracking APIs to program the ball trough, but adds
+support for autoplunging and multiball logic.
+
+   <p>The system supports games with autoplungers or manual plungers. 
+Auto launch support requires that the machine defines three things:
+the launch button switch, the launch solenoid, and a shooter switch.
+
+   <p>The base API <code>serve_ball</code> simply kicks a ball out of the trough. 
+It also resets the valid playfield flag and refreshes background effects. 
+This is the same call made by the game state machine during start ball.
+
+   <p>Use <code>serve_ball_auto</code> instead if you want the ball to be autolaunched
+as soon as it is served successfully.  Otherwise, it is identical to
+<code>serve_ball</code>.  If
+a ball is served without autolaunch, it can be launched later by calling
+<code>launch_ball</code>.  This happens automatically when the launch button is
+pressed and a ball is detected in the shooter lane.
+
+   <p>You normally do not need to call either of those APIs, except in some
+rare cases.
+
+   <p>The preferred way to start multiballs is to use <code>set_ball_count</code>,
+which sets the number of balls in play, or <code>add_ball_count</code> if you
+want to say how many balls to be added.  These use <code>serve_ball_auto</code>
+to do the work.  They work on manual plunger games too.  Only one ball
+will ever be placed in the shooter at a time.
+
+     <dl>
+<dt><code>serve_ball</code><br><dt><code>serve_ball_auto</code><br><dt><code>launch_ball</code><br><dt><code>set_ball_count</code><br><dt><code>add_ball_count</code><dd></dl>
+
+<h3 class="section">9.15 Multiball Modes</h3>
+
+<p><a name="index-Multiball-63"></a>
+Multiball modes can be implemented by defining a structure of type
+<code>struct mb_mode_ops</code>.  They are modeled after the way that timed
+modes are constructed.  Use the DEFAULT_MBMODE macro in the initializer
+to set suitable values before declaring your own values.
+
+   <p>The key difference is how the mode ends; here, we examine the number
+of balls in play and end the mode when it reduces to 1.
+
+<h3 class="section">9.16 Mute and Pause Mode</h3>
+
+<p>FreeWPC implements the Mute and Pause feature that was included
+in the Twilight Zone home ROM.  It is optional at compile-time. 
+The machine must have an extra-ball buyin button for it to work.
+
+   <p>When compiled in, and the adjustment "MUTE/PAUSE" is set to YES,
+then pressing buyin during a game will hold the flippers,
+disable ball kickouts, pause timers, and turn off the background music.  To
+continue, press the button again.  It will also timeout automatically
+after 15 minutes.
+
+<h3 class="section">9.17 Status Report</h3>
+
+<p>A default status report is builtin which shows basic game information. 
+To activate it in a game, hold in either flipper button for about 5
+seconds.
+
+   <p>Machines can customize the report by defining their own status pages. 
+Modules should declare a handler for the <code>status_report</code> event.
+
+<!-- ====================================================== -->
+   </body></html>
+

@@ -1,0 +1,77 @@
+<html lang="en">
+<head>
+<title>Lamps - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Core-APIs.html#Core-APIs" title="Core APIs">
+<link rel="prev" href="Switches.html#Switches" title="Switches">
+<link rel="next" href="Solenoids.html#Solenoids" title="Solenoids">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Lamps"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Solenoids.html#Solenoids">Solenoids</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Switches.html#Switches">Switches</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Core-APIs.html#Core-APIs">Core APIs</a>
+<hr>
+</div>
+
+<h3 class="section">5.2 Lamps</h3>
+
+<p><a name="index-Lamps-33"></a>
+Controlled lamps are used to highlight shots on the playfield and to keep
+track of the progress of scoring features.  Unlike general illumination,
+each lamp is individually controllable by the CPU.
+
+   <p>Lamps are numbered from 0 to <code>NUM_LAMPS</code>-1.  For each lamp, there
+are several flags that can be set to determine its physical state. 
+The job of the lamp driver is to combine all of these flags into a
+single output value, and send that to the underlying hardware.
+
+   <p>Every lamp has a <dfn>basic state</dfn>, which is either <em>on</em>,
+<em>off</em>, or <em>flashing</em>.  The basic state of a lamp is
+a per-player value and is automatically saved and restored as players
+change in a multiplayer game.  It is managed by the following APIs:
+
+     <dl>
+<dt><code>lamp_on</code><dd>Turns on a lamp. 
+<br><dt><code>lamp_off</code><dd>Turns off a lamp. 
+<br><dt><code>lamp_test</code><dd>Tests whether a lamp is on/off. 
+<br><dt><code>lamp_toggle</code><dd>Toggles a lamp's on/off state. 
+<br><dt><code>lamp_flash_on</code><dd>Enable lamp flashing.  Note that the steady state of a lamp must be
+off in order for the flashing to be seen.  (I.e., if you call lamp_on(),
+and then lamp_flash_on(), the lamp will be <em>steady</em>.) 
+<br><dt><code>lamp_flash_off</code><dd>Disable lamp flashing. 
+<br><dt><code>lamp_flash_toggle</code><dd>Toggle lamp flashing. 
+<br><dt><code>lamp_tristate_on</code><dd>Ensure the lamp is steady. 
+<br><dt><code>lamp_tristate_off</code><dd>Ensure the lamp is off. 
+<br><dt><code>lamp_tristate_flash</code><dd>Ensure the lamp is flashing. 
+</dl>
+
+   <p>The basic state may be temporarily overriden via a <dfn>lamp effect</dfn>. 
+An effect can allocate a lamp, thereby overriding its basic value. 
+When the effect finishes, it frees the lamp, causing the basic state to
+be shown again (see <a href="Lamp-Effects.html#Lamp-Effects">Lamp Effects</a>).
+
+   <p>In the machine description, you can attach a color and coordinates
+to each lamp.  These are not used by the core OS, but they can be used
+to construct nice looking lamp effects that manipulate them in certain patterns.
+
+   </body></html>
+

@@ -1,0 +1,220 @@
+<html lang="en">
+<head>
+<title>Compiling - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Installation.html#Installation" title="Installation">
+<link rel="next" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Compiling"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Software-Environment.html#Software-Environment">Software Environment</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Installation.html#Installation">Installation</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">3 Compiling</h2>
+
+<h3 class="section">3.1 Configuration</h3>
+
+<p><a name="index-Configuration-6"></a>
+FreeWPC can be compiled in many different ways with lots of optional features. 
+You cannot just type <samp><span class="command">make</span></samp> at the top of the directory tree without
+first specifying what you want to build.  This is done by creating a file
+named <samp><span class="file">.config</span></samp>.  The file <samp><span class="file">config.example</span></samp> is provided as an
+example of the kinds of things that can be tuned.
+
+   <p><samp><span class="file">.config</span></samp> is written in standard Makefile syntax.  (The top-level
+Makefile includes this file.)  You set various options by writing
+variable assignments, such as:
+
+<pre class="example">     MACHINE := wcs
+</pre>
+   <p>You must specify at least a <var>MACHINE</var>.  All other configuration
+variables are optional; suitable defaults will be used.
+
+   <p>Here is a list of the most important build options.
+
+     <dl>
+<dt><code>MACHINE</code><dd>
+Names the machine that you want to build for.  This corresponds to the
+name of the subdirectory in the <samp><span class="file">machine</span></samp> directory that has the
+machine specific files.
+
+     <br><dt><code>MAKEFLAGS</code><dd>
+This is a feature of the <samp><span class="command">make</span></samp> utility, not FreeWPC per se, but
+it can be useful: if you want to pass special flags to <samp><span class="command">make</span></samp>,
+include them here.  In particular, the <samp><span class="option">-j</span></samp> option can be used to
+run multiple commands in parallel, which can speed up the build
+significantly.
+
+     <br><dt><code>FREEWPC_DEBUGGER</code><dd>
+Set to <code>y</code> if you want to include debug messages in the build.
+
+     <br><dt><code>CONFIG_BPT</code><dd>
+Set to <code>y</code> if you want to enable the breakpoint module.
+
+     <br><dt><code>GCC_VERSION</code><dd>
+Used only when building for the 6809 target, this lets you specify the
+version of the GCC6809 compiler.
+
+     <br><dt><code>EXTRA_CFLAGS</code><dd>
+Used to pass arbitrary options to the C compiler.  If you add special
+logic to the code under an <code>#ifdef</code>, you can enable those flags
+by including them in <code>EXTRA_CFLAGS</code>.
+
+     <br><dt><code>DEBUG_COMPILER</code><dd>
+Set to <code>y</code> if you are debugging the 6809 compiler.  This causes
+many temporary files to be saved for later analysis.
+
+     <br><dt><code>SAVE_ASM</code><dd>
+Set to <code>y</code> if you just want to see the assembly language code that
+GCC6809 generates.  This is similar to <code>DEBUG_COMPILER</code> but produces
+much less GCC internals.  If you understand 6809 assembly language, this
+can be useful.
+
+     <br><dt><code>NATIVE</code><dd>
+Set to <code>y</code> to enable native mode, or simulation.
+
+     <br><dt><code>CONFIG_UI</code><dd>
+In native mode, this option controls the user-interface that is used. 
+The default is curses, which works within most internals and is fairly
+easy to understand.  Use <code>console</code> for a much more raw, <code>printf</code>
+style output.  <code>gtk</code> support is in progress.
+
+     <br><dt><code>PINMAME</code><dd>
+Set to the pathname where your PinMAME executable is, if you plan to
+use that for testing.
+
+     <br><dt><code>EXTRA_PINMAME_FLAGS</code><dd>
+Set to flags that you want to pass to PinMAME when testing; for example,
+sound driver options or DMD color schemes.
+
+     <br><dt><code>TARGET_ROMPATH</code><dd>
+Set to the directory where PinMAME ROM files are kept.
+
+   </dl>
+
+<h3 class="section">3.2 Building</h3>
+
+<p>After configuring, type <samp><span class="command">make</span></samp>.  This will build a ROM and optionally
+install it into your PinMAME ROM directory if you have said where that is.
+
+   <p>The exact commands are not printed, but you can force the details to be
+shown by setting the environment variable <var>Q</var> to the empty string, like
+this:
+
+<pre class="example">     make Q=""
+</pre>
+   <p>The build procedure is complicated, but it can be broken down into the
+following steps:
+
+     <ol type=1 start=1>
+
+     <li>Create Blank File
+
+     <p>If the size of the ROM is larger than the number of pages that
+the compiler generates, then the final ROM image must be
+padded with blank sections.  The <samp><span class="command">dd</span></samp> command is used
+to generate a file named <samp><span class="file">blank</span><var>xxx</var><span class="file">.bin</span></samp>, where <var>xxx</var>
+is the size of the file in kilobytes (KB).  This file
+is later concatenated with the linker output to produce
+a final ROM of the required size.
+
+     <li>Create Linker Command Files
+
+     <p>The linker is invoked several times, once per page or
+bank of ROM.  Different options are passed each time
+to place the correct object files into that section, and
+to resolve references correctly.  All of these options
+are written to linker command files, which have the .lnk
+extension and are placed in the <samp><span class="file">build</span></samp> directory. 
+They are lists of command-line options to the linker,
+but placed into a file because of the huge number of them.
+
+     <li>Setting the Machine Symbolic Links
+
+     <p>The symbol link <samp><span class="file">mach</span></samp> is set to point to the correct
+machine code directory, based on the value of the MACHINE
+make variable.  Likewise, <samp><span class="file">include/mach</span></samp> is pointed to the
+machine includes.
+
+     <li>Generating Defines
+
+     <p>Some #defines are generated automatically by scanning the
+code for their uses.  These include files begin with the prefix
+<samp><span class="command">gendefine</span></samp> and are created by a script also named
+<samp><span class="command">gendefine</span></samp> in the <samp><span class="file">tools</span></samp> directory.
+
+     <p>At present this is only used to autogenerate the task group IDs.
+
+     <li>Generating Callsets
+
+     <p>Callsets are a mechanism for implementing a simple
+event subscription/invocation mechanism that is fully
+described at compile-time.  Event handling code is
+emitted in a C file named <samp><span class="file">callset.c</span></samp>.
+
+     <li>Compiling and Assembling Source Code
+
+     <p>Source code is compiled using the GCC6809 compiler. 
+The compiler generates assembler code with the <samp><span class="file">.s</span></samp>
+extension.  These files are then assembled using the
+asxxxx asembler tools into object files with the <samp><span class="file">.o</span></samp>
+extension.
+
+     <li>Compiling Page Headers
+
+     <p>Because the linker requires each section to contain at
+least one object file, a dummy file is assembly per
+section to ensure that this doesn't happen.  The page
+header is 1 byte long and contains the page number.
+
+     <li>Linking Pages
+
+     <p>The aslink utility is used to create one S-record file,
+with the <samp><span class="file">.s19</span></samp> extension, for each page of ROM.
+
+     <li>Converting Pages to Binary
+
+     <p>The <samp><span class="file">tools/srec2bin</span></samp> utility included with FreeWPC
+is run to convert the S-records into raw binary files.
+
+     <li>Concatenating Pages
+
+     <p>The binary files are concatenated, along with any blank
+files, to form the final ROM image.
+
+        </ol>
+
+<h3 class="section">3.3 Build Results</h3>
+
+<p>If successful, <samp><span class="file">build/</span><var>var</var><span class="file">.rom</span></samp> will contain the ready-to-burn ROM image.  <var>var</var> is
+a string composed of the machine's short name and the version number.
+
+   <p>Warnings and errors during the build are display on the console as they
+occur; they are also log to a file named <samp><span class="file">err</span></samp>.
+
+   <p>In native mode, instead of a ROM, a file named <samp><span class="file">freewpc_</span><var>var</var></samp> is generated.
+
+<!-- ====================================================== -->
+   </body></html>
+

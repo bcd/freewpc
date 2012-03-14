@@ -1,0 +1,64 @@
+<html lang="en">
+<head>
+<title>Bit Variables - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Software-Environment.html#Software-Environment" title="Software Environment">
+<link rel="prev" href="Memory-Allocation.html#Memory-Allocation" title="Memory Allocation">
+<link rel="next" href="Event-Handling.html#Event-Handling" title="Event Handling">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Bit-Variables"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Event-Handling.html#Event-Handling">Event Handling</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Memory-Allocation.html#Memory-Allocation">Memory Allocation</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Software-Environment.html#Software-Environment">Software Environment</a>
+<hr>
+</div>
+
+<h3 class="section">4.4 Bit Variables</h3>
+
+<p>Although ordinary variables work well, sometimes you only need
+to store a single bit.  For this, instead of declaring a byte
+variable and wasting 7 of the 8 bits, you can use a <dfn>flag</dfn>. 
+Flags are packed efficiently in the memory to avoid wasting
+space.  This can be used helpful on small memory platforms.
+
+   <p>The bit APIs are the most generic.  You provide a bit number
+and a pointer to a bit buffer where the bits are packed.
+
+   <p>The flag APIs operate on a per-player flag buffer.  They are
+also automatically cleared at player start.  You only provide
+a flag number.
+
+   <p>The global flag APIs are similar, but those flags are global and do
+not change across players, nor across games.
+
+   <p>Flag and global flag IDs are distinct.  Be careful not to pass
+a global flag ID to a flag API, or vice-versa.
+
+     <dl>
+<dt><code>bit_on, flag_on, global_flag_on</code><dd>Sets a bit flag. 
+<br><dt><code>bit_off, flag_off, global_flag_off</code><dd>Clears a bit flag. 
+<br><dt><code>bit_toggle, flag_toggle, global_flag_toggle</code><dd>Toggles a bit flag. 
+<br><dt><code>bit_test, flag_test, global_flag_test</code><dd>Tests a bit flag. 
+</dl>
+
+   </body></html>
+

@@ -1,0 +1,217 @@
+<html lang="en">
+<head>
+<title>Fonts and Graphics - The FreeWPC Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The FreeWPC Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Common-Pinball-Library.html#Common-Pinball-Library" title="Common Pinball Library">
+<link rel="next" href="System-Initialization.html#System-Initialization" title="System Initialization">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Fonts-and-Graphics"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="System-Initialization.html#System-Initialization">System Initialization</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Common-Pinball-Library.html#Common-Pinball-Library">Common Pinball Library</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">10 Fonts and Graphics</h2>
+
+<p><a name="index-Fonts-64"></a><a name="index-Graphics-65"></a><a name="index-Frames-66"></a>
+This chapter explains in detail how FreeWPC fonts and graphics work.
+
+   <p>FreeWPC uses simple bitmaps to represent fonts, icons, and full-screen
+graphics.  A <dfn>bitmap</dfn> is an array of rectangular pixel data. 
+The data bits are prefixed by a short header which contains the width
+and height information.  The image is stored one row at a time, starting
+from the top.  Within a row, the bits are stored in little-endian format,
+with the least significant bit representing the leftmost pixel.
+
+   <p>A <dfn>font</dfn> is a set of bitmaps mapped to a contiguous sequence of
+characters.  The font header identifies the ASCII code for the first
+bitmap that is represented; this saves space by not needing to encode
+the low-valued ASCII control characters.  The nominal height of the
+characters is also defined, which allows for descenders.
+
+   <p>A <dfn>frame</dfn> is a full-screen bitmap, 128x32.  Since these are fairly
+common, special APIs are used to draw them that are more optimal, and
+the width/height is implied and not actually stored in the bitmap. 
+A frame can have 4 colors per pixel (3 shades plus black) so
+the frame is actually stored as two consecutive <dfn>bit planes</dfn>.
+
+<h3 class="section">10.1 Compression</h3>
+
+<p>Each bit plane of a frame can optionally be compressed using run-length
+encoding (RLE) or zero suppression to save space.  An uncompressed
+frame requires 1KB, which limits the total number of frames in a ROM
+significantly.  Every frame header includes
+a flags field, which indicates which if any compression method was used. 
+The frame decoders are written in assembly language in <code>platform/wpc/dmd.s</code>.
+
+   <p>Compression is a balance between ROM size and processor speed.  The best
+compression methods would take far too long for the 6809 to decode.  The
+methods used strike a compromise.  In particular, bitwise operations are
+avoided in the decoders because of the 6809's inability to do bitlevel
+operations quickly.
+
+     <ul>
+<li>Run-Length Encoding
+
+     <p>Useful for images that contain long sequences of the same byte value. 
+Each long run is replaced by a 3-byte code: the first byte is the code
+0xA8, which signals an <dfn>escape sequence</dfn>, the second byte is the
+number of bytes divided by 2 (so the length must be even), and the
+third byte is the repeated value.  A special two-byte code also
+indicate end of frame, so that the decoder does not need to count
+the number of decoded bytes.
+
+     <li>Sparse Encoding
+
+     <p>The sparse format encodes images that contain mostly zeroes, or
+which have large transparent sections that do not require writing
+to the display.  The image is encoded as a series of
+(length, data, move) triples, where the <var>move</var> value says how
+many bytes forward to move the cursor.
+
+   </ul>
+
+<h3 class="section">10.2 Using TrueType Fonts</h3>
+
+<p>The script <samp><span class="command">fontgen2</span></samp> converts TrueType font files (.ttf files)
+into WPC font files (.fon).  Not all characters are supported; in particular,
+lowercase characters are not included by default in order to save space. 
+Trying to display any characters not included in the font will generally
+cause a system crash, as there is not much error checking.
+
+<h3 class="section">10.3 Printing Text</h3>
+
+<p><a name="index-Text-formatting-67"></a><a name="index-Printing-text-68"></a>
+The <code>font_render_string</code> family of APIs is used to draw text to
+the display.  The arguments are a font object, the x and y coordinates
+where the string should be placed, and a string.  The string can be
+a constant string literal or the global format buffer (see below).
+
+   <p>There are three variants which justify the text differently: centered,
+left-justified, and right-justified.  Centering is done both vertically
+and horizontally; the others only justify left-to-right, and the y
+coordinate always specifies the top of the print area.
+
+   <p>Text printing is CPU intensive.  Display effects should take care not to
+print text more than needed.  It is often more efficient to print strings
+to an overlay buffer, and then copy them to the main display page, if the
+same text needs to be printed over and over again.
+
+<h3 class="section">10.4 Formatting Text</h3>
+
+<p>FreeWPC contains a <code>printf</code>-like function for formatting text
+strings with variable data, however, it is not quite the same.
+
+   <p>The <code>sprintf()</code> function formats a string into a unique,
+<em>global</em> buffer named <code>sprintf_buffer</code>.  It is like the
+actual C function of the same name, but the first argument is implied.
+
+   <p>The format specifiers are also slightly different.  Here is a list of
+the valid ones:
+
+     <dl>
+<dt><code>%b</code><dd>
+Print a binary-coded decimal value.  The format length gives the total
+number of digits; for example, <code>%8b</code> would print a 4-byte BCD
+string containing 8 digits.  Also, this format will insert commas
+(or periods) between digits as necessary.
+
+     <br><dt><code>%c</code><dd>
+Print a single 8-bit ASCII character.
+
+     <br><dt><code>%d</code><dd>
+Print an 8-bit decimal integer (declared <code>U8</code>).
+
+     <br><dt><code>%E</code><dd>
+When this is the first specifier in a string, it will cause
+all output to be appended to the previous string in the print
+buffer, rather than overwriting it completely.
+
+     <br><dt><code>%ld</code><dd>
+Print a 16-bit decimal integer (declared <code>U16</code>).
+
+     <br><dt><code>%lx</code><dd>
+Print a 16-bit hexadecimal integer (declared <code>U16</code>).
+
+     <br><dt><code>%p</code><dd>
+Print a pointer.
+
+     <br><dt><code>%s</code><dd>
+Print a string.
+
+     <br><dt><code>%w</code><dd>
+Print a 32-bit hexadecimal integer (declared <code>U32</code>).
+
+     <br><dt><code>%x</code><dd>
+Print an 8-bit hexadecimal integer (declared <code>U8</code>).
+
+   </dl>
+
+   <p>Like in C, you can insert a number in front of the format letter to
+limit the output to a particular width.  If the length begins with
+'0', then it will be padded with leading zeroes if necessary.
+
+   <p>The formatter does not support signed numbers, and will print them as
+if they were declared unsigned.
+
+   <p>The formatter is not particularly efficient for printing large decimal
+values, as the 6809 is not very good at long division.
+
+<h3 class="section">10.5 Frame List</h3>
+
+<p><a name="index-Image-map-69"></a><a name="index-Frame-list-70"></a><a name="index-Image-linker-71"></a>
+The list of all frames compiled in the ROM is defined in an
+<dfn>image map</dfn>.  This is a machine-specific file that says which
+images to copy into the final ROM image.
+
+   <p>There can be multiple frame list files.  The common code
+provides a frame list of standard images, like the FreeWPC logo,
+which go into every build.
+
+   <p>Each entry in the image map gives an image to be imported, such as a
+PGM graphics file, plus an optional <dfn>frame ID</dfn>.  The frame ID becomes
+a C #define that refers to the image from the source code. 
+The image linker writes a file <samp><span class="file">build/imagemap.h</span></samp> which
+contains a list of all the frame IDs.  Frame IDs are optional for
+the internal frames in a sequence (a for loop would only need to name the
+starting and ending frame).
+
+   <p>It is the job of the image linker to decide what compression techniques
+to perform.  The linker is told the maximum amount of space that can be
+used for images, which is the total size of the ROM minus any sections
+reserved for source code.  If all images fit without compression, then all
+is well.
+
+   <p>Otherwise, the linker will perform as much as compression as
+necessary.  At present, images are compressed in the order that they
+were declared.  A future enhancement would be to start with those images
+that can be compressed the best without requiring much more CPU power
+to decode them.
+
+   <p>In some rare cases, trying to compress an image fails to produce a
+smaller buffer.  The linker notices this and leaves such images
+uncompressed.
+
+<!-- ====================================================== -->
+   </body></html>
+
