@@ -308,8 +308,8 @@ void slam_tilt_deff (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 13, "SLAM TILT");
 	dmd_show_low ();
-	task_sleep_sec (3);
-	deff_exit ();
+	for (;;)
+		task_sleep_sec (30);
 }
 
 

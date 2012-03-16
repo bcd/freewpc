@@ -132,12 +132,15 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	if (price_config.slamtilt_penalty)
 		remove_credit ();
 
-	while (deff_get_active () == DEFF_SLAM_TILT)
-		task_sleep (TIME_66MS);
-
-	/* TODO: wait for slam switch to become stable, to avoid
-	 * endless restarts */
-	 warm_reboot ();
+	/* Wait for the switch to clear before rebooting. */
+	task_sleep_sec (1);
+	for (;;)
+	{
+		task_sleep (TIME_500MS);
+		if (!switch_poll (SW_SLAM_TILT))
+			break;
+	}
+	warm_reboot ();
 }
 
 
