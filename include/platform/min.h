@@ -75,10 +75,12 @@ extern inline void pinio_write_sound (U8 val)
 
 extern inline bool pinio_sound_ready_p (void)
 {
+	return FALSE;
 }
 
 extern inline U8 pinio_read_sound (void)
 {
+	return 0;
 }
 
 extern inline void pinio_nvram_lock (void)
