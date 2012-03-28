@@ -69,7 +69,7 @@ void sol_init (void);
 /* sol_start is a wrapper function, because the 'time' value must be scaled
 to the correct resolution.  Ticks are normally 1 per 16ms, but
 we need 1 per 4ms for solenoids, so scale accordingly. */
-__attribute__((deprecated))
+__deprecated__
 extern inline void sol_start (U8 sol, U8 mask, U8 time)
 {
 	sol_start_real (sol, mask, (4 * time));

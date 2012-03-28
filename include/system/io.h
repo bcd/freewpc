@@ -70,7 +70,7 @@ U8 readb (IOPTR addr);
 #endif
 
 
-__attribute__((deprecated))
+__deprecated__
 extern inline void io_toggle_bits (U16 addr, U8 val)
 {
 #ifdef CONFIG_NATIVE

@@ -239,8 +239,8 @@ void switch_idle (void);
 bool switch_poll (const switchnum_t sw);
 bool switch_is_opto (const switchnum_t sw);
 bool switch_poll_logical (const switchnum_t sw);
-const switch_info_t *switch_lookup (const switchnum_t sw) __attribute__((pure));
-U8 switch_lookup_lamp (const switchnum_t sw) __attribute__((pure));
+const switch_info_t *switch_lookup (const switchnum_t sw) __pure__;
+U8 switch_lookup_lamp (const switchnum_t sw) __pure__;
 void switch_queue_dump (void);
 
 #if (MACHINE_PIC == 1)

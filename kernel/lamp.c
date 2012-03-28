@@ -207,7 +207,7 @@ bool bit_test_all_off (const_bitset matrix)
 }
 
 
-__attribute__((pure)) U8 *matrix_lookup (lamp_matrix_id_t id)
+__pure__ U8 *matrix_lookup (lamp_matrix_id_t id)
 {
 	switch (id)
 	{

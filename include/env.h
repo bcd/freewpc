@@ -91,6 +91,17 @@
 #define __leff__
 #endif
 
+#ifndef CONFIG_NO_DEPRECATED
+#define __deprecated__ __attribute__((deprecated))
+#else
+#define __deprecated__
+#endif
+
+#ifndef CONFIG_NO_PURE
+#define __pure__ __attribute__((pure))
+#else
+#define __pure__
+#endif
 
 #ifdef HAVE_INTERRUPT_ATTRIBUTE
 #define __interrupt__ __attribute__((interrupt))
