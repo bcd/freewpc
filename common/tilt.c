@@ -133,6 +133,7 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 		remove_credit ();
 
 	/* Wait for the switch to clear before rebooting. */
+#ifdef SW_SLAM_TILT
 	task_sleep_sec (1);
 	for (;;)
 	{
@@ -140,6 +141,7 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 		if (!switch_poll (SW_SLAM_TILT))
 			break;
 	}
+#endif
 	warm_reboot ();
 }
 
