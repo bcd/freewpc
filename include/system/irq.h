@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -31,22 +31,35 @@
 #define disable_firq() m6809_orcc (CC_FIRQ)
 #define enable_firq() m6809_andcc (~CC_FIRQ)
 
-/** How to enable/disable all interrupts */
-#define disable_interrupts() m6809_orcc (CC_IRQ|CC_FIRQ)
-#define enable_interrupts() m6809_andcc (~(CC_IRQ|CC_FIRQ))
+#ifdef CONFIG_PERIODIC_IRQ
+#define rtt_disable() disable_irq()
+#define rtt_enable() enable_irq()
+#endif
+#ifdef CONFIG_PERIODIC_FIRQ
+#define rtt_disable() disable_firq()
+#define rtt_enable() enable_firq()
+#endif
 
-#else /* __m6809__ */
+#endif /* __m6809__ */
+
+#ifdef CONFIG_NATIVE
 
 extern bool linux_irq_enable;
 extern bool linux_firq_enable;
 
 #define disable_irq()	linux_irq_enable = FALSE;
 #define disable_firq()	linux_firq_enable = FALSE;
+
 #define enable_irq()		linux_irq_enable = TRUE;
 #define enable_firq()	linux_firq_enable = TRUE;
-#define disable_interrupts()	do { disable_irq(); disable_firq(); } while (0)
-#define enable_interrupts()	do { enable_irq(); enable_firq(); } while (0)
 
-#endif /* __m6809__ */
+#define rtt_disable() disable_irq()
+#define rtt_enable() enable_irq()
+
+#endif /* CONFIG_NATIVE */
+
+/* For compatibility with the older names used */
+#define disable_interrupts() rtt_disable()
+#define enable_interrupts() rtt_enable()
 
 #endif /* _SYS_IRQ_H */
