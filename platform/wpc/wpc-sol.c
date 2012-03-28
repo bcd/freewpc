@@ -80,6 +80,7 @@ extern inline void platform_sol_update_direct (const U8 sol_set)
 
 
 /** Realtime update of the first set of flasher outputs */
+/* RTT(name=sol_update_rtt_0 freq=2) */
 void sol_update_rtt_0 (void)
 {
 	platform_sol_update_direct (0);
@@ -92,6 +93,7 @@ void sol_update_rtt_0 (void)
 
 
 /** Realtime update of the second set of flasher outputs */
+/* RTT(name=sol_update_rtt_1 freq=2) */
 void sol_update_rtt_1 (void)
 {
 	platform_sol_update_direct (1);

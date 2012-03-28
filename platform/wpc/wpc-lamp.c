@@ -3,6 +3,7 @@
 #include <system/platform.h>
 
 /** Runs periodically to update the physical lamp state. */
+/* RTT(name=lamp_rtt freq=2) */
 void lamp_rtt (void)
 {
 	U8 bits;
