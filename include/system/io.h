@@ -69,18 +69,4 @@ U8 readb (IOPTR addr);
 #error
 #endif
 
-
-__deprecated__
-extern inline void io_toggle_bits (U16 addr, U8 val)
-{
-#ifdef CONFIG_NATIVE
-	U8 reg = readb (addr);
-	reg ^= val;
-	writeb (addr, val);
-#else
-	*(volatile U8 *)addr ^= val;
-#endif
-}
-
-
 #endif /* __SYSTEM_IO_H */
