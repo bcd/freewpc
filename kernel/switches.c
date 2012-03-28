@@ -353,11 +353,11 @@ void switch_transitioned (const U8 sw)
 	/* Latch the transition.  sw_logical is still an open/closed level.
 	 * By clearing the stable/unstable bits, IRQ will begin scanning
 	 * for new transitions at this point. */
-	disable_irq ();
+	rtt_disable ();
 	bit_toggle (sw_logical, sw);
 	bit_off (sw_stable, sw);
 	bit_off (sw_unstable, sw);
-	enable_irq ();
+	rtt_enable ();
 
 	/* See if the transition requires scheduling.  It does if the
 	   switch is declared 'edge' (it schedules when becoming active
@@ -449,10 +449,10 @@ void switch_service_queue (void)
 			{
 				/* Debouncing failed, so don't process the switch.
 				 * Restart IRQ-level scanning. */
-				disable_irq ();
+				rtt_disable ();
 				bit_off (sw_stable, entry->id);
 				bit_off (sw_unstable, entry->id);
-				enable_irq ();
+				rtt_enable ();
 			}
 			else
 			{
