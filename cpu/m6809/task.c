@@ -671,16 +671,6 @@ void task_set_pointer_arg (task_t *tp, void *arg)
 }
 
 
-/** Allocate stack size from another task.  This should only be
-called immediately after the task is created before it gets a chance
-to run. */
-void *task_alloca (task_t *tp, U8 size)
-{
-	tp->stack_size += size;
-	return &tp->stack[TASK_STACK_SIZE - tp->stack_size];
-}
-
-
 /**
  * The task dispatcher.  This function selects a new task to run.
  *
