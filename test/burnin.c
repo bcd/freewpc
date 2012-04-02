@@ -66,8 +66,8 @@ void burnin_flasher_thread (void)
 				task_sleep (TIME_200MS);
 			}
 		}
+		task_sleep (TIME_500MS);
 	}
-	task_sleep (TIME_500MS);
 }
 
 
