@@ -531,6 +531,7 @@ Clock Working:
 # Display effects
 ##########################################################################
 [deffs]
+Enter PIN: page(COMMON_PAGE), PRI_PIN_ENTRY
 Cow: page(MACHINE_PAGE), PRI_EGG1
 TZ Flipcode entry: page(MACHINE3_PAGE), PRI_REPLAY
 TZ Flipcode entered: page(MACHINE3_PAGE), PRI_DEBUGGER, D_PAUSE+D_QUEUED
