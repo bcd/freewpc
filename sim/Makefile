@@ -32,6 +32,7 @@ NATIVE_OBJS += $(D)/io.o
 NATIVE_OBJS += $(D)/keyboard.o
 NATIVE_OBJS += $(if $(CONFIG_PLATFORM_WPC), $(D)/io_wpc.o)
 NATIVE_OBJS += $(if $(CONFIG_PLATFORM_MIN), $(D)/io_min.o)
+NATIVE_OBJS += $(if $(CONFIG_PLATFORM_P2K), $(D)/io_p2k.o)
 NATIVE_OBJS += $(if $(CONFIG_PIC), $(D)/wpc-pic.o)
 ifeq ($(MACHINE),tz)
 $(eval $(call have,CONFIG_MACHINE_SIM))
