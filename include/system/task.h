@@ -51,7 +51,7 @@ typedef int task_pid_t;
 typedef unsigned int task_gid_t;
 typedef unsigned int task_ticks_t;
 typedef void (*task_function_t) (void);
-extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
+#define task_set_rom_page(pid, page)
 
 #else /* !CONFIG_NATIVE */
 

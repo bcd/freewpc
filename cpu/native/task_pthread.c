@@ -372,11 +372,6 @@ task_gid_t task_getgid (void)
 }
 
 
-void task_set_rom_page (task_pid_t pid, U8 rom_page)
-{
-}
-
-
 void *task_get_class_data (task_pid_t pid)
 {
 	int i;
