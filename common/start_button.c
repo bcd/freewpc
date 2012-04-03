@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,7 +21,9 @@
 #include <freewpc.h>
 
 extern U8 initials_enter_timer;
+#ifdef CONFIG_ENTER_PIN
 extern U8 pin_enter_timer;
+#endif
 
 extern U8 switch_stress_enable;
 
@@ -55,10 +57,12 @@ CALLSET_ENTRY (start_button, sw_start_button)
 	{
 		SECTION_VOIDCALL (__common__, initials_start_button_handler);
 	}
+#ifdef CONFIG_ENTER_PIN
 	else if (pin_enter_timer)
 	{
 		SECTION_VOIDCALL (__common__, pin_start_button_handler);
 	}
+#endif
 #ifdef CONFIG_TEST
 	else if (in_test)
 	{
