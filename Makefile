@@ -466,7 +466,9 @@ endif
 
 MACH_LINKS = .mach .include_mach
 
+ifndef QUICK_MAKE
 MAKE_DEPS = Makefile kernel/Makefile common/Makefile $(MMAKEFILE) $(BLDDIR)/mach-Makefile $(DOTCONFIG)
+endif
 ifeq ($(CONFIG_FONT),y)
 MAKE_DEPS += fonts/Makefile
 endif
