@@ -43,13 +43,8 @@ void abort_monitor_task (void)
 }
 
 
-CALLSET_ENTRY (abort, sw_left_button)
+CALLSET_ENTRY (abort, sw_left_button, sw_right_button)
 {
 	task_recreate_gid (GID_FLIPPER_ABORT_MONITOR, abort_monitor_task);
-}
-
-CALLSET_ENTRY (abort, sw_right_button)
-{
-	abort_sw_left_button ();
 }
 
