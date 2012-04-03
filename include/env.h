@@ -91,10 +91,12 @@
 #define __leff__
 #endif
 
+#ifndef __attribute_deprecated__
 #ifndef CONFIG_NO_DEPRECATED
-#define __deprecated__ __attribute__((deprecated))
+#define __attribute_deprecated__ __attribute__((__deprecated__))
 #else
-#define __deprecated__
+#define __attribute_deprecated__
+#endif
 #endif
 
 #ifndef CONFIG_NO_PURE
