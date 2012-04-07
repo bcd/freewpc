@@ -82,19 +82,28 @@ void sim_switch_set (int sw, int on)
 	sim_switch_update (sw);
 }
 
+unsigned int sim_switch_timer;
 
 int sim_switch_read (int sw)
 {
 	return sim_switch_matrix[sw/8] & (1 << (sw%8));
 }
 
+void sim_switch_finish (int sw)
+{
+	if (--sim_switch_timer == 0)
+	{
+		sim_switch_toggle (sw);
+	}
+	else
+		sim_time_register (16, FALSE, (time_handler_t)sim_switch_finish, sw);
+}
 
 void sim_switch_depress (int sw)
 {
 	sim_switch_toggle (sw);
-	task_sleep (TIME_166MS);
-	sim_switch_toggle (sw);
-	task_sleep (TIME_66MS);
+	sim_switch_timer = 10;
+	sim_time_register (16, FALSE, (time_handler_t)sim_switch_finish, sw);
 }
 
 
