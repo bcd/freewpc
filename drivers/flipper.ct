@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -37,12 +37,19 @@
 
 
 @@
+@@file @self.sched
+@@
+!@self_service		4		40c
+
+
+@@
 @@file @class.h
 @@
 
 #ifndef __@class_DRIVER_H
 #define __@class_DRIVER_H
 
+#include <freewpc.h>
 extern __fastram__ U8 @class_enabled;
 extern __fastram__ U8 @class_running;
 
@@ -95,9 +102,9 @@ CALLSET_ENTRY (@self, end_ball, tilt)
 @@file @self.h
 @@
 
-/* Schedule this driver every 8ms.  This should be enough
+/* Schedule this driver every 4ms.  This should be enough
 to see all switch transitions, and to update the coils. */
-#define RTT_SCHED 8
+#define RTT_SCHED 4
 
 /* Length of time for the initial power pulse */
 #define POWER_PULSE 40
@@ -106,20 +113,21 @@ to see all switch transitions, and to update the coils. */
 #include <@class.h>
 
 extern __fastram__ S8 @self_timer;
-
+extern bool flippers_enabled;
 
 /**
- * The driver for a single flipper.
+ * The service routine for a single flipper.
  */
-extern inline void @self_driver (void)
+extern inline void @self_service (void)
 {
-	if (flippers_enabled && BUTTON_PRESSED (@button))
+	if (flippers_enabled && rt_switch_poll (@button))
 	{
 		/* Flipper button is pressed.  See what phase we are in. */
 		if (@self_timer == 0)
 		{
 			/* Start the high power 40ms pulse */
-			sol_enable (@power_sol | @hold_sol);
+			sol_enable (@power_sol);
+			sol_enable (@hold_sol);
 			@self_timer = POWER_TICKS;
 		}
 		else if (@self_timer > 0)
@@ -135,11 +143,12 @@ extern inline void @self_driver (void)
 		else if (@self_timer < 0)
 		{
 			/* The flipper is in hold mode.  Check for foldback */
-			if (EOS_INACTIVE (@eos))
+			if (!rt_switch_poll (@eos)) // TODO - check polarity
 			{
 				/* Start another high power pulse.
 				TODO - a bad EOS switch will fry this puppy. */
-				sol_enable (@power_sol | @hold_sol);
+				sol_enable (@power_sol);
+				sol_enable (@hold_sol);
 				@self_timer = POWER_TICKS;
 			}
 		}
@@ -148,7 +157,8 @@ extern inline void @self_driver (void)
 	{
 		/* Flipper button is not pressed: the coil should be off */
 		@self_timer = 0;
-		sol_disable (@power_sol | @hold_sol);
+		sol_disable (@power_sol);
+		sol_disable (@hold_sol);
 	}
 }
 
@@ -156,6 +166,8 @@ extern inline void @self_driver (void)
 @@
 @@file @self.c
 @@
+
+#include <freewpc.h>
 
 /** Each flipper has its own timer instance variable.
  * When zero, it means the flipper is not running at all.
