@@ -54,6 +54,8 @@ simply decremented by 1 tick (33ms) if it is nonzero. */
 /* RTT(name=free_timer_rtt freq=32) */
 void free_timer_rtt (void)
 {
+	if (MAX_FREE_TIMERS == 0)
+		return;
 	U8 *timer_ptr = free_timers;
 	do {
 		timer_ptr = free_timer_update (timer_ptr);
