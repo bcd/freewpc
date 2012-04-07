@@ -84,7 +84,7 @@ static void door_start_event (U8 id)
 		case 3: callset_invoke (door_start_clock_millions); break;
 		case 4: callset_invoke (door_start_spiral); break;
 		case 5: callset_invoke (door_start_battle_power); break;
-		case 6: callset_invoke (door_start_10M); break;
+		case 6: callset_invoke (door_start_10m); break;
 		case 7: callset_invoke (door_start_greed); break;
 		case 8: callset_invoke (door_start_camera); break;
 		case 9: callset_invoke (door_start_hitchhiker); break;
