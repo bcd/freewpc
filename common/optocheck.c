@@ -34,6 +34,7 @@
  */
 void opto_check (void)
 {
+#ifdef CONFIG_PLATFORM_WPC
 	U8 col;
 	U8 row;
 	U8 bits;
@@ -64,5 +65,6 @@ void opto_check (void)
 	 */
 	dbprintf ("Bad opto power?\n");
 	task_sleep (TIME_33MS);
+#endif /* CONFIG_PLATFORM_WPC */
 }
 
