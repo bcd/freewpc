@@ -101,9 +101,12 @@ void sim_switch_finish (int sw)
 
 void sim_switch_depress (int sw)
 {
-	sim_switch_toggle (sw);
-	sim_switch_timer = 10;
-	sim_time_register (16, FALSE, (time_handler_t)sim_switch_finish, sw);
+	if (sim_switch_timer == 0)
+	{
+		sim_switch_toggle (sw);
+		sim_switch_timer = 10;
+		sim_time_register (16, FALSE, (time_handler_t)sim_switch_finish, sw);
+	}
 }
 
 
@@ -140,5 +143,6 @@ void sim_switch_init (void)
 		}
 		else
 			sim_switch_update (sw);
+	sim_switch_timer = 0;
 }
 
