@@ -248,6 +248,8 @@ CALLSET_ENTRY (serve, dev_trough_kick_success)
  */
 CALLSET_ENTRY (serve, sw_shooter)
 {
+	if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
+		return;
 	ball_search_timer_reset ();
 	if (valid_playfield
 		&& !tournament_mode_enabled
