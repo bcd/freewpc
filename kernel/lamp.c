@@ -102,8 +102,8 @@ void lamp_init (void)
 	lamp_set_off (lamp_flash_matrix_now);
 	lamp_set_off (lamp_leff1_matrix);
 	lamp_set_off (lamp_leff2_matrix);
-	lamp_set_off (bit_matrix);
-	lamp_set_off (global_bits);
+	memset (bit_matrix, 0, sizeof (bit_matrix));
+	memset (global_bits, 0, sizeof (global_bits));
 
 	/* Lamp effect allocation matrices are "backwards",
 	 * in the sense that a '1' means free, and '0' means
