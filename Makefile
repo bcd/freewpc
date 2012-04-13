@@ -846,7 +846,7 @@ fonts clean-fonts:
 ifdef CONFIG_GEN_RTT
 sched : $(BLDDIR)/rtt.c
 
-$(BLDDIR)/rtt.c : $(MACH_LINKS) tools/genrtt $(OBJS:.o=.c)
+$(BLDDIR)/rtt.c : $(MACH_LINKS) tools/genrtt $(filter-out $(OBJS:.o=.c),$(BLDDIR)/rtt.c)
 	$(Q)echo "Generating RTTs ... " && rm -f $@ \
 		&& tools/genrtt $(SCHED_FLAGS) \
 			$(foreach section,$(CALLSET_SECTIONS),$($(section)_OBJS:.o=.c:$(section)_PAGE)) \
