@@ -13,6 +13,10 @@ REQUIRED += $(CC) $(LD)
 
 GCC_VERSION = NATIVE
 CFLAGS =
+HOST_LFLAGS += -Wl,-Map=build/freewpc.map
+HOST_LFLAGS += -Wl,--section-start=.globalflag=0x8100000
+HOST_LFLAGS += -Wl,--section-start=.flag=0x8100100
+HOST_LFLAGS += -Wl,--section-start=.freetimer=0x8100200
 
 # TODO : don't define CONFIG_LITTLE_ENDIAN on sparc, etc.
 
