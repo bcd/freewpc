@@ -90,6 +90,7 @@ extern inline @self_state_t @self_get_state (void)
 /**
  * Realtime update of a duty-cycled device.
  */
+/* RTT(name=@self_service freq=16) */
 extern inline void @self_service (void)
 {
 	/* Only act if device is enabled */

@@ -59,6 +59,7 @@ extern U8 @self_prev_state;
  * process all of the spins in one dispatch.  This cuts down
  * the overhead in switch scanning and task creation.
  */
+/* RTT(name=@self_service freq=8) */
 extern inline void @self_service (void)
 {
 	U8 state = rt_switch_poll (@sw_number);

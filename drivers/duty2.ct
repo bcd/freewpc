@@ -78,6 +78,7 @@ void @self_stop (void);
 /**
  * Realtime update of a duty-cycled device.
  */
+/* RTT(name=@self_service freq=4) */
 extern inline void @self_service (void)
 {
 	if (unlikely (@self_timer > 0))
