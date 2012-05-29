@@ -39,11 +39,11 @@ GtkTextBuffer *msg_text_buffer;
 GtkAdjustment *msg_adj;
 
 GtkWidget *dmd_widget;
-GdkColor dmd_colors[4];
+GdkColor dmd_colors[PINIO_DMD_PIXEL_COLORS];
 int dmd_current_color = -1;
 
-unsigned char dmd_prev[4096];
-unsigned char dmd_next[4096];
+unsigned char dmd_prev[PINIO_DMD_WIDTH * PINIO_DMD_HEIGHT];
+unsigned char dmd_next[PINIO_DMD_WIDTH * PINIO_DMD_HEIGHT];
 
 void ui_print_command (const char *cmdline)
 {
@@ -101,7 +101,7 @@ void ui_write_task (int taskno, int gid)
 #if (MACHINE_DMD == 1)
 void ui_refresh_asciidmd (unsigned char *data)
 {
-	memcpy (dmd_next, data, 4096);
+	memcpy (dmd_next, data, PINIO_DMD_WIDTH * PINIO_DMD_HEIGHT);
 	gdk_window_invalidate_rect (dmd_widget->window, NULL, FALSE);
 }
 #else
@@ -135,32 +135,41 @@ gboolean display_expose_event_cb (GtkWidget *widget, GdkEventExpose *event,
 	static int inited = 0;
 	int color;
 
+#define DMD_COLOR_BLACK 0
+#define DMD_COLOR_DEFAULT 2
+
 	if (!inited)
 	{
 		gdk_color_parse ("black", &dmd_colors[0]);
+#ifdef CONFIG_PLATFORM_WPC
 		gdk_color_parse ("orange3", &dmd_colors[1]);
 		gdk_color_parse ("orange2", &dmd_colors[2]);
 		gdk_color_parse ("orange1", &dmd_colors[3]);
+#else
+#error "No colormap defined for this platform"
+#endif
 		gtk_widget_modify_bg (widget, GTK_STATE_NORMAL, &dmd_colors[0]);
-		dmd_current_color = 2;
-		gtk_widget_modify_fg (widget, GTK_STATE_NORMAL, &dmd_colors[2]);
+		dmd_current_color = DMD_COLOR_DEFAULT;
+		gtk_widget_modify_fg (widget, GTK_STATE_NORMAL, &dmd_colors[DMD_COLOR_DEFAULT]);
 		inited = 1;
 	}
 
 	fg = widget->style->fg_gc[gtk_widget_get_state (widget)];
 	bg = widget->style->bg_gc[gtk_widget_get_state (widget)];
 
-	for (color = 0; color < 4; color++)
+#define DMD_PIXEL_BOX_SIZE 4
+
+	for (color = 0; color < PINIO_DMD_PIXEL_COLORS; color++)
 	{
 		nx = dmd_next;
-		for (y = 0; y < 32; y++)
+		for (y = 0; y < PINIO_DMD_HEIGHT; y++)
 		{
-			for (x = 0; x < 128; x++, nx++)
+			for (x = 0; x < PINIO_DMD_WIDTH; x++, nx++)
 			{
 				if (color != *nx)
 					continue;
 
-				if (color == 0)
+				if (color == DMD_COLOR_BLACK)
 					gc = bg;
 				else if (color != dmd_current_color)
 				{
@@ -171,9 +180,9 @@ gboolean display_expose_event_cb (GtkWidget *widget, GdkEventExpose *event,
 				}
 				else
 					gc = fg;
-				width = (*nx != 0) ? 3 : 4;
+				width = (*nx != 0) ? (DMD_PIXEL_BOX_SIZE-1) : DMD_PIXEL_BOX_SIZE;
 				gdk_draw_rectangle (widget->window, gc, TRUE,
-					x*4+1, y*4+1, width, width);
+					x*DMD_PIXEL_BOX_SIZE+1, y*DMD_PIXEL_BOX_SIZE+1, width, width);
 			}
 		}
 	}
@@ -240,6 +249,7 @@ void ui_init (void)
 	dmd_widget = ui_widget_named ("display_area");
 
 	/* Connect the coin door buttons */
+	/* TODO - autogenerate this block */
 	ui_connect_sw ("sw_left_coin", 0);
 	ui_connect_sw ("sw_center_coin", 1);
 	ui_connect_sw ("sw_right_coin", 2);

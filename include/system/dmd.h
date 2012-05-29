@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -30,8 +30,33 @@
 #ifndef _SYS_DMD_H
 #define _SYS_DMD_H
 
+/** The number of bits per pixel.  On true DMD games this must be 1. */
+#ifndef PINIO_DMD_PIXEL_BITS
+#define PINIO_DMD_PIXEL_BITS 1
+#endif
+
+/** The display refresh rate, in frames per second.
+    The default here is for WPC games. */
+#ifndef PINIO_DMD_REFRESH_RATE
+#define PINIO_DMD_REFRESH_RATE 122
+#endif
+
+/* The number of colors per pixel */
+#ifdef PINIO_DMD_PIXEL_COLORS
+#define PINIO_DMD_PIXEL_COLORS 4
+#endif
+
+/** Page flipping is needed when we want to use more colors than we
+ * have bits per pixel */
+#if (PINIO_DMD_PIXEL_COLORS > 1 && PINIO_DMD_PIXEL_BITS == 1)
+#define PINIO_DMD_FLIP_COUNT (LOG2(PINIO_DMD_PIXEL_COLORS)+1)
+#define PINIO_DMD_EFFECTIVE_RATE (PINIO_DMD_REFRESH_RATE / PINIO_DMD_FLIP_COUNT)
+#else
+#define PINIO_DMD_EFFECTIVE_RATE PINIO_DMD_REFRESH_RATE
+#endif
+
 /** The width of a DMD page, in bytes */
-#define DMD_BYTE_WIDTH (PINIO_DMD_WIDTH / 8)
+#define DMD_BYTE_WIDTH (PINIO_DMD_WIDTH * PINIO_DMD_PIXEL_BITS / 8)
 
 /** The size of each DMD page, in bytes */
 #define DMD_PAGE_SIZE (1UL * DMD_BYTE_WIDTH * PINIO_DMD_HEIGHT)

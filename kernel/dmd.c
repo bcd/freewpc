@@ -136,6 +136,9 @@ U8 dmd_phase_table[] = {
 	0, 1, 1, 0, 1, 1
 };
 
+#if PINIO_DMD_PIXEL_BITS == 8
+U8 dmd_current_color;
+#endif
 
 void dmd_new_rtt (void)
 {
@@ -156,6 +159,9 @@ void dmd_init (void)
 	dmd_phase_ptr = dmd_phase_table;
 	dmd_in_transition = FALSE;
 	dmd_transition = NULL;
+#if PINIO_DMD_PIXEL_BITS == 8
+	dmd_current_color = 1;
+#endif
 
 	/* If DMD_BLANK_PAGE_COUNT is defined, this says how
 	 * many DMD pages should not be allocatable, but should be
@@ -388,7 +394,11 @@ void dmd_clean_page (dmd_buffer_t dbuf)
 
 void dmd_fill_page_low (void)
 {
+#if PINIO_DMD_PIXEL_BITS == 1
 	memset (dmd_low_buffer, 0xFF, DMD_PAGE_SIZE);
+#else
+	memset (dmd_low_buffer, dmd_current_color, DMD_PAGE_SIZE);
+#endif
 }
 
 

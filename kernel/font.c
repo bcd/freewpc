@@ -133,6 +133,7 @@ static inline void font_blit_internal (U8 *dst, U8 byte_width, const U8 shift)
 	register const U8 *src = bitmap_src;
 
 	do {
+#if (PINIO_DMD_PIXEL_BITS == 1)
 		if (shift == 0)
 		{
 			*dst ^= *src;
@@ -142,6 +143,18 @@ static inline void font_blit_internal (U8 *dst, U8 byte_width, const U8 shift)
 			dst[0] ^= *src << shift;
 			dst[1] = (*src >> (8-shift)) ^ dst[1];
 		}
+#elif (PINIO_DMD_PIXEL_BITS == 8)
+		if (*src & 0x01) dst[shift+0] = 0x01; /* TODO - current color */
+		if (*src & 0x02) dst[shift+1] = 0x01;
+		if (*src & 0x04) dst[shift+2] = 0x01;
+		if (*src & 0x08) dst[shift+3] = 0x01;
+		if (*src & 0x10) dst[shift+4] = 0x01;
+		if (*src & 0x20) dst[shift+5] = 0x01;
+		if (*src & 0x40) dst[shift+6] = 0x01;
+		if (*src & 0x80) dst[shift+7] = 0x01;
+#else
+#error
+#endif
 	
 		src++;
 		bitmap_src = src;
