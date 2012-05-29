@@ -31,6 +31,8 @@
 	Multiple "types" of coils can be defined, each with different properties.
  */
 
+int sim_coils_all_disabled = 0;
+
 extern device_properties_t device_properties_table[];
 
 struct sim_coil_state;
@@ -364,7 +366,7 @@ void sim_coil_change (unsigned int coil, unsigned int on)
 	struct sim_coil_state *c = coil_states + coil;
 
 	/* Ignore all writes to a disabled device */
-	if (c->disabled)
+	if (sim_coils_all_disabled || c->disabled)
 		return;
 
 	/* Only take action when the CPU writes a different value */
@@ -433,10 +435,12 @@ void sim_coil_init (void)
 
 		/* When the configuration item "coil.X.disabled" is read, this
 		will cause coil X to be disabled.  Use this to simulate a broken
-		wire. */
+		wire.  Also, if "coils.disabled" is 1, then all coils will be
+		disabled. */
 		snprintf (item_name, sizeof (item_name), "coil.%d.disabled", sol);
 		conf_add (item_name, &c->disabled);
 	}
+	conf_add ("coils.disabled", &sim_coils_all_disabled);
 
 	/* Redefine coils which are attached to ball devices, so that the
 	   action of the coil will trigger remove events on the device nodes. */
