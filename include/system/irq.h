@@ -31,6 +31,10 @@
 #define disable_firq() m6809_orcc (CC_FIRQ)
 #define enable_firq() m6809_andcc (~CC_FIRQ)
 
+#ifdef CONFIG_PLATFORM_WPC
+#define rtt_disable() do { disable_irq(); disable_firq(); } while (0)
+#define rtt_enable()  do { enable_irq(); enable_firq(); } while (0)
+#else
 #ifdef CONFIG_PERIODIC_IRQ
 #define rtt_disable() disable_irq()
 #define rtt_enable() enable_irq()
@@ -38,6 +42,7 @@
 #ifdef CONFIG_PERIODIC_FIRQ
 #define rtt_disable() disable_firq()
 #define rtt_enable() enable_firq()
+#endif
 #endif
 
 #endif /* __m6809__ */
