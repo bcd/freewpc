@@ -86,10 +86,6 @@ typedef enum
 
 void lamp_init (void);
 void lamp_flash_rtt (void);
-void lamp_rtt_0 (void);
-void lamp_rtt_1 (void);
-void lamp_rtt_2 (void);
-void lamp_rtt_3 (void);
 
 __pure__ U8 *matrix_lookup (lamp_matrix_id_t id);
 
