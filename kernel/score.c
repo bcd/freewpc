@@ -267,6 +267,7 @@ void score_multiplier_set (U8 m)
 CALLSET_ENTRY (score, start_ball)
 {
 	score_multiplier_set (1);
+	score_update_request ();
 }
 
 CALLSET_ENTRY (score, factory_reset)
