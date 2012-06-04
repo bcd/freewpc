@@ -36,7 +36,6 @@
 
 
 #define TIMER_FREERUNNING_GRAN	TIME_100MS
-#define TIMER_PAUSABLE_GRAN		TIME_100MS
 
 /**
  * When nonzero, system timers are paused.  This feature can allow you to pause
