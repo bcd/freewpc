@@ -42,7 +42,7 @@
 #endif
 
 /* The number of colors per pixel */
-#ifdef PINIO_DMD_PIXEL_COLORS
+#ifndef PINIO_DMD_PIXEL_COLORS
 #define PINIO_DMD_PIXEL_COLORS 4
 #endif
 
