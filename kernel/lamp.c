@@ -97,11 +97,11 @@ U16 lamp_power_idle_timer;
 void lamp_init (void)
 {
 	/* Clear all lamps/flags */
-	lamp_set_off (lamp_matrix);
-	lamp_set_off (lamp_flash_matrix);
-	lamp_set_off (lamp_flash_matrix_now);
-	lamp_set_off (lamp_leff1_matrix);
-	lamp_set_off (lamp_leff2_matrix);
+	lamp_set_zero (lamp_matrix);
+	lamp_set_zero (lamp_flash_matrix);
+	lamp_set_zero (lamp_flash_matrix_now);
+	lamp_set_zero (lamp_leff1_matrix);
+	lamp_set_zero (lamp_leff2_matrix);
 	memset (bit_matrix, 0, sizeof (bit_matrix));
 	memset (global_bits, 0, sizeof (global_bits));
 
@@ -232,12 +232,6 @@ void lamp_set_on (lamp_set lset)
 	memset (lset, 0xFF, NUM_LAMP_COLS);
 }
 
-void lamp_set_off (lamp_set lset)
-{
-	memset (lset, 0, NUM_LAMP_COLS);
-}
-
-
 /*
  * Lamp manipulation routines
  *
@@ -323,7 +317,7 @@ bool lamp_flash_test (lampnum_t lamp)
 void lamp_all_on (void)
 {
 	disable_interrupts ();
-	lamp_set_off (lamp_flash_matrix);
+	lamp_set_zero (lamp_flash_matrix);
 	enable_interrupts ();
 	lamp_set_on (lamp_matrix);
 }
@@ -332,12 +326,12 @@ void lamp_all_on (void)
 void lamp_all_off (void)
 {
 	disable_interrupts ();
-	lamp_set_off (lamp_flash_matrix_now);
-	lamp_set_off (lamp_flash_matrix);
-	lamp_set_off (lamp_leff1_matrix);
-	lamp_set_off (lamp_leff2_matrix);
+	lamp_set_zero (lamp_flash_matrix_now);
+	lamp_set_zero (lamp_flash_matrix);
+	lamp_set_zero (lamp_leff1_matrix);
+	lamp_set_zero (lamp_leff2_matrix);
 	enable_interrupts ();
-	lamp_set_off (lamp_matrix);
+	lamp_set_zero (lamp_matrix);
 }
 
 /*
@@ -352,12 +346,12 @@ void lamp_all_off (void)
 
 void lamp_leff1_allocate_all (void)
 {
-	lamp_set_off (lamp_leff1_allocated);
+	lamp_set_zero (lamp_leff1_allocated);
 }
 
 void lamp_leff1_erase (void)
 {
-	lamp_set_off (lamp_leff1_matrix);
+	lamp_set_zero (lamp_leff1_matrix);
 }
 
 void lamp_leff1_free_all (void)
@@ -367,7 +361,7 @@ void lamp_leff1_free_all (void)
 
 void lamp_leff2_erase (void)
 {
-	lamp_set_off (lamp_leff2_matrix);
+	lamp_set_zero (lamp_leff2_matrix);
 }
 
 void lamp_leff2_free_all (void)

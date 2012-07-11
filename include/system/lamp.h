@@ -169,6 +169,11 @@ void lamplist_set_count (lamplist_id_t set, U8 count);
 bool lamplist_test_all (lamplist_id_t id, lamp_boolean_operator_t op);
 
 __attribute__((noinline)) void lamp_set_on (lamp_set matrix);
-__attribute__((noinline)) void lamp_set_off (lamp_set matrix);
+
+void lamp_set_zero (lamp_set dst);
+void lamp_set_copy (lamp_set dst, const lamp_set src);
+void lamp_set_add (lamp_set dst, const lamp_set src);
+void lamp_set_subtract (lamp_set dst, const lamp_set src);
+bool lamp_set_disjoint (const lamp_set a, const lamp_set b);
 
 #endif /* _SYS_LAMP_H */
