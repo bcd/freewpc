@@ -1317,7 +1317,7 @@ sub machine_write_lamplist_decls {
 		print "};\n\n";
 		$ls->{'value'} = $lamplist;
 
-		if ($ls->{'set'} == 1) {
+		if (1) {
 			$c_decl = $ls->{'c_decl'};
 			$c_decl =~ s/lamplist/lampset/g;
 			print "const U8 " . $c_decl . "[] = {\n   ";
@@ -1352,7 +1352,7 @@ sub machine_write_lamplist_decls {
 
 	print "const U8 * lampset_table[] = {\n";
 	for $ls (unique ($m->{"lamplists"})) {
-		if ($ls->{'set'} == 1) {
+		if (1) {
 			$name = $ls->{'c_decl'};
 			$name =~ s/lamplist/lampset/g;
 		}
