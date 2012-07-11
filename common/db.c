@@ -64,6 +64,7 @@ void db_dump_all (void)
 	VOIDCALL (triac_dump);
 #endif
 	SECTION_VOIDCALL (__common__, device_debug_all);
+	VOIDCALL (leff_dump);
 }
 #endif
 

@@ -92,6 +92,9 @@ U8 leff_prio;
  * otherwise. */
 U8 leffs_running[BITS_TO_BYTES (MAX_LEFFS)];
 
+void leff_dump (void)
+{
+}
 
 /** Test if a lamp effect is running. */
 bool leff_running_p (leffnum_t dn)
