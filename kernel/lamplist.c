@@ -266,7 +266,7 @@ bool lamplist_test_any (lamplist_id_t id, lamp_boolean_operator_t op)
 
 
 static __pure__
-lamp_boolean_operator_t matrix_test_operator (const bitset matrix)
+lamp_boolean_operator_t matrix_test_operator (const lamp_set matrix)
 {
 	if (matrix == lamp_matrix)
 	{
