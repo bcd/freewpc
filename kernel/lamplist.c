@@ -54,7 +54,7 @@ U8 lamplist_alternation_state;
 /** Returns true if the current task is a lamp effect. */
 static inline bool leff_caller_p (void)
 {
-	return ((task_getgid () == GID_LEFF) || (task_getgid () == GID_SHARED_LEFF));
+	return TRUE;
 }
 
 

@@ -1854,16 +1854,16 @@ effects always have a priority that is non-zero.
 The running effect is executed in a separate task context, except for
 music, which is executed on a separate CPU.  The
 currently running display effect always has the group ID
-@code{GID_DEFF}; likewise @code{GID_LEFF} for the lamps.  Effects
-that are started but not running do not have a task assigned to them,
+@code{GID_DEFF}; likewise one of several @code{GID_LEFF} IDs for the lamps.  Effects
+that are started but cannot run do not have a task assigned to them,
 and are simply marked as started in memory somehow.  Because they do
 not have enough priority to run, there is nothing for them to do.
 
 Effect tasks can be preempted, if a higher priority effect is started later.
 In that case, the old task is killed, and a new task is started.  When
-the task is killed, there is no guarantee as to what was doing
+the task is killed, there is no guarantee as to what it was doing
 previously, and there is no opportunity for it to do cleanup on its
-own.
+own.  The effect subsystem generally takes care of cleanup correctly though.
 
 Effect functions must be declared in the machine configuration file.  Each
 entry names the function to be called to run the effect, along with its priority
@@ -1889,7 +1889,8 @@ nothing really important is happening.  Thus, these effect modules
 implement @dfn{background effects}, a way to determine what to do
 in these circumstances.  Lamp effects do not support a background mode;
 it is OK for no effect to be running, as the lamps have a default state
-that shows through.
+that shows through.  (However you can emulate this behavior by
+periodically trying to start lamp effects on your own.)
 
 The strategy for handling background effects is as follows:  When
 there is no explicitly started effect, an event is generated:
@@ -2014,21 +2015,20 @@ The objects allocated to a lamp effect are guaranteed to be turned off
 when the function starts, and are restored to their previous states
 when the function ends.
 
-A lamp effect can also be declared as @dfn{shared}.  A shared leff can
-run in parallel with the current running leff, and with other shared
-leffs.  Shared leffs have a lower priority than normal leffs; the
-effect can be masked.  Also, shared leffs run to completion and are
-never preempted.
+Unlike display effects, several lamp effects might be running in
+parallel.  As long as two effects do not overlap at all, they are
+both allowed to run together.  When a conflict occurs, the higher
+priority effect takes precedence.  An effect may be suddenly stopped
+if a higher priority effect is started later.
 
-Shared leffs are usually for indicating low-priority game state
-that requires constant updating, and where it is not appropriate to use
-the default lamp state.
-Normal leffs are intended for light shows.
+In previous versions of the lamp effect, the @dfn{shared} keyword
+was needed to tag possibly parallel effects; this is not required
+now and is ignored.
 
 Lamp effects cannot be aborted by the flippers like display effects.
-
-If a normal leff cannot be started, it is forgotten and never queued, like
-display effects can be.
+They also cannot be queued for automatic retry.  If you need that
+capability, you should attempt to start the effect periodically
+yourself.
 
 @table @code
 
@@ -2051,7 +2051,7 @@ that has been allocated to it.
 
 @item gi_leff_alloc, gi_leff_enable, gi_leff_disable, gi_leff_free
 
-Called only from within lamps effects.  These modify GI strings
+Called only from within lamp effects.  These modify GI strings
 overriding their default settings.
 
 @item leff_exit

@@ -54,10 +54,9 @@ static void lamp_timer_effect_task (void)
 	struct lamp_timer_data *tdata;
 
 	edata = task_current_class_data (struct lamp_timer_effect_data);
-	edata->leffdata.flags = L_SHARED;
 	tdata = edata->tdata;
 
-	if (lamp_leff2_test_and_allocate (tdata->lamp))
+	if (leff_quick_alloc (tdata->lamp))
 	{
 		do {
 			leff_toggle (tdata->lamp);
@@ -69,7 +68,7 @@ static void lamp_timer_effect_task (void)
 			if (tdata->timer >= TIME_3S)
 				task_sleep (TIME_100MS);
 		} while (tdata->timer != 0);
-		lamp_leff2_free (tdata->lamp);
+		leff_quick_free (tdata->lamp);
 	}
 	task_exit ();
 }
