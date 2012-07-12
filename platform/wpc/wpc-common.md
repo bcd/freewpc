@@ -74,7 +74,7 @@ A4: General Sol. 4, notinstalled
 
 [lamplists]
 ALL: 11..88
-Ball Save: MACHINE_BALL_SAVE_LAMP
+Ball Save: %ball-save
 
 [fonts]
 mono5:

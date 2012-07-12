@@ -130,12 +130,5 @@ __noreturn__ void leff_exit (void);
 void leff_init (void);
 void leff_stop_all (void);
 
-#ifndef MACHINE_SHOOT_AGAIN_LAMP
-#define MACHINE_SHOOT_AGAIN_LAMP 0
-#endif
-#ifndef MACHINE_BALL_SAVE_LAMP
-#define MACHINE_BALL_SAVE_LAMP MACHINE_SHOOT_AGAIN_LAMP
-#endif
-
 #endif /* _SYS_LEFF_H */
 

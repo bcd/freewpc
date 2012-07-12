@@ -123,6 +123,7 @@ my %BinaryProperties = (
 		"buyin" => $GLOBAL_OBJECT,
 		"extra-ball" => $GLOBAL_OBJECT,
 		"shoot-again" => $GLOBAL_OBJECT,
+		"ball-save" => $GLOBAL_OBJECT,
 		"cabinet" => 1,
 	},
 	"drives" => {
@@ -645,7 +646,10 @@ sub machine_finish {
 		}
 	}
 
-	# TODO : Are there any GLOBAL_OBJECTS that aren't defined?
+	# Are there any GLOBAL_OBJECTS that aren't defined?
+	if (!defined $m->{'*lamps:ball-save'}) {
+		$m->{'*lamps:ball-save'} = $m->{'*lamps:shoot-again'};
+	}
 }
 
 
@@ -761,6 +765,7 @@ sub machine_write_defines {
 	print_c_ident ($m->{'*lamps:start'}, "MACHINE_START_LAMP");
 	print_c_ident ($m->{'*lamps:buyin'}, "MACHINE_BUYIN_LAMP");
 	print_c_ident ($m->{'*lamps:shoot-again'}, "MACHINE_SHOOT_AGAIN_LAMP");
+	print_c_ident ($m->{'*lamps:ball-save'}, "MACHINE_BALL_SAVE_LAMP");
 	print_c_ident ($m->{'*lamps:extra-ball'}, "MACHINE_EXTRA_BALL_LAMP");
 
 	print_c_ident ($m->{'*drives:launch'}, "MACHINE_LAUNCH_SOLENOID");
@@ -1184,8 +1189,12 @@ END
 
 sub machine_lamp_get_value {
 	my ($lampid) = @_;
-	return $lampid if ($lampid =~ /^MACHINE_/);
-	$lamp = ($m->{'lamps'})->{$lampid};
+	if ($lampid =~ /^%(.*)$/) {
+		$lamp = $m->{"*lamps:$1"};
+	}
+	else {
+		$lamp = ($m->{'lamps'})->{$lampid};
+	}
 	die "undefined lamp $lampid" if (!defined $lamp);
 	return $lamp->{'number'};
 }
