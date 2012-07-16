@@ -100,6 +100,7 @@ my %BinaryProperties = (
 		"opto" => 1, 
 		"edge" => 1,
 		"noplay" => 1,
+		"novalid" => 1,
 		"ingame" => 1,
 		"intest" => 1,
 		"button" => 1,
@@ -1037,13 +1038,18 @@ sub machine_write_switch_decls {
 
 		if (defined $sw->{'noscore'}) {
 			$sw->{'playfield'} = undef;
-			$sw->{'noplay'} = 1;
+			$sw->{'novalid'} = 1;
 			$sw->{'intest'} = 1;
+		}
+
+		if (defined $sw->{'noplay'}) {
+			warning "deprecated property 'noplay' seen on switch " . $sw->{'name'} . " ; use 'novalid' instead.";
+			$sw->{'novalid'} = 1;
 		}
 
 		add_flag ($sw, "opto", "flags", "SW_OPTICAL");
 		add_flag ($sw, "edge", "flags", "SW_EDGE");
-		add_flag ($sw, "noplay", "flags", "SW_NOVALID");
+		add_flag ($sw, "novalid", "flags", "SW_NOVALID");
 		add_flag ($sw, "ingame", "flags", "SW_IN_GAME");
 		add_flag ($sw, "intest", "flags", "SW_IN_TEST");
 		add_flag ($sw, "playfield", "flags", "SW_PLAYFIELD");
