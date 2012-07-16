@@ -94,7 +94,7 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 11: Unused
 12: Magnet Button, button, noscore, cabinet
 13: Start Button, start-button, cabinet, intest
-14: Tilt, cabinet, tilt, ingame, noplay
+14: Tilt, cabinet, tilt, ingame, novalid
 15: Left Flipper Lane, ingame
 16: Striker 3, ingame
 17: Right Flipper Lane, ingame
@@ -115,8 +115,8 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 38: Shooter, edge, noscore, shooter, debounce(TIME_200MS)
 41: Goal Trough, opto, ingame
 42: Goal Popper, opto, ingame
-43: Goalie Left, noplay, intest, service, opto
-44: Goalie Right, noplay, intest, service, opto
+43: Goalie Left, novalid, intest, service, opto
+44: Goalie Right, novalid, intest, service, opto
 45: TV Popper, opto, ingame
 46: Unused
 47: Travel Lane, ingame
@@ -141,11 +141,11 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 76: Lock Low, ingame
 77: Lock High, ingame
 78: R. Ramp Exit, ingame
-81: Left Jet, ingame, noplay
-82: Upper Jet, ingame, noplay
-83: Lower Jet, ingame, noplay
-84: Left Slingshot, ingame, noplay
-85: Right Slingshot, ingame, noplay
+81: Left Jet, ingame, novalid
+82: Upper Jet, ingame, novalid
+83: Lower Jet, ingame, novalid
+84: Left Slingshot, ingame, novalid
+85: Right Slingshot, ingame, novalid
 86: Kickback, ingame
 87: Upper Left Lane, ingame
 88: Upper Right Lane, ingame

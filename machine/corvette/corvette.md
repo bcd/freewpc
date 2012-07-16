@@ -106,23 +106,23 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 11: Kickback, ingame # actually "Left Out Lane"
 12: Right Out Lane, ingame
 13: Start Button, start-button, cabinet, intest
-14: Tilt, cabinet, tilt, ingame, noplay
+14: Tilt, cabinet, tilt, ingame, novalid
 # not called 'Shooter', see: trivial.c/CALLSET_ENTRY (trivial, sw_plunger)
 15: Plunger, shooter, edge, debounce(TIME_200MS)
 16: Left Return Lane, ingame
 17: Right Return Lane, ingame
 18: Spinner, ingame
 21: Slam Tilt, cabinet, ingame, slam-tilt
-22: Coin Door Closed, noscore, noplay
+22: Coin Door Closed, noscore, novalid
 23: Buyin Button, buyin-button, cabinet
 #24: Always Closed
-31: Trough 1, noscore, noplay, opto
-32: Trough 2, noscore, noplay, opto
-33: Trough 3, noscore, noplay, opto
-34: Trough 4, noscore, noplay, opto
+31: Trough 1, noscore, novalid, opto
+32: Trough 2, noscore, novalid, opto
+33: Trough 3, noscore, novalid, opto
+34: Trough 4, noscore, novalid, opto
 35: Route 66 Entry, ingame, opto
 36: Pit Stop Popper, ingame, opto
-37: Trough Eject, noscore, noplay, opto # stuck off = ball jam
+37: Trough Eject, noscore, novalid, opto # stuck off = ball jam
 38: Inner Loop Entry, ingame
 41: ZR1 Bottom Entry, ingame, opto
 42: ZR1 Top Entry, ingame, opto
@@ -138,16 +138,16 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 56: Right Race Encoder, noscore, opto
 57: Route 66 Kickout, ingame
 58: Skid Route 66 Exit, ingame
-61: Left Slingshot, ingame, noplay
-62: Right Slingshot, ingame, noplay
-63: Left Jet, ingame, noplay
-64: Lower Jet, ingame, noplay
-65: Upper Jet, ingame, noplay # actually the RIGHT jet
+61: Left Slingshot, ingame, novalid
+62: Right Slingshot, ingame, novalid
+63: Left Jet, ingame, novalid
+64: Lower Jet, ingame, novalid
+65: Upper Jet, ingame, novalid # actually the RIGHT jet
 66: Left Rollover, ingame
 67: Middle Rollover, ingame
 68: Right Rollover, ingame
-71: ZR1 Full Left, opto, noplay, noscore
-72: ZR1 Full Right, opto, noplay, noscore
+71: ZR1 Full Left, opto, novalid, noscore
+72: ZR1 Full Right, opto, novalid, noscore
 75: ZR1 Exit, ingame
 76: ZR1 Lock Ball 1, ingame
 77: ZR1 Lock Ball 2, ingame
@@ -155,8 +155,8 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 81: Million Standup, standup
 82: Skid Pad Standup, standup
 83: Right Standup, standup # lite kickback
-84: Right Rubber, noplay # playfield has hole for switch but no switch
-86: Jet Rubber, noplay # playfield has hole for switch but no switch
+84: Right Rubber, novalid # playfield has hole for switch but no switch
+86: Jet Rubber, novalid # playfield has hole for switch but no switch
 87: Left Outer Loop, ingame
 88: Right Outer Loop, ingame
 

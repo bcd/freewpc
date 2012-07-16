@@ -63,7 +63,7 @@ WPC95: Yes/No
 # name.  Options can be given in any order:
 #    ingame - only service the switch during a game
 #    intest - also service the switch in test mode
-#    noplay - tripping this switch does NOT mark ball in play
+#    novalid - tripping this switch does NOT mark ball in play
 #    standup - this is a standup
 #    button - this is a button
 #    edge - this switch should be serviced on either transition

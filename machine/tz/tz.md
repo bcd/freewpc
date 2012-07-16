@@ -120,7 +120,7 @@ define CONFIG_TZONE_IP y
 # name.  Options can be given in any order:
 #    ingame - only service the switch during a game
 #    intest - also service the switch in test mode
-#    noplay - tripping this switch does NOT mark ball in play
+#    novalid - tripping this switch does NOT mark ball in play
 #    standup - this is a standup
 #    button - this is a button
 #    edge - this switch should be serviced on either transition
@@ -140,22 +140,22 @@ define CONFIG_TZONE_IP y
 11: Right Inlane, ingame, sound(SND_INSIDE_LEFT_INLANE)
 12: Right Outlane, ingame, sound(SND_DRAIN)
 13: Start Button, start-button, intest, debounce(TIME_100MS)
-14: Tilt, tilt, ingame, noplay, cabinet
+14: Tilt, tilt, ingame, novalid, cabinet
 15: Right Trough, noscore
 16: Center Trough, noscore
 17: Left Trough, noscore
-18: Outhole, outhole, service, noplay, intest
+18: Outhole, outhole, service, novalid, intest
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
 26: Trough Proximity, edge, noscore
 27: Shooter, edge, shooter, noscore, debounce(TIME_200MS)
 28: Rocket Kicker
-31: Left Jet, ingame, c_decl(sw_jet), noplay, lamp(LM_LEFT_JET)
-32: Right Jet, ingame, c_decl(sw_jet), noplay, lamp(LM_RIGHT_JET)
-33: Bottom Jet, ingame, c_decl(sw_jet), noplay, lamp(LM_LOWER_JET)
-34: Left Sling, ingame, c_decl(sw_sling), noplay
-35: Right Sling, ingame, c_decl(sw_sling), noplay
+31: Left Jet, ingame, c_decl(sw_jet), novalid, lamp(LM_LEFT_JET)
+32: Right Jet, ingame, c_decl(sw_jet), novalid, lamp(LM_RIGHT_JET)
+33: Bottom Jet, ingame, c_decl(sw_jet), novalid, lamp(LM_LOWER_JET)
+34: Left Sling, ingame, c_decl(sw_sling), novalid
+35: Right Sling, ingame, c_decl(sw_sling), novalid
 36: Left Outlane, ingame, sound(SND_DRAIN)
 37: Left Inlane 1, ingame, sound(SND_INSIDE_LEFT_INLANE)
 38: Left Inlane 2, ingame, sound(SND_INSIDE_LEFT_INLANE)
@@ -175,16 +175,16 @@ define CONFIG_TZONE_IP y
 56: Gumball Exit, noscore
 57: Slot Proximity, edge, noscore
 58: Slot
-61: Skill Bottom, ingame, noplay
-62: Skill Center, ingame, noplay
-63: Skill Top, ingame, noplay
+61: Skill Bottom, ingame, novalid
+62: Skill Center, ingame, novalid
+63: Skill Top, ingame, novalid
 64: Standup 4, standup, ingame, lamp(LM_UR_5M)
 65: Power Payoff, standup, ingame
 66: Standup 5, standup, ingame, lamp(LM_MR1_5M)
 67: Standup 6, standup, ingame, lamp(LM_MR2_5M)
 68: Standup 7, standup, ingame, lamp(LM_LR_5M)
-71: Autofire1, opto, noplay, ingame
-72: Autofire2, opto, noplay, ingame
+71: Autofire1, opto, novalid, ingame
+72: Autofire2, opto, novalid, ingame
 73: Right Ramp, opto, ingame
 74: Gumball Popper, opto, intest
 75: MPF Top, opto, ingame

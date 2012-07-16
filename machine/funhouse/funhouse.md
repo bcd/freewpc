@@ -129,7 +129,7 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 # name.  Options can be given in any order:
 #    ingame - only service the switch during a game
 #    intest - also service the switch in test mode
-#    noplay - tripping this switch does NOT mark ball in play
+#    novalid - tripping this switch does NOT mark ball in play
 #    standup - this is a standup
 #    button - this is a button
 #    edge - this switch should be serviced on either transition
@@ -149,13 +149,13 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 11: Right Flipper, button, intest, c_decl(sw_right_button)
 12: Left Flipper, button, intest, c_decl(sw_left_button)
 13: Start Button, start-button, intest
-14: Plumb Bob Tilt, c_decl(sw_tilt), cabinet, tilt, ingame, noplay
+14: Plumb Bob Tilt, c_decl(sw_tilt), cabinet, tilt, ingame, novalid
 15: Steps Frenzy
 16: Upper Ramp
 17: Step S, lamp(LM_STEP_S)
 18: Upper Left Jet
 21: Slam Tilt, slam-tilt, ingame, cabinet
-23: Ticket Opto, cabinet, opto, noplay
+23: Ticket Opto, cabinet, opto, novalid
 25: Lock Right
 26: Step Extra Ball
 27: Lock Center
@@ -177,27 +177,27 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 47: Left Plunger, edge, debounce(TIME_200MS)
 48: Ramp Exit
 51: Dummy Jaw, opto
-52: Right Outlane, noplay
+52: Right Outlane, novalid
 53: Right Slingshot
 54: Step T, lamp(LM_STEP_T)
 55: Step Exit, opto
 56: Ramp Enter
-57: Jet Lane, noplay
+57: Jet Lane, novalid
 58: Tunnel Kickout
 61: Inner Right Inlane
-62: Right Plunger, shooter, edge, noplay, debounce(TIME_200MS)
-63: Right Trough, trough, noscore, noplay
+62: Right Plunger, shooter, edge, novalid, debounce(TIME_200MS)
+63: Right Trough, trough, noscore, novalid
 64: Step E, lamp(LM_STEP_E)
 65: Dummy Eject Hole
 66: Right Gangway
 67: Lower Right Hole
 68: Lower Jet
 71: Outer Right Inlane
-72: Left Trough, trough, noscore, noplay
+72: Left Trough, trough, noscore, novalid
 73: Outhole, outhole, noscore
-74: Center Trough, trough, noscore, noplay
+74: Center Trough, trough, noscore, novalid
 75: Upper Loop
-76: Trap Door Closed, noplay, service
+76: Trap Door Closed, novalid, service
 77: Upper Right Jet
 
 ##########################################################################

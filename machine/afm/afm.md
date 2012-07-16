@@ -96,20 +96,20 @@ define MACHINE_BALL_SAVE_TIME 0
 88: Start Button
 
 [switches]
-11: Launch Button, launch-button, cabinet, noplay
+11: Launch Button, launch-button, cabinet, novalid
 13: Start Button, yellow, start-button, cabinet, intest
-14: Tilt, tilt, noplay, cabinet
+14: Tilt, tilt, novalid, cabinet
 16: Left Outlane
 17: Right Inlane
-18: Shooter, edge, shooter, noplay, debounce(TIME_200MS)
+18: Shooter, edge, shooter, novalid, debounce(TIME_200MS)
 21: Slam Tilt, slam-tilt, ingame, cabinet
 26: Left Inlane
 27: Right Outlane
-31: Trough Eject, opto, noscore, noplay
-32: Trough 1, trough, opto, noscore, noplay
-33: Trough 2, trough, opto, noscore, noplay
-34: Trough 3, trough, opto, noscore, noplay
-35: Trough 4, trough, opto, noscore, noplay
+31: Trough Eject, opto, noscore, novalid
+32: Trough 1, trough, opto, noscore, novalid
+33: Trough 2, trough, opto, noscore, novalid
+34: Trough 3, trough, opto, noscore, novalid
+35: Trough 4, trough, opto, noscore, novalid
 36: Left Popper, opto
 37: Right Popper, opto
 38: Left Top Lane
@@ -121,11 +121,11 @@ define MACHINE_BALL_SAVE_TIME 0
 46: Motor Bank 2, ingame
 47: Motor Bank 3, ingame
 48: Right Top Lane
-51: Left Slingshot, noplay
-52: Right Slingshot, noplay
-53: Left Jet, noplay
-54: Bottom Jet, noplay
-55: Right Jet, noplay
+51: Left Slingshot, novalid
+52: Right Slingshot, novalid
+53: Left Jet, novalid
+54: Bottom Jet, novalid
+55: Right Jet, novalid
 56: Martian 1, lamp(LM_MARTIAN_1)
 57: Martian 2, lamp(LM_MARTIAN_2)
 58: Martian 3, lamp(LM_MARTIAN_3)
@@ -134,10 +134,10 @@ define MACHINE_BALL_SAVE_TIME 0
 63: Right Ramp Enter
 64: Left Ramp Exit
 65: Right Ramp Exit
-66: Motor Bank Down, noplay, intest, service
-67: Motor Bank Up, noplay, intest, service
-71: Right Loop High, noplay
-72: Right Loop Low, noplay
+66: Motor Bank Down, novalid, intest, service
+67: Motor Bank Up, novalid, intest, service
+71: Right Loop High, novalid
+72: Right Loop Low, novalid
 73: Left Loop High
 74: Left Loop Low
 75: L. Saucer Tgt.
