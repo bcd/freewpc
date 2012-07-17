@@ -635,7 +635,7 @@ void stop_game (void)
 
 
 /** Perform final checks before allowing a game to start. */
-bool verify_start_ok (void)
+static bool verify_start_ok (void)
 {
 #ifndef DEVNO_TROUGH
 	return FALSE;
@@ -648,6 +648,7 @@ bool verify_start_ok (void)
 	/* check ball devices stable */
 	if (!in_game && !device_check_start_ok ())
 		return FALSE;
+
 #ifdef MACHINE_TZ
 	/* Don't allow the game to start if we are still
 	 * loading balls into the gumball */
@@ -655,7 +656,10 @@ bool verify_start_ok (void)
 	if (gumball_enable_from_trough)
 		return FALSE;
 #endif
-	return TRUE;
+
+	/* Give other modules a chance to decide if game start
+	is OK.  Return FALSE whenever start should be denied. */
+	return callset_invoke_boolean (game_start_allowed);
 }
 
 
