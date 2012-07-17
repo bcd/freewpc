@@ -13,7 +13,6 @@ Pinmame-ROM: afm_113b.bin
 
 define MACHINE_NUMBER 541
 define MACHINE_CUSTOM_AMODE
-define MACHINE_BALL_SAVE_LAMP LM_RETURN_TO_BATTLE
 
 # Replay level ranges from 50M-500M (default is 100M).
 # Replay boost ranges from 10-100M (default is 25M).
@@ -35,7 +34,7 @@ define MACHINE_BALL_SAVE_TIME 0
 12: RTU Super Jackpot
 13: RTU Martian MB
 14: RTU Total Ann.
-15: Return to Battle
+15: Return to Battle, ball-save
 16: RTU Conquer Mars
 17: RTU 5 Way
 18: Saucer
