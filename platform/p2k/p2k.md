@@ -78,6 +78,6 @@ F8: U.L. Flip Hold, time(TIME_100MS)
 
 [lamplists]
 ALL: 11..88
-Ball Save: MACHINE_BALL_SAVE_LAMP
+Ball Save: %ball-save
 
 
