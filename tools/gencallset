@@ -157,6 +157,7 @@ foreach $src (@srclist) {
 
 			my $primary = $sets[0];
 			foreach my $set (@sets) {
+				$set = lc($set);
 				if (!defined $functionhash{$set}) {
 					$functionhash{$set} = "";
 				}
