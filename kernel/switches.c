@@ -357,6 +357,7 @@ void switch_transitioned (const U8 sw)
 	bit_toggle (sw_logical, sw);
 	bit_off (sw_stable, sw);
 	bit_off (sw_unstable, sw);
+	bit_off (sw_edge, sw);
 	rtt_enable ();
 
 	/* See if the transition requires scheduling.  It does if the
