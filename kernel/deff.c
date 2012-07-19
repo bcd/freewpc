@@ -602,7 +602,25 @@ CALLSET_ENTRY (deff, idle_every_ten_seconds)
 
 CALLSET_ENTRY (deff, end_ball)
 {
-	/* At the beginning of end_ball, stop all display effects.
-	But allow things like "round completion" screens play out. */
+	/* At the beginning of end_ball, delete all queued effects
+	that are not allowed to run during endball. */
+	struct deff_queue_entry *dq = deff_queue;
+	do
+	{
+		if (dq->id != DEFF_NULL)
+		{
+			const deff_t *deff = &deff_table[dq->id];
+			if (!(deff->flags & D_ENDBALL))
+			{
+				dq->id = NULL;
+				dq->timeout = 0;
+			}
+		}
+	} while (++dq < deff_queue + MAX_QUEUED_DEFFS);
+}
+
+CALLSET_ENTRY (deff, bonus_complete)
+{
+	deff_stop_all ();
 }
 

@@ -78,6 +78,10 @@ on the playfield. */
 /** Set for a deff that is allowed to preempt itself */
 #define D_RESTARTABLE 0x20
 
+/** Set for a deff that is allowed to run during end-of-ball.
+  * This should be used only on 'completion' deffs. */
+#define D_ENDBALL 0x40
+
 /** A constant descriptor for a display effect. */
 typedef struct
 {
