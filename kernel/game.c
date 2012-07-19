@@ -251,6 +251,7 @@ void end_ball (void)
 
 	/* If the ball was not tilted, start bonus. */
 	in_bonus = TRUE;
+	callset_invoke (bonus_entered);
 	music_disable ();
 	if (!in_tilt)
 		callset_invoke (bonus);
@@ -275,7 +276,6 @@ void end_ball (void)
 		start_ball ();
 		goto done;
 	}
-
 	/* If this is the last ball of the game for this player,
 	 * then offer to buy an extra ball if enabled.  Also
 	 * save away the per-player audits. */

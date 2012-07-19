@@ -526,6 +526,10 @@ void deff_update (void)
 	if (deff_running && (deff_running != deff_background))
 		return;
 
+	/* If we are in bonus, don't try to start anything else */
+	if (in_bonus)
+		return;
+
 	/* Recalculate which display effect should run in the
 	background */
 	previous = deff_running;
@@ -619,8 +623,15 @@ CALLSET_ENTRY (deff, end_ball)
 	} while (++dq < deff_queue + MAX_QUEUED_DEFFS);
 }
 
-CALLSET_ENTRY (deff, bonus_complete)
+CALLSET_ENTRY (deff, bonus_entered)
 {
+	U8 timeout = 16 * 15;
+	while (--timeout > 0)
+	{
+		if (deff_running == deff_background)
+			return;
+		task_sleep (TIME_66MS);
+	}
 	deff_stop_all ();
 }
 
