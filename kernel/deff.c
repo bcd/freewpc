@@ -604,6 +604,11 @@ CALLSET_ENTRY (deff, idle_every_ten_seconds)
 }
 
 
+CALLSET_ENTRY (deff, tilt)
+{
+	deff_queue_reset ();
+}
+
 CALLSET_ENTRY (deff, end_ball)
 {
 	/* At the beginning of end_ball, delete all queued effects
