@@ -402,10 +402,11 @@ void switch_queue_add (const switchnum_t sw)
 void switch_queue_remove (pending_switch_t *entry)
 {
 	/* Copy the last entry in the queue into the slot being deleted. */
+	dbprintf ("removing %d from queue\n", entry->id);
+	bit_off (sw_queued, entry->id);
 	entry->id = (switch_queue_top-1)->id;
 	entry->timer = (switch_queue_top-1)->timer;
 	switch_queue_top--;
-	bit_off (sw_queued, entry->id);
 }
 
 /** Initialize the switch queue */
@@ -459,10 +460,16 @@ void switch_service_queue (void)
 				switch_transitioned (entry->id);
 			}
 
-			/* The queue entry can be removed now. */
+			/* The queue entry can be removed now.
+			   Note we do not advance the 'entry' pointer in
+				this case, as we may have copied a legitimate
+				entry here. */
 			switch_queue_remove (entry);
 		}
-		entry++;
+		else
+		{
+			entry++;
+		}
 	}
 
 	switch_last_service_time = get_sys_time ();
