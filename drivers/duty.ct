@@ -140,7 +140,7 @@ U8 @self_cycles;
 void @self_start (void)
 {
 	/* The entire operation must be done with interrupts disabled,
-	 * in case the solenoid is always running. */
+	 * in case the solenoid is already running. */
 	disable_interrupts ();
 	@self_timer = @ontime;
 	@self_cycles = (@timeout - @ontime) / (@duty_ontime + @duty_offtime);
