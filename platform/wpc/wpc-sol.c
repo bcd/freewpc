@@ -75,7 +75,7 @@ extern inline void sol_update_fliptronic_powered (void)
 
 extern inline void platform_sol_update_direct (const U8 sol_set)
 {
-	pinio_write_solenoid_set (sol_set, *sol_get_read_reg (sol_set));
+	pinio_write_solenoid_set (sol_set, *sol_get_read_reg (sol_set * CHAR_BIT));
 }
 
 
