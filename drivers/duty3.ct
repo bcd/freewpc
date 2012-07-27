@@ -1,0 +1,144 @@
+/*
+ * Generic duty cycle driver - version 3
+ *
+ * Yet another duty driver.  This one is more generic than the others and
+ * allows for any fraction to be specified, not just 1/2, 1/4, etc.
+ * If you want 3/11, then call start with a cycle size of 11 and an on
+ * time of 3.
+ *
+ * The granularity is also programmable at compile time.  It cannot be
+ * lower than the refresh rate of solenoids from memory, which is
+ * currently 4ms.
+ *
+ * You can also provide a timeout, in multiples of the cycle length.
+ */
+
+@@class duty3
+
+/* The solenoid that is being controlled */
+@@parameter sol
+
+/* The timeout, after which the coil will automatically go off.
+   You can specify zero and it will run indefinitely, but that is
+	not recommended.  It is given in TIME_xxx format. */
+@@parameter timeout
+
+/* The period at which the service routine is scheduled. */
+@@parameter granularity
+
+
+@@parameter fixed_cycle_size
+
+
+
+@@
+@@file @self.sched
+@@
+!@self_service @granularity 20c
+
+
+@@
+@@file @self.h
+@@
+
+#include <freewpc.h>
+
+/* Conversion factor between time units and task ticks.
+   The @timeout config option is given in task ticks, and thus
+	must be scaled. */
+#define TIME_UNIT (IRQS_PER_TICK / @granularity)
+
+/* A typedef for time unit variables.  Because these are 8-bit,
+   they max at 255.  With default granularity of 4ms, that
+	gives a maximum of about a 1s cycle.  (Even when 1ms
+	granularity is supported, 8-bits is still adequate.) */
+typedef U8 time_unit_t;
+
+extern time_unit_t @self_cycle_size;
+extern __fastram__ time_unit_t @self_on_time;
+extern __fastram__ time_unit_t @self_cycle;
+extern U8 @self_timeout;
+
+/* RTT(name=@self_service freq=@granularity) */
+extern inline void @self_service (void)
+{
+	if (unlikely (@self_cycle) > 0)
+	{
+		@self_cycle--;
+		if (@self_cycle == 0)
+		{
+			@self_cycle = @self_cycle_size;
+			sol_disable (@sol);
+			if (@self_timeout)
+			{
+				if (--@self_timeout == 0)
+				{
+					@self_cycle = 0;
+				}
+			}
+		}
+		else if (@self_cycle == @self_on_time)
+		{
+			sol_enable (@sol);
+		}
+	}
+}
+
+@@
+@@file @self.c
+@@
+
+#include <freewpc.h>
+#include "@self.h"
+
+time_unit_t @self_cycle_size;
+__fastram__ time_unit_t @self_on_time;
+__fastram__ time_unit_t @self_cycle;
+time_unit_t @self_timeout;
+
+
+/* Configure the duty cycle and duration.
+   This MUST be called prior to starting the output. */
+#if (@fixed_cycle_size == 0)
+void @self_config (U8 size, U8 on_time)
+{
+	@self_cycle_size = size;
+	@self_on_time = on_time;
+}
+#else
+void @self_config (U8 on_time)
+{
+	@self_on_time = on_time;
+}
+#endif
+
+/* Start the output using preconfigured duty/duration */
+void @self_start (void)
+{
+	rtt_disable ();
+	sol_disable (@sol);
+	@self_cycle = @self_cycle_size;
+	@self_timeout = @timeout * TIME_UNIT; // ticks-to-time-units
+	rtt_enable ();
+}
+
+/* Stop the output */
+void @self_stop (void)
+{
+	rtt_disable ();
+	sol_disable (@sol);
+	@self_cycle = 0;
+	rtt_enable ();
+}
+
+CALLSET_ENTRY (@self, init)
+{
+	@self_cycle = 0;
+}
+
+CALLSET_ENTRY (@self, tilt, stop_game)
+{
+	@self_stop ();
+}
+
+/* vim: set filetype=c: */
