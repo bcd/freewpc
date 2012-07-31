@@ -118,6 +118,7 @@ extern U8 periodic_ok;
 
 #ifdef CONFIG_NATIVE
 #include <platform/native.h>
+#include <native/native.h>
 #endif
 
 /* Include the standard header files that are needed

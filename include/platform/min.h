@@ -48,7 +48,6 @@ extern inline U8 pinio_get_bank (U8 bankno) { return 0; }
 
 /* TODO : why do I have to say this? */
 #define LOCAL_SIZE 64
-#define AREA_SIZE(name) 0
 
 /* The following two are very similar, and could be merged... */
 

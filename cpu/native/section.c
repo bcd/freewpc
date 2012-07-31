@@ -32,11 +32,6 @@
  * provide persistence.
  */
 
-extern char *__start_protected, *__stop_protected;
-extern char *__start_nvram, *__stop_nvram;
-extern char *__start_local, *__stop_local;
-
-
 /** The name of the backing file */
 char protected_memory_file[256] = "nvram/default.nv";
 
@@ -44,7 +39,7 @@ char protected_memory_file[256] = "nvram/default.nv";
 /** Load the contents of the protected memory from file to RAM. */
 void protected_memory_load (void)
 {
-	int size = (int)&__stop_nvram - (int)&__start_nvram;
+	int size = AREA_SIZE(nvram);
 	FILE *fp;
 
 	/* Use a different file for each machine */
@@ -54,13 +49,13 @@ void protected_memory_load (void)
 	fp = fopen (protected_memory_file, "r");
 	if (fp)
 	{
-		fread (&__start_nvram, 1, size, fp);
+		fread (AREA_BASE(nvram), 1, size, fp);
 		fclose (fp);
 	}
 	else
 	{
 		print_log ("Error loading memory, using defaults\n");
-		memset (&__start_nvram, 0, size);
+		memset (AREA_BASE(nvram), 0, size);
 	}
 }
 
@@ -68,14 +63,14 @@ void protected_memory_load (void)
 /** Save the contents of the protected memory from RAM to a file. */
 void protected_memory_save (void)
 {
-	int size = (int)&__stop_nvram - (int)&__start_nvram;
+	int size = AREA_SIZE(nvram);
 	FILE *fp;
 
 	print_log ("Saving 0x%X bytes of protected memory to %s\n", size, protected_memory_file);
 	fp = fopen (protected_memory_file, "w");
 	if (fp)
 	{
-		if (fwrite (&__start_nvram, 1, size, fp) < size)
+		if (fwrite (AREA_BASE(nvram), 1, size, fp) < size)
 		{
 			print_log ("Warning: could not save all of memory\n");
 			task_sleep_sec (1);

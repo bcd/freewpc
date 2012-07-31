@@ -88,8 +88,6 @@
 
 #define LOCAL_SIZE      0x40
 
-#define AREA_SIZE(name) 1
-
 /*
  * Pinball I/O (pinio) functions
  */

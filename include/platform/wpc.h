@@ -39,38 +39,6 @@
  * Memory usage
  ***************************************************************/
 
-#ifdef __m6809__
-
-/** AREA_DECL is used to expose a linker area name within the C
- * variable namespace.  It appears an external name.  The asm syntax
- * is needed so that the normal appending of an underscore does not
- * occur. */
-#define ASM_DECL(name) name asm (#name)
-#define AREA_DECL(name) extern U8 ASM_DECL (s_ ## name); extern U8 ASM_DECL (l_ ## name);
-
-/** Return the base address of a linker area.  This has type (U8 *). */
-#define AREA_BASE(name) (&s_ ## name)
-
-/** Return the runtime size of a linker area.  This has type U16.
- * This is not the maximum allowable space for the area, but rather
- * reflects how many actual variables have been mapped there. */
-#define AREA_SIZE(name) ((U16)(&l_ ## name))
-
-/* Define externs for all of these areas.  AREA_BASE and AREA_SIZE can
- * only be called on these. */
-AREA_DECL(direct)
-AREA_DECL(ram)
-AREA_DECL(local)
-AREA_DECL(heap)
-AREA_DECL(stack)
-AREA_DECL(permanent)
-AREA_DECL(nvram)
-
-#else
-#define AREA_SIZE(name) 0
-#endif /* __m6809__ */
-
-
 /** The total size of RAM  -- 8K */
 #define RAM_SIZE 			0x2000UL
 

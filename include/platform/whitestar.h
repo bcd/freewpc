@@ -32,27 +32,6 @@
  * Memory usage
  ***************************************************************/
 
-#ifdef __m6809__
-
-#define ASM_DECL(name) name asm (#name)
-
-#define AREA_DECL(name) extern U8 ASM_DECL (s_ ## name); extern U8 ASM_DECL (l_ ## name);
-#define AREA_BASE(name) (&s_ ## name)
-#define AREA_SIZE(name) ((U16)(&l_ ## name))
-
-AREA_DECL(direct)
-AREA_DECL(ram)
-AREA_DECL(local)
-AREA_DECL(heap)
-AREA_DECL(stack)
-AREA_DECL(permanent)
-AREA_DECL(nvram)
-
-#else
-/* TODO */
-#endif /* __m6809__ */
-
-
 /** The total size of RAM  -- 8K */
 #define RAM_SIZE 			0x2000UL
 

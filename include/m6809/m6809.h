@@ -39,6 +39,31 @@
 #define CC_FIRQ 		0x40
 #define CC_E 			0x80
 
+/** AREA_DECL is used to expose a linker area name within the C
+ * variable namespace.  It appears an external name.  The asm syntax
+ * is needed so that the normal appending of an underscore does not
+ * occur. */
+#define ASM_DECL(name) name asm (#name)
+#define AREA_DECL(name) extern U8 ASM_DECL (s_ ## name); extern U8 ASM_DECL (l_ ## name);
+
+/** Return the base address of a linker area.  This has type (U8 *). */
+#define AREA_BASE(name) (&s_ ## name)
+
+/** Return the runtime size of a linker area.  This has type U16.
+ * This is not the maximum allowable space for the area, but rather
+ * reflects how many actual variables have been mapped there. */
+#define AREA_SIZE(name) ((U16)(&l_ ## name))
+
+/* Define externs for all of these areas.  AREA_BASE and AREA_SIZE can
+ * only be called on these. */
+AREA_DECL(direct)
+AREA_DECL(ram)
+AREA_DECL(local)
+AREA_DECL(heap)
+AREA_DECL(stack)
+AREA_DECL(permanent)
+AREA_DECL(nvram)
+
 /* Defines for various assembler routines that can be called from C */
 __attribute__((noreturn)) void start (void);
 U8 far_read8 (const void *address, U8 page);
