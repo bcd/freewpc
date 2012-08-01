@@ -54,8 +54,11 @@ __noreturn__ void warm_reboot (void)
 #ifdef __m6809__
 	start ();
 #else
-	disable_interrupts ();
-	freewpc_init ();
+#ifdef CONFIG_SIM
+	sim_exit (1);
+#else
+	exit (1);
+#endif
 #endif
 }
 
