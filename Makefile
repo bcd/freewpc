@@ -361,7 +361,8 @@ $(eval $(call AREA_SETUP, stack,     0x1680,   0x0180,  virtual))
 $(eval $(call AREA_SETUP, nvram,     0x1810,   0x06F0))
 $(eval $(call AREA_SETUP, dirtab,    0x1F00,   0x0100))
 $(eval $(call AREA_SETUP, paged,     0x4000,   0x4000,  virtual))
-$(eval $(call AREA_SETUP, sysrom,    0x8000,   0x7FF0,  virtual))
+$(eval $(call AREA_SETUP, sysrom,    0x8000,   0x7FB0,  virtual))
+$(eval $(call AREA_SETUP, registers, 0xFFB0,   0x0040))
 $(eval $(call AREA_SETUP, vector,    0xFFF0,   0x0010,  virtual))
 
 # Declare pseudo-sections for non-variable objects.  The
@@ -371,7 +372,7 @@ $(eval $(call AREA_SETUP, .flag,     0x0000,   0x0100))
 $(eval $(call AREA_SETUP, .globalflag, 0x0000,   0x0100))
 $(eval $(call AREA_SETUP, .freetimer,  0x0000,   0x0100))
 
-SYSROM_SIZE := $(shell echo $$(($(AREASIZE_sysrom) + $(AREASIZE_vector))))
+SYSROM_SIZE := $(shell echo $$(($(AREASIZE_sysrom) + $(AREASIZE_vector) + $(AREASIZE_registers))))
 
 MACHINE_SYS_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_OBJS))
 MACHINE_TEST_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_TEST_OBJS))
@@ -679,7 +680,7 @@ $(LINKCMD) : $(MAKE_DEPS) $(PMAKEFILE)
 	echo "-b .text = $(AREA_sysrom)" >> $(LINKCMD) ;\
 	echo "$(BLDDIR)/freewpc.o" >> $(LINKCMD) ;\
 	for f in `echo $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
-	echo "-v" >> $(LINKCMD) ;\
+	echo "-o" >> $(LINKCMD) ;\
 	for f in `echo $(PAGED_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
 	echo "-o" >> $(LINKCMD) ;\
 	echo "-e" >> $(LINKCMD)

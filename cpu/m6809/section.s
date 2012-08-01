@@ -20,3 +20,8 @@
 .area .flag
 .area .globalflag
 .area .freetimer
+
+.bank registers
+.area registers (BANK=registers)
+.area timedmodes (BANK=registers)
+.area mbmodes (BANK=registers)
