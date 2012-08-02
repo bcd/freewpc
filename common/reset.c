@@ -68,13 +68,9 @@ extern inline void wait_for_button (const U8 swno)
 void factory_reset (void)
 {
 	file_reset ();
-#ifdef __m6809__
 	memset (AREA_BASE (permanent), 0, AREA_SIZE (permanent));
-#else
-	/* TODO - how to clean the permanent area in native mode? */
-#endif
-	timestamp_update (&system_timestamps.factory_reset);
 	callset_invoke (factory_reset);
+	timestamp_update (&system_timestamps.factory_reset);
 }
 
 
