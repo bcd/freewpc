@@ -98,7 +98,7 @@ for sim in $sim_options; do
 					export GCC_VERSION=$gcc
 					export CONFIG_SIM
 					export CONFIG_BPT
-					make $make_options DOTCONFIG="" $target 2>&1 > /dev/null
+					make $make_options CONFIG="" $target 2>&1 > /dev/null
 					rc="$?"
 
 					if [ -f err ]; then

@@ -226,14 +226,19 @@ build process, appear here.
 @cindex Configuration
 
 FreeWPC can be compiled in many different ways with lots of optional features.
-You cannot just type @command{make} at the top of the directory tree without
-first specifying what you want to build.  This is done by creating a file
-named @file{.config}.  The file @file{config.example} is provided as an
-example of the kinds of things that can be tuned.
+A config file, written in Makefile syntax, specifies the specific configuration
+you want to build.
 
-@file{.config} is written in standard Makefile syntax.  (The top-level
-Makefile includes this file.)  You set various options by writing
-variable assignments, such as:
+By default, the build system will look for a file called @file{.config} in
+the top-level directory.  You can create this file yourself with the options
+you want; see @file{config.example} for a list of possible options.  After
+setting this up, you can just run @command{make}.
+
+Alternatively, you can point to a different configuration by running
+@command{make CONFIG=filename}.  In this way, you can create multiple
+configs and switch between them.
+
+The config file sets various options by writing variable assignments, such as:
 
 @example
 MACHINE := wcs

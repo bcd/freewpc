@@ -32,9 +32,9 @@ EXTRA_ASFLAGS += -U$1
 endef
 
 # Include the .config file, which must exist
-DOTCONFIG ?= .config
-ifneq ($(DOTCONFIG),)
-include $(DOTCONFIG)
+CONFIG ?= .config
+ifneq ($(CONFIG),)
+include $(CONFIG)
 endif
 
 define require
@@ -468,7 +468,7 @@ endif
 MACH_LINKS = .mach .include_mach
 
 ifndef QUICK_MAKE
-MAKE_DEPS = Makefile kernel/Makefile common/Makefile $(MMAKEFILE) $(BLDDIR)/mach-Makefile $(DOTCONFIG)
+MAKE_DEPS = Makefile kernel/Makefile common/Makefile $(MMAKEFILE) $(BLDDIR)/mach-Makefile $(CONFIG)
 endif
 ifeq ($(CONFIG_FONT),y)
 MAKE_DEPS += fonts/Makefile
@@ -899,9 +899,9 @@ $(sort $(HOST_OBJS)) : %.o : %.c
 
 # Provide a target for .config that will run 'configure' or abort if it
 # does not exist.
-ifneq ($(DOTCONFIG),)
-$(DOTCONFIG):
-	echo "No $(DOTCONFIG)" && exit 1
+ifneq ($(CONFIG),)
+$(CONFIG):
+	echo "No config specified.  $(CONFIG) does not exist." && exit 1
 endif
 
 #
