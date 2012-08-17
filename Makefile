@@ -454,6 +454,10 @@ C_OBJS := $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(COMMON2_OBJS) $(EVENT_OBJS)
 	$(MACHINE2_OBJS) $(MACHINE3_OBJS) $(MACHINE4_OBJS) $(MACHINE5_OBJS) \
 	$(FONT_OBJS) $(EFFECT_OBJS) \
 	$(INIT_OBJS) $(DEFF_OBJS) $(LEFF_OBJS) $(SCHED_OBJ)
+C_OBJS_SUFFIXES := $(sort $(suffix $(C_OBJS)))
+ifneq ($(C_OBJS_SUFFIXES), .o)
+$(error $(filter-out %.o,$(C_OBJS)) : non-.o files listed as objects)
+endif
 
 ifeq ($(PLATFORM),wpc)
 OBJS = $(C_OBJS) $(AS_OBJS) $(FON_OBJS)
