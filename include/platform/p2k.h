@@ -31,7 +31,6 @@ extern U8 *pinio_dmd_low_page, *pinio_dmd_high_page;
 
 /* TODO : we shouldn't need to declare anything if there is no banking... */
 
-#define timestamp_update(x)
 #define PINIO_BANK_ROM 0
 #define PINIO_BANK_RAM 1
 extern inline void pinio_set_bank (U8 bankno, U8 val) { }

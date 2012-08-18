@@ -209,7 +209,11 @@ __noreturn__ void freewpc_init (void);
 #ifdef CONFIG_GI
 #include <system/triac.h>
 #endif
-#include <system/rtc.h> // CONFIG_RTC?
+#ifdef CONFIG_RTC
+#include <system/rtc.h>
+#else
+#define timestamp_update(x)
+#endif
 
 /* Common software structures */
 #include <priority.h>

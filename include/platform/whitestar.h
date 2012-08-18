@@ -327,7 +327,5 @@ extern inline void pinio_watchdog_reset (void)
 {
 }
 
-#define timestamp_update(x)
-
 #endif /* _WHITESTAR_H */
 

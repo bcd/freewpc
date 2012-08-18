@@ -106,6 +106,4 @@ extern inline U8 pinio_read_locale (void)
 {
 }
 
-#define timestamp_update(x)
-
 #endif /* __PLATFORM_MIN_H */
