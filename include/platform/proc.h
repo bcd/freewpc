@@ -175,10 +175,6 @@ extern inline void pinio_disable_flippers (void)
 {
 }
 
-extern inline void pinio_clear_periodic (void)
-{
-}
-
 extern inline void pinio_watchdog_reset (void)
 {
 }

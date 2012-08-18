@@ -28,9 +28,11 @@ extern inline void do_irq_begin (void)
 	pinio_set_bank (PINIO_BANK_RAM, 0);
 #endif
 
-	/* Clear the source of the periodic interrupt, and reset
+	/* On WPC, clear the source of the periodic interrupt, and reset
 	the hardware watchdog */
+#ifdef CONFIG_PLATFORM_WPC
 	pinio_clear_periodic ();
+#endif
 }
 
 

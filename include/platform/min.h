@@ -90,10 +90,6 @@ extern inline void pinio_nvram_unlock (void)
 {
 }
 
-extern inline void pinio_clear_periodic (void)
-{
-}
-
 extern inline void pinio_enable_flippers (void)
 {
 }
