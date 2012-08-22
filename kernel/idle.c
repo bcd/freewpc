@@ -61,6 +61,9 @@ reaches 10, we clear it and consider that 10 seconds
 have passed. */
 U8 idle_10second_timer;
 
+#ifndef CONFIG_RTC
+U8 idle_minute_timer;
+#endif
 
 /** Runs the periodic functions.   This function is called
  * about once every 16ms, but it may run less often when
@@ -99,6 +102,14 @@ void do_periodic (void)
 		{
 			idle_10second_timer -= 10;
 			callset_invoke (idle_every_ten_seconds);
+#ifndef CONFIG_RTC
+			idle_minute_timer++;
+			if (idle_minute_timer >= 6)
+			{
+				idle_minute_timer -= 6;
+				callset_invoke (minute_elapsed);
+			}
+#endif
 		}
 	}
 }
@@ -109,4 +120,7 @@ CALLSET_ENTRY (idle, init)
 	idle_ready_time = get_sys_time () + TIME_100MS;
 	idle_second_timer = 0;
 	idle_10second_timer = 0;
+#ifndef CONFIG_RTC
+	idle_minute_timer = 0;
+#endif
 }
