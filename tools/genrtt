@@ -35,7 +35,11 @@
 # A list of directories to be searched.
 my @SearchDirs = ();
 
+# A list of RTT declarations
 my @rtlist;
+
+# A hash of RTTs by their function name
+my %rtt_by_name;
 
 # The output file name
 $OutputFile = "build/rtt.c";
@@ -125,6 +129,14 @@ foreach $src (@srclist) {
 				error "$name has invalid frequency";
 			}
 			push @rtlist, $rtt;
+			$rtt_by_name{ $rtt->{'name'} } = $rtt;
+		}
+		elsif (/([a-z_0-9]*_rtt[a-z_0-9]*)[ \t].*void/) {
+			my $name = $1;
+			if (!defined $rtt_by_name{$name})
+			{
+				warning "found possible function '$name' without an RTT header";
+			}
 		}
 	}
 	close FH;
