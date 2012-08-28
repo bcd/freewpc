@@ -137,6 +137,7 @@ static __attribute__((noinline)) void triac_rtt_1 (U8 dim_bits)
 
 
 /** Update the triacs at interrupt time */
+/* RTT(name=triac_rtt freq=1) */
 void triac_rtt (void)
 {
 	/* We only need to update the triacs if dimming

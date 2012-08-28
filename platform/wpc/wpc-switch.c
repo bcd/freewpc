@@ -147,7 +147,7 @@ extern inline void switch_rowpoll (const U8 col)
 
 
 
-
+/* RTT(name=switch_rtt freq=2) */
 void switch_rtt (void)
 {
 	switch_rowpoll (0);

@@ -61,6 +61,7 @@ U8 ac_zerocross_errors;
 /**
  * Real-time function that checks to see if we are currently at a
  * zero crossing point. */
+/* RTT(name=ac_rtt freq=1) */
 void ac_rtt (void)
 {
 	if (unlikely (zc_status == ZC_INITIALIZING))
