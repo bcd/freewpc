@@ -73,6 +73,10 @@ U8 deff_data_pending_count;
 U8 deff_data_active[MAX_DEFF_DATA];
 U8 deff_data_active_count;
 
+/** The deff queue is a priority-based list of effects which
+    were requested but could not be started, and which need to
+	 be retried. */
+
 #define MAX_QUEUED_DEFFS 8
 
 struct deff_queue_entry
@@ -168,6 +172,29 @@ void deff_queue_reset (void)
 
 
 /**
+ * Clear all queued effects that are abortable.
+ */
+void deff_queue_abort (void)
+{
+	const deff_t *deff;
+	struct deff_queue_entry *dq = deff_queue;
+	do
+	{
+		if (dq->id != DEFF_NULL)
+		{
+			deff = &deff_table[dq->id];
+			if (deff->flags & D_ABORTABLE)
+			{
+				dq->id = DEFF_NULL;
+				dq->timeout = 0;
+			}
+		}
+	} while (++dq < deff_queue + MAX_QUEUED_DEFFS);
+}
+
+
+
+/**
  * Find a display queue entry with the given id.
  *
  * This can be an actual deff number, or DEFF_NULL if you want to
@@ -203,7 +230,9 @@ struct deff_queue_entry *deff_queue_find_priority (void)
 			if (time_reached_p (dq->timeout))
 			{
 				/* This queued effect already expired, so we will
-				ignore it and free it. */
+				ignore it and free it.  It's important that we scan
+				the queue more frequently than task time values can
+				wrap around to avoid trouble here... */
 				dq->id = dq->timeout = 0;
 			}
 			else
@@ -539,7 +568,8 @@ void deff_start_sync (deffnum_t dn)
 
 
 /** If both flippers are pressed and the current running deff
- * is abortable, then stop it. */
+ * is abortable, then stop it.  If there are any abortable
+ * deffs in the queue, delete them. */
 CALLSET_ENTRY (deff, flipper_abort)
 {
 	if (deff_running)
@@ -549,9 +579,24 @@ CALLSET_ENTRY (deff, flipper_abort)
 		{
 			dbprintf ("Deff %d aborted.\n", deff_running);
 			deff_stop (deff_running);
-			deff_queue_service ();
 		}
 	}
+	deff_queue_abort ();
+	deff_queue_service ();
+}
+
+
+/**
+ * Very infrequently, go through the deff queue and scrub for
+ * effects that have expired.  Don't try to start anything,
+ * as that can only happen when the running deff actually exits.
+ * This keeps the queue from overflowing when long-running deffs
+ * are hogging the display, and prevents timeout values from
+ * overflowing.
+ */
+CALLSET_ENTRY (deff, idle_every_ten_seconds)
+{
+	(void)deff_queue_find_priority ();
 }
 
 
