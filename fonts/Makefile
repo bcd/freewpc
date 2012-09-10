@@ -49,4 +49,7 @@ FON_OBJS += $(if $(CONFIG_FON_ARIAL11A), fonts/free/arial11a.o)
 FON_OBJS += $(if $(CONFIG_FON_ARIAL11B), fonts/free/arial11b.o)
 FON_OBJS += $(if $(CONFIG_FON_FFFEXTRA), fonts/free/fffextra.o)
 
+FON_OBJS += $(if $(CONFIG_FON_EMULOGIC), fonts/free/emulogic.o)
+FON_OBJS += $(if $(CONFIG_FON_PIXELMIX), fonts/free/pixelmix.o)
+FON_OBJS += $(if $(CONFIG_FON_HELLOVETICA), fonts/free/hellovetica.o)
 
