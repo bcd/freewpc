@@ -125,6 +125,12 @@ extern U8 periodic_ok;
 
 /* Main configuration - game specific.  All machines MUST define one */
 #include <mach-config.h>
+#undef MAX_TIMERS
+#define MAX_TIMERS 32
+#undef MAX_FLAGS
+#define MAX_FLAGS 64
+#undef MAX_GLOBAL_FLAGS
+#define MAX_GLOBAL_FLAGS 32
 
 /* Processor specifics */
 #include <limits.h>
