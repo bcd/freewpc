@@ -1173,7 +1173,7 @@ $section += $o_file
 
 $o_file : $c_file $h_file build/mach-Makefile
 
-$c_file $h_file : $template_file \$(CTEMP)
+$test_c_file $c_file $h_file : $template_file \$(CTEMP)
 	\$(CTEMP) -s $ident -i $id $args $template_file
 
 END
