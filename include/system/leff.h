@@ -95,6 +95,7 @@ extern inline void leff_create_peer (void (*fn)(void))
 void leff_start (leffnum_t dn);
 void leff_stop (leffnum_t dn);
 void leff_restart (leffnum_t dn);
+const leff_t *leff_get_current (void);
 __noreturn__ void leff_exit (void);
 bool leff_running_p (leffnum_t dn);
 void leff_stop_all (void);

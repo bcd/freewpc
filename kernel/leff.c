@@ -413,6 +413,19 @@ void leff_stop (leffnum_t id)
 }
 
 
+const leff_t *leff_get_current (void)
+{
+	task_gid_t gid;
+	U8 idx;
+	U8 id;
+
+	gid = task_getgid ();
+	idx = gid - GID_LEFF_BASE;
+	id = leff_running_list[idx];
+	return &leff_table[id];
+}
+
+
 /**
  * Exit from a running lamp effect.
  */
