@@ -21,11 +21,9 @@ extern inline void platform_switch_debounce (const U8 col)
 	sw_edge[col] = edge;
 }
 
-extern __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_leff1_matrix[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_leff1_allocated[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
+extern __fastram__ lamp_set lamp_matrix;
+extern __fastram__ lamp_set leff_free_set;
+extern __fastram__ lamp_set leff_data_set;
 extern __fastram__ U8 lamp_strobe_mask;
 extern __fastram__ U8 lamp_strobe_column;
 extern __fastram__ U8 lamp_power_timer;
@@ -59,10 +57,8 @@ extern inline U8 platform_lamp_compute (const U8 col)
 	 * for quick effects.  Therefore leff2 is applied first,
 	 * and leff1 may override it.
 	 */
-	bits &= lamp_leff2_allocated[col];
-	bits |= lamp_leff2_matrix[col];
-	bits &= lamp_leff1_allocated[col];
-	bits |= lamp_leff1_matrix[col];
+	bits &= leff_free_set[col];
+	bits |= leff_data_set[col];
 	return bits;
 }
 

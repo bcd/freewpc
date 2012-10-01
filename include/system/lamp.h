@@ -175,5 +175,6 @@ void lamp_set_copy (lamp_set dst, const lamp_set src);
 void lamp_set_add (lamp_set dst, const lamp_set src);
 void lamp_set_subtract (lamp_set dst, const lamp_set src);
 bool lamp_set_disjoint (const lamp_set a, const lamp_set b);
+bool lamp_set_can_be_added (const lamp_set a, const lamp_set b);
 
 #endif /* _SYS_LAMP_H */

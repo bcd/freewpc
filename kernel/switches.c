@@ -191,13 +191,10 @@ typedef struct
 void switch_lamp_pulse (void)
 {
 	lamp_pulse_data_t * const cdata = task_current_class_data (lamp_pulse_data_t);
-	/* Although not a true leff, this fools the lamp draw to doing
-	 * the right thing. */
-	cdata->leffdata.flags = L_SHARED;
 
 	/* If the lamp is already allocated by another lamp effect,
 	then don't bother trying to do the pulse. */
-	if (lamp_leff2_test_and_allocate (cdata->swinfo->lamp))
+	if (leff_quick_alloc (cdata->swinfo->lamp))
 	{
 		/* Change the state of the lamp */
 		if (lamp_test (cdata->swinfo->lamp))
@@ -211,7 +208,7 @@ void switch_lamp_pulse (void)
 		task_sleep (TIME_200MS);
 
 		/* Free the lamp */
-		lamp_leff2_free (cdata->swinfo->lamp);
+		leff_quick_free (cdata->swinfo->lamp);
 	}
 	task_exit ();
 }

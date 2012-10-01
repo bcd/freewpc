@@ -66,12 +66,10 @@
 #include <freewpc.h>
 
 __fastram__ lamp_set lamp_matrix;
+
 lamp_set lamp_flash_matrix;
+
 __fastram__ lamp_set lamp_flash_matrix_now;
-__fastram__ lamp_set lamp_leff1_matrix;
-__fastram__ lamp_set lamp_leff1_allocated;
-__fastram__ lamp_set lamp_leff2_matrix;
-__fastram__ lamp_set lamp_leff2_allocated;
 
 U8 bit_matrix[BITS_TO_BYTES (MAX_FLAGS)];
 
@@ -92,6 +90,9 @@ U8 lamp_power_level;
 
 U16 lamp_power_idle_timer;
 
+extern lamp_set leff_free_set;
+extern lamp_set leff_data_set;
+
 
 /** Initialize the lamp subsystem at startup. */
 void lamp_init (void)
@@ -100,17 +101,8 @@ void lamp_init (void)
 	lamp_set_zero (lamp_matrix);
 	lamp_set_zero (lamp_flash_matrix);
 	lamp_set_zero (lamp_flash_matrix_now);
-	lamp_set_zero (lamp_leff1_matrix);
-	lamp_set_zero (lamp_leff2_matrix);
 	memset (bit_matrix, 0, sizeof (bit_matrix));
 	memset (global_bits, 0, sizeof (global_bits));
-
-	/* Lamp effect allocation matrices are "backwards",
-	 * in the sense that a '1' means free, and '0' means
-	 * allocated. */
-	lamp_leff1_free_all ();
-	lamp_leff2_free_all ();
-
 	lamp_strobe_mask = 0x1;
 	lamp_strobe_column = 0;
 	lamp_power_timer = 0;
@@ -216,13 +208,11 @@ __pure__ U8 *matrix_lookup (lamp_matrix_id_t id)
 		case LMX_FLASH:
 			return lamp_flash_matrix;
 		case LMX_EFFECT1_ALLOC:
-			return lamp_leff1_allocated;
-		case LMX_EFFECT1_LAMPS:
-			return lamp_leff1_matrix;
 		case LMX_EFFECT2_ALLOC:
-			return lamp_leff2_allocated;
+			return leff_free_set;
+		case LMX_EFFECT1_LAMPS:
 		case LMX_EFFECT2_LAMPS:
-			return lamp_leff2_matrix;
+			return leff_data_set;
 	}
 	fatal (ERR_INVALID_MATRIX);
 }
@@ -231,6 +221,7 @@ void lamp_set_on (lamp_set lset)
 {
 	memset (lset, 0xFF, NUM_LAMP_COLS);
 }
+
 
 /*
  * Lamp manipulation routines
@@ -328,121 +319,52 @@ void lamp_all_off (void)
 	disable_interrupts ();
 	lamp_set_zero (lamp_flash_matrix_now);
 	lamp_set_zero (lamp_flash_matrix);
-	lamp_set_zero (lamp_leff1_matrix);
-	lamp_set_zero (lamp_leff2_matrix);
+	lamp_set_zero (leff_data_set);
 	enable_interrupts ();
 	lamp_set_zero (lamp_matrix);
 }
 
-/*
- * Lamp effect allocation/free functions.  These are called
- * during leff creation/shutdown time to override some of the
- * lamp bits for use by the lamp effect routine.
- *
- * They are not called from the context of the lamp effect
- * itself, but rather from the context in which it is
- * started/stopped.
- */
-
-void lamp_leff1_allocate_all (void)
-{
-	lamp_set_zero (lamp_leff1_allocated);
-}
-
-void lamp_leff1_erase (void)
-{
-	lamp_set_zero (lamp_leff1_matrix);
-}
-
-void lamp_leff1_free_all (void)
-{	
-	lamp_set_on (lamp_leff1_allocated);
-}
-
-void lamp_leff2_erase (void)
-{
-	lamp_set_zero (lamp_leff2_matrix);
-}
-
-void lamp_leff2_free_all (void)
-{
-	lamp_set_on (lamp_leff2_allocated);
-}
-
-
-void lamp_leff_allocate (lampnum_t lamp)
-{
-	bit_off (lamp_leff1_allocated, lamp);
-}
-
-void lamp_leff_free (lampnum_t lamp)
-{
-	bit_on (lamp_leff1_allocated, lamp);
-}
-
-void lamp_leff2_allocate (lampnum_t lamp)
-{
-	bit_off (lamp_leff2_matrix, lamp);
-	bit_off (lamp_leff2_allocated, lamp);
-}
-
-bool lamp_leff2_test_and_allocate (lampnum_t lamp)
-{
-	bool ok;
-
-	disable_interrupts ();
-	ok = bit_test (lamp_leff2_allocated, lamp);
-	if (ok)
-		lamp_leff2_allocate (lamp);
-	enable_interrupts ();
-	return ok;
-}
-
-void lamp_leff2_free (lampnum_t lamp)
-{
-	bit_on (lamp_leff2_allocated, lamp);
-	bit_off (lamp_leff2_matrix, lamp);
-}
 
 /*
  * The leff_ functions below are used to set/clear/toggle/test
  * bits from a lamp effect function.  Otherwise they work
  * identically to the lamp_ versions.
- *
- * The functions manipulate either the leff1 or leff2 matrix,
- * depending on whether the leff is shared or not.  Quick leffs
- * used for light shows use leff1.  Shared leffs that run
- * longer and may overlap with other shared leffs use leff2.
  */
 void leff_on (lampnum_t lamp)
 {
-	register bitset p = (leff_running_flags & L_SHARED) ?
-		lamp_leff2_matrix : lamp_leff1_matrix;
-	bit_on (p, lamp);
+#ifdef PARANOID
+	if (bit_test (leff_free_set, lamp))
+	{
+		dbprintf ("unallocated lamp on %d\n", lamp);
+		return;
+	}
+#endif
+	bit_on (leff_data_set, lamp);
 }
 
 
 void leff_off (lampnum_t lamp)
 {
-	register bitset p = (leff_running_flags & L_SHARED) ?
-		lamp_leff2_matrix : lamp_leff1_matrix;
-	bit_off (p, lamp);
+	bit_off (leff_data_set, lamp);
 }
 
 
 void leff_toggle (lampnum_t lamp)
 {
-	register bitset p = (leff_running_flags & L_SHARED) ?
-		lamp_leff2_matrix : lamp_leff1_matrix;
-	bit_toggle (p, lamp);
+#ifdef PARANOID
+	if (bit_test (leff_free_set, lamp))
+	{
+		dbprintf ("unallocated lamp on %d\n", lamp);
+		return;
+	}
+#endif
+	bit_toggle (leff_data_set, lamp);
 }
 
 
 bool leff_test (lampnum_t lamp)
 {
-	register bitset p = (leff_running_flags & L_SHARED) ?
-		lamp_leff2_matrix : lamp_leff1_matrix;
-	return bit_test (p, lamp);
+	return bit_test (leff_data_set, lamp);
 }
 
 

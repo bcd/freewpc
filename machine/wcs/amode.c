@@ -76,7 +76,7 @@ void amode_leff1 (void)
 void amode_leff (void)
 {
 	gi_leff_enable (PINIO_GI_STRINGS);
-	lamp_leff_free (LM_START_BUTTON);
+	leff_quick_free (LM_START_BUTTON);
 
 	for (lamplist = LAMPLIST_GOAL_COUNTS; lamplist <= LAMPLIST_RAMP_TICKETS; lamplist++)
 	{

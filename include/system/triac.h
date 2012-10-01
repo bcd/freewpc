@@ -34,6 +34,7 @@ typedef U8 triacbits_t;
 
 #ifdef CONFIG_TRIAC
 void triac_rtt (void);
+void triac_update (void);
 void gi_dim (U8 bits, U8 brightness);
 void gi_leff_dim (U8 bits, U8 brightness);
 #endif
