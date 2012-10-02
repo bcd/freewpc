@@ -150,6 +150,7 @@ my %BinaryProperties = (
 		"queue" => 1,
 		"timeout" => 1,
 		"abortable" => 1,
+		"endball" => 1,
 	},
 	"leffs" => {
 		"amode" => $GLOBAL_OBJECT,

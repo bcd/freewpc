@@ -526,6 +526,10 @@ void deff_update (void)
 	if (deff_running && (deff_running != deff_background))
 		return;
 
+	/* If we are in bonus, don't try to start anything else */
+	if (in_bonus)
+		return;
+
 	/* Recalculate which display effect should run in the
 	background */
 	previous = deff_running;
@@ -600,9 +604,39 @@ CALLSET_ENTRY (deff, idle_every_ten_seconds)
 }
 
 
+CALLSET_ENTRY (deff, tilt)
+{
+	deff_queue_reset ();
+}
+
 CALLSET_ENTRY (deff, end_ball)
 {
-	/* At the beginning of end_ball, stop all display effects.
-	But allow things like "round completion" screens play out. */
+	/* At the beginning of end_ball, delete all queued effects
+	that are not allowed to run during endball. */
+	struct deff_queue_entry *dq = deff_queue;
+	do
+	{
+		if (dq->id != DEFF_NULL)
+		{
+			const deff_t *deff = &deff_table[dq->id];
+			if (!(deff->flags & D_ENDBALL))
+			{
+				dq->id = NULL;
+				dq->timeout = 0;
+			}
+		}
+	} while (++dq < deff_queue + MAX_QUEUED_DEFFS);
+}
+
+CALLSET_ENTRY (deff, bonus_entered)
+{
+	U8 timeout = 16 * 15;
+	while (--timeout > 0)
+	{
+		if (deff_running == deff_background)
+			return;
+		task_sleep (TIME_66MS);
+	}
+	deff_stop_all ();
 }
 
