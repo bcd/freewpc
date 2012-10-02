@@ -219,6 +219,7 @@ __noreturn__ void freewpc_init (void);
 #include <system/rtc.h>
 #else
 #define timestamp_update(x)
+struct date {};
 #endif
 
 /* Common software structures */
