@@ -6,6 +6,7 @@ C := cpu/$(CPU)
 # Path to the compiler
 GCC_ROOT ?= /usr/local/bin
 CC := $(GCC_ROOT)/m6809-unknown-none-gcc-$(GCC_VERSION)
+CXX := $(GCC_ROOT)/m6809-unknown-none-g++-$(GCC_VERSION)
 AS := $(CC) -xassembler-with-cpp
 LD := $(GCC_ROOT)/m6809-unknown-none-ld
 REQUIRED += $(CC) $(LD)

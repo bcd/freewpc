@@ -249,7 +249,8 @@ EXTRA_ASFLAGS += -I$(BLDDIR) -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
 CFLAGS += -DGCC_VERSION=$(GCC_VERSION)
 
 # Please, turn on all warnings!
-CFLAGS += -Wall -Wstrict-prototypes
+CFLAGS += -Wall
+CONLY_FLAGS += -Wstrict-prototypes
 
 #
 # Define lots of other things based on make parameters
@@ -459,13 +460,17 @@ ifneq ($(C_OBJS_SUFFIXES), .o)
 $(error $(filter-out %.o,$(C_OBJS)) : non-.o files listed as objects)
 endif
 
+CXX_OBJS := $(MACHINE_OBJS) $(MACHINE2_OBJS) $(MACHINE3_OBJS)
+
+CXX_OBJS := $(CP_KERNEL_OBJS)
+
 ifeq ($(PLATFORM),wpc)
-OBJS = $(C_OBJS) $(AS_OBJS) $(FON_OBJS)
+OBJS = $(C_OBJS) $(CXX_OBJS) $(AS_OBJS) $(FON_OBJS)
 else
 ifeq ($(PLATFORM),whitestar)
-OBJS = $(C_OBJS) $(AS_OBJS)
+OBJS = $(C_OBJS) $(CXX_OBJS) $(AS_OBJS)
 else
-OBJS = $(C_OBJS) $(FON_OBJS)
+OBJS = $(C_OBJS) $(CXX_OBJS) $(FON_OBJS)
 endif
 endif
 
@@ -694,14 +699,14 @@ $(LINKCMD) : $(MAKE_DEPS) $(PMAKEFILE)
 # as a front end to the actual assembler, so the preprocessor is
 # available.
 #
-$(AS_OBJS) : %.o : %.s $(CC) $(MAKE_DEPS)
+$(AS_OBJS) : %.o : %.s $(GCCEXE) $(MAKE_DEPS)
 	$(Q)echo Assembling $< ... && $(AS) $(EXTRA_ASFLAGS) -o $@ -c $< >> $(ERR) 2>&1
 
 #
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
 #
-$(PAGE_HEADER_OBJS) : $(BLDDIR)/page%.o : $(BLDDIR)/page%.s $(CC)
+$(PAGE_HEADER_OBJS) : $(BLDDIR)/page%.o : $(BLDDIR)/page%.s $(GCCEXE)
 	$(Q)echo Assembling page header $< ... && $(AS) -o $@ -c $< >> $(ERR) 2>&1
 
 #
@@ -734,13 +739,15 @@ $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
 $(BASIC_OBJS) $(KERNEL_SW_OBJS) $(COMMON_OBJS) $(COMMON2_OBJS) $(INIT_OBJS) $(TEST2_OBJS) $(TRANS_OBJS): SOFTREG_CFLAGS=$(SOFTREG_OPTIONS)
 endif
 
-$(NATIVE_OBJS) $(C_OBJS) : %.o : %.c
+$(NATIVE_OBJS) $(C_OBJS) $(CXX_OBJS): %.o : %.c
+
+$(CXX_OBJS) : %.o : %.cpp
 
 $(FON_OBJS) : %.o : %.fon
 
-$(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
+$(filter-out $(BASIC_OBJS),$(C_OBJS)) $(CXX_OBJS) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
 
-$(C_OBJS) $(FON_OBJS) : $(IMAGE_HEADER)
+$(C_OBJS) $(CXX_OBJS) $(FON_OBJS) : $(IMAGE_HEADER)
 
 $(NATIVE_OBJS) : $(GENDEFINES) $(REQUIRED)
 
@@ -751,13 +758,24 @@ $(COMMON_OBJS) $(COMMON2_OBJS) : common/Makefile
 
 $(filter-out $(HOST_OBJS),$(NATIVE_OBJS)) $(C_OBJS) $(FON_OBJS):
 ifeq ($(CPU),m6809)
-	$(Q)echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
+	$(Q)echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) $(CONLY_FLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
 else
 	$(Q)echo "Compiling $< ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) $< >> $(ERR) 2>&1
-endif
 ifeq ($(CONFIG_PROFILING),y)
 	$(Q)mkdir -p gprof.data
 	$(shell mv gmon.out gprof.data/gmon.$$RANDOM.out)
+endif
+endif
+
+$(CXX_OBJS):
+ifeq ($(CPU),m6809)
+	$(Q)echo "Compiling C++ $< (in page $(PAGE)) ..." && $(CXX) -x c++ -o $@ $(CFLAGS) $(CXXONLY_FLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
+else
+	$(Q)echo "Compiling C++ $< ..." && $(HOSTCC) -x c++ -o $@ $(CFLAGS) -c $(PAGEFLAGS) $< >> $(ERR) 2>&1
+ifeq ($(CONFIG_PROFILING),y)
+	$(Q)mkdir -p gprof.data
+	$(shell mv gmon.out gprof.data/gmon.$$RANDOM.out)
+endif
 endif
 
 #######################################################################
@@ -974,9 +992,11 @@ info:
 	$(Q)echo "NATIVE_PROG = $(NATIVE_PROG)"
 	$(Q)echo "NATIVE_OBJS = $(NATIVE_OBJS)"
 	$(Q)echo "C_OBJS = $(C_OBJS)"
+	$(Q)echo "CXX_OBJS = $(C_OBJS)"
 	$(Q)echo "SYSTEM_PAGE = $(CONFIG_SYSTEM_CODE_PAGE)"
 	$(Q)echo "BOTTOM_BANK = $(BOTTOM_BANK)"
 	$(Q)echo "TOP_BANK = $(TOP_BANK)"
+	$(Q)echo "CXX_OBJS = $(CXX_OBJS)"
 
 .PHONY : areainfo
 areainfo:
@@ -986,6 +1006,10 @@ areainfo:
 .PHONY : have
 have:
 	@true $(foreach item,$(HAVE_LIST),&& echo "$(item)")
+
+callset.in :
+	cat $(C_OBJS:.o=.c) $(CXX_OBJS:.o=.c) | $(CC) -E $(CFLAGS) -DGENCALLSET - > callset.in
+
 
 #
 # 'make clean' does what you think.
