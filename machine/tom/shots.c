@@ -258,7 +258,9 @@ CALLSET_ENTRY (shot, dev_popper_kick_success, dev_popper_kick_failure)
 CALLSET_ENTRY (shot, sw_top_jet, sw_bottom_jet, sw_middle_jet)
 {
 	score (SC_170);
+#ifdef TIM_PAUSE_TIMERS
 	free_timer_restart (TIM_PAUSE_TIMERS, TIME_250MS);
+#endif
 }
 
 CALLSET_ENTRY (shot, sw_left_sling, sw_right_sling)

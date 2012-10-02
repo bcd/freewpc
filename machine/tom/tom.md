@@ -91,7 +91,7 @@ define MACHINE_LACKS_PROTOS_H
 11: Unused
 12: Magnet Button, button, noscore, cabinet
 13: Start Button, start-button, cabinet, intest
-14: Tilt, cabinet, tilt, ingame, noplay
+14: Tilt, cabinet, tilt, ingame, novalid
 15: Shooter, edge, shooter, noscore, debounce(TIME_200MS)
 21: Slam Tilt, slam-tilt, ingame, cabinet
 25: Left Outlane, ingame
@@ -121,11 +121,11 @@ define MACHINE_LACKS_PROTOS_H
 56: Cube Pos. 1, opto, intest
 57: Cube Pos. 2, opto, intest
 58: Cube Pos. 3, opto, intest
-61: Left Sling, ingame, noplay
-62: Right Sling, ingame, noplay
-63: Bottom Jet, ingame, noplay
-64: Middle Jet, ingame, noplay
-65: Top Jet, ingame, noplay
+61: Left Sling, ingame, novalid
+62: Right Sling, ingame, novalid
+63: Bottom Jet, ingame, novalid
+64: Middle Jet, ingame, novalid
+65: Top Jet, ingame, novalid
 66: Top Lane 1, ingame
 67: Top Lane 2, ingame
 71: Center Ramp Exit, ingame
