@@ -33,7 +33,11 @@ extern __attribute__((noreturn)) void start (void);
 extern void do_swi3 (void);
 extern void do_swi2 (void);
 extern void do_firq (void);
+#ifdef CONFIG_GEN_RTT
+extern void exec_rtt (void);
+#else
 extern void tick_driver (void);
+#endif
 extern void do_swi (void);
 extern void do_nmi (void);
 #endif
@@ -75,7 +79,11 @@ __attribute__((section("vector"))) m6809_vector_table_t vectors = {
 	 * The function 'tick_driver' is automatically generated from a schedule
 	 * of functions to call.  See build/sched-irq.c for the results and
 	 * kernel/system.sched for the tasks common to all machines. */
+#ifdef CONFIG_GEN_RTT
+	.irq = exec_rtt,
+#else
 	.irq = tick_driver,
+#endif
 	.swi = do_swi,
 
 	/* NMI also shouldn't happen, but log it if it does. */
