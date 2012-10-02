@@ -95,14 +95,22 @@ static void timed_mode_monitor (void)
 }
 
 
+static void timed_mode_start_task (struct timed_mode_ops *ops)
+{
+	task_pid_t tp;
+	struct timed_mode_task_config *cfg;
+
+	tp = task_recreate_gid (ops->gid, timed_mode_monitor);
+	cfg = task_init_class_data (tp, struct timed_mode_task_config);
+	cfg->ops = ops;
+}
+
+
 /**
  * Start a mode.
  */
 void timed_mode_begin (struct timed_mode_ops *ops)
 {
-	task_pid_t tp;
-	struct timed_mode_task_config *cfg;
-
 #ifdef PARANOID
 	/* Verify that init_timer, timer, prio are defined; there are
 	no defaults for these */
@@ -111,9 +119,7 @@ void timed_mode_begin (struct timed_mode_ops *ops)
 	*ops->timer = ops->init_timer;
 	if (ops->deff_starting)
 		deff_start (ops->deff_starting);
-	tp = task_create_gid1 (ops->gid, timed_mode_monitor);
-	cfg = task_init_class_data (tp, struct timed_mode_task_config);
-	cfg->ops = ops;
+	timed_mode_start_task (ops);
 	ops->init ();
 }
 
@@ -172,16 +178,7 @@ void timed_mode_reset (struct timed_mode_ops *ops, U8 time)
 	in its main loop anymore (it is at timeout() or later).  We need to
 	restart the mode task from the beginning. */
 	if (*ops->timer == 0)
-	{
-		/* Note: much of this is copied directly from timed_mode_begin() */
-		task_pid_t tp;
-		struct timed_mode_task_config *cfg;
-
-		tp = task_recreate_gid (ops->gid, timed_mode_monitor);
-		cfg = task_init_class_data (tp, struct timed_mode_task_config);
-		cfg->ops = ops;
-	}
-
+		timed_mode_start_task (ops);
 	*ops->timer = time;
 }
 

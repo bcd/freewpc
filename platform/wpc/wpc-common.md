@@ -65,11 +65,11 @@ A3: General Sol. 3, notinstalled
 A4: General Sol. 4, notinstalled
 
 [gi]
-0: G.I. String 1
-1: G.I. String 2
-2: G.I. String 3
-3: G.I. String 4
-4: G.I. String 5
+0: String 1
+1: String 2
+2: String 3
+3: String 4
+4: String 5
 
 
 [lamplists]
@@ -87,8 +87,6 @@ fixed6:
 cu17:
 fixed10:
 term6:
-times8:
 bitmap8:
 symbol:
-
 

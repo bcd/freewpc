@@ -1,0 +1,359 @@
+
+Preliminary Rules to NEW THEATRE OF MAGIC
+Author: Brian Dominy <brian@oddchange.com>
+Last Revised: April 21, 2011
+
+This is a work in progress.  All rules are subject to change; in fact,
+I hope they do!  If you are reading this, you are welcome to comment on
+the direction that this game is taking.  However, please consider the
+following basic guidelines:
+
+* The goal is not to add every little idea that you can think of.
+* Features need to be understandable, and mostly, fun.
+* Where possible, I'd like for the game to allow more concurrent modes
+  than the original game did, to allow for more possible ways of
+  interaction.
+* Don't just "fix up" things you don't like about the original.  For
+  all the effort to design a new set of rules, make it something unique
+  and worth playing.
+* That said, don't make the same mistakes as before.  Know what the
+  flaws in the original rules were, and avoid them again.
+
+
+Some other thoughts about the development of a new ruleset on an old game:
+
+* We all know how the playfield works by now.  During the design of a
+  brand new machine, the designers need to figure out the flow and the
+  difficult of the shots.  Use that knowledge wisely; it makes things
+  easier!
+
+* Use the playfield lamps intuitively.  The design of where to put lamps
+  and how to label cannot be changed.  But the lamps are a key visual aid
+  on how to play the game, so we have to live with what we have.  This
+  often means that the rules cannot stray too far from the original.
+
+* Theatre is a manual plunger game, whereas all modern games have
+  autoplungers, which aids in the ability to offer nonstop multiball
+  action.  We don't have that luxury.  However, you can design fun rules
+  that don't involve multiball all the time.  When you do want to use
+  a multiball, it needs to be written so that all of the extra balls
+  are already on the playfield; you should never have to plunge more
+  than 1 more ball.
+
+
+Introduction
+============
+
+The main goal of NTOM (New Theatre of Magic) is to reach Grand Finale,
+by completing 4 different tasks: Theatre, Illusions, Multiball, and Midnight.
+Once all four are achieved, Grand Finale will be lit at the left loop.
+
+To summarize the 4 tasks:
+
+Theatre - Collect a Theatre Hurryup
+Illusions - Start Illusion Multiball, which is lit by making all major
+  playfield shots 3 times.
+Multiball - Start Magic Multiball, which is lit by spelling MAGIC on the
+  ramps.
+Midnight - Advance the clock to midnight, by shooting the right orbit and/or
+  the jet bumpers.
+
+[The major change from the actual game is the way that Illusions are
+collected.  The 3 other tasks are similar, but slightly more difficult
+and more interesting IMO when they are collected.]
+
+
+TBD
+===
+- Need a rule for the Basement
+- Need a rule for the Tiger Saw Lock (2-ball multiball)
+- Need a rule for Hocus Pocus
+- Bonus rule should not be as large.  Bonus X is single increase.
+	- 100K minimum.
+	- +10K per shot.
+	- +50K per shot completed.
+	- All times bonus X (up to max 10X).
+- Elaborate on conflict rules for Theatre Hurry-Up and Quick Multiball.
+
+
+Trunk position driver:
+======================
+- If Final Battle running:
+	(special rules apply)
+- If Main Multiball running:
+	If Trunk Super Jackpot lit, then WIGGLE.
+	Else WALL.
+- If Midnight Multiball running, then WALL.
+- If Trick Multiball running, then:	
+	- If Trunk Escape not completed, then WALL.
+	- Else HOLE.
+
+- If Main Multiball lit, then MAGNET.
+- If Midnight Multiball lit, then MAGNET.
+- If Trick Multiball lit, then HOLE.
+
+- If Theatre Hurry-Up running, then HOLE.
+
+- Default state for completion illusions:
+	- If Trunk Escape not completed, then WALL.
+	- If Trunk Hole not completed, then HOLE.
+
+
+Basement Popup driver rules (TBD):
+===========================
+
+Right Ramp divertor rule:
+- On left inlane, Spirit Ring lamp becomes timed lit.  Making Ramp
+	shot in time will divert the ball.
+
+
+Left Orbit divertor rule:
+- Generally, it should not divert.  Use Right Orbit to get to jets.
+
+
+Trunk pin divertor rule:
+- Only when locking a ball?
+
+
+
+Skill Shot
+==========
+
+At the beginning of each ball (not counting after balls are locked
+or ball saves), the major playfield shots are all lit for a Skill Shot.
+Hit any shot right away (without bricking; it will timeout quickly)
+to score *two shots* instead of one, as far as "Illusions" scoring
+is concerned (see below).
+
+The shots are: Captive Ball, Left Center Loop, Trunk Hole/Wall,
+Center Ramp, Right Center Loop (Spinner), Right Ramp, Jet Bumpers.
+There are 2 Trunk modes, only one of which is active at a time
+depending on which Trunk face is showing.
+
+In addition, if that particular shot has not been hit previously
+for a skill shot, bonus points are also awarded: 200K, 400K, etc.
+up to a maximum 1M.
+
+The "Spirit Cards" award, which is collected on the spinner, will
+award 2X spins for a maximum of 10 spins before it reverts to single
+scoring.  The same applies to the jet bumpers for "Strait Jacket".
+
+The Award lamps on each shot will flash if a Skill Shot is available
+there, or be steady if already collected.
+
+
+Illusions
+=========
+
+Tiger Saw = Captive Ball (3)
+Levitating Woman = Center Ramp (3)
+Trunk Escape = Trunk Box (3)
+Spirit Cards = Spinners (30)
+Safe Escape = Center Loops (3)
+Metamorphoses = Right Ramp (3)
+Strait Jacket = Jet Bumpers (30)
+Hat Magic = Trunk Hole (3)
+
+There are two basic objectives:
+1. Complete each shot a certain number of times.  For most shots, it
+takes 3 hits to "complete it".  For spinners and bumpers, it takes 10x,
+or 30.  Progress here carries over from ball to ball.  The goal
+increases on every run through all the modes.
+
+2. Complete all of the shots at least once on the same ball.  This
+boosts the value of jackpot during Trick MB.
+
+The grid of Mode lamps (4x2) on the lower playfield tracks your progress
+towards objective #1:
+	OFF = goal has not been reached
+	FLASHING = goal reached on this ball
+	ON = goal reached on previous ball
+
+The lamps on each shot track progress towards objective #2.  Lamps
+are OFF until they are collected, then they become ON.  They FLASH
+if enabled for skill shot.
+
+The value of a shot is based on the number of times it has been hit
+on that ball.  Initial value is 100K, then 120K, up to 20K each time to
+a maximum 300K.  For spinners/bumpers, divide by 10. (10K+2K to 30K;
+the value increases when on the next entry to the shot).
+This value resets every ball start.
+
+Reaching the goal on any shot scores 500K, 600K, etc. with no limit.
+This bonus resets at the start of each ball.  It also starts Double Scoring;
+see below.
+
+Making any 3 different shots in a row (they can be lit/unlit, it doesn't matter)
+will award a Combo for the final shot; see Combos below.
+
+When all 8 shots have been completed the required number of times, Trick Multiball becomes lit at the
+Trunk hole.  If all are flashing, because you finished all on the same ball,
+you'll get Super Trick Multiball instead.  See below.
+
+When all lamps become solid/flashing, Trunk hole lights for Trick Multiball.
+At the completion of Trick MB, all lamps are turned off. (? or maybe # of
+flashing lamps determines mode scoring, so it varies from 1-8, kinda like
+Multiball Madness.)
+
+At ball start, any flashing lamps (shots completed previous ball) become solid.
+Their counts are also reset, so that you can try to make it flashing again,
+but you don't have to, to qualify Trick MB.
+
+Getting N shots flashing lights Extra Ball #1 (default N=4).  Once per
+run, reenabled after Trick MB but N++.
+
+
+Trick Multiball
+===============
+
+- Shoot trunk hole to start when enabled.
+- Starting this awards the Illusions badge.
+- This is initially a 2-ball multiball.  Second ball sent to manual
+	plunger before first one is released.
+- All shots score at least their maximum value during regular play.
+	Small increase for every FLASHING shot.
+- Illusion lamps track which shots have been made at least once.
+- Complete all 8 shots to light the Spinner for Super Jackpot:
+	worth 250K per spin the first time, then 500K, then 750K maximum.
+- Super Jackpot unlights after 5 spins have been collected, but current
+	shot continues to award.
+- 30 second ballsaver/restart feature in effect: with one ball in play,
+	timer begins to count down and you must relock the ball in either
+	center loop to return another ball to the plunger.  You can play
+	multiball restarts until the timer expires (minimum 5 sec. required).
+	During restart, jackpots/Super Jackpot cannot be scored.
+- At completion of Trick Multiball, all lamps go OFF and everything is reset.
+	Goal values are increased (4 per shot, 20 bumpers)
+
+
+Double Scoring
+==============
+
+Reaching a shot goal starts a 15 second Double Scoring timer.
+This applies to EVERYTHING.
+
+If Double Scoring is already running, and you complete another shot goal,
+an additional 15 seconds is awarded.  You can theoretically earn up to
+2 min of double scoring time this way.
+
+This timer does not stop for anything like jets, etc.
+
+
+
+Combos
+======
+- Combos earned when 3 or more shots made sequentially.
+	- Must be three different shots in a row.
+	- Combo Bonus starts at 250K, up 25K each time to max of 500K.
+	- Slingshots/jets cancel the combo timer.
+	- 4-way combo scores 2X Combo Bonus for the fourth shot.
+	- 5-way or combo scores 3X.
+- Number of combos made is counted across game:
+	- Hold Bonus X at 3
+	- Light Extra Ball at 6
+	- Spot Illusion at 9
+	- Light Lock at 12
+	- Repeat after these 4, with Light EB replaced by points.
+
+
+Theatre:
+========
+- Shoot Left Loop to add Theatre letters as usual.  Not during any multiball?
+- When spelled, ball is diverted to the saucer lock, and then ejected back the
+	left loop.  Letters are cleared.
+- Trunk Hole is then lit for Theatre Hurry-Up.  Value counts down rapidly from
+	1M to 200K in 15 seconds.  Collect 3 times to earn the Theatre badge.  Does
+	not have to be on the same ball.
+- Hurry-Up can be collected more than once during the 15 seconds.  Timer is
+	paused briefly during effect and kickout.  Subsequent values are higher:
+		1.5X, 2X, 2.5X, 3X at max.  This multiplier resets on each THEATRE spell.
+- Difficulty of spelling Theatre increases for subsequent attempts:
+	- Letters no longer carry over from ball to ball.  (Consider a HOLD THEATRE
+	award elsewhere?)
+- Once Final Battle played, it takes 1 more Hurry Up collection to award the
+  badge (4, then 5, etc.)
+- Hurryup can run during MB, if it is started before the MB.  But not the
+	other way around.
+
+
+Main Multiball:
+===============
+- Spell MAGIC to light Center Locks.  Shoot Lit Ramps to add letters.
+- Shoot either Ramp Standup to relight an unlit ramp.
+- At ball start, both Ramps are lit.  Ramp goes unlit once letter added for
+	the 2nd multiball (but other ramp remains lit).  For 3rd MB, both ramps
+	become unlit on any shot; targets relight right, then left.
+- Lock 2 balls to qualify Multiball at the magnet, shoot magnet to start.
+- During multiball, bang away on the trunk to light Jackpot, then shoot
+	another shot to collect it:
+	- 3 hits (200K) to light Left Ramp for 2M.
+	- 4 hits (300K) to light Left Orbit for 4M.
+	- 5 hits (400K) to light Right Ramp for 6M.
+	- 6 hits (500K) to light Right Orbit for 8M.
+	- 7 hits (600K) to light Trunk Hole (wiggling) for 10M.
+	- then return to step 1 -- values reset as well.
+- Next jackpot level is retained across Multiballs, but progress on level is reset.
+
+
+Midnight:
+=========
+- Base time is 12PM.
+- Each bumper/right orbit adds time
+	- Bumpers add 5min initially, add 5min per hit each time Captive Ball Top hit
+	on same ball, up to 15 min. per hit.
+	- Right orbit advances progressively more each ball: 30min, 35min, 40min,
+	etc. up to 60min per shot.
+- Right orbit behavior gets progressively harder each time through:
+	- For first run, starts at 30min
+	- For second run, starts at 20min
+	- For third+ runs, starts at 10min
+- At Midnight, badge is collected and Multiball is lit at the magnet:
+	- Immediate score 2M.
+	- Frenzy mode starts: All switches score 50K
+	- Save Timer = 30 seconds (minimum time played)
+	- Right orbit collects Midnight Jackpot = 500K+10K per switch so far.
+		Each jackpot also boosts the base value by 250K.  Maximum base is 1.5M.
+		Switch addition resets after each collection.
+	- Trunk wall increases switch value by 10K up to 100K each.
+- Bumpers becomes unlit at ball start and at the end of Midnight Multiball.
+
+
+Final Battle:
+=============
+- Once all 4 badges are earned, shoot center loop to begin (lock ball).
+- Single ball mode, with 2-ball multiball at the beginning of various stages,
+	similar to Cirqus Voltaire.
+- Global 2X scoring in effect when 2-balls are in play, but draining 1 ball
+	does not end the mode.  Also mode continues across balls.
+- Stage 1: Trunk Battle - shoot Trunk wall 30 times.  Each shot is worth 500K.
+	After last shot, hole will open to lock ball for effect and completion
+	bonus of 2M (total 17M)
+- Stage 2: Shoot each Illusion again in order.  Each shot is worth 3M.
+	Final shot is Hat Magic to lock ball for effect.  Total 24M.
+- Stage 3: Super Spinner - 100 spins needed to win.  But the count will go
+	up slowly if you don't make the shot quickly enough.  25K per spin.
+	25M total.  Points cannot be rescored.
+- Stage 4: Big Multiball!!!
+	- Unlimited Balls served for 45 seconds, like World Cup Soccer.
+	- All shots score Jackpot Value that increases as each shot is made.
+		1M, 1.1M, 1.2M, etc. up to 2.5M per shot.
+	- Trunk remains at WALL.
+	- Play continues after 45 seconds expires, until down to 1 ball again.
+	- One illusion at a time is lit for Super Jackpot (it does not roam until you
+	collect it), worth 2X the regular jackpot.  Collecting all 8 Supers reset
+	again and the multiplier increases to 3X (max) and restores 1 ball to play.
+- At completion of Big Multiball, badges are reset and progress can continue
+	on other things.
+
+
+
+Quick Multiball:
+================
+
+- Total hits on captive ball are counted and awards at various levels:
+	- Quick Multiball Lit at 10, then 30, 50, etc.
+	- Mystery Lit at 5, 15, 25, 35, etc.
+	- ??? lit at 20, 40, 60, ...
+
+
+

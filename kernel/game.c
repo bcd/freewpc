@@ -102,7 +102,7 @@ void start_ball (void);
 void amode_start (void)
 {
 	deff_start (DEFF_AMODE);
-#ifdef MACHINE_CUSTOM_AMODE
+#ifdef LEFF_AMODE
 	leff_start (LEFF_AMODE);
 #endif
 #ifdef CONFIG_GI

@@ -393,7 +393,7 @@ void io_wpc_init (void)
 	io_add_wo (WPC_LEDS, wpc_write_led, NULL);
 
 	/* Install jumper/DIP switch handler */
-	sim_jumpers = LC_USA_CANADA << 2;
+	sim_jumpers = LC_USA_CANADA << 4;
 	conf_add ("jumpers", &sim_jumpers);
 	io_add_ro (WPC_SW_JUMPER_INPUT, io_conf_reader, &sim_jumpers);
 

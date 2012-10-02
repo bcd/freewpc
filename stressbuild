@@ -6,7 +6,7 @@
 typeset -i count
 typeset -i mincount
 
-machines="tz corvette wcs funhouse t2 afm bop tester min p2ktest tspp"
+machines="tz corvette wcs tom funhouse t2 afm bop tester min p2ktest tspp"
 sim_options="n y"
 gcc_options="4.3.4"
 debugger_options="y n"
