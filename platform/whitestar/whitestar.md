@@ -8,7 +8,7 @@
 include platform/generic.md
 
 [lamps]
-11: First Lamp
+11: First Lamp, ball-save
 88: Last Lamp
 
 [switches]
@@ -69,7 +69,7 @@ A8: Aux. Sol. 8
 
 [lamplists]
 ALL: 11..88
-Ball Save: MACHINE_BALL_SAVE_LAMP
+Ball Save: %ball-save
 
 [fonts]
 mono5:
