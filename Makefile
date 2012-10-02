@@ -63,9 +63,9 @@ $(eval $(call require,MACHINE))
 
 M := machine/$(MACHINE)
 MMAKEFILE := $(M)/Makefile
-MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
-MACHINE_DIR = machine/$(MACHINE)
-PLATFORM_DESC = $(shell grep include $(MACH_DESC) | head -n 1)
+MACH_DESC := $(M)/$(MACHINE).md
+MACHINE_DIR := machine/$(MACHINE)
+PLATFORM_DESC := $(shell grep 'include' $(MACH_DESC) | awk '{print $$2; exit;}')
 
 top_target : default_target
 
