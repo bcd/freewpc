@@ -52,11 +52,27 @@ typedef unsigned int task_ticks_t;
 typedef void (*task_function_t) (void);
 #define task_set_rom_page(pid, page)
 
+typedef struct
+{
+	pthread_t pid;
+	task_gid_t gid;
+	PTR_OR_U16 arg;
+	U8 duration;
+	unsigned char class_data[32];
+} aux_task_data_t;
+
+
+
 
 /********************************/
 /*     Function Prototypes      */
 /********************************/
 
+#ifdef CONFIG_SIM
+void ui_write_task (int, task_gid_t);
+#else
+extern inline void ui_write_task (int t, task_gid_t g) {}
+#endif /* CONFIG_SIM */
 void task_dump (void);
 void task_init (void);
 void task_create (void);

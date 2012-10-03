@@ -57,21 +57,8 @@ extern int linux_irq_multiplier;
 #define linux_irq_multiplier 1
 #endif
 
-#ifdef CONFIG_SIM
-extern void ui_write_task (int, task_gid_t);
-#endif
-
 /* Some WPC per-task data must be stored separately, outside of the pth
  * context.  The aux_task_data_t structure holds this. */
-typedef struct
-{
-	pthread_t pid;
-	task_gid_t gid;
-	PTR_OR_U16 arg;
-	U8 duration;
-	unsigned char class_data[32];
-} aux_task_data_t;
-
 aux_task_data_t task_data_table[NUM_TASKS];
 
 pthread_attr_t attr_default;
@@ -128,9 +115,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 			task_data_table[i].duration = TASK_DURATION_INF;
 			task_data_table[i].arg.u16 = 0;
 			task_data_table[i].duration = TASK_DURATION_BALL;
-#ifdef CONFIG_SIM
 			ui_write_task (i, gid);
-#endif
 			pthread_debug ("pthread_create: index=%d, pid=%u\n", i, (unsigned)pid);
 			return (pid);
 		}
@@ -171,9 +156,7 @@ void task_exit (void)
 		if (task_data_table[i].pid == task_getpid ())
 		{
 			task_data_table[i].pid = 0;
-#ifdef CONFIG_SIM
 			ui_write_task (i, 0);
-#endif
 			pthread_debug ("pthread_exit: index=%d\n", i);
 			for (;;)
 				pthread_exit (0);
@@ -224,9 +207,7 @@ void task_kill_pid (task_pid_t tp)
 			if (tp != 0)
 				pthread_cancel (tp);
 			task_data_table[i].pid = 0;
-#ifdef CONFIG_SIM
 			ui_write_task (i, 0);
-#endif
 			return;
 		}
 }

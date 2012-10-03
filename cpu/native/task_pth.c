@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -44,19 +44,8 @@ extern int linux_irq_multiplier;
 
 #define PTH_USECS_PER_TICK (16000 / linux_irq_multiplier)
 
-extern void ui_write_task (int, task_gid_t);
-
 /* Some WPC per-task data must be stored separately, outside of the pth
  * context.  The aux_task_data_t structure holds this. */
-typedef struct
-{
-	pth_t pid;
-	task_gid_t gid;
-	PTR_OR_U16 arg;
-	U8 duration;
-	unsigned char class_data[32];
-} aux_task_data_t;
-
 aux_task_data_t task_data_table[NUM_TASKS];
 
 
