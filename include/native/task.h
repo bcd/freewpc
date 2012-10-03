@@ -61,6 +61,7 @@ typedef struct
 	unsigned char class_data[32];
 } aux_task_data_t;
 
+extern aux_task_data_t task_data_table[NUM_TASKS];
 
 
 

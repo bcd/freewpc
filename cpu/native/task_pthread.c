@@ -57,10 +57,6 @@ extern int linux_irq_multiplier;
 #define linux_irq_multiplier 1
 #endif
 
-/* Some WPC per-task data must be stored separately, outside of the pth
- * context.  The aux_task_data_t structure holds this. */
-aux_task_data_t task_data_table[NUM_TASKS];
-
 pthread_attr_t attr_default;
 pthread_attr_t attr_task;
 pthread_attr_t attr_input;
@@ -71,10 +67,6 @@ void task_dump (void)
 {
 }
 
-
-void idle_profile_rtt (void)
-{
-}
 
 
 /**
@@ -122,7 +114,6 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 
 	fatal (ERR_NO_FREE_TASKS);
 }
-
 
 void task_setgid (task_gid_t gid)
 {
@@ -212,160 +203,9 @@ void task_kill_pid (task_pid_t tp)
 		}
 }
 
-bool task_kill_gid (task_gid_t gid)
-{
-	int i;
-	bool rc = FALSE;
-
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if ((task_data_table[i].gid == gid) &&
-			 (task_data_table[i].pid != 0) &&
-			 (task_data_table[i].pid != task_getpid ()))
-		{
-			task_kill_pid (task_data_table[i].pid);
-			rc = TRUE;
-		}
-	}
-	return (rc);
-}
-
-
-void task_duration_expire (U8 cond)
-{
-	int i;
-
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if ((task_data_table[i].pid != 0) &&
-			 (task_data_table[i].duration & cond))
-			task_kill_pid (task_data_table[i].pid);
-	}
-}
-
-void task_set_duration (task_pid_t tp, U8 cond)
-{
-	int i;
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if (task_data_table[i].pid == tp)
-		{
-			task_data_table[i].duration = cond;
-			break;
-		}
-	}
-}
-
-
-void task_add_duration (U8 flags)
-{
-	int i;
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if (task_data_table[i].pid == task_getpid ())
-		{
-			task_data_table[i].duration |= flags;
-			break;
-		}
-	}
-}
-
-
-void task_remove_duration (U8 flags)
-{
-	int i;
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if (task_data_table[i].pid == task_getpid ())
-		{
-			task_data_table[i].duration &= ~flags;
-			break;
-		}
-	}
-}
-
-
-U16 task_get_arg (void)
-{
-	int i;
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if (task_data_table[i].pid == task_getpid ())
-			return task_data_table[i].arg.u16;
-	}
-	fatal (ERR_CANT_GET_HERE);
-}
-
-
-void *task_get_pointer_arg (void)
-{
-	int i;
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if (task_data_table[i].pid == task_getpid ())
-			return task_data_table[i].arg.ptr;
-	}
-	fatal (ERR_CANT_GET_HERE);
-}
-
-
-void task_set_arg (task_pid_t tp, U16 arg)
-{
-	int i;
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if (task_data_table[i].pid == tp)
-		{
-			task_data_table[i].arg.u16 = arg;
-		}
-	}
-}
-
-
-void task_set_pointer_arg (task_pid_t tp, void *arg)
-{
-	int i;
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if (task_data_table[i].pid == tp)
-		{
-			task_data_table[i].arg.ptr = arg;
-		}
-	}
-}
-
-
 task_pid_t task_getpid (void)
 {
 	return pthread_self ();
-}
-
-
-task_gid_t task_getgid (void)
-{
-	int i;
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if (task_data_table[i].pid == task_getpid ())
-			return task_data_table[i].gid;
-	}
-	return 255;
-}
-
-
-void *task_get_class_data (task_pid_t pid)
-{
-	int i;
-
-	for (i=0; i < NUM_TASKS; i++)
-		if (task_data_table[i].pid == pid)
-			return task_data_table[i].class_data;
-	printf ("task_get_class_data for pid %u failed\n", (unsigned)pid);
-	fatal (0xFD);
-}
-
-void task_set_class_data (task_pid_t pid, size_t size)
-{
 }
 
 
