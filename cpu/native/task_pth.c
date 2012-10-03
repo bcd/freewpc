@@ -174,12 +174,7 @@ task_pid_t task_getpid (void)
 
 void task_init (void)
 {
-	memset (task_data_table, 0, sizeof (task_data_table));
-	
+	ntask_init ();
 	pth_init ();
-
-	task_data_table[0].pid = task_getpid ();
-	task_data_table[0].gid = GID_FIRST_TASK;
-	task_data_table[0].duration = TASK_DURATION_INF;
 }
 

@@ -227,3 +227,13 @@ void task_set_class_data (task_pid_t pid, size_t size)
 {
 }
 
+
+void ntask_init (void)
+{
+	memset (task_data_table, 0, sizeof (task_data_table));
+	task_data_table[0].pid = task_getpid ();
+	task_data_table[0].gid = GID_FIRST_TASK;
+	task_data_table[0].duration = TASK_DURATION_INF;
+}
+
+
