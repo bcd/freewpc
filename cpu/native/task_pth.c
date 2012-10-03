@@ -30,7 +30,7 @@
 
 
 /** Enable this to turn on verbose debugging of the task subsystem. */
-//#define PTHDEBUG
+//#define CONFIG_DEBUG_TASK
 
 bool task_dispatching_ok = TRUE;
 
@@ -95,7 +95,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	pth_attr_t attr;
 	int i;
 
-#ifdef PTHDEBUG
+#ifdef CONFIG_DEBUG_TASK
 	printf ("task_create_gid: gid=%d, fn=%p\n", gid, fn);
 #endif
 
@@ -146,9 +146,6 @@ void task_setgid (task_gid_t gid)
 
 void task_sleep (task_ticks_t ticks)
 {
-#ifdef PTHDEBUG2
-	printf ("task_sleep(%d)\n", ticks);
-#endif
 	pth_nap (pth_time (0, ticks * PTH_USECS_PER_TICK));
 }
 
@@ -163,7 +160,7 @@ __noreturn__
 void task_exit (void)
 {
 	int i;
-#ifdef PTHDEBUG
+#ifdef CONFIG_DEBUG_TASK
 	printf ("task_exit: pid=%p\n", task_getpid ());
 #endif
 	for (i=0; i < NUM_TASKS; i++)
@@ -212,7 +209,7 @@ void task_kill_pid (task_pid_t tp)
 {
 	int i;
 
-#ifdef PTHDEBUG
+#ifdef CONFIG_DEBUG_TASK
 	printf ("task_kill_pid: pid=%p\n", tp);
 #endif
 
