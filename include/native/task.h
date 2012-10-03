@@ -108,6 +108,7 @@ task_pid_t task_getpid (void);
 task_gid_t task_getgid (void);
 void do_periodic (void);
 void ntask_init (void);
+aux_task_data_t *aux_task_find_pid (task_pid_t pid);
 
 /** Create a new task that has the same group ID as the current one. */
 #define task_create_peer(fn)		task_create_gid (task_getgid (), fn)

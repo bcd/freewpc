@@ -41,6 +41,30 @@ void idle_profile_rtt (void)
 }
 
 
+/* Lookup the aux structure for a given PID */
+aux_task_data_t *aux_task_find_pid (task_pid_t pid)
+{
+	aux_task_data_t *auxp = task_data_table;
+	while (auxp < &task_data_table[NUM_TASKS])
+	{
+		if (auxp->pid == pid)
+			return auxp;
+		auxp++;
+	}
+	return NULL;
+}
+
+
+void task_setgid (task_gid_t gid)
+{
+	aux_task_data_t *auxp = aux_task_find_pid (task_getpid ());
+	if (auxp)
+	{
+		auxp->gid = gid;
+	}
+}
+
+
 task_pid_t task_find_gid (task_gid_t gid)
 {
 	int i;

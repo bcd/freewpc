@@ -90,31 +90,20 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	 * function and pass it a pointer to the task_data_table entry
 	 * as an argument. */
 	pid = pth_spawn (attr, fn, 0);
-
-	for (i=0; i < NUM_TASKS; i++)
-		if (task_data_table[i].pid == 0)
-		{
-			task_data_table[i].pid = pid;
-			task_data_table[i].gid = gid;
-			task_data_table[i].arg.u16 = 0;
-			task_data_table[i].duration = TASK_DURATION_BALL;
-			ui_write_task (i, gid);
-			return (pid);
-		}
+	aux_task_data_t *auxp = aux_task_find_pid (0);
+	if (auxp)
+	{
+		auxp->pid = pid;
+		auxp->gid = gid;
+		auxp->arg.u16 = 0;
+		auxp->duration = TASK_DURATION_BALL;
+		ui_write_task (auxp - task_data_table, gid);
+		return (pid);
+	}
 
 	fatal (ERR_NO_FREE_TASKS);
 }
 
-void task_setgid (task_gid_t gid)
-{
-	int i;
-	for (i=0; i < NUM_TASKS; i++)
-		if (task_data_table[i].pid == task_getpid ())
-		{
-			task_data_table[i].gid = gid;
-			break;
-		}
-}
 
 void task_sleep (task_ticks_t ticks)
 {
@@ -131,39 +120,34 @@ void task_sleep_sec1 (U8 secs)
 __noreturn__ 
 void task_exit (void)
 {
-	int i;
 #ifdef CONFIG_DEBUG_TASK
 	printf ("task_exit: pid=%p\n", task_getpid ());
 #endif
-	for (i=0; i < NUM_TASKS; i++)
-		if (task_data_table[i].pid == task_getpid ())
-		{
-			task_data_table[i].pid = 0;
-			ui_write_task (i, 0);
-			for (;;)
-				pth_exit (0);
-		}
+	aux_task_data_t *auxp = aux_task_find_pid (task_getpid ());
+	if (auxp)
+	{
+		auxp->pid = 0;
+		ui_write_task (auxp - task_data_table, 0);
+		for (;;)
+			pth_exit (0);
+	}
 	fatal (ERR_TASK_KILL_FAILED);
 }
 
 
 void task_kill_pid (task_pid_t tp)
 {
-       int i;
-
 #ifdef CONFIG_DEBUG_TASK
-       printf ("task_kill_pid: pid=%p\n", tp);
+	printf ("task_kill_pid: pid=%p\n", tp);
 #endif
-
-       for (i=0; i < NUM_TASKS; i++)
-               if (task_data_table[i].pid == tp)
-               {
-                       task_data_table[i].pid = 0;
-                       ui_write_task (i, 0);
-                       if (tp != 0)
-                               pth_abort (tp);
-                       return;
-               }
+	aux_task_data_t *auxp = aux_task_find_pid (tp);
+	if (auxp)
+	{
+		auxp->pid = 0;
+      ui_write_task (auxp - task_data_table, 0);
+      if (tp != 0)
+      	pth_abort (tp);
+	}
 }
 
 task_pid_t task_getpid (void)
