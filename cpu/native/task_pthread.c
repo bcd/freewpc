@@ -55,11 +55,6 @@ pthread_attr_t attr_input;
 pthread_attr_t attr_interrupt;
 
 
-void task_dump (void)
-{
-}
-
-
 
 /**
  * The main function for creating a new task.
@@ -91,18 +86,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 		fatal (ERR_NO_FREE_TASKS);
 	}
 
-	aux_task_data_t *auxp = aux_task_find_pid (0);
-	if (auxp)
-	{
-		auxp->pid = pid;
-		auxp->gid = gid;
-		auxp->arg.u16 = 0;
-		auxp->duration = TASK_DURATION_BALL;
-		ui_write_task (auxp - task_data_table, gid);
-		pthread_debug ("pthread_create: index=%d, pid=%u\n", i, (unsigned)pid);
-		return (pid);
-	}
-	fatal (ERR_NO_FREE_TASKS);
+	return aux_task_create (pid, gid);
 }
 
 
@@ -120,30 +104,19 @@ void task_sleep_sec1 (U8 secs)
 __noreturn__
 void task_exit (void)
 {
-	pthread_debug ("task_exit: pid=%u\n", (unsigned)task_getpid ());
-	aux_task_data_t *auxp = aux_task_find_pid (task_getpid ());
-	if (auxp)
-	{
-		pthread_debug ("pthread_exit: pid=%d\n", auxp->pid);
-		auxp->pid = 0;
-		ui_write_task (auxp - task_data_table, 0);
-		for (;;)
-			pthread_exit (0);
-	}
-	fatal (ERR_TASK_KILL_FAILED);
+	aux_task_delete (task_getpid ());
+	for (;;)
+		pthread_exit (0);
 }
 
 
 void task_kill_pid (task_pid_t tp)
 {
 	pthread_debug ("task_kill_pid: pid=%u\n", (unsigned)tp);
-	aux_task_data_t *auxp = aux_task_find_pid (tp);
-	if (auxp)
+	if (tp != PID_NONE)
 	{
-		if (tp != 0)
-			pthread_cancel (tp);
-		auxp->pid = 0;
-		ui_write_task (auxp - task_data_table, 0);
+		aux_task_delete (tp);
+		pthread_cancel (tp);
 	}
 }
 

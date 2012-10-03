@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <printf.h>
 
 
 bool task_dispatching_ok = TRUE;
@@ -41,6 +42,27 @@ void idle_profile_rtt (void)
 }
 
 
+void task_dump (void)
+{
+#ifdef DEBUGGER
+	int i;
+	printf ("PID         GID   ARG    FLAGS\n");
+	for (i=0; i < NUM_TASKS; i++)
+	{
+		aux_task_data_t *td = &task_data_table[i];
+
+		if (td->pid != 0)
+		{
+			printf ("%p: %p%c   %d    %08X   %02X\n",
+				td, td->pid,
+				(td->pid == task_getpid ()) ? '*' : ' ',
+				td->gid, td->arg.u16, td->duration);
+		}
+	}
+#endif
+}
+
+
 /* Lookup the aux structure for a given PID */
 aux_task_data_t *aux_task_find_pid (task_pid_t pid)
 {
@@ -53,6 +75,42 @@ aux_task_data_t *aux_task_find_pid (task_pid_t pid)
 	}
 	return NULL;
 }
+
+
+task_pid_t aux_task_create (task_pid_t pid, task_gid_t gid)
+{
+	aux_task_data_t *auxp = aux_task_find_pid (0);
+	if (auxp)
+	{
+		auxp->pid = pid;
+		auxp->gid = gid;
+		auxp->arg.u16 = 0;
+		auxp->duration = TASK_DURATION_BALL;
+		ui_write_task (auxp - task_data_table, gid);
+#ifdef CONFIG_DEBUG_TASK
+		printf ("aux_task_create auxp=%p, pid=%p\n", auxp, pid);
+#endif
+		return (pid);
+	}
+	fatal (ERR_NO_FREE_TASKS);
+}
+
+
+void aux_task_delete (task_pid_t pid)
+{
+	aux_task_data_t *auxp = aux_task_find_pid (pid);
+#ifdef CONFIG_DEBUG_TASK
+	printf ("aux_task_delete: pid=%p, auxp=%p\n", pid, auxp);
+#endif
+	if (auxp)
+	{
+		auxp->pid = 0;
+		ui_write_task (auxp - task_data_table, 0);
+	}
+	else
+		fatal (ERR_TASK_KILL_FAILED);
+}
+
 
 
 void task_setgid (task_gid_t gid)

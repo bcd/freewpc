@@ -37,27 +37,6 @@ extern int linux_irq_multiplier;
 #define PTH_USECS_PER_TICK (16000 / linux_irq_multiplier)
 
 
-void task_dump (void)
-{
-#ifdef DEBUGGER
-	int i;
-	dbprintf ("PID         GID   ARG    FLAGS\n");
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		aux_task_data_t *td = &task_data_table[i];
-
-		if (td->pid != 0)
-		{
-			dbprintf ("%p: %p%c   %d    %08X   %02X\n",
-				td, td->pid,
-				(td->pid == task_getpid ()) ? '*' : ' ', 
-				td->gid, td->arg.u16, td->duration);
-		}
-	}
-#endif
-}
-
-
 
 /**
  * The main function for creating a new task.
@@ -90,21 +69,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	 * function and pass it a pointer to the task_data_table entry
 	 * as an argument. */
 	pid = pth_spawn (attr, fn, 0);
-	aux_task_data_t *auxp = aux_task_find_pid (0);
-	if (auxp)
-	{
-		auxp->pid = pid;
-		auxp->gid = gid;
-		auxp->arg.u16 = 0;
-		auxp->duration = TASK_DURATION_BALL;
-		ui_write_task (auxp - task_data_table, gid);
-#ifdef CONFIG_DEBUG_TASK
-	printf ("task_create_gid allocated auxp=%p, pid=%p", auxp, pid);
-#endif
-		return (pid);
-	}
-
-	fatal (ERR_NO_FREE_TASKS);
+	return aux_task_create (pid, gid);
 }
 
 
@@ -119,23 +84,12 @@ void task_sleep_sec1 (U8 secs)
 	pth_nap (pth_time (0, secs * TIME_1S * PTH_USECS_PER_TICK));
 }
 
-
-__noreturn__ 
+__noreturn__
 void task_exit (void)
 {
-	task_pid_t tp = task_getpid ();
-	aux_task_data_t *auxp = aux_task_find_pid (tp);
-#ifdef CONFIG_DEBUG_TASK
-	printf ("task_exit: pid=%p, auxp=%p\n", tp, auxp);
-#endif
-	if (auxp)
-	{
-		auxp->pid = 0;
-		ui_write_task (auxp - task_data_table, 0);
-		for (;;)
-			pth_exit (0);
-	}
-	fatal (ERR_TASK_KILL_FAILED);
+	aux_task_delete (task_getpid ());
+	for (;;)
+		pth_exit (0);
 }
 
 
@@ -144,13 +98,10 @@ void task_kill_pid (task_pid_t tp)
 #ifdef CONFIG_DEBUG_TASK
 	printf ("task_kill_pid: pid=%p\n", tp);
 #endif
-	aux_task_data_t *auxp = aux_task_find_pid (tp);
-	if (auxp)
+	if (tp != PID_NONE)
 	{
-		auxp->pid = 0;
-      ui_write_task (auxp - task_data_table, 0);
-      if (tp != 0)
-      	pth_abort (tp);
+		aux_task_delete (tp);
+		pth_abort (tp);
 	}
 }
 
