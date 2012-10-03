@@ -123,7 +123,6 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 		{
 			task_data_table[i].pid = pid;
 			task_data_table[i].gid = gid;
-			task_data_table[i].duration = TASK_DURATION_INF;
 			task_data_table[i].arg.u16 = 0;
 			task_data_table[i].duration = TASK_DURATION_BALL;
 			ui_write_task (i, gid);
