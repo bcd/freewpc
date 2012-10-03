@@ -28,6 +28,7 @@ HOST_LIBS += -lm
 ifeq ($(CONFIG_PTH),y)
 PTH_CFLAGS := $(shell pth-config --cflags)
 HOST_LIBS += -lpth
+HOST_LFLAGS += $(shell pth-config --ldflags)
 CFLAGS += $(PTH_CFLAGS)
 NATIVE_OBJS += $(C)/task_pth.o
 endif
