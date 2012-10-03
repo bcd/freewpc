@@ -20,13 +20,55 @@
 
 #include <freewpc.h>
 
+
+bool task_dispatching_ok = TRUE;
+
+U8 task_largest_stack = 0;
+
+U8 task_count = 0;
+
+U8 task_max_count = 0;
+
+
 /* Some WPC per-task data must be stored separately, outside of the pth
  * context.  The aux_task_data_t structure holds this. */
 aux_task_data_t task_data_table[NUM_TASKS];
 
 
+
 void idle_profile_rtt (void)
 {
+}
+
+
+task_pid_t task_find_gid (task_gid_t gid)
+{
+	int i;
+	for (i=0; i < NUM_TASKS; i++)
+	{
+		if ((task_data_table[i].gid == gid)
+			&& (task_data_table[i].pid != 0))
+			return task_data_table[i].pid;
+	}
+	return PID_NONE;
+}
+
+
+task_pid_t task_find_gid_next (task_pid_t last, task_gid_t gid)
+{
+	int i;
+	int ok_to_return = 0;
+	for (i=0; i < NUM_TASKS; i++)
+	{
+		if ((task_data_table[i].gid == gid) && (task_data_table[i].pid != 0))
+		{
+			if (ok_to_return)
+				return task_data_table[i].pid;
+			else if (task_data_table[i].pid == last)
+				ok_to_return = 1;
+		}
+	}
+	return PID_NONE;
 }
 
 

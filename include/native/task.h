@@ -38,11 +38,13 @@ extern bool task_dispatching_ok;
 #if defined(CONFIG_PTH)
 #include <pth.h>
 typedef pth_t task_pid_t;
+#define PID_NONE NULL
 #elif defined(CONFIG_PTHREADS)
 #undef __noreturn__
 #include <pthread.h>
 #define __noreturn__ __attribute__((noreturn))
 typedef pthread_t task_pid_t;
+#define PID_NONE 0
 #else
 typedef int task_pid_t;
 #endif

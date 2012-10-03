@@ -28,17 +28,9 @@
  * It exposes the same task_ API functions, with similar semantics.
  */
 
-
 /** Enable this to turn on verbose debugging of the task subsystem. */
 //#define CONFIG_DEBUG_TASK
 
-bool task_dispatching_ok = TRUE;
-
-U8 task_largest_stack = 0;
-
-U8 task_count = 0;
-
-U8 task_max_count = 0;
 
 extern int linux_irq_multiplier;
 
@@ -152,36 +144,6 @@ void task_exit (void)
 				pth_exit (0);
 		}
 	fatal (ERR_TASK_KILL_FAILED);
-}
-
-task_pid_t task_find_gid (task_gid_t gid)
-{
-	int i;
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if ((task_data_table[i].gid == gid)
-			&& (task_data_table[i].pid != 0))
-			return task_data_table[i].pid;
-	}
-	return NULL;
-}
-
-
-task_pid_t task_find_gid_next (task_pid_t last, task_gid_t gid)
-{
-	int i;
-	int ok_to_return = 0;
-	for (i=0; i < NUM_TASKS; i++)
-	{
-		if ((task_data_table[i].gid == gid) && (task_data_table[i].pid != 0))
-		{
-			if (ok_to_return)
-				return task_data_table[i].pid;
-			else if (task_data_table[i].pid == last)
-				ok_to_return = 1;
-		}
-	}
-	return NULL;
 }
 
 
