@@ -155,8 +155,6 @@ task_pid_t task_getpid (void)
 
 void task_init (void)
 {
-	ntask_init ();
-
 	struct sched_param sched_param;
 	sched_param.sched_priority = 1;
 	sched_setscheduler (0, SCHED_FIFO, &sched_param);
@@ -177,4 +175,5 @@ void task_init (void)
 	attr_interrupt = attr_task;
 	sched_param.sched_priority = 8;
 	pthread_attr_setschedparam (&attr_interrupt, &sched_param);
+	ntask_init ();
 }

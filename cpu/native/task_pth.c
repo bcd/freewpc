@@ -158,7 +158,7 @@ task_pid_t task_getpid (void)
 
 void task_init (void)
 {
-	ntask_init ();
 	pth_init ();
+	ntask_init ();
 }
 
