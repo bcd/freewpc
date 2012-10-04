@@ -199,6 +199,7 @@ do { \
 	U8 __caller_page; asm ("sta\t%0" : "=m"(__caller_page))
 #else
 #define far_read_access()
+#define __caller_page 0
 #endif
 
 #ifdef __m6809__
