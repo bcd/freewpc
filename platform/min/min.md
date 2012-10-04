@@ -35,6 +35,7 @@ H3: Right Flipper
 # save active as a lamp effect.
 
 [lamplists]
+ALL: PF:all
 Ball Save: Shoot Again
 Playfield: Shoot Again, Target
 
