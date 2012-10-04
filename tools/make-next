@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# Syntax: make-next [master-branch]
+#
+# Operation: Given a master branch M, and a set of topic branches
+# M-with-A, M-with-B, etc., rebase all of the topic branches to M
+# then merge them all onto a new branch M-next.  It essentially creates
+# a throwaway branch to test all pending changes.
+#
+
+main=$1; shift
+if [ -z "$main" ]; then
+	echo "error: no stable branch given (e.g. master)"
+	exit 1
+fi
+
+broken=
+next=$main-next
+echo "Stable branch: $main"
+echo "Next branch: $next"
+sleep 3
+
+# Make sure we are on main before we grep for topics, otherwise
+# we could be on a topic branch and git's asterisk will get in the way.
+git checkout $main
+
+topics=`git branch | grep " $main-with-" | sed -e "s/$main-with-//"`
+echo "Topic branches:"
+for t in $topics; do echo $t; done
+
+echo "About to recreate $next from all topics..."
+sleep 5
+
+# Destroy the old next branch
+git branch -D $next
+
+# Abort if anything from here out fails.
+set -e
+
+# Rebase all topic branches
+for t in $topics; do
+	topic=${main}-with-${t}
+	git checkout $topic
+	git rebase ${main}
+done
+
+# Create next branch
+git checkout $main
+git checkout -b $next
+for t in $topics; do
+	topic=${main}-with-${t}
+	git merge --no-ff $topic
+done
+
