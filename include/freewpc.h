@@ -191,7 +191,11 @@ __noreturn__ void freewpc_init (void);
 #include <system/bitarray.h>
 #include <system/errno.h>
 #include <system/time.h>
+#ifdef CONFIG_NATIVE
+#include <native/task.h>
+#else
 #include <system/task.h>
+#endif /* CONFIG_NATIVE */
 #if (MACHINE_DMD == 1)
 #include <system/font.h>
 #endif

@@ -136,7 +136,7 @@ void ui_write_sound_reset (void)
 {
 }
 
-void ui_write_task (int taskno, int gid)
+void ui_write_task (int taskno, task_gid_t gid)
 {
 }
 

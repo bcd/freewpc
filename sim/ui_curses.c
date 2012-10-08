@@ -146,7 +146,7 @@ void ui_write_sound_reset (void)
 }
 
 
-void ui_write_task (int taskno, int gid)
+void ui_write_task (int taskno, task_gid_t gid)
 {
 	int x = (taskno / 11) * 7 + 1;
 	int y = (taskno % 11) + 1;
