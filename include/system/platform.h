@@ -58,7 +58,7 @@ extern inline U8 platform_lamp_compute (const U8 col)
 	 * and leff1 may override it.
 	 */
 	bits &= leff_free_set[col];
-	bits |= leff_data_set[col];
+	bits |= (leff_data_set[col] & ~leff_free_set[col]);
 	return bits;
 }
 
