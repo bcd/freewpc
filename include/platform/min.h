@@ -104,6 +104,7 @@ extern inline void pinio_active_led_toggle (void)
 
 extern inline U8 pinio_read_locale (void)
 {
+	return 0;
 }
 
 #endif /* __PLATFORM_MIN_H */
