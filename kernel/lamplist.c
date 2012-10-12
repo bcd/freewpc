@@ -45,7 +45,7 @@
 #include <freewpc.h>
 
 /** A table of pointers to all of the defined lamplists */
-extern const lampnum_t *lamplist_table[];
+extern const lampnum_t * const lamplist_table[];
 
 
 U8 lamplist_alternation_state;
