@@ -103,7 +103,7 @@ static U8 default_high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ] = {
 };
 
 
-extern U8 initials_data[];
+extern char initials_data[];
 
 #ifdef CONFIG_DMD_OR_ALPHA
 
