@@ -35,6 +35,8 @@
  * Queue full conditions are not checked...
  */
 
+#ifndef __QUEUE_H
+#define __QUEUE_H
 
 /** A generic queue management structure.  This contains a pointer to
  * the head and tail of the elements, which are expected to appear
@@ -88,3 +90,4 @@ extern inline bool queue_empty_p (queue_t *q)
 }
 
 
+#endif /* __QUEUE_H */
