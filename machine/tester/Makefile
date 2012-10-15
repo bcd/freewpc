@@ -33,7 +33,6 @@ GAME_ROM_PREFIX = wpct
 # 512KB.....32 pages
 # 1MB...... 64 pages
 #
-ROM_PAGE_COUNT = 32
 
 #################################################
 #
@@ -49,11 +48,17 @@ ROM_PAGE_COUNT = 32
 MACHINE_MAJOR = 0
 MACHINE_MINOR = 31
 
+ifdef WPC95TEST
+ROM_PAGE_COUNT = 64
+PINMAME_MACHINE = afm_113
+PINMAME_GAME_ROM = afm_1_13.bin
+PINMAME_OTHER_ROMS = afm_s*.l1
+else
+ROM_PAGE_COUNT = 32
 PINMAME_MACHINE = tz_92
-
 PINMAME_GAME_ROM = tzone9_2.rom
-
 PINMAME_OTHER_ROMS = tzu*.rom
+endif
 
 #
 # Object files exported by this game
