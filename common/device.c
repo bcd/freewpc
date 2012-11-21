@@ -240,6 +240,9 @@ wait_and_recount:
 	 */
 	task_sleep (dev->props->settle_delay);
 
+start_update:
+	task_sleep (TIME_50MS);
+
 	/* The device is probably stable now.  Poll all of the
 	 * switches and recount */
 	device_recount (dev);
@@ -397,14 +400,14 @@ wait_and_recount:
 		{
 			/* Container ready to kick, but 1 or more
 			 * locks are held so we must wait. */
-			goto wait_and_recount;
+			goto start_update;
 		}
 		else if (!device_call_boolean_op (dev, kick_request))
 		{
 			/* Inform other modules that a kick was requested.
 			These handlers can return FALSE to delay (but not
 			cancel) the kick. */
-			goto wait_and_recount;
+			goto start_update;
 		}
 			/* TODO - if multiple devices want to kick at the same time,
 			 * they should be staggered a bit.  Another case should be
@@ -445,7 +448,7 @@ wait_and_recount:
 	be a race condition where a switch closure gets missed. */
 	device_recount (dev);
 	if (dev->actual_count != dev->previous_count)
-		goto wait_and_recount;
+		goto start_update;
 
 	task_exit ();
 }
