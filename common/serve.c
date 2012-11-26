@@ -137,68 +137,35 @@ void serve_ball_auto (void)
 }
 
 
-/**
- * A background task that attempts to set the number of balls
- * in play to 'live_balls_wanted'.
- */
 #ifdef DEVNO_TROUGH
-static void set_ball_count_task (void)
-{
-	device_t *dev = device_entry (DEVNO_TROUGH);
-	U8 max_live_balls;
-	U8 retries;
-
-	/* While we are launching balls, we monitor 'live_balls' to
-	check that it is going up. */
-	max_live_balls = live_balls;
-
-	/* Set the number of times we will attempt to kick a ball.
-	This is the number of balls that need to be added to play,
-	plus 2 to handle errors.  After this, we give up. */
-	retries = live_balls_wanted - max_live_balls + 2;
-
-	while (retries && max_live_balls < live_balls_wanted)
-	{
-		retries--;
-
-		/* Are there enough balls in the trough to satisfy another
-		kick request?  If not, then we need to add the balls from
-		somewhere else.  This is machine-specific. */
-		if (dev->actual_count < dev->kicks_needed)
-		{
-			callset_invoke (trough_rescue);
-		}
-		else
-		{
-			serve_ball_auto ();
-		}
-
-		/* Wait a bit for the ball to make it to the shooter lane. */
-		task_sleep (TIME_2S + TIME_500MS);
-
-		/* As long as there is a ball on the shooter, wait before trying
-		to continue.  This flag will clear once the shooter switch
-		has cleared for a few seconds. */
-		while (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
-			task_sleep (TIME_133MS);
-
-		/* See if the ball count went up, indicating success */
-		if (live_balls > max_live_balls)
-			max_live_balls = live_balls;
-	}
-	task_exit ();
-}
-
-
 /**
  * Set the total number of balls in play to COUNT.
  */
 void set_ball_count (U8 count)
 {
+	device_t *dev;
+	U8 adds;
+
 	if (count <= live_balls)
 		return;
-	live_balls_wanted = count;
-	task_recreate_gid (GID_SET_BALL_COUNT, set_ball_count_task);
+
+	dev = device_entry (DEVNO_TROUGH);
+	adds = count - live_balls;
+	if (adds > dev->actual_count)
+	{
+		U8 rescues = adds - dev->actual_count;
+		while (rescues > 0)
+		{
+			rescues--;
+			callset_invoke (trough_rescue);
+		}
+		adds = dev->actual_count;
+	}
+	while (adds > 0)
+	{
+		serve_ball_auto ();
+		adds--;
+	}
 }
 
 
@@ -209,7 +176,7 @@ void add_ball_count (U8 count)
 {
 	set_ball_count (live_balls + count);
 }
-#endif
+#endif /* DEVNO_TROUGH */
 
 
 /**
