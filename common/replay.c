@@ -245,7 +245,7 @@ void replay_check_current (void)
 		return;
 
 	curr = (replay_score_t *)(current_score + REPLAY_SCORE_OFFSET);
-	if (unlikely (*curr >= next_replay_score))
+	if (score_compare (curr, next_replay_score) >= 0)
 	{
 		replay_award ();
 	}
