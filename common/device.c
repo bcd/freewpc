@@ -285,7 +285,8 @@ start_update:
 			 * Treat this as an enter event (or multiple events, if the
 			 * count goes up by more than 1). */
 			U8 enter_count = dev->actual_count - dev->previous_count;
-			set_valid_playfield ();
+			if (!trough_dev_p (dev))
+				set_valid_playfield ();
 			while (enter_count > 0)
 			{
 				callset_invoke (any_device_enter);
