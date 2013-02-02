@@ -332,8 +332,8 @@ void high_score_check_player (U8 player)
 			high_score_free (hs);
 			memcpy (hsp->score, scores[player], sizeof (score_t));
 			hsp->initials[0] = player;
-			pinio_nvram_lock ();
 			csum_area_update (&high_csum_info);
+			pinio_nvram_lock ();
 			return;
 		}
 	}
@@ -385,8 +385,8 @@ void high_score_enter_initials (U8 position)
 		/* Save the initials to table entry */
 		pinio_nvram_unlock ();
 		memcpy (hsp->initials, initials_data, HIGH_SCORE_NAMESZ);
-		pinio_nvram_lock ();
 		csum_area_update (&high_csum_info);
+		pinio_nvram_lock ();
 
 		/* Award credits */
 		deff_start (DEFF_HSCREDITS);

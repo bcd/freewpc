@@ -430,8 +430,8 @@ void adj_browser_enter (void)
 			/* Modify the adjustment */
 			pinio_nvram_unlock ();
 			*(ad->nvram) = adj_edit_value;
-			pinio_nvram_lock ();
 			adj_modified (ad->nvram);
+			pinio_nvram_lock ();
 			sound_send (SND_TEST_CONFIRM);
 		}
 		browser_action = ADJ_BROWSING;

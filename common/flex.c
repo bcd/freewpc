@@ -68,8 +68,8 @@ static void flex_recalc (__fardata__ const struct flex_config *fconf)
 	pinio_nvram_unlock ();
 	fdata->level = level-1;
 	fdata->games = 0;
-	pinio_nvram_lock ();
 	csum_area_update (far_read (fconf, csum)); // FIXME
+	pinio_nvram_lock ();
 }
 
 void flex_end_game (__fardata__ const struct flex_config *fconf)
@@ -99,8 +99,8 @@ void flex_end_player (__fardata__ const struct flex_config *fconf, U8 value)
 	{
 		pinio_nvram_unlock ();
 		fdata->history[fdata->games++] = value;
-		pinio_nvram_lock ();
 		csum_area_update (far_read (fconf, csum));
+		pinio_nvram_lock ();
 		dbprintf ("Logging flex #%d %d, level is %d\n",
 			fdata->games, value, fdata->level);
 	}
