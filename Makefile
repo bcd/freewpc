@@ -356,7 +356,7 @@ endef
 
 $(eval $(call AREA_SETUP, direct,    0x0004,   0x00FC))
 $(eval $(call AREA_SETUP, ram,       0x0100,   0x1300))
-$(eval $(call AREA_SETUP, local,     0x1400,   0x0040))
+$(eval $(call AREA_SETUP, local,     0x1400,   0x0030))
 $(eval $(call AREA_SETUP, permanent, 0x1600,   0x0080))
 $(eval $(call AREA_SETUP, stack,     0x1680,   0x0180,  virtual))
 $(eval $(call AREA_SETUP, nvram,     0x1810,   0x06F0))
