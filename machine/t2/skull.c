@@ -5,13 +5,12 @@
 CALLSET_ENTRY (drop, skull_drop_down)
 {
 	sound_send (SND_SPLAT);
-	score (SC_100K);
-	skull_drop_reset ();
+	//skull_drop_reset ();
 }
 
 
 CALLSET_ENTRY (drop, start_ball)
 {
-	skull_drop_reset ();
+	//skull_drop_reset ();
 }
 

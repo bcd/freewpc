@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS = -g -I../../include -I../../build -I../wpclib -DCONFIG_NATIVE -DWPC_DMD_LOW_PAGE=0 -DWPC_DMD_HIGH_PAGE=0
+CFLAGS = -g -I../../include -I../../build -I../wpclib -DCONFIG_NATIVE -DWPC_DMD_LOW_PAGE=0 -DWPC_DMD_HIGH_PAGE=0 -fgnu89-inline
 
 FONT_DIR = ../../fonts
 WPCLIB_DIR = ../../../wpclib

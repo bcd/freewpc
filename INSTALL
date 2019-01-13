@@ -26,3 +26,6 @@ there as well (replacing any zip file that was already there, which
 will get backed up to a .original file; sound ROMs from the original
 will also get copied into the new zip archive).
 
+6. Dependencies
+
+On Debian/Ubuntu you need to install build-essentials and libpth-dev.
