@@ -1,3 +1,24 @@
+# FreeWPC: a framework/OS for WPC pinball machines of the 90s
+
+Note: FreeWPC is no longer being maintained!
+
+This framework was actively developed between 2005-2013 as a side
+project to experiment with and learn about coding for actual
+pinball machines.  In 2012, I joined the startup Heighway Pinball
+to do software for their new games and used FreeWPC as a starting
+point.  Later, they were acquired by Pinball Brothers who continues
+to make games as of 2026.
+
+Because of this, my time shifted by hobby project to part-time
+commercial development and this project became abandoned.
+
+I'm keeping this repository online for those who are curious how
+pinball games work, but no further commits are being made to it.
+Also, the framework has evolved significantly and this does not
+accurately reflect how today's generation of games are made.
+
+
+## Original README:
 
 This is FreeWPC, an open source operating system for the Williams
 Pinball Controller (WPC) family of pinball machines.  FreeWPC is
